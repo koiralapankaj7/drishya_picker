@@ -115,7 +115,8 @@ class DrishyaPicker extends StatefulWidget {
   _DrishyaPickerState createState() => _DrishyaPickerState();
 }
 
-class _DrishyaPickerState extends State<DrishyaPicker> {
+class _DrishyaPickerState extends State<DrishyaPicker>
+    with WidgetsBindingObserver {
   late CustomMediaController _controller;
   late PanelController _panelController;
 
@@ -125,10 +126,13 @@ class _DrishyaPickerState extends State<DrishyaPicker> {
 
   late double _panelMaxHeight;
   late double _panelMinHeight;
+  var _keyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+
     _controller = widget.controller ?? CustomMediaController();
     _panelController = _controller.panelController;
     _galleryCubit = GalleryCubit();
@@ -151,17 +155,15 @@ class _DrishyaPickerState extends State<DrishyaPicker> {
         }
       });
 
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      _controller._checkKeyboard.addListener(_init);
-    });
+    _controller._checkKeyboard.addListener(_init);
   }
 
   void _init() {
     if (_controller._checkKeyboard.value) {
-      if (MediaQuery.of(context).viewInsets.bottom > 0) {
+      if (_keyboardVisible) {
         FocusScope.of(context).unfocus();
         Future.delayed(
-          const Duration(milliseconds: 200),
+          const Duration(milliseconds: 180),
           _panelController.openPanel,
         );
       } else {
@@ -171,12 +173,23 @@ class _DrishyaPickerState extends State<DrishyaPicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (MediaQuery.of(context).viewInsets.bottom > 0 &&
-        _panelController.isVisible) {
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final bottomInset = WidgetsBinding.instance?.window.viewInsets.bottom;
+    _keyboardVisible = (bottomInset ?? 0.0) > 0.0;
+    if (_keyboardVisible && _panelController.isVisible) {
       _controller._cancel();
     }
+  }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
       child: MediaControllerProvider(
         controller: _controller,
@@ -186,7 +199,7 @@ class _DrishyaPickerState extends State<DrishyaPicker> {
           _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
 
           return Stack(
-            fit: StackFit.expand,
+            // fit: StackFit.expand,
             children: [
               // Child i.e, Back view
               Column(
@@ -338,12 +351,12 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
   /// Pick media
   Future<List<AssetEntity>> pickMedia({MediaSetting? setting}) {
     _completer = Completer<List<AssetEntity>>();
+    _checkKeyboard.value = true;
     _setting = MediaSetting(
       albumSubtitle: setting?.albumSubtitle ?? 'Select media',
       maximum: setting?.maximum ?? 20,
       selected: setting?.selected ?? <AssetEntity>[],
     );
-    _checkKeyboard.value = true;
     if (setting?.selected?.isNotEmpty ?? false) {
       value = value.copyWith(
         entities: setting?.selected,
