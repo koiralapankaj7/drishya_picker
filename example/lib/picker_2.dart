@@ -48,7 +48,7 @@ class _Picker2State extends State<Picker2> {
                     valueListenable: notifier,
                     builder: (context, list, child) {
                       return MediaPicker(
-                        setting: MediaSetting(
+                        setting: DrishyaSetting(
                           selected: list,
                           maximum: 5,
                           albumSubtitle: 'common',

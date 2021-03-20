@@ -17,7 +17,7 @@ class GalleryView extends StatefulWidget {
   final Color? panelBackground;
 
   ///
-  final CustomMediaController? mediaController;
+  final DrishyaPickerController? mediaController;
 
   @override
   _GalleryViewState createState() => _GalleryViewState();
@@ -451,7 +451,7 @@ class __ImageViewState extends State<_ImageView>
                       ),
 
                     // Image selection overlay
-                    ValueListenableBuilder<CustomMediaValue>(
+                    ValueListenableBuilder<DrishyaValue>(
                       valueListenable: mediaController!,
                       builder: (context, value, child) {
                         final isSelected =
@@ -497,7 +497,7 @@ class _SelectSelection extends StatefulWidget {
     required this.mediaController,
   }) : super(key: key);
 
-  final CustomMediaController? mediaController;
+  final DrishyaPickerController? mediaController;
 
   @override
   __SelectSelectionState createState() => __SelectSelectionState();
@@ -581,7 +581,7 @@ class __SelectSelectionState extends State<_SelectSelection>
     final buttonWidth = (size.width - padding) / 2;
     final mediaController = widget.mediaController!;
 
-    return ValueListenableBuilder<CustomMediaValue>(
+    return ValueListenableBuilder<DrishyaValue>(
       valueListenable: mediaController,
       builder: (context, value, child) {
         return Container(

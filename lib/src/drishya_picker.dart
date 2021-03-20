@@ -7,18 +7,18 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../src/widgets/media_controller_provider.dart';
 import '../src/widgets/slidable_panel.dart';
 import 'application/media_cubit.dart';
+import 'widgets/drishya_picker_controller_provider.dart';
 
 part '../src/widgets/gallery_view.dart';
 part '../src/widgets/header.dart';
 part '../src/widgets/media_picker.dart';
 
 /// Media picker setting
-class MediaSetting {
+class DrishyaSetting {
   ///
-  MediaSetting({
+  DrishyaSetting({
     this.selected,
     this.maximum,
     this.albumSubtitle,
@@ -58,7 +58,7 @@ class DrishyaPicker extends StatefulWidget {
         super(key: key);
 
   /// Controller for [DrishyaPicker]
-  final CustomMediaController? controller;
+  final DrishyaPickerController? controller;
 
   /// Widget
   final Widget? child;
@@ -117,7 +117,7 @@ class DrishyaPicker extends StatefulWidget {
 
 class _DrishyaPickerState extends State<DrishyaPicker>
     with WidgetsBindingObserver {
-  late CustomMediaController _controller;
+  late DrishyaPickerController _controller;
   late PanelController _panelController;
 
   late AlbumCollectionCubit _albumCollectionCubit;
@@ -133,7 +133,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
 
-    _controller = widget.controller ?? CustomMediaController();
+    _controller = widget.controller ?? DrishyaPickerController();
     _panelController = _controller.panelController;
     _galleryCubit = GalleryCubit();
 
@@ -191,7 +191,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: MediaControllerProvider(
+      child: DrishyaPickerControllerProvider(
         controller: _controller,
         child: LayoutBuilder(builder: (context, constraints) {
           _panelMaxHeight = (widget.panelMaxHeight ?? constraints.maxHeight) -
@@ -268,12 +268,12 @@ class _DrishyaPickerState extends State<DrishyaPicker>
 }
 
 ///
-class CustomMediaController extends ValueNotifier<CustomMediaValue> {
+class DrishyaPickerController extends ValueNotifier<DrishyaValue> {
   ///
-  CustomMediaController()
+  DrishyaPickerController()
       : _panelController = PanelController(),
         _checkKeyboard = ValueNotifier(false),
-        super(const CustomMediaValue());
+        super(const DrishyaValue());
 
   final PanelController _panelController;
   final ValueNotifier<bool> _checkKeyboard;
@@ -287,7 +287,7 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
   void Function(List<AssetEntity> entities)? _onSubmitted;
 
   // Media setting
-  MediaSetting? _setting;
+  DrishyaSetting? _setting;
 
   // Selecting and unselecting entities
   void _select(AssetEntity entity, BuildContext context) {
@@ -316,7 +316,7 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
   void _clearSelection() {
     _onChanged?.call(_lastSelectedEntity!, true);
     _onSubmitted?.call(value.entities);
-    value = const CustomMediaValue();
+    value = const DrishyaValue();
   }
 
   // When selection is completed
@@ -325,7 +325,7 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
     _completer.complete(value.entities);
     _checkKeyboard.value = false;
     _onSubmitted?.call(value.entities);
-    value = const CustomMediaValue();
+    value = const DrishyaValue();
   }
 
   // When panel closed without any selection
@@ -334,14 +334,14 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
     _completer.complete(<AssetEntity>[]);
     _checkKeyboard.value = false;
     _onSubmitted?.call(<AssetEntity>[]);
-    value = const CustomMediaValue();
+    value = const DrishyaValue();
   }
 
   //
   void _fromPicker(
     void Function(AssetEntity entity, bool removed)? onChanged,
     final void Function(List<AssetEntity> entities)? onSubmitted,
-    MediaSetting setting,
+    DrishyaSetting setting,
   ) {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
@@ -349,10 +349,10 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
   }
 
   /// Pick media
-  Future<List<AssetEntity>> pickMedia({MediaSetting? setting}) {
+  Future<List<AssetEntity>> pickMedia({DrishyaSetting? setting}) {
     _completer = Completer<List<AssetEntity>>();
     _checkKeyboard.value = true;
-    _setting = MediaSetting(
+    _setting = DrishyaSetting(
       albumSubtitle: setting?.albumSubtitle ?? 'Select media',
       maximum: setting?.maximum ?? 20,
       selected: setting?.selected ?? <AssetEntity>[],
@@ -370,13 +370,13 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
   PanelController get panelController => _panelController;
 
   /// Media setting
-  MediaSetting? get setting => _setting;
+  DrishyaSetting? get setting => _setting;
 
   ///
   bool get reachedMaximumLimit => value.entities.length == setting!.maximum;
 
   @override
-  set value(CustomMediaValue newValue) {
+  set value(DrishyaValue newValue) {
     super.value = newValue;
   }
 
@@ -391,9 +391,9 @@ class CustomMediaController extends ValueNotifier<CustomMediaValue> {
 }
 
 ///
-class CustomMediaValue {
+class DrishyaValue {
   ///
-  const CustomMediaValue({
+  const DrishyaValue({
     this.entities = const <AssetEntity>[],
     this.previousSelection = true,
   });
@@ -405,11 +405,11 @@ class CustomMediaValue {
   final bool previousSelection;
 
   ///
-  CustomMediaValue copyWith({
+  DrishyaValue copyWith({
     List<AssetEntity>? entities,
     bool? previousSelection,
   }) =>
-      CustomMediaValue(
+      DrishyaValue(
         entities: entities ?? this.entities,
         previousSelection: previousSelection ?? this.previousSelection,
       );
@@ -421,7 +421,7 @@ class CustomMediaValue {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    if (other is CustomMediaValue) {
+    if (other is DrishyaValue) {
       if (entities.length != other.entities.length) return false;
 
       var isIdentical = true;

@@ -104,7 +104,7 @@ class Header extends StatelessWidget {
                 Expanded(
                   child: Align(
                     alignment: Alignment.topLeft,
-                    child: ValueListenableBuilder<CustomMediaValue>(
+                    child: ValueListenableBuilder<DrishyaValue>(
                       valueListenable: mediaController,
                       builder: (context, value, child) {
                         return _IconButton(
@@ -128,7 +128,7 @@ class Header extends StatelessWidget {
                   child: Container(
                     alignment: Alignment.topLeft,
                     padding: const EdgeInsets.only(left: 16.0),
-                    child: ValueListenableBuilder<CustomMediaValue>(
+                    child: ValueListenableBuilder<DrishyaValue>(
                       valueListenable: mediaController,
                       builder: (context, value, child) {
                         return Opacity(

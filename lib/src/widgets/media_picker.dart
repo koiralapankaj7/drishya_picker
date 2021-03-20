@@ -18,7 +18,7 @@ class MediaPicker extends StatefulWidget {
   final void Function(List<AssetEntity> entities)? onSubmitted;
 
   ///
-  final MediaSetting? setting;
+  final DrishyaSetting? setting;
 
   ///
   final Widget? child;
