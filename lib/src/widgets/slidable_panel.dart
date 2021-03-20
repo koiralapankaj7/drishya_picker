@@ -79,6 +79,7 @@ class _SlidablePanelState extends State<SlidablePanel>
   late double _panelMinHeight;
   late double _panelMaxHeight;
   late double _remainingSpace;
+  late MediaQueryData _mediaQuery;
 
   //
   late PanelController _panelController;
@@ -172,9 +173,14 @@ class _SlidablePanelState extends State<SlidablePanel>
     if (!_scrollToBottom &&
         panelState == SlidingState.max &&
         state == SlidingState.slidingDown) {
-      final isControllerOffsetZero =
-          _scrollController.hasClients ? _scrollController.offset == 0.0 : true;
-      final headerMinPosition = mediaQuery.padding.top;
+      final isControllerOffsetZero = _scrollController.offset == 0.0;
+      // final headerMinPosition = mediaQuery.padding.top;
+      // final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
+      // final isHandler = event.position.dy >= headerMinPosition &&
+      //     event.position.dy <= headerMaxPosition;
+      // _scrollToBottom = isHandler || isControllerOffsetZero;
+
+      final headerMinPosition = _mediaQuery.size.height - _panelMaxHeight;
       final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
       final isHandler = event.position.dy >= headerMinPosition &&
           event.position.dy <= headerMaxPosition;
@@ -252,7 +258,8 @@ class _SlidablePanelState extends State<SlidablePanel>
 
   @override
   Widget build(BuildContext context) {
-    // final _mediaQuery = MediaQuery.of(context);
+    _mediaQuery = MediaQuery.of(context);
+
     /// When making slidable different package then only set size from here
     // _panelMaxHeight = widget.panelMaxHeight ?? constraints.maxHeight;
     // _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
@@ -356,8 +363,14 @@ class PanelController extends ValueNotifier<SliderValue> {
   /// Minimize panel
   void openPanel() {
     if (value.state == SlidingState.min) return;
-    value = value.copyWith(state: SlidingState.min);
+    value = value.copyWith(
+      state: SlidingState.min,
+      factor: 0.0,
+      offset: 0.0,
+      position: Offset.zero,
+    );
     panelVisibility.value = true;
+    _gesture = true;
   }
 
   /// Maximize panel
@@ -375,8 +388,14 @@ class PanelController extends ValueNotifier<SliderValue> {
   /// Close Panel
   void closePanel() {
     if (value.state == SlidingState.close) return;
-    value = value.copyWith(state: SlidingState.close);
+    value = value.copyWith(
+      state: SlidingState.close,
+      factor: 0.0,
+      offset: 0.0,
+      position: Offset.zero,
+    );
     panelVisibility.value = false;
+    _gesture = false;
   }
 
   ///
