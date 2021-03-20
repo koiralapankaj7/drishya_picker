@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -50,6 +50,7 @@ class DrishyaPicker extends StatefulWidget {
     this.panelBackground,
     this.snapingPoint,
     this.background,
+    this.topMargin,
   })  : assert(
           snapingPoint == null || (snapingPoint >= 0.0 && snapingPoint <= 1.0),
           '[snapingPoint] value must be between 1.0 and 0.0',
@@ -105,6 +106,10 @@ class DrishyaPicker extends StatefulWidget {
   ///
   /// Default: [Colors.black]
   final Color? background;
+
+  /// Margin for panel top. Which can be used to show status bar if you need
+  /// to show panel above scaffold.
+  final double? topMargin;
 
   @override
   _DrishyaPickerState createState() => _DrishyaPickerState();
@@ -167,85 +172,85 @@ class _DrishyaPickerState extends State<DrishyaPicker> {
 
   @override
   Widget build(BuildContext context) {
-    // _context = context;
-    final _mediaQuery = MediaQuery.of(context);
-    _panelMaxHeight = widget.panelMaxHeight ??
-        _mediaQuery.size.height - _mediaQuery.padding.top;
-    _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
-
-    // _panelMaxHeight ??= mediaQuery.size.height - mediaQuery.padding.top;
-    // _panelMinHeight ??= _panelMaxHeight! * 0.35;
-
-    if (_mediaQuery.viewInsets.bottom > 0 && _panelController.isVisible) {
+    if (MediaQuery.of(context).viewInsets.bottom > 0 &&
+        _panelController.isVisible) {
       _controller._cancel();
     }
 
-    return MediaControllerProvider(
-      controller: _controller,
-      child: Scaffold(
-        body: Stack(
-          // fit: StackFit.expand,
-          children: [
-            // Child i.e, Back view
-            Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_panelController.isVisible) {
-                        _controller._cancel();
-                      }
-                    },
-                    child: widget.child ?? const SizedBox(),
-                  ),
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _panelController.panelVisibility,
-                  builder: (context, isVisible, child) {
-                    return isVisible ? child! : const SizedBox();
-                  },
-                  child: SizedBox(height: _panelMinHeight),
-                ),
-              ],
-            ),
+    return Material(
+      child: MediaControllerProvider(
+        controller: _controller,
+        child: LayoutBuilder(builder: (context, constraints) {
+          _panelMaxHeight = (widget.panelMaxHeight ?? constraints.maxHeight) -
+              (widget.topMargin ?? 0.0);
+          _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
 
-            // Custom media picker view i.e, Front view
-            MultiBlocProvider(
-              providers: [
-                BlocProvider<AlbumCollectionCubit>(
-                  create: (context) => _albumCollectionCubit,
-                ),
-                BlocProvider<CurrentAlbumCubit>(
-                  create: (context) => _currentAlbumCubit,
-                ),
-                BlocProvider<GalleryCubit>(
-                  create: (context) => _galleryCubit,
-                ),
-              ],
-              child: Center(
-                child: SlidablePanel(
-                  controller: _panelController,
-                  panelHeaderMaxHeight: widget.panelHeaderMaxHeight,
-                  panelHeaderMinHeight: widget.panelHeaderMinHeight,
-                  panelMinHeight: _panelMinHeight,
-                  panelMaxHeight: _panelMaxHeight,
-                  snapingPoint: widget.snapingPoint,
-                  child: GalleryView(
-                    mediaController: _controller,
-                    headerBackground:
-                        widget.panelHeaderBackground ?? widget.background,
-                    panelBackground:
-                        widget.panelBackground ?? widget.background,
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              // Child i.e, Back view
+              Column(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_panelController.isVisible) {
+                          _controller._cancel();
+                        }
+                      },
+                      child: widget.child ?? const SizedBox(),
+                    ),
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _panelController.panelVisibility,
+                    builder: (context, isVisible, child) {
+                      return isVisible ? child! : const SizedBox();
+                    },
+                    child: SizedBox(height: _panelMinHeight),
+                  ),
+                ],
+              ),
+
+              // Custom media picker view i.e, Front view
+              MultiBlocProvider(
+                providers: [
+                  BlocProvider<AlbumCollectionCubit>(
+                    create: (context) => _albumCollectionCubit,
+                  ),
+                  BlocProvider<CurrentAlbumCubit>(
+                    create: (context) => _currentAlbumCubit,
+                  ),
+                  BlocProvider<GalleryCubit>(
+                    create: (context) => _galleryCubit,
+                  ),
+                ],
+                child: Center(
+                  child: SlidablePanel(
+                    controller: _panelController,
+                    panelHeaderMaxHeight: widget.panelHeaderMaxHeight,
+                    panelHeaderMinHeight: widget.panelHeaderMinHeight,
+                    panelMinHeight: _panelMinHeight,
+                    panelMaxHeight: _panelMaxHeight,
+                    snapingPoint: widget.snapingPoint,
+                    child: GalleryView(
+                      mediaController: _controller,
+                      headerBackground:
+                          widget.panelHeaderBackground ?? widget.background,
+                      panelBackground:
+                          widget.panelBackground ?? widget.background,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            //
-          ],
-        ),
+              //
+            ],
+          );
+        }),
       ),
     );
+
+    //
   }
 }
 

@@ -82,10 +82,9 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final albumListHeight = mediaQuery.size.height -
-        mediaQuery.padding.top -
-        _panelController.headerMaxHeight!;
+    final albumListHeight =
+        _panelController.panelMaxHeight! - _panelController.headerMaxHeight!;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -113,7 +112,6 @@ class _GalleryViewState extends State<GalleryView>
                   _panelController.headerMinHeight!,
                   _panelController.headerMaxHeight!,
                 );
-
                 return SizedBox(height: height as double?);
               },
             ),
@@ -611,7 +609,7 @@ class __SelectSelectionState extends State<_SelectSelection>
                     width: buttonWidth,
                     child: _TextButton(
                       onPressed: () {
-                        log('Edit photo');
+                        //
                       },
                       label: 'EDIT',
                       background: Colors.white,

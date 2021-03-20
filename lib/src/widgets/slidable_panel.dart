@@ -73,7 +73,7 @@ class SlidablePanel extends StatefulWidget {
 
 class _SlidablePanelState extends State<SlidablePanel>
     with TickerProviderStateMixin {
-  late double _statusBarHeight;
+  // late double _statusBarHeight;
   late double _panelHeaderMinHeight;
   late double _panelHeaderMaxHeight;
   late double _panelMinHeight;
@@ -113,6 +113,13 @@ class _SlidablePanelState extends State<SlidablePanel>
   void initState() {
     super.initState();
 
+    _panelHeaderMinHeight =
+        widget.panelHeaderMinHeight ?? kPanelHeaderMinHeight;
+    _panelHeaderMaxHeight =
+        widget.panelHeaderMaxHeight ?? kPanelHeaderMaxHeight;
+    _panelMaxHeight = widget.panelMaxHeight!;
+    _panelMinHeight = widget.panelMinHeight!;
+
     // Initialization of panel controller
     _panelController = (widget.controller ?? PanelController()).._init(this);
 
@@ -135,10 +142,6 @@ class _SlidablePanelState extends State<SlidablePanel>
           state: _aboveHalfWay ? SlidingState.max : SlidingState.min,
         ));
       });
-
-    // WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-
-    // });
   }
 
   void _onPointerDown(PointerDownEvent event) {
@@ -252,18 +255,10 @@ class _SlidablePanelState extends State<SlidablePanel>
 
   @override
   Widget build(BuildContext context) {
-    // todo : Use maximum height to configure other height
-    final _mediaQuery = MediaQuery.of(context);
-
-    _panelHeaderMinHeight =
-        widget.panelHeaderMinHeight ?? kPanelHeaderMinHeight;
-    _panelHeaderMaxHeight =
-        widget.panelHeaderMaxHeight ?? kPanelHeaderMaxHeight;
-
-    _statusBarHeight = _mediaQuery.padding.top;
-    _panelMaxHeight =
-        widget.panelMaxHeight ?? _mediaQuery.size.height - _statusBarHeight;
-    _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
+    // final _mediaQuery = MediaQuery.of(context);
+    /// When making slidable different package then only set size from here
+    // _panelMaxHeight = widget.panelMaxHeight ?? constraints.maxHeight;
+    // _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
     _remainingSpace = _panelMaxHeight - _panelMinHeight;
 
     return ValueListenableBuilder<bool>(
@@ -274,19 +269,19 @@ class _SlidablePanelState extends State<SlidablePanel>
       child: Column(
         children: [
           // Status bar space
-          SizedBox(height: _mediaQuery.padding.top),
+          // SizedBox(height: _mediaQuery.padding.top),
 
           // Space between sliding panel and status bar
-          const Expanded(child: SizedBox()),
+          const Spacer(),
 
           // Sliding panel
           ValueListenableBuilder(
             valueListenable: _panelController,
             builder: (context, SliderValue value, child) {
-              final num height =
+              final height =
                   (_panelMinHeight + (_remainingSpace * value.factor))
                       .clamp(_panelMinHeight, _panelMaxHeight);
-              return SizedBox(height: height as double?, child: child);
+              return SizedBox(height: height, child: child);
             },
             child: Listener(
               onPointerDown: _onPointerDown,

@@ -131,14 +131,9 @@ class Header extends StatelessWidget {
                     child: ValueListenableBuilder<CustomMediaValue>(
                       valueListenable: mediaController,
                       builder: (context, value, child) {
-                        // if (value.entities.isEmpty)
                         return Opacity(
                           opacity: value.entities.isEmpty ? 1.0 : 0.0,
-                          child: _IconButton(
-                            iconData: Icons.keyboard_arrow_down,
-                            onPressed: toogleAlbumList,
-                            size: 34.0,
-                          ),
+                          child: _AnimatedDropdown(onPressed: toogleAlbumList),
                         );
                       },
                     ),
@@ -152,6 +147,45 @@ class Header extends StatelessWidget {
 
           //
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedDropdown extends StatefulWidget {
+  const _AnimatedDropdown({
+    Key? key,
+    this.onPressed,
+  }) : super(key: key);
+
+  final Function? onPressed;
+
+  @override
+  __AnimatedDropdownState createState() => __AnimatedDropdownState();
+}
+
+class __AnimatedDropdownState extends State<_AnimatedDropdown> {
+  bool isDown = true;
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      tween: Tween(begin: isDown ? 1.0 : 0.0, end: isDown ? 0.0 : 1.0),
+      duration: const Duration(milliseconds: 300),
+      builder: (context, double value, child) {
+        return Transform.rotate(
+          angle: pi * value,
+          child: child,
+        );
+      },
+      child: _IconButton(
+        iconData: Icons.keyboard_arrow_down,
+        onPressed: () {
+          widget.onPressed?.call();
+          setState(() {
+            isDown = !isDown;
+          });
+        },
+        size: 34.0,
       ),
     );
   }
