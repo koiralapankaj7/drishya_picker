@@ -1,7 +1,7 @@
 library drishya_picker;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'package:photo_manager/photo_manager.dart';
+
+export './src/drishya_picker.dart' hide Header, GalleryView;
+// export './src/widgets/media_controller_provider.dart';
+// export './src/widgets/slidable_panel.dart' show PanelController;
