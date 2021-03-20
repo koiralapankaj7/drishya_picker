@@ -123,15 +123,12 @@ class _SlidablePanelState extends State<SlidablePanel>
     // Initialization of panel controller
     _panelController = (widget.controller ?? PanelController()).._init(this);
 
-    _scrollController = _panelController.scrollController;
-
-    if (_scrollController.hasClients) {
-      _scrollController.addListener(() {
-        if (_scrollToTop || _scrollToBottom && _scrollController.hasClients) {
+    _scrollController = _panelController.scrollController
+      ..addListener(() {
+        if ((_scrollToTop || _scrollToBottom) && _scrollController.hasClients) {
           _scrollController.position.hold(() {});
         }
       });
-    }
 
     _animationController = AnimationController(
       vsync: this,
