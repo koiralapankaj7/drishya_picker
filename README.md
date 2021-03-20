@@ -2,6 +2,22 @@
 
 Messanger like media picker
 
+<table>
+  <tr>
+    <td><img src="/assets/gif.gif" width="300" height="500"></td>
+    <td><img src="/assets/1.jpg" width="300" height="500"></td>
+    <td><img src="/assets/2.jpg" width="300" height="500"></td>
+  </tr>
+  <tr>
+    <td><img src="/assets/3.jpg" width="300" height="500"></td>
+    <td><img src="/assets/4.jpg" width="300" height="500"></td>
+    <td><img src="/assets/5.jpg" width="300" height="500"></td>
+  </tr>
+  <tr>
+    <td><img src="/assets/6.jpg" width="300" height="500"></td>
+  </tr>
+ </table>
+
 #### Using controller
 
 ```dart
