@@ -1,8 +1,7 @@
 name: drishya_picker
-description: A new Flutter package project.
-version: 0.0.1
-author:
-homepage:
+description: Messenger like image, video picker
+version: 1.0.0
+homepage: https://github.com/koiralapankajgit/drishya_picker.git
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
