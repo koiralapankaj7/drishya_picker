@@ -20,14 +20,14 @@ class _Picker1State extends State<Picker1> {
 
   @override
   Widget build(BuildContext context) {
-    return DrishyaPicker(
-      controller: controller,
-      requestType: RequestType.image,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Pick using controller'),
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Pick using controller'),
+      ),
+      body: DrishyaPicker(
+        controller: controller,
+        requestType: RequestType.image,
+        child: Column(
           children: [
             // Grid view
             Expanded(

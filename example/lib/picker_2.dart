@@ -16,6 +16,7 @@ class _Picker2State extends State<Picker2> {
   Widget build(BuildContext context) {
     return DrishyaPicker(
       requestType: RequestType.common,
+      topMargin: MediaQuery.of(context).padding.top,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Pick using picker view'),
