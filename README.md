@@ -1,15 +1,75 @@
 # drishya_picker
 
-A new Flutter package project.
+Messanger like media picker
 
-## Getting Started
+#### Using controller
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+```dart
+/// Media picker demo using controller
+class PickerDemo extends StatelessWidget {
+    final controller = DrishyaPickerController();
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
-# drishya_picker
+    // Call this method to pick data
+    Future<void> _pickData({DrishyaSetting? setting}) async {
+        final data = await controller.pickMedia(setting: setting);
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+            appBar: AppBar(
+                title: const Text('Pick using controller'),
+            ),
+            body: DrishyaPicker(
+                controller: controller,
+                child: ...
+            ),
+        );
+    }
+}
+```
+
+#### Using picker
+
+```dart
+class PickerDemo extends StatefulWidget {
+    @override
+    _PickerDemoState createState() => _PickerDemoState();
+}
+
+/// Media picker demo using controller
+class _PickerDemoState extends State<PickerDemo> {
+    final controller = DrishyaPickerController();
+
+    // Call this method to pick data
+    Future<void> _pickData({DrishyaSetting? setting}) async {
+        final data = await controller.pickMedia(setting: setting);
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return DrishyaPicker(
+            requestType: RequestType.common,
+            topMargin: MediaQuery.of(context).padding.top,
+            child: Scaffold(
+                body: Center(
+                    child: MediaPicker(
+                        setting: DrishyaSetting(
+                            selected: list,
+                            maximum: 5,
+                            albumSubtitle: 'common',
+                        ),
+                        onChanged: (entity, isRemoved) {
+                            //
+                        },
+                        onSubmitted: (list) {
+                            //
+                        },
+                        child: child,
+                    ),
+                ),
+            ),
+        );
+    }
+}
+```
