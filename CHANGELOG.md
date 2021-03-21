@@ -5,3 +5,6 @@
 * MediaController / MediaPicker (TextField behaviour) for picking media    
 * OnChanged and OnSubmitted callback available, similar to Textfield
 
+## [1.0.0+1] -
+
+* Bug fixes

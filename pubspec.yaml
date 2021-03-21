@@ -1,6 +1,6 @@
 name: drishya_picker
 description: Messenger like image, video picker with two different option. 1. Using Controller 2. Using MediaPicker widget
-version: 1.0.0
+version: 1.0.0+1
 homepage: https://github.com/koiralapankajgit/drishya_picker
 
 environment:
