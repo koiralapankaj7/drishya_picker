@@ -1,3 +1,7 @@
+import 'dart:developer';
+import 'dart:ui';
+
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -30,38 +34,201 @@ class _Home extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Media Picker'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Picker1()),
+      body: _SliderDemo(),
+    );
+  }
+}
+
+class _PickerDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Picker1()),
+              );
+            },
+            child: const Text('Pick using controller'),
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Colors.green,
+            ),
+          ),
+          const SizedBox(height: 20.0),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Picker2()),
+              );
+            },
+            child: const Text('Pick without controller'),
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Colors.green,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SliderDemo extends StatefulWidget {
+  @override
+  __SliderDemoState createState() => __SliderDemoState();
+}
+
+class __SliderDemoState extends State<_SliderDemo> {
+  final controller = CustomSliderController();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomSlider(
+      count: 3,
+      controller: controller,
+      child: ValueListenableBuilder<SliderValue>(
+        valueListenable: controller,
+        builder: (context, value, child) {
+          log('${value.currentIndex} : ${value.direction} : ${value.slidePercent}');
+          return Container(
+            height: 200.0,
+            color: Colors.cyan,
+            child: Center(
+              child: _Indicator(controller: controller, count: 3),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _Indicator extends StatelessWidget {
+  const _Indicator({
+    Key? key,
+    required this.controller,
+    required this.count,
+  }) : super(key: key);
+
+  final CustomSliderController controller;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<SliderValue>(
+      valueListenable: controller,
+      builder: (context, state, child) {
+        //
+
+        // This calculation is made for placing active index always in
+        // center of the row.
+        const minIndicatorWidth = 5.0 + 4.0; // 2.0 for margin
+        const maxIndicatorWidth = 36.0;
+
+        final baseTranslation =
+            ((maxIndicatorWidth + ((count - 1) * minIndicatorWidth)) / 2) -
+                (maxIndicatorWidth / 2);
+
+        var translation =
+            baseTranslation - (state.currentIndex * minIndicatorWidth);
+
+        if (state.direction == SlideDirection.leftToRight) {
+          translation += minIndicatorWidth * state.slidePercent;
+        } else if (state.direction == SlideDirection.rightToLeft) {
+          translation -= minIndicatorWidth * state.slidePercent;
+        }
+
+        // Pager indicator return column which first child is expended so that we
+        // can place indicators at the bottom.
+
+        return Transform(
+          transform: Matrix4.translationValues(translation, 0.0, 0.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(
+              count,
+              (index) {
+                double? percentActive;
+
+                if (index == state.currentIndex) {
+                  percentActive = 1.0 - state.slidePercent;
+                } else if (index == state.currentIndex - 1 &&
+                    state.direction == SlideDirection.leftToRight) {
+                  percentActive = state.slidePercent;
+                } else if (index == state.currentIndex + 1 &&
+                    state.direction == SlideDirection.rightToLeft) {
+                  percentActive = state.slidePercent;
+                } else {
+                  percentActive = 0.0;
+                }
+
+                // Calculation isHollow
+                final isHollow = index > state.currentIndex ||
+                    (index == state.currentIndex &&
+                        state.direction == SlideDirection.leftToRight);
+
+                return Indicator(
+                  isHollow: isHollow,
+                  activePercent: percentActive,
+                  isActive: state.currentIndex == index,
                 );
               },
-              child: const Text('Pick using controller'),
-              style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Colors.green,
-              ),
             ),
-            const SizedBox(height: 20.0),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Picker2()),
-                );
-              },
-              child: const Text('Pick without controller'),
-              style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Colors.green,
-              ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class Indicator extends StatelessWidget {
+  ///
+  const Indicator({
+    Key? key,
+    this.icon,
+    this.color,
+    this.isHollow,
+    this.activePercent,
+    this.isActive,
+  }) : super(key: key);
+
+  ///
+  final IconData? icon;
+
+  ///
+  final Color? color;
+
+  ///
+  final bool? isHollow;
+
+  ///
+  final double? activePercent;
+
+  ///
+  final bool? isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 24.0,
+      child: Center(
+        child: Container(
+          height: lerpDouble(5.0, 5.0, activePercent!),
+          width: lerpDouble(5.0, 36.0, activePercent!),
+          margin: const EdgeInsets.only(right: 4.0),
+          decoration: BoxDecoration(
+            color: Colors.red.withAlpha(
+              (0xFF * activePercent!.clamp(0.2, 1.0)).round(),
             ),
-          ],
+            borderRadius: BorderRadius.circular(3.0),
+          ),
         ),
       ),
     );
