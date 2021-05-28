@@ -85,25 +85,18 @@ class _SliderDemo extends StatefulWidget {
 }
 
 class __SliderDemoState extends State<_SliderDemo> {
-  final controller = CustomSliderController();
+  final controller = SlideController(length: 3);
 
   @override
   Widget build(BuildContext context) {
-    return CustomSlider(
-      count: 3,
+    return SlideGesture(
       controller: controller,
-      child: ValueListenableBuilder<SliderValue>(
-        valueListenable: controller,
-        builder: (context, value, child) {
-          log('${value.currentIndex} : ${value.direction} : ${value.slidePercent}');
-          return Container(
-            height: 200.0,
-            color: Colors.cyan,
-            child: Center(
-              child: _Indicator(controller: controller, count: 3),
-            ),
-          );
-        },
+      child: Container(
+        height: 200.0,
+        color: Colors.cyan,
+        child: Center(
+          child: _Indicator(controller: controller),
+        ),
       ),
     );
   }
@@ -113,26 +106,23 @@ class _Indicator extends StatelessWidget {
   const _Indicator({
     Key? key,
     required this.controller,
-    required this.count,
   }) : super(key: key);
 
-  final CustomSliderController controller;
-  final int count;
+  final SlideController controller;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<SliderValue>(
+    return ValueListenableBuilder<SlideValue>(
       valueListenable: controller,
       builder: (context, state, child) {
-        //
-
         // This calculation is made for placing active index always in
         // center of the row.
         const minIndicatorWidth = 5.0 + 4.0; // 2.0 for margin
         const maxIndicatorWidth = 36.0;
 
         final baseTranslation =
-            ((maxIndicatorWidth + ((count - 1) * minIndicatorWidth)) / 2) -
+            ((maxIndicatorWidth + ((state.length - 1) * minIndicatorWidth)) /
+                    2) -
                 (maxIndicatorWidth / 2);
 
         var translation =
@@ -153,7 +143,7 @@ class _Indicator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: List.generate(
-              count,
+              state.length,
               (index) {
                 double? percentActive;
 

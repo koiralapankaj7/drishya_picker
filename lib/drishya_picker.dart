@@ -6,5 +6,4 @@ export './src/drishya_picker.dart' hide Header, GalleryView;
 // export './src/widgets/media_controller_provider.dart';
 // export './src/widgets/slidable_panel.dart' show PanelController;
 
-export './src/widgets/custom_slider/custom_slider.dart';
-export './src/widgets/custom_slider/custom_slider_controller.dart';
+export 'src/widgets/slide_gesture/slide_gesture.dart';

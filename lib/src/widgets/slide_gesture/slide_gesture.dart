@@ -2,24 +2,18 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'custom_slider_controller.dart';
-
 ///
-class CustomSlider extends StatefulWidget {
+class SlideGesture extends StatefulWidget {
   ///
-  const CustomSlider({
+  const SlideGesture({
     Key? key,
-    required this.count,
     this.controller,
     this.child,
     this.background,
   }) : super(key: key);
 
   ///
-  final int count;
-
-  ///
-  final CustomSliderController? controller;
+  final SlideController? controller;
 
   ///
   final Widget? child;
@@ -28,12 +22,12 @@ class CustomSlider extends StatefulWidget {
   final Color? background;
 
   @override
-  _CustomSliderState createState() => _CustomSliderState();
+  _SlideGestureState createState() => _SlideGestureState();
 }
 
-class _CustomSliderState extends State<CustomSlider>
+class _SlideGestureState extends State<SlideGesture>
     with TickerProviderStateMixin {
-  late final CustomSliderController _sliderController;
+  late final SlideController _sliderController;
   late AnimationController _animationController;
 
   Offset dragStart = Offset.zero;
@@ -46,7 +40,7 @@ class _CustomSliderState extends State<CustomSlider>
   @override
   void initState() {
     super.initState();
-    _sliderController = (widget.controller ?? CustomSliderController())
+    _sliderController = (widget.controller ?? SlideController(length: 0))
       .._init(this);
   }
 
@@ -72,13 +66,14 @@ class _CustomSliderState extends State<CustomSlider>
 
     _animationController = AnimationController(duration: duration, vsync: this)
       ..addListener(() {
-        slidePercent = lerpDouble(
+        final percent = lerpDouble(
               startSlidePercent,
               endSlidePercent,
               _animationController.value,
             ) ??
             0.0;
-        _sliderController._addSlide(Slide(
+        slidePercent = double.parse(percent.toStringAsFixed(2));
+        _sliderController._addSlideDetail(_SlideDetail(
           direction: direction,
           percent: slidePercent,
           state: SlideState.animating,
@@ -87,7 +82,7 @@ class _CustomSliderState extends State<CustomSlider>
       ..addStatusListener(
         (AnimationStatus status) {
           if (status == AnimationStatus.completed) {
-            _sliderController._addSlide(Slide(
+            _sliderController._addSlideDetail(_SlideDetail(
               direction: direction,
               percent: endSlidePercent,
               state: SlideState.doneAnimating,
@@ -108,7 +103,8 @@ class _CustomSliderState extends State<CustomSlider>
 
       final slideValue = _sliderController.value;
       final canDragLeftToRight = slideValue.currentIndex > 0;
-      final canDragRightToLeft = slideValue.currentIndex < widget.count - 1;
+      final canDragRightToLeft =
+          slideValue.currentIndex < _sliderController.value.length - 1;
 
       if (dx > 0.0 && canDragRightToLeft) {
         slideDirection = SlideDirection.rightToLeft;
@@ -143,7 +139,7 @@ class _CustomSliderState extends State<CustomSlider>
         // slidePercent = (dx / fullTransitionPx).abs().clamp(0.0, 1.0);
         final percent = (dx / fullTransitionPx).abs().clamp(0.0, 1.0);
         slidePercent = double.parse(percent.toStringAsFixed(2));
-        _sliderController._addSlide(Slide(
+        _sliderController._addSlideDetail(_SlideDetail(
           state: SlideState.dragging,
           direction: slideDirection,
           percent: slidePercent,
@@ -155,7 +151,7 @@ class _CustomSliderState extends State<CustomSlider>
   void onHorizontalDragEnd(DragEndDetails details) {
     // Clean up
     dragStart = Offset.zero;
-    _sliderController._addSlide(Slide(
+    _sliderController._addSlideDetail(_SlideDetail(
       state: SlideState.doneDragging,
       direction: SlideDirection.none,
       percent: 0.0,
@@ -171,10 +167,12 @@ class _CustomSliderState extends State<CustomSlider>
 
   @override
   Widget build(BuildContext context) {
+    final enableGesture =
+        _sliderController.value.direction == SlideDirection.none;
     return GestureDetector(
-      onHorizontalDragStart: onHorizontalDragStart,
-      onHorizontalDragUpdate: onHorizontalDragUpdate,
-      onHorizontalDragEnd: onHorizontalDragEnd,
+      onHorizontalDragStart: enableGesture ? onHorizontalDragStart : null,
+      onHorizontalDragUpdate: enableGesture ? onHorizontalDragUpdate : null,
+      onHorizontalDragEnd: enableGesture ? onHorizontalDragEnd : null,
       child: Container(
         color: widget.background ?? Theme.of(context).scaffoldBackgroundColor,
         child: widget.child,
@@ -184,36 +182,37 @@ class _CustomSliderState extends State<CustomSlider>
 }
 
 ///
-class CustomSliderController extends ValueNotifier<SliderValue> {
+class SlideController extends ValueNotifier<SlideValue> {
   ///
-  CustomSliderController() : super(SliderValue());
+  SlideController({required int length}) : super(SlideValue(length: length));
 
-  late final ValueNotifier<Slide> _slideNotifier;
+  late final ValueNotifier<_SlideDetail> _slideNotifier;
 
-  late final _CustomSliderState _state;
+  late final _SlideGestureState _state;
 
-  void _init(_CustomSliderState state) {
+  void _init(_SlideGestureState state) {
     _state = state;
-    _slideNotifier = ValueNotifier(Slide())..addListener(_slideListener);
+    _slideNotifier = ValueNotifier(_SlideDetail())..addListener(_slideListener);
   }
 
   void _slideListener() {
     final slide = _slideNotifier.value;
 
     if (slide.state == SlideState.dragging) {
-      _updateState(
+      _updateSlideValue(
         slideDirection: slide.direction,
         slidePercent: slide.percent,
+        state: slide.state,
       );
       if (value.direction == SlideDirection.leftToRight) {
-        _updateState(nextPageIndex: value.currentIndex - 1);
+        _updateSlideValue(nextPageIndex: value.currentIndex - 1);
       } else if (value.direction == SlideDirection.rightToLeft) {
-        _updateState(nextPageIndex: value.currentIndex + 1);
+        _updateSlideValue(nextPageIndex: value.currentIndex + 1);
       } else {
-        _updateState(nextPageIndex: value.currentIndex);
+        _updateSlideValue(nextPageIndex: value.currentIndex);
       }
       if (!slide.withGesture) {
-        _slideNotifier.value = Slide(
+        _slideNotifier.value = _SlideDetail(
           state: SlideState.doneDragging,
           direction: value.direction,
           percent: 0.0,
@@ -223,6 +222,8 @@ class CustomSliderController extends ValueNotifier<SliderValue> {
     }
 
     if (slide.state == SlideState.doneDragging) {
+      _updateSlideValue(state: slide.state);
+
       if (value.slidePercent > 0.5 || !slide.withGesture) {
         _state._animate(
           direction: value.direction,
@@ -235,23 +236,25 @@ class CustomSliderController extends ValueNotifier<SliderValue> {
           goal: SlideGoal.close,
           slidePercent: value.slidePercent,
         );
-        _updateState(nextPageIndex: value.currentIndex);
+        _updateSlideValue(nextPageIndex: value.currentIndex);
       }
       _state._animationController.forward(from: 0.0);
     }
 
     if (slide.state == SlideState.animating) {
-      _updateState(
+      _updateSlideValue(
         slideDirection: slide.direction,
         slidePercent: slide.percent,
+        state: slide.state,
       );
     }
 
     if (slide.state == SlideState.doneAnimating) {
-      _updateState(
+      _updateSlideValue(
         activeIndex: value.nextIndex,
         slideDirection: SlideDirection.none,
         slidePercent: 0.0,
+        state: slide.state,
       );
       _state._animationController.dispose();
     }
@@ -259,31 +262,30 @@ class CustomSliderController extends ValueNotifier<SliderValue> {
   }
 
   ///
-  void _updateState({
+  void _updateSlideValue({
     int? activeIndex,
     int? nextPageIndex,
     SlideDirection? slideDirection,
     double? slidePercent,
+    SlideState? state,
   }) {
-    value = value.copyWith(
+    value = value._copyWith(
       currentIndex: activeIndex,
       nextIndex: nextPageIndex,
       direction: slideDirection,
       slidePercent: slidePercent,
+      state: state,
     );
   }
 
   ///
-  void _addSlide(Slide slide) {
+  void _addSlideDetail(_SlideDetail slide) {
     _slideNotifier.value = slide;
   }
 
-  /// Slide detail listenable
-  ValueNotifier<Slide> get slideNotifier => _slideNotifier;
-
   /// Run animation from provided direction without scrolling
   void runAnimationFrom(SlideDirection direction) {
-    _slideNotifier.value = Slide(
+    _slideNotifier.value = _SlideDetail(
       state: SlideState.dragging,
       direction: direction,
       percent: 0.0,
@@ -299,4 +301,112 @@ class CustomSliderController extends ValueNotifier<SliderValue> {
   }
 
 //
+}
+
+class _SlideDetail {
+  _SlideDetail({
+    this.state = SlideState.none,
+    this.direction = SlideDirection.none,
+    this.percent = 0.0,
+    this.withGesture = true,
+  });
+
+  final SlideState state;
+  final SlideDirection direction;
+  final double percent;
+  final bool withGesture;
+}
+
+///
+/// Slide value
+class SlideValue {
+  ///
+  SlideValue({
+    required this.length,
+    this.currentIndex = 0,
+    this.nextIndex = 0,
+    this.direction = SlideDirection.none,
+    this.slidePercent = 0.0,
+    this.state = SlideState.none,
+  });
+
+  ///
+  final int length;
+
+  ///
+  final int currentIndex;
+
+  ///
+  final int nextIndex;
+
+  ///
+  final SlideDirection direction;
+
+  ///
+  final double slidePercent;
+
+  ///
+  final SlideState state;
+
+  ///
+  SlideValue _copyWith({
+    int? currentIndex,
+    int? nextIndex,
+    SlideDirection? direction,
+    double? slidePercent,
+    SlideState? state,
+  }) =>
+      SlideValue(
+        currentIndex: currentIndex ?? this.currentIndex,
+        nextIndex: nextIndex ?? this.nextIndex,
+        direction: direction ?? this.direction,
+        slidePercent: slidePercent ?? this.slidePercent,
+        state: state ?? this.state,
+        length: length,
+      );
+}
+
+///
+/// Slide gesture goal
+///
+enum SlideGoal {
+  ///
+  open,
+
+  ///
+  close,
+}
+
+///
+/// Current slide state
+///
+enum SlideState {
+  ///
+  dragging,
+
+  ///
+  doneDragging,
+
+  ///
+  animating,
+
+  ///
+  doneAnimating,
+
+  ///
+  none,
+}
+
+///
+/// Current sliding direction
+///
+enum SlideDirection {
+  ///
+  leftToRight,
+
+  ///
+  rightToLeft,
+
+  ///
+  none,
 }
