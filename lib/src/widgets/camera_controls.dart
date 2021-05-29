@@ -1,41 +1,28 @@
-part of 'camera_view.dart';
+// part of 'camera_view.dart';
 
-class CameraControl extends StatefulWidget {
-  const CameraControl({
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/utils/custom_icons.dart';
+import 'package:drishya_picker/src/utils/custom_icons.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+class CameraAction extends StatefulWidget {
+  const CameraAction({
     Key? key,
-    required this.controller,
+    // required this.controller,
   }) : super(key: key);
 
-  final CameraController controller;
+  // final CameraController controller;
 
   @override
-  _CameraControlState createState() => _CameraControlState();
+  _CameraActionState createState() => _CameraActionState();
 }
 
-class _CameraControlState extends State<CameraControl> {
+class _CameraActionState extends State<CameraAction> {
   XFile? imageFile;
-  late final PageController pageController;
-  late final _InputController inputController;
-  late final ValueNotifier<ScrollDetail> pageVisibility;
-
-  @override
-  void initState() {
-    super.initState();
-    inputController = _InputController();
-    pageVisibility = ValueNotifier(ScrollDetail(0.0, AxisDirection.left));
-    pageController = PageController(
-      viewportFraction: 0.22,
-    )..addListener(_pageListener);
-  }
-
-  void _pageListener() {
-    pageVisibility.value = ScrollDetail(
-      pageController.page ?? 0.0,
-      pageController.position.axisDirection,
-    );
-  }
-
-  void _onPageChanged(int index) {}
 
   ///
   // void _displayThumbnail(XFile file) {
@@ -44,11 +31,7 @@ class _CameraControlState extends State<CameraControl> {
   //   });
   // }
 
-  @override
-  void dispose() {
-    pageController.removeListener(_pageListener);
-    super.dispose();
-  }
+  // final _slideController = SlideController(length: _InputType.values.length);
 
   @override
   Widget build(BuildContext context) {
@@ -67,20 +50,20 @@ class _CameraControlState extends State<CameraControl> {
                 },
               ),
               const Expanded(child: SizedBox()),
-              _CameraListener(
-                controller: widget.controller,
-                builder: (value) {
-                  return IconButton(
-                    icon: Icon(
-                      value.flashMode == FlashMode.off
-                          ? Icons.flash_on
-                          : Icons.flash_off,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {},
-                  );
-                },
-              ),
+              // _CameraListener(
+              //   controller: widget.controller,
+              //   builder: (value) {
+              //     return IconButton(
+              //       icon: Icon(
+              //         value.flashMode == FlashMode.off
+              //             ? Icons.flash_on
+              //             : Icons.flash_off,
+              //         color: Colors.white,
+              //       ),
+              //       onPressed: () {},
+              //     );
+              //   },
+              // ),
             ],
           ),
 
@@ -92,14 +75,14 @@ class _CameraControlState extends State<CameraControl> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: 80.0,
-                width: 80.0,
+                height: 60.0,
+                width: 60.0,
                 padding: EdgeInsets.all(3.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(40.0),
                   border: Border.all(
                     color: Colors.white,
-                    width: 6.0,
+                    width: 3.0,
                   ),
                 ),
                 child: CircleAvatar(
@@ -109,58 +92,49 @@ class _CameraControlState extends State<CameraControl> {
             ],
           ),
 
-          // preview, mode and camera
-          Row(
-            children: [
-              // Preview
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Container(
-                  color: Colors.white,
-                  height: 48.0,
-                  width: 48.0,
-                  child: imageFile == null
-                      ? SizedBox()
-                      : Image.file(File(imageFile!.path)),
-                ),
-              ),
+          const SizedBox(height: 4.0),
 
-              // Expanded
-              Expanded(
-                child: Container(
-                  height: 40.0,
+          // preview, mode and camera
+          Container(
+            height: 60.0,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 12.0,
+                  spreadRadius: 1.0,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Preview
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Container(
+                      color: Colors.white,
+                      height: 48.0,
+                      width: 48.0,
+                      child: imageFile == null
+                          ? SizedBox()
+                          : Image.file(File(imageFile!.path)),
+                    ),
+                  ),
+                ),
+
+                // Expanded
+                Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       // Text scroller
-                      Expanded(
-                        child: PageView.builder(
-                          itemCount: _InputType.values.length,
-                          controller: pageController,
-                          onPageChanged: _onPageChanged,
-                          itemBuilder: (context, index) {
-                            final type = _InputType.values[index];
+                      Expanded(child: _ItemsPageView()),
 
-                            return ValueListenableBuilder<ScrollDetail>(
-                              valueListenable: pageVisibility,
-                              builder: (context, detail, child) {
-                                final value = detail.page;
+                      const SizedBox(height: 8.0),
 
-                                final isCurrent = value == index.toDouble();
-                                log('$index : $isCurrent');
-                                final color = Colors.white.withAlpha(
-                                  (0xFF * value.clamp(0.5, 1.0)).round(),
-                                );
-                                return _InputItem(
-                                  type: type,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-
-                      // Indicator
+                      // _InputItem
                       Container(
                         height: 10.0,
                         width: 10.0,
@@ -174,22 +148,24 @@ class _CameraControlState extends State<CameraControl> {
                           ),
                         ),
                       ),
+
+                      //
                     ],
                   ),
                 ),
-              ),
 
-              // Camera
-              IconButton(
-                icon: const Icon(
-                  Icons.flip_camera_ios,
-                  color: Colors.white,
+                // Camera
+                IconButton(
+                  icon: const Icon(
+                    CustomIcons.camera,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
                 ),
-                onPressed: () {},
-              ),
 
-              //
-            ],
+                //
+              ],
+            ),
           ),
 
           //
@@ -199,30 +175,99 @@ class _CameraControlState extends State<CameraControl> {
   }
 }
 
-class _InputItem extends StatelessWidget {
-  const _InputItem({
+class _ItemsPageView extends StatefulWidget {
+  const _ItemsPageView({
     Key? key,
-    required this.type,
-    this.color,
-    this.fontSize = 14.0,
+    this.onPageChanged,
   }) : super(key: key);
 
-  final _InputType type;
-  final Color? color;
-  final double fontSize;
+  final void Function(int)? onPageChanged;
+
+  @override
+  __ItemsPageViewState createState() => __ItemsPageViewState();
+}
+
+class __ItemsPageViewState extends State<_ItemsPageView> {
+  late final PageController pageController;
+  double pageValue = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController(
+      viewportFraction: 0.25,
+    )..addListener(() {
+        setState(() {
+          pageValue = pageController.page ?? 0.0;
+        });
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // color: Colors.white,
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(right: 4.0),
-      child: Text(
-        type.value.toUpperCase(),
-        style: TextStyle(
-          fontWeight: FontWeight.w900,
-          color: color ?? Colors.white,
-          fontSize: fontSize,
+    return PageView.builder(
+      itemCount: _InputType.values.length,
+      controller: pageController,
+      onPageChanged: (index) {},
+      itemBuilder: (context, position) {
+        final type = _InputType.values[position];
+        double activePercent = 0.0;
+        if (position == pageValue.floor()) {
+          activePercent = 1 - (pageValue - position).clamp(0.0, 1.0);
+        } else if (position == pageValue.floor() + 1) {
+          activePercent = 1 - (position - pageValue).clamp(0.0, 1.0);
+        } else {
+          activePercent = 0.0;
+        }
+
+        return _InputItem(
+          type: type,
+          activePercent: activePercent,
+          onPressed: () {
+            pageController.animateToPage(
+              type.index,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeIn,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _InputItem extends StatelessWidget {
+  ///
+  const _InputItem({
+    Key? key,
+    required this.type,
+    required this.activePercent,
+    this.onPressed,
+  }) : super(key: key);
+
+  ///
+  final _InputType type;
+
+  ///
+  final double activePercent;
+
+  ///
+  final void Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Text(
+          type.value.toUpperCase(),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: (14.0 * activePercent).clamp(12.0, 14.0),
+            color: Colors.white
+                .withAlpha((0xFF * activePercent.clamp(0.5, 1.0)).round()),
+          ),
         ),
       ),
     );
@@ -250,17 +295,17 @@ class _CameraListener extends StatelessWidget {
   }
 }
 
-class _InputController extends ValueNotifier<_InputValue> {
-  _InputController() : super(_InputValue());
-}
+// class _InputController extends ValueNotifier<_InputValue> {
+//   _InputController() : super(_InputValue());
+// }
 
-class _InputValue {
-  _InputValue({
-    this.type = _InputType.normal,
-  });
+// class _InputValue {
+//   _InputValue({
+//     this.type = _InputType.normal,
+//   });
 
-  final _InputType type;
-}
+//   final _InputType type;
+// }
 
 class _InputType {
   const _InputType._internal(this.value, this.index);
@@ -281,15 +326,47 @@ class _InputType {
   static const _InputType video = _InputType._internal('Video', 2);
 
   ///
-  static const _InputType selfi = _InputType._internal('Selfi', 3);
+  // static const _InputType boomerang = _InputType._internal('Boomerang', 3);
+
+  ///
+  static const _InputType selfi = _InputType._internal('Selfi', 4);
 
   ///
   static List<_InputType> get values => [text, normal, video, selfi];
 }
 
 class ScrollDetail {
-  ScrollDetail(this.page, this.direction);
+  ///
+  ScrollDetail({
+    this.currentIndex = 0,
+    this.nextIndex = 0,
+    this.direction = ScrollDirection.idle,
+    this.slidePercent = 0.0,
+  });
 
-  final double page;
-  final AxisDirection direction;
+  ///
+  final int currentIndex;
+
+  ///
+  final int nextIndex;
+
+  ///
+  final ScrollDirection direction;
+
+  ///
+  final double slidePercent;
+
+  ///
+  ScrollDetail _copyWith({
+    int? currentIndex,
+    int? nextIndex,
+    ScrollDirection? direction,
+    double? slidePercent,
+  }) =>
+      ScrollDetail(
+        currentIndex: currentIndex ?? this.currentIndex,
+        nextIndex: nextIndex ?? this.nextIndex,
+        direction: direction ?? this.direction,
+        slidePercent: slidePercent ?? this.slidePercent,
+      );
 }
