@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -34,7 +33,7 @@ class _Home extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Media Picker'),
       ),
-      body: _SliderDemo(),
+      body: CameraView(),
     );
   }
 }
