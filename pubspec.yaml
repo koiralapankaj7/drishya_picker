@@ -4,7 +4,7 @@ version: 1.0.0+1
 homepage: https://github.com/koiralapankajgit/drishya_picker
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -22,8 +22,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - lib/assets/camera.png
+
   fonts:
     - family: CustomIcons
-      fonts:
-        - asset: fonts/CustomIcons.ttf
+      fonts: 
+        - asset: lib/assets/fonts/CustomIcons.ttf
   

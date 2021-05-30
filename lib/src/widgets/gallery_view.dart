@@ -171,24 +171,12 @@ class _GalleryViewState extends State<GalleryView>
                         if (index == 0) {
                           return InkWell(
                             onTap: () async {
-                              try {
-                                WidgetsFlutterBinding.ensureInitialized();
-                                final cameras = await availableCameras();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) {
-                                    return CameraView(cameras: cameras);
-                                  }),
-                                );
-                              } on CameraException catch (e) {
-                                logError(e.code, e.description);
-                              }
-
-                              // final PickedFile? pickedFile = await picker
-                              //     .getImage(source: ImageSource.camera);
-                              // if (pickedFile != null) {
-                              //   final file = File(pickedFile.path);
-                              // }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) {
+                                  return CameraView();
+                                }),
+                              );
                             },
                             child: Container(
                               color: Colors.cyan,

@@ -12,6 +12,10 @@
 ///       - asset: fonts/CustomIcons.ttf
 ///
 ///
+/// * Material Design Icons, Copyright (C) Google, Inc
+///         Author:    Google
+///         License:   Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+///         Homepage:  https://design.google.com/icons/
 ///
 import 'package:flutter/widgets.dart';
 
@@ -19,18 +23,20 @@ class CustomIcons {
   CustomIcons._();
 
   static const _kFontFam = 'CustomIcons';
-  static const String? _kFontPkg = null;
+  static const String? _kFontPkg = 'drishya_picker';
 
-  static const IconData camera =
+  static const camera =
       IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData cameraRotate =
+  static const cameraRotate =
       IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData flashoff =
+  static const flashoff =
       IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData flashon =
+  static const flashon =
       IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData play =
+  static const play =
       IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData send =
+  static const send =
       IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const close =
+      IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
