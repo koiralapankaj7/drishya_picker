@@ -15,7 +15,7 @@ class _Picker2State extends State<Picker2> {
   @override
   Widget build(BuildContext context) {
     return DrishyaPicker(
-      requestType: RequestType.common,
+      // requestType: RequestType.common,
       topMargin: MediaQuery.of(context).padding.top,
       child: Scaffold(
         appBar: AppBar(
@@ -47,9 +47,9 @@ class _Picker2State extends State<Picker2> {
                   ValueListenableBuilder<List<AssetEntity>?>(
                     valueListenable: notifier,
                     builder: (context, list, child) {
-                      return MediaPicker(
+                      return DrishyaPickerField(
                         setting: DrishyaSetting(
-                          selected: list,
+                          selectedItems: list ?? [],
                           maximum: 5,
                           albumSubtitle: 'common',
                         ),

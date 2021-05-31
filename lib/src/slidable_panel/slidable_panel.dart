@@ -73,7 +73,6 @@ class SlidablePanel extends StatefulWidget {
 
 class _SlidablePanelState extends State<SlidablePanel>
     with TickerProviderStateMixin {
-  // late double _statusBarHeight;
   late double _panelHeaderMinHeight;
   late double _panelHeaderMaxHeight;
   late double _panelMinHeight;
@@ -113,7 +112,6 @@ class _SlidablePanelState extends State<SlidablePanel>
   @override
   void initState() {
     super.initState();
-
     _panelHeaderMinHeight =
         widget.panelHeaderMinHeight ?? kPanelHeaderMinHeight;
     _panelHeaderMaxHeight =

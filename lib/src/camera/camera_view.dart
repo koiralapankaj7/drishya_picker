@@ -10,7 +10,7 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/widgets/camera/text_view.dart';
+import 'package:drishya_picker/src/camera/text_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -46,6 +46,7 @@ class _CameraViewState extends State<CameraView>
   bool enableAudio = true;
   List<CameraDescription> cameras = <CameraDescription>[];
   late final InputTypeController inputTypeController;
+  AssetEntity? selectedItem;
 
   VoidCallback? videoPlayerListener;
 
@@ -106,7 +107,7 @@ class _CameraViewState extends State<CameraView>
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _onNewCameraSelected(cameraController.description.lensDirection);
+      _switchCameraDirection(cameraController.description.lensDirection);
     }
   }
 
@@ -147,9 +148,10 @@ class _CameraViewState extends State<CameraView>
                     inputTypeController: inputTypeController,
                     controller: controller!,
                     onFalshIconPressed: _setFlashMode,
-                    onCameraRotatePressed: _onNewCameraSelected,
+                    onCameraRotatePressed: _switchCameraDirection,
                     onCaptureImagePressed: _onTakePictureButtonPressed,
                     onInputTypeChanged: (type) {},
+                    onPopRequest: () {},
                     onPreviewMediaPressed: () {},
                   ),
               ],
@@ -172,6 +174,166 @@ class _CameraViewState extends State<CameraView>
         .clamp(_minAvailableZoom, _maxAvailableZoom);
 
     await controller!.setZoomLevel(_currentScale);
+  }
+
+  String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  void showInSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showCameraException(CameraException e) {
+    logError(e.code, e.description);
+  }
+
+  void _onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
+    if (controller == null) return;
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+    controller!.setExposurePoint(offset);
+    controller!.setFocusPoint(offset);
+  }
+
+  // Setup camera controller
+  void _switchCameraDirection(CameraLensDirection direction) async {
+    try {
+      if (controller != null) {
+        // todo disposing causing error
+        // await controller!.dispose();
+      }
+
+      final cameraDescription = cameras
+          .firstWhere((desc) => desc.lensDirection == direction, orElse: () {
+        return CameraDescription(
+          name: 'name',
+          lensDirection: direction,
+          sensorOrientation: 0,
+        );
+      });
+
+      final cameraController = CameraController(
+        cameraDescription,
+        ResolutionPreset.veryHigh,
+        enableAudio: enableAudio,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+      );
+
+      await cameraController.initialize();
+      controller = cameraController;
+
+      await Future.wait([
+        cameraController
+            .getMinExposureOffset()
+            .then((value) => _minAvailableExposureOffset = value),
+        cameraController
+            .getMaxExposureOffset()
+            .then((value) => _maxAvailableExposureOffset = value),
+        cameraController
+            .getMaxZoomLevel()
+            .then((value) => _maxAvailableZoom = value),
+        cameraController
+            .getMinZoomLevel()
+            .then((value) => _minAvailableZoom = value),
+      ]);
+
+      // If the controller is updated then update the UI.
+      cameraController.addListener(() {
+        // if (mounted) setState(() {});
+        if (cameraController.value.hasError) {
+          showInSnackBar(
+              'Camera error ${cameraController.value.errorDescription}');
+        }
+      });
+    } on CameraException catch (e) {
+      _showCameraException(e);
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  ///
+  void _onTakePictureButtonPressed() {
+    _takePicture().then((AssetEntity? entity) {
+      if (mounted) {
+        setState(() {
+          videoController?.dispose();
+          videoController = null;
+        });
+
+        if (entity != null) {
+          Navigator.of(context).pop(entity);
+        }
+        // showInSnackBar('Picture saved to ${entity.relativePath}');
+      }
+    });
+  }
+
+  /// Set flash mode
+  Future<void> _setFlashMode(FlashMode mode) async {
+    if (controller == null) {
+      return;
+    }
+    try {
+      await controller!.setFlashMode(mode);
+    } on CameraException catch (e) {
+      _showCameraException(e);
+      rethrow;
+    }
+  }
+
+  //
+  Future<AssetEntity?> _takePicture() async {
+    if (!_canProcess) {
+      log('Error: No camera selected..');
+      return null;
+    }
+
+    final ctrl = controller!;
+
+    if (ctrl.value.isTakingPicture) {
+      log('Capturing is currently running..');
+      return null;
+    }
+
+    try {
+      XFile file = await ctrl.takePicture();
+      final time = await file.lastModified();
+      final entity = AssetEntity(
+        id: time.millisecond.toString(),
+        height: 1080,
+        width: 1920,
+        typeInt: 1,
+        mimeType: file.mimeType,
+        createDtSecond: time.second,
+        modifiedDateSecond: time.second,
+        title: file.name,
+        relativePath: file.path,
+        orientation: ctrl.description.sensorOrientation,
+      );
+      return entity;
+    } on CameraException catch (e) {
+      log('Exception occured while capturing picture : $e');
+      return null;
+    }
+  }
+
+  ///
+  Future<void> setExposureMode(ExposureMode mode) async {
+    if (controller == null) {
+      return;
+    }
+
+    try {
+      await controller!.setExposureMode(mode);
+    } on CameraException catch (e) {
+      _showCameraException(e);
+      rethrow;
+    }
   }
 
   void _onTakeImgButtonPressed() {
@@ -208,277 +370,165 @@ class _CameraViewState extends State<CameraView>
     //           : null,
   }
 
-  String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
-
-  void showInSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+  void _onAudioModeButtonPressed() {
+    // enableAudio = !enableAudio;
+    // if (controller != null) {
+    //   _onNewCameraSelected(controller!.description.lensDirection);
+    // }
   }
 
-  void _onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
-    if (controller == null) return;
-    final offset = Offset(
-      details.localPosition.dx / constraints.maxWidth,
-      details.localPosition.dy / constraints.maxHeight,
-    );
-    controller!.setExposurePoint(offset);
-    controller!.setFocusPoint(offset);
+  void _onCaptureOrientationLockButtonPressed() async {
+    // if (controller != null) {
+    //   final CameraController cameraController = controller!;
+    //   if (cameraController.value.isCaptureOrientationLocked) {
+    //     await cameraController.unlockCaptureOrientation();
+    //     showInSnackBar('Capture orientation unlocked');
+    //   } else {
+    //     await cameraController.lockCaptureOrientation();
+    //     showInSnackBar(
+    //         'Capture orientation locked to ${cameraController.value.lockedCaptureOrientation.toString().split('.').last}');
+    //   }
+    // }
   }
 
-  // Setup camera controller
-  void _onNewCameraSelected(CameraLensDirection direction) async {
-    try {
-      if (controller != null) {
-        await controller!.dispose();
-      }
-      final cameraDescription = cameras
-          .firstWhere((desc) => desc.lensDirection == direction, orElse: () {
-        return CameraDescription(
-          name: 'name',
-          lensDirection: direction,
-          sensorOrientation: 0,
-        );
-      });
-      final CameraController cameraController = CameraController(
-        cameraDescription,
-        ResolutionPreset.veryHigh,
-        enableAudio: enableAudio,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-      controller = cameraController;
-
-      await cameraController.initialize();
-      await Future.wait([
-        cameraController
-            .getMinExposureOffset()
-            .then((value) => _minAvailableExposureOffset = value),
-        cameraController
-            .getMaxExposureOffset()
-            .then((value) => _maxAvailableExposureOffset = value),
-        cameraController
-            .getMaxZoomLevel()
-            .then((value) => _maxAvailableZoom = value),
-        cameraController
-            .getMinZoomLevel()
-            .then((value) => _minAvailableZoom = value),
-      ]);
-
-      // If the controller is updated then update the UI.
-      cameraController.addListener(() {
-        if (mounted) setState(() {});
-        if (cameraController.value.hasError) {
-          showInSnackBar(
-              'Camera error ${cameraController.value.errorDescription}');
-        }
-      });
-    } on CameraException catch (e) {
-      _showCameraException(e);
-    }
-
-    if (mounted) {
-      setState(() {});
-    }
+  void _onSetExposureModeButtonPressed(ExposureMode mode) {
+    // setExposureMode(mode).then((_) {
+    //   if (mounted) setState(() {});
+    //   showInSnackBar('Exposure mode set to ${mode.toString().split('.').last}');
+    // });
   }
 
-  ///
-  void _onTakePictureButtonPressed() {
-    _takePicture().then((AssetEntity? entity) {
-      if (mounted) {
-        setState(() {
-          videoController?.dispose();
-          videoController = null;
-        });
-        if (entity != null)
-          showInSnackBar('Picture saved to ${entity.relativePath}');
-      }
-    });
+  void _onSetFocusModeButtonPressed(FocusMode mode) {
+    // _setFocusMode(mode).then((_) {
+    //   if (mounted) setState(() {});
+    //   showInSnackBar('Focus mode set to ${mode.toString().split('.').last}');
+    // });
   }
 
-  void onAudioModeButtonPressed() {
-    enableAudio = !enableAudio;
-    if (controller != null) {
-      _onNewCameraSelected(controller!.description.lensDirection);
-    }
+  void _onVideoRecordButtonPressed() {
+    // _startVideoRecording().then((_) {
+    //   if (mounted) setState(() {});
+    // });
   }
 
-  void onCaptureOrientationLockButtonPressed() async {
-    if (controller != null) {
-      final CameraController cameraController = controller!;
-      if (cameraController.value.isCaptureOrientationLocked) {
-        await cameraController.unlockCaptureOrientation();
-        showInSnackBar('Capture orientation unlocked');
-      } else {
-        await cameraController.lockCaptureOrientation();
-        showInSnackBar(
-            'Capture orientation locked to ${cameraController.value.lockedCaptureOrientation.toString().split('.').last}');
-      }
-    }
+  void _onStopButtonPressed() {
+    // _stopVideoRecording().then((file) {
+    //   if (mounted) setState(() {});
+    //   if (file != null) {
+    //     showInSnackBar('Video recorded to ${file.path}');
+    //     // videoFile = file;
+    //     _startVideoPlayer();
+    //   }
+    // });
   }
 
-  void onSetExposureModeButtonPressed(ExposureMode mode) {
-    setExposureMode(mode).then((_) {
-      if (mounted) setState(() {});
-      showInSnackBar('Exposure mode set to ${mode.toString().split('.').last}');
-    });
+  void _onPauseButtonPressed() {
+    // _pauseVideoRecording().then((_) {
+    //   if (mounted) setState(() {});
+    //   showInSnackBar('Video recording paused');
+    // });
   }
 
-  void onSetFocusModeButtonPressed(FocusMode mode) {
-    setFocusMode(mode).then((_) {
-      if (mounted) setState(() {});
-      showInSnackBar('Focus mode set to ${mode.toString().split('.').last}');
-    });
+  void _onResumeButtonPressed() {
+    // _resumeVideoRecording().then((_) {
+    //   if (mounted) setState(() {});
+    //   showInSnackBar('Video recording resumed');
+    // });
   }
 
-  void onVideoRecordButtonPressed() {
-    startVideoRecording().then((_) {
-      if (mounted) setState(() {});
-    });
+  Future<void> _setExposureOffset(double offset) async {
+    // if (controller == null) {
+    //   return;
+    // }
+
+    // setState(() {
+    //   _currentExposureOffset = offset;
+    // });
+    // try {
+    //   offset = await controller!.setExposureOffset(offset);
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   rethrow;
+    // }
   }
 
-  void onStopButtonPressed() {
-    stopVideoRecording().then((file) {
-      if (mounted) setState(() {});
-      if (file != null) {
-        showInSnackBar('Video recorded to ${file.path}');
-        // videoFile = file;
-        _startVideoPlayer();
-      }
-    });
+  Future<void> _startVideoRecording() async {
+    // final CameraController? cameraController = controller;
+
+    // if (cameraController == null || !cameraController.value.isInitialized) {
+    //   showInSnackBar('Error: select a camera first.');
+    //   return;
+    // }
+
+    // if (cameraController.value.isRecordingVideo) {
+    //   // A recording is already started, do nothing.
+    //   return;
+    // }
+
+    // try {
+    //   await cameraController.startVideoRecording();
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   return;
+    // }
   }
 
-  void onPauseButtonPressed() {
-    pauseVideoRecording().then((_) {
-      if (mounted) setState(() {});
-      showInSnackBar('Video recording paused');
-    });
+  Future<XFile?> _stopVideoRecording() async {
+    // final CameraController? cameraController = controller;
+
+    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    //   return null;
+    // }
+
+    // try {
+    //   return cameraController.stopVideoRecording();
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   return null;
+    // }
   }
 
-  void onResumeButtonPressed() {
-    resumeVideoRecording().then((_) {
-      if (mounted) setState(() {});
-      showInSnackBar('Video recording resumed');
-    });
+  Future<void> _pauseVideoRecording() async {
+    // final CameraController? cameraController = controller;
+
+    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    //   return null;
+    // }
+
+    // try {
+    //   await cameraController.pauseVideoRecording();
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   rethrow;
+    // }
   }
 
-  Future<void> startVideoRecording() async {
-    final CameraController? cameraController = controller;
+  Future<void> _resumeVideoRecording() async {
+    // final CameraController? cameraController = controller;
 
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
-      return;
-    }
+    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    //   return null;
+    // }
 
-    if (cameraController.value.isRecordingVideo) {
-      // A recording is already started, do nothing.
-      return;
-    }
-
-    try {
-      await cameraController.startVideoRecording();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return;
-    }
+    // try {
+    //   await cameraController.resumeVideoRecording();
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   rethrow;
+    // }
   }
 
-  Future<XFile?> stopVideoRecording() async {
-    final CameraController? cameraController = controller;
+  Future<void> _setFocusMode(FocusMode mode) async {
+    // if (controller == null) {
+    //   return;
+    // }
 
-    if (cameraController == null || !cameraController.value.isRecordingVideo) {
-      return null;
-    }
-
-    try {
-      return cameraController.stopVideoRecording();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      return null;
-    }
-  }
-
-  Future<void> pauseVideoRecording() async {
-    final CameraController? cameraController = controller;
-
-    if (cameraController == null || !cameraController.value.isRecordingVideo) {
-      return null;
-    }
-
-    try {
-      await cameraController.pauseVideoRecording();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
-  }
-
-  Future<void> resumeVideoRecording() async {
-    final CameraController? cameraController = controller;
-
-    if (cameraController == null || !cameraController.value.isRecordingVideo) {
-      return null;
-    }
-
-    try {
-      await cameraController.resumeVideoRecording();
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
-  }
-
-  /// Set flash mode
-  Future<void> _setFlashMode(FlashMode mode) async {
-    if (controller == null) {
-      return;
-    }
-    try {
-      await controller!.setFlashMode(mode);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
-  }
-
-  Future<void> setExposureMode(ExposureMode mode) async {
-    if (controller == null) {
-      return;
-    }
-
-    try {
-      await controller!.setExposureMode(mode);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
-  }
-
-  Future<void> setExposureOffset(double offset) async {
-    if (controller == null) {
-      return;
-    }
-
-    setState(() {
-      _currentExposureOffset = offset;
-    });
-    try {
-      offset = await controller!.setExposureOffset(offset);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
-  }
-
-  Future<void> setFocusMode(FocusMode mode) async {
-    if (controller == null) {
-      return;
-    }
-
-    try {
-      await controller!.setFocusMode(mode);
-    } on CameraException catch (e) {
-      _showCameraException(e);
-      rethrow;
-    }
+    // try {
+    //   await controller!.setFocusMode(mode);
+    // } on CameraException catch (e) {
+    //   _showCameraException(e);
+    //   rethrow;
+    // }
   }
 
   Future<void> _startVideoPlayer() async {
@@ -506,46 +556,6 @@ class _CameraViewState extends State<CameraView>
     //   });
     // }
     // await vController.play();
-  }
-
-  ///
-  Future<AssetEntity?> _takePicture() async {
-    if (!_canProcess) {
-      log('Error: No camera selected..');
-      return null;
-    }
-
-    final ctrl = controller!;
-
-    if (ctrl.value.isTakingPicture) {
-      log('Capturing is currently running..');
-      return null;
-    }
-
-    try {
-      XFile file = await ctrl.takePicture();
-      final time = await file.lastModified();
-      final entity = AssetEntity(
-        id: time.millisecond.toString(),
-        height: 1080,
-        width: 1920,
-        typeInt: 1,
-        mimeType: file.mimeType,
-        createDtSecond: time.second,
-        modifiedDateSecond: time.second,
-        title: file.name,
-        relativePath: file.path,
-        orientation: ctrl.description.sensorOrientation,
-      );
-      return entity;
-    } on CameraException catch (e) {
-      log('Exception occured while capturing picture : $e');
-      return null;
-    }
-  }
-
-  void _showCameraException(CameraException e) {
-    logError(e.code, e.description);
   }
 
   /// Display the preview from the camera (or a message if the preview is not available).

@@ -11,10 +11,10 @@ class Picker1 extends StatefulWidget {
 
 class _Picker1State extends State<Picker1> {
   final notifier = ValueNotifier(<AssetEntity>[]);
-  final controller = DrishyaPickerController();
+  final controller = DrishyaController();
 
   Future<void> _pickData({DrishyaSetting? setting}) async {
-    final data = await controller.pickMedia(setting: setting);
+    final data = await controller.pickDrishya(setting: setting);
     notifier.value = data;
   }
 
@@ -26,7 +26,7 @@ class _Picker1State extends State<Picker1> {
       ),
       body: DrishyaPicker(
         controller: controller,
-        requestType: RequestType.image,
+        // requestType: RequestType.image,
         child: Column(
           children: [
             // Grid view
@@ -61,7 +61,7 @@ class _Picker1State extends State<Picker1> {
                       onPressed: () {
                         _pickData(
                           setting: DrishyaSetting(
-                            selected: notifier.value,
+                            selectedItems: notifier.value,
                             maximum: 10,
                             albumSubtitle: 'image only',
                           ),

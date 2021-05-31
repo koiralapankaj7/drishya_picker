@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:drishya_picker/custom_icons.dart';
+import 'package:drishya_picker/src/entities/custom_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,6 +18,7 @@ class CameraAction extends StatefulWidget {
     this.onCaptureImagePressed,
     this.onPreviewMediaPressed,
     this.onInputTypeChanged,
+    this.onPopRequest,
     this.inputTypeController,
   }) : super(key: key);
 
@@ -27,6 +28,7 @@ class CameraAction extends StatefulWidget {
   final void Function()? onCaptureImagePressed;
   final void Function()? onPreviewMediaPressed;
   final void Function(_InputItem type)? onInputTypeChanged;
+  final void Function()? onPopRequest;
   final InputTypeController? inputTypeController;
 
   @override

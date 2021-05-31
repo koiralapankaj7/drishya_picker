@@ -1,15 +1,27 @@
-part of '../drishya_picker.dart';
+import 'dart:math';
+
+import 'package:drishya_picker/src/application/media_cubit.dart';
+import 'package:drishya_picker/src/entities/entities.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../drishya_picker.dart';
 
 ///
-class Header extends StatelessWidget {
+class Header extends StatefulWidget {
   ///
   const Header({
     Key? key,
+    required this.drishyaController,
     this.background,
     this.headerSubtitle,
     this.toogleAlbumList,
     this.onClosePressed,
+    this.onSelectionClear,
   }) : super(key: key);
+
+  ///
+  final DrishyaController drishyaController;
 
   ///
   final Color? background;
@@ -18,16 +30,23 @@ class Header extends StatelessWidget {
   final String? headerSubtitle;
 
   ///
-  final Function? toogleAlbumList;
+  final void Function()? toogleAlbumList;
 
   ///
-  final Function? onClosePressed;
+  final void Function()? onClosePressed;
 
-  void _showAlert(BuildContext context) {
+  ///
+  final void Function()? onSelectionClear;
+
+  @override
+  _HeaderState createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  //
+  void _showAlert() {
     final cancel = TextButton(
-      onPressed: () {
-        Navigator.of(context).pop();
-      },
+      onPressed: Navigator.of(context).pop,
       child: Text(
         'CANCEL',
         style: Theme.of(context).textTheme.button!.copyWith(
@@ -36,10 +55,7 @@ class Header extends StatelessWidget {
       ),
     );
     final unselectItems = TextButton(
-      onPressed: () {
-        context.mediaController!._clearSelection();
-        Navigator.of(context).pop();
-      },
+      onPressed: widget.onSelectionClear,
       child: Text(
         'USELECT ITEMS',
         style: Theme.of(context).textTheme.button!.copyWith(
@@ -61,12 +77,8 @@ class Header extends StatelessWidget {
               color: Colors.grey.shade600,
             ),
       ),
-      actions: [
-        cancel,
-        unselectItems,
-      ],
+      actions: [cancel, unselectItems],
       backgroundColor: Colors.grey.shade900,
-      // contentPadding: EdgeInsets.all(16.0),
       actionsPadding: const EdgeInsets.all(0.0),
       titlePadding: const EdgeInsets.all(16.0),
       contentPadding: const EdgeInsets.symmetric(
@@ -83,18 +95,18 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaController = context.mediaController!;
+    final drishyaController = widget.drishyaController;
 
     return Container(
-      color: background ?? Colors.black,
+      color: widget.background ?? Colors.black,
       constraints: BoxConstraints(
-        minHeight: mediaController.panelController.headerMinHeight!,
-        maxHeight: mediaController.panelController.headerMaxHeight!,
+        minHeight: drishyaController.panelController.headerMinHeight!,
+        maxHeight: drishyaController.panelController.headerMaxHeight!,
       ),
       child: Column(
         children: [
           // Handler
-          _Handler(height: mediaController.panelController.headerMinHeight),
+          _Handler(height: drishyaController.panelController.headerMinHeight),
 
           // Details and controls
           Expanded(
@@ -105,15 +117,13 @@ class Header extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: mediaController,
+                      valueListenable: drishyaController,
                       builder: (context, value, child) {
                         return _IconButton(
                           iconData: Icons.close,
                           onPressed: value.entities.isEmpty
-                              ? onClosePressed
-                              : () {
-                                  _showAlert(context);
-                                },
+                              ? widget.onClosePressed
+                              : _showAlert,
                         );
                       },
                     ),
@@ -121,7 +131,7 @@ class Header extends StatelessWidget {
                 ),
 
                 // Album name and media receiver name
-                _AlbumDetail(subtitle: headerSubtitle),
+                _AlbumDetail(subtitle: widget.headerSubtitle),
 
                 // Dropdown
                 Expanded(
@@ -129,11 +139,13 @@ class Header extends StatelessWidget {
                     alignment: Alignment.topLeft,
                     padding: const EdgeInsets.only(left: 16.0),
                     child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: mediaController,
+                      valueListenable: drishyaController,
                       builder: (context, value, child) {
                         return Opacity(
                           opacity: value.entities.isEmpty ? 1.0 : 0.0,
-                          child: _AnimatedDropdown(onPressed: toogleAlbumList),
+                          child: _AnimatedDropdown(
+                            onPressed: widget.toogleAlbumList,
+                          ),
                         );
                       },
                     ),
@@ -161,10 +173,10 @@ class _AnimatedDropdown extends StatefulWidget {
   final Function? onPressed;
 
   @override
-  __AnimatedDropdownState createState() => __AnimatedDropdownState();
+  _AnimatedDropdownState createState() => _AnimatedDropdownState();
 }
 
-class __AnimatedDropdownState extends State<_AnimatedDropdown> {
+class _AnimatedDropdownState extends State<_AnimatedDropdown> {
   bool isDown = true;
   @override
   Widget build(BuildContext context) {
@@ -200,7 +212,7 @@ class _IconButton extends StatelessWidget {
   }) : super(key: key);
 
   final IconData? iconData;
-  final Function? onPressed;
+  final void Function()? onPressed;
   final double? size;
 
   @override
