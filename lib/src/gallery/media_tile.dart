@@ -11,12 +11,16 @@ class MediaTile extends StatefulWidget {
     Key? key,
     required this.entity,
     required this.drishyaController,
+    required this.onSelect,
   }) : super(key: key);
 
   final DrishyaController drishyaController;
 
   ///
   final AssetEntity entity;
+
+  ///
+  final void Function() onSelect;
 
   @override
   MediaTileState createState() => MediaTileState();
@@ -51,9 +55,7 @@ class MediaTileState extends State<MediaTile>
     final drishyaController = widget.drishyaController;
 
     return GestureDetector(
-      onTap: () {
-        drishyaController._select(widget.entity, context);
-      },
+      onTap: widget.onSelect,
       child: Container(
         color: Colors.grey.shade700,
         child: FutureBuilder<Uint8List?>(

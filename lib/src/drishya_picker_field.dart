@@ -3,7 +3,6 @@ import 'package:photo_manager/photo_manager.dart';
 
 import 'camera/camera_view.dart';
 import 'entities/entities.dart';
-import 'gallery/gallery_view.dart';
 
 /// Media Picker
 class DrishyaPickerField extends StatefulWidget {
@@ -42,7 +41,7 @@ class DrishyaPickerField extends StatefulWidget {
 
 class _DrishyaPickerFieldState extends State<DrishyaPickerField> {
   late final DrishyaSetting setting;
-  late final DrishyaController controller;
+  // late final DrishyaController controller;
 
   @override
   void initState() {

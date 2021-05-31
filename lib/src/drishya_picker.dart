@@ -2,12 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import 'application/media_cubit.dart';
 import 'camera/camera_view.dart';
 import 'drishya_controller_provider.dart';
 import 'entities/entities.dart';
-import 'gallery/gallery_view.dart';
+import 'gallery/albums.dart';
+import 'gallery/buttons.dart';
+import 'gallery/header.dart';
+import 'gallery/media_tile.dart';
 import 'gallery/permission_view.dart';
 import 'slidable_panel/slidable_panel.dart';
 
@@ -215,16 +219,17 @@ class GalleryView extends StatefulWidget {
 
 class _GalleryViewState extends State<GalleryView>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-  late PanelController _panelController;
+  late final PanelController _panelController;
+  late final DrishyaController _controller;
+
+  late final AnimationController _animationController;
+  late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-
-    _panelController = widget.controller.panelController;
-
+    _controller = widget.controller;
+    _panelController = _controller.panelController;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -271,7 +276,7 @@ class _GalleryViewState extends State<GalleryView>
   }
 
   void _onSelectionClear() {
-    // context.drishyaController!._clearSelection();
+    _controller._clearSelection();
     Navigator.of(context).pop();
   }
 
@@ -285,10 +290,11 @@ class _GalleryViewState extends State<GalleryView>
       children: [
         // Header
         Header(
+          drishyaController: _controller,
           background: widget.headerBackground,
           toogleAlbumList: _toogleAlbumList,
           onClosePressed: _onClosePressed,
-          headerSubtitle: widget.controller.setting!.albumSubtitle,
+          headerSubtitle: _controller.setting!.albumSubtitle,
           onSelectionClear: _onSelectionClear,
         ),
 
@@ -379,7 +385,13 @@ class _GalleryViewState extends State<GalleryView>
                           );
                         }
                         final entity = state.items[index - 1];
-                        return MediaTile(entity: entity);
+                        return MediaTile(
+                          drishyaController: _controller,
+                          entity: entity,
+                          onSelect: () {
+                            _controller._select(entity, context);
+                          },
+                        );
                       },
                     );
                   },
@@ -395,7 +407,9 @@ class _GalleryViewState extends State<GalleryView>
         Positioned(
           bottom: 0.0,
           child: Buttons(
-            mediaController: widget.controller,
+            drishyaController: _controller,
+            onEdit: () {},
+            onSubmit: _controller._submit,
           ),
         ),
 
@@ -410,7 +424,7 @@ class _GalleryViewState extends State<GalleryView>
               child: child!,
             );
           },
-          child: _AlbumList(
+          child: AlbumList(
             height: albumListHeight,
             onPressed: (album) {
               context.read<CurrentAlbumCubit>().changeAlbum(album);
@@ -522,16 +536,6 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
     pickDrishya(setting: setting);
-  }
-
-  Future<AssetEntity?> _fromCamera() async {
-    // final entity = await Navigator.of(context).push<AssetEntity?>(
-    //   MaterialPageRoute(builder: (context) => CameraView()),
-    // );
-    // if (entity != null) {
-    //   widget.onChanged?.call(entity, false);
-    //   widget.onSubmitted?.call([entity]);
-    // }
   }
 
   /// Pick media

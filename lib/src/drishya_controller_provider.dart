@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'gallery/gallery_view.dart';
+import 'drishya_picker.dart';
 
 ///
 class DrishyaControllerProvider extends InheritedWidget {

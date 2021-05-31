@@ -163,7 +163,7 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                       );
                     },
                     child: _TextButton(
-                      onPressed: widget.drishyaController._submit,
+                      onPressed: widget.onSubmit,
                       label: 'SELECT',
                     ),
                   ),
