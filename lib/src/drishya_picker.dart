@@ -57,7 +57,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _setting = widget.panelSetting ?? const PanelSetting();
-    _controller = widget.controller ?? DrishyaController();
+    _controller = (widget.controller ?? DrishyaController()).._init(context);
     _panelController = _controller.panelController;
     _galleryCubit = GalleryCubit();
 
@@ -67,17 +67,17 @@ class _DrishyaPickerState extends State<DrishyaPicker>
           _galleryCubit.fetchAssets(state.album!);
         }
       });
-    // _albumCollectionCubit = AlbumCollectionCubit()
-    //   ..fetchAlbums(widget.requestType ?? RequestType.all)
-    //   ..stream.listen((state) {
-    //     if (state.hasData) {
-    //       if (state.isEmpty) {
-    //         _galleryCubit.empty();
-    //       } else {
-    //         _currentAlbumCubit.changeAlbum(state.albums.first);
-    //       }
-    //     }
-    //   });
+    _albumCollectionCubit = AlbumCollectionCubit()
+      ..fetchAlbums(_controller.setting.requestType)
+      ..stream.listen((state) {
+        if (state.hasData) {
+          if (state.isEmpty) {
+            _galleryCubit.empty();
+          } else {
+            _currentAlbumCubit.changeAlbum(state.albums.first);
+          }
+        }
+      });
 
     _controller._checkKeyboard.addListener(_init);
   }
@@ -88,7 +88,13 @@ class _DrishyaPickerState extends State<DrishyaPicker>
         FocusScope.of(context).unfocus();
         Future.delayed(
           const Duration(milliseconds: 180),
-          _panelController.openPanel,
+          () {
+            if (_controller.setting.fullScreenMode) {
+              _panelController.maximizePanel();
+            } else {
+              _panelController.openPanel();
+            }
+          },
         );
       } else {
         _panelController.openPanel();
@@ -294,7 +300,7 @@ class _GalleryViewState extends State<GalleryView>
           background: widget.headerBackground,
           toogleAlbumList: _toogleAlbumList,
           onClosePressed: _onClosePressed,
-          headerSubtitle: _controller.setting!.albumSubtitle,
+          headerSubtitle: _controller.setting.albumSubtitle,
           onSelectionClear: _onSelectionClear,
         ),
 
@@ -389,7 +395,7 @@ class _GalleryViewState extends State<GalleryView>
                           drishyaController: _controller,
                           entity: entity,
                           onSelect: () {
-                            _controller._select(entity, context);
+                            _controller._select(entity);
                           },
                         );
                       },
@@ -440,6 +446,66 @@ class _GalleryViewState extends State<GalleryView>
 }
 
 ///
+class DrishyaPickerField extends StatefulWidget {
+  ///
+  const DrishyaPickerField({
+    Key? key,
+    this.onChanged,
+    this.onSubmitted,
+    this.setting,
+    this.child,
+  }) : super(key: key);
+
+  ///
+  /// If source is [DrishyaSource.camera] [removed] will be always false
+  ///
+  /// While picking drishya using gallery [removed] will be true if,
+  /// previously selected drishya is unselected otherwise false.
+  ///
+  final void Function(AssetEntity entity, bool removed)? onChanged;
+
+  ///
+  /// Triggered when picker complet its task.
+  ///
+  final void Function(List<AssetEntity> entities)? onSubmitted;
+
+  ///
+  /// Setting for drishya picker
+  final DrishyaSetting? setting;
+
+  ///
+  final Widget? child;
+
+  @override
+  _DrishyaPickerFieldState createState() => _DrishyaPickerFieldState();
+}
+
+///
+class _DrishyaPickerFieldState extends State<DrishyaPickerField> {
+  late final DrishyaController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = DrishyaController().._init(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        _controller._fromPicker(
+          widget.onChanged,
+          widget.onSubmitted,
+          widget.setting,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+///
 class DrishyaController extends ValueNotifier<DrishyaValue> {
   ///
   DrishyaController()
@@ -450,26 +516,30 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   final PanelController _panelController;
   final ValueNotifier<bool> _checkKeyboard;
   late Completer<List<AssetEntity>> _completer;
+  late BuildContext _context;
+
+  void _init(BuildContext context) {
+    _context = context;
+  }
 
   // When clearing all selected entities on changed need to notify current
   // status of last selected asset
   AssetEntity? _lastSelectedEntity;
-
-  Function(AssetEntity entity, bool removed)? _onChanged;
+  void Function(AssetEntity entity, bool removed)? _onChanged;
   void Function(List<AssetEntity> entities)? _onSubmitted;
 
   // Media setting
   DrishyaSetting _setting = DrishyaSetting();
 
   // Selecting and unselecting entities
-  void _select(AssetEntity entity, BuildContext context) {
+  void _select(AssetEntity entity) {
     final selectedList = value.entities.toList();
     if (selectedList.contains(entity)) {
       selectedList.remove(entity);
       _onChanged?.call(entity, true);
     } else {
       if (reachedMaximumLimit) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(_context).showSnackBar(
           const SnackBar(content: Text('Maximum selection limit reached!')),
         );
         return;
@@ -509,59 +579,68 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     value = const DrishyaValue();
   }
 
-  //
+  ///
   void _fromPicker(
     void Function(AssetEntity entity, bool removed)? onChanged,
     final void Function(List<AssetEntity> entities)? onSubmitted,
     DrishyaSetting? setting,
-    BuildContext context,
   ) {
-    if (setting != null) {
-      _setting = setting;
-    }
-    if (_setting.source == DrishyaSource.camera) {
-      Navigator.of(context).push<AssetEntity?>(
-        MaterialPageRoute(
-          builder: (context) {
-            return CameraView();
-          },
-        ),
-      ).then((entity) {
-        if (entity != null) {
-          onChanged?.call(entity, false);
-        }
-      });
-    }
-
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
     pickDrishya(setting: setting);
   }
 
   /// Pick media
-  Future<List<AssetEntity>> pickDrishya({DrishyaSetting? setting}) {
+  Future<List<AssetEntity>> pickDrishya({DrishyaSetting? setting}) async {
     if (setting != null) {
       _setting = setting;
     }
-    _completer = Completer<List<AssetEntity>>();
-    _checkKeyboard.value = true;
-    if (_setting.selectedItems.isNotEmpty) {
-      value = value.copyWith(
-        entities: _setting.selectedItems,
-        previousSelection: true,
+
+    // Camera picker
+    if (_setting.source == DrishyaSource.camera) {
+      final entity = await Navigator.of(_context).push<AssetEntity?>(
+        MaterialPageRoute(builder: (context) => CameraView()),
       );
+      if (entity != null) {
+        _onChanged?.call(entity, false);
+        _onSubmitted?.call([entity]);
+        return [entity];
+      }
+      return [];
     }
-    return _completer.future;
+
+    // Gallery picker
+    if (_setting.source == DrishyaSource.gallery) {
+      _completer = Completer<List<AssetEntity>>();
+      _checkKeyboard.value = true;
+      // If widget is not wrapped by drishya picker
+      if (_context.drishyaController == null) {
+        Navigator.of(_context).push<List<AssetEntity>?>(
+          MaterialPageRoute(
+            builder: (context) => DrishyaPicker(controller: this),
+          ),
+        );
+      }
+      if (_setting.selectedItems.isNotEmpty) {
+        value = value.copyWith(
+          entities: _setting.selectedItems,
+          previousSelection: true,
+        );
+      }
+      return _completer.future;
+    }
+
+    return [];
   }
 
   /// Panel controller
   PanelController get panelController => _panelController;
 
   /// Media setting
-  DrishyaSetting? get setting => _setting;
+  DrishyaSetting get setting => _setting;
 
   ///
-  bool get reachedMaximumLimit => value.entities.length == setting!.maximum;
+  bool get reachedMaximumLimit => value.entities.length == setting.maximum;
 
   @override
   set value(DrishyaValue newValue) {

@@ -98,7 +98,8 @@ class _Album extends StatelessWidget {
                       future: listSnapshot.data!.first
                           .thumbDataWithSize(imageSize * 5, imageSize * 5),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            snapshot.data != null) {
                           return Image.memory(
                             snapshot.data!,
                             fit: BoxFit.cover,

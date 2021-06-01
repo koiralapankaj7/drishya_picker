@@ -38,7 +38,8 @@ class GridViewWidget extends StatelessWidget {
             return FutureBuilder<Uint8List?>(
               future: entity.thumbDataWithSize(400, 400),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.data != null) {
                   return Image.memory(
                     snapshot.data!,
                     fit: BoxFit.cover,

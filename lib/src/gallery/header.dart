@@ -229,7 +229,7 @@ class _IconButton extends StatelessWidget {
           color: Colors.lightBlue.shade300,
           size: size ?? 26.0,
         ),
-        onPressed: onPressed as void Function()?,
+        onPressed: onPressed,
       ),
     );
   }

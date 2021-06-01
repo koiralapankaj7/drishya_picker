@@ -64,6 +64,7 @@ class _Picker1State extends State<Picker1> {
                             selectedItems: notifier.value,
                             maximum: 10,
                             albumSubtitle: 'image only',
+                            source: DrishyaSource.camera,
                           ),
                         );
                       },

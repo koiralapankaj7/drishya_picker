@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
@@ -266,7 +267,7 @@ class _CameraViewState extends State<CameraView>
         });
 
         if (entity != null) {
-          Navigator.of(context).pop(entity);
+          // Navigator.of(context).pop(entity);
         }
         // showInSnackBar('Picture saved to ${entity.relativePath}');
       }
@@ -315,6 +316,11 @@ class _CameraViewState extends State<CameraView>
         relativePath: file.path,
         orientation: ctrl.description.sensorOrientation,
       );
+
+      final f = await entity.loadFile();
+      final dd = await File(file.path);
+
+      log('$f : ${dd}');
       return entity;
     } on CameraException catch (e) {
       log('Exception occured while capturing picture : $e');
