@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -57,7 +58,10 @@ class _DrishyaPickerState extends State<DrishyaPicker>
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _setting = widget.panelSetting ?? const PanelSetting();
-    _controller = (widget.controller ?? DrishyaController()).._init(context);
+    _controller = (widget.controller ?? DrishyaController())
+      .._init(context)
+      .._checkKeyboard.addListener(_init);
+
     _panelController = _controller.panelController;
     _galleryCubit = GalleryCubit();
 
@@ -78,11 +82,10 @@ class _DrishyaPickerState extends State<DrishyaPicker>
           }
         }
       });
-
-    _controller._checkKeyboard.addListener(_init);
   }
 
   void _init() {
+    log('Listener =======>>');
     if (_controller._checkKeyboard.value) {
       if (_keyboardVisible) {
         FocusScope.of(context).unfocus();
@@ -119,6 +122,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -454,6 +458,7 @@ class DrishyaPickerField extends StatefulWidget {
     this.onSubmitted,
     this.setting,
     this.child,
+    this.source = DrishyaSource.gallery,
   }) : super(key: key);
 
   ///
@@ -474,6 +479,10 @@ class DrishyaPickerField extends StatefulWidget {
   final DrishyaSetting? setting;
 
   ///
+  /// Camera, Gallery
+  final DrishyaSource source;
+
+  ///
   final Widget? child;
 
   @override
@@ -487,7 +496,10 @@ class _DrishyaPickerFieldState extends State<DrishyaPickerField> {
   @override
   void initState() {
     super.initState();
-    _controller = DrishyaController().._init(context);
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      _controller = (context.drishyaController ?? DrishyaController())
+        .._init(context);
+    });
   }
 
   @override
@@ -498,6 +510,8 @@ class _DrishyaPickerFieldState extends State<DrishyaPickerField> {
           widget.onChanged,
           widget.onSubmitted,
           widget.setting,
+          widget.source,
+          context,
         );
       },
       child: widget.child,
@@ -584,11 +598,37 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     void Function(AssetEntity entity, bool removed)? onChanged,
     final void Function(List<AssetEntity> entities)? onSubmitted,
     DrishyaSetting? setting,
+    DrishyaSource source,
+    BuildContext context,
   ) {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
-    pickDrishya(setting: setting);
+    if (source == DrishyaSource.camera) {
+      pickFromCamera(context);
+    }
+
+    if (source == DrishyaSource.gallery) {
+      pickFromGallery(context);
+    }
+    // pickDrishya(setting: setting);
   }
+
+  /// Pick drishya using camera
+  Future<AssetEntity?> pickFromCamera(BuildContext context) async {
+    final entity = await Navigator.of(context).push<AssetEntity?>(
+      MaterialPageRoute(builder: (context) => CameraView()),
+    );
+    if (entity != null) {
+      _onChanged?.call(entity, false);
+      _onSubmitted?.call([entity]);
+    }
+    return entity;
+  }
+
+  Future<List<AssetEntity>?> pickFromGallery(
+    BuildContext context, {
+    DrishyaSetting? setting,
+  }) async {}
 
   /// Pick media
   Future<List<AssetEntity>> pickDrishya({DrishyaSetting? setting}) async {
@@ -611,8 +651,6 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
 
     // Gallery picker
     if (_setting.source == DrishyaSource.gallery) {
-      _completer = Completer<List<AssetEntity>>();
-      _checkKeyboard.value = true;
       // If widget is not wrapped by drishya picker
       if (_context.drishyaController == null) {
         Navigator.of(_context).push<List<AssetEntity>?>(
@@ -620,14 +658,17 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
             builder: (context) => DrishyaPicker(controller: this),
           ),
         );
+      } else {
+        _completer = Completer<List<AssetEntity>>();
+        _checkKeyboard.value = true;
+        if (_setting.selectedItems.isNotEmpty) {
+          value = value.copyWith(
+            entities: _setting.selectedItems,
+            previousSelection: true,
+          );
+        }
+        return _completer.future;
       }
-      if (_setting.selectedItems.isNotEmpty) {
-        value = value.copyWith(
-          entities: _setting.selectedItems,
-          previousSelection: true,
-        );
-      }
-      return _completer.future;
     }
 
     return [];

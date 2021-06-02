@@ -320,7 +320,7 @@ class PanelController extends ValueNotifier<SliderValue> {
   ///
   ScrollController get scrollController => _scrollController;
 
-  late _SlidablePanelState _state;
+  late final _SlidablePanelState _state;
 
   void _init(_SlidablePanelState state) {
     _state = state;

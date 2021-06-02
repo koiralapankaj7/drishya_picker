@@ -14,78 +14,72 @@ class _Picker2State extends State<Picker2> {
 
   @override
   Widget build(BuildContext context) {
-    return DrishyaPicker(
-      // requestType: RequestType.common,
-      panelSetting: PanelSetting(
-        topMargin: MediaQuery.of(context).padding.top,
+    return Scaffold(
+      backgroundColor: Colors.pink,
+      appBar: AppBar(
+        title: const Text('Pick using picker view'),
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Pick using picker view'),
-        ),
-        body: Column(
-          children: [
-            // Grid view
-            Expanded(
-              child: Container(
-                color: Colors.grey.shade200,
-                child: GridViewWidget(notifier: notifier),
-              ),
+      body: Column(
+        children: [
+          // Grid view
+          Expanded(
+            child: Container(
+              child: GridViewWidget(notifier: notifier),
             ),
+          ),
 
-            // Textfield
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Test field',
-                      ),
+          // Textfield
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Test field',
                     ),
                   ),
-                  const SizedBox(width: 16.0),
-                  ValueListenableBuilder<List<AssetEntity>?>(
-                    valueListenable: notifier,
-                    builder: (context, list, child) {
-                      return DrishyaPickerField(
-                        setting: DrishyaSetting(
-                          selectedItems: list ?? [],
-                          maximum: 5,
-                          albumSubtitle: 'common',
-                        ),
-                        onChanged: (entity, isRemoved) {
-                          final value = notifier.value?.toList() ?? [];
-                          if (isRemoved) {
-                            value.remove(entity);
-                          } else {
-                            value.add(entity);
-                          }
-                          notifier.value = value;
-                        },
-                        onSubmitted: (list) {
-                          notifier.value = list;
-                        },
-                        child: child,
-                      );
-                    },
-                    child: const CircleAvatar(
-                      backgroundColor: Colors.cyan,
-                      minRadius: 24.0,
-                      child: Icon(
-                        Icons.add,
-                        color: Colors.white,
+                ),
+                const SizedBox(width: 16.0),
+                ValueListenableBuilder<List<AssetEntity>?>(
+                  valueListenable: notifier,
+                  builder: (context, list, child) {
+                    return DrishyaPickerField(
+                      setting: DrishyaSetting(
+                        selectedItems: list ?? [],
+                        maximum: 5,
+                        albumSubtitle: 'common',
                       ),
+                      onChanged: (entity, isRemoved) {
+                        final value = notifier.value?.toList() ?? [];
+                        if (isRemoved) {
+                          value.remove(entity);
+                        } else {
+                          value.add(entity);
+                        }
+                        notifier.value = value;
+                      },
+                      onSubmitted: (list) {
+                        notifier.value = list;
+                      },
+                      child: child,
+                    );
+                  },
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.cyan,
+                    minRadius: 24.0,
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.white,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            //
-          ],
-        ),
+          //
+        ],
       ),
     );
   }

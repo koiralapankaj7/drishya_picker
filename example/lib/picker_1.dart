@@ -21,6 +21,7 @@ class _Picker1State extends State<Picker1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.yellow,
       appBar: AppBar(
         title: const Text('Pick using controller'),
       ),
@@ -64,7 +65,8 @@ class _Picker1State extends State<Picker1> {
                             selectedItems: notifier.value,
                             maximum: 10,
                             albumSubtitle: 'image only',
-                            source: DrishyaSource.camera,
+                            source: DrishyaSource.gallery,
+                            fullScreenMode: true,
                           ),
                         );
                       },

@@ -64,7 +64,8 @@ class MediaTileState extends State<MediaTile>
             400,
           ),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.data != null) {
               return AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
