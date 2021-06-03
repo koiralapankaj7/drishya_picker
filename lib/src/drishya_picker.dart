@@ -613,7 +613,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     // pickDrishya(setting: setting);
   }
 
-  /// Pick drishya using camera
+  /// Pick drishya from camera
   Future<AssetEntity?> pickFromCamera(BuildContext context) async {
     final entity = await Navigator.of(context).push<AssetEntity?>(
       MaterialPageRoute(builder: (context) => CameraView()),
@@ -625,30 +625,37 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     return entity;
   }
 
+  /// Pick drishya from gallery
   Future<List<AssetEntity>?> pickFromGallery(
     BuildContext context, {
     DrishyaSetting? setting,
-  }) async {}
+  }) async {
+    _completer = Completer<List<AssetEntity>>();
+    // If widget is not wrapped by drishya picker
+    if (context.drishyaController == null) {
+      final entities = await Navigator.of(_context).push<List<AssetEntity>?>(
+        MaterialPageRoute(
+          builder: (context) => DrishyaPicker(controller: this),
+        ),
+      );
+      return entities;
+    } else {
+      _checkKeyboard.value = true;
+      if (_setting.selectedItems.isNotEmpty) {
+        value = value.copyWith(
+          entities: _setting.selectedItems,
+          previousSelection: true,
+        );
+      }
+      return _completer.future;
+    }
+  }
 
   /// Pick media
   Future<List<AssetEntity>> pickDrishya({DrishyaSetting? setting}) async {
     if (setting != null) {
       _setting = setting;
     }
-
-    // Camera picker
-    if (_setting.source == DrishyaSource.camera) {
-      final entity = await Navigator.of(_context).push<AssetEntity?>(
-        MaterialPageRoute(builder: (context) => CameraView()),
-      );
-      if (entity != null) {
-        _onChanged?.call(entity, false);
-        _onSubmitted?.call([entity]);
-        return [entity];
-      }
-      return [];
-    }
-
     // Gallery picker
     if (_setting.source == DrishyaSource.gallery) {
       // If widget is not wrapped by drishya picker
