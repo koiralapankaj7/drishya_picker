@@ -136,7 +136,8 @@ class _HeaderState extends State<Header> {
                       builder: (context, value, child) {
                         return _IconButton(
                           iconData: Icons.close,
-                          onPressed: value.entities.isEmpty
+                          onPressed: value.entities.isEmpty ||
+                                  widget.controller.singleSelection
                               ? widget.onClosePressed
                               : _showAlert,
                         );
@@ -159,10 +160,12 @@ class _HeaderState extends State<Header> {
                     child: ValueListenableBuilder<DrishyaValue>(
                       valueListenable: widget.controller,
                       builder: (context, value, child) {
+                        final visible = value.entities.isEmpty ||
+                            widget.controller.singleSelection;
                         return Opacity(
-                          opacity: value.entities.isEmpty ? 1.0 : 0.0,
+                          opacity: visible ? 1.0 : 0.0,
                           child: _AnimatedDropdown(
-                            onPressed: widget.toogleAlbumList,
+                            onPressed: visible ? widget.toogleAlbumList : null,
                             notifier: widget.dropdownNotifier,
                           ),
                         );
