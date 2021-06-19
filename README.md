@@ -2,9 +2,7 @@
 
 Messanger like media picker
 
-<img src="/assets/gif.gif" width="300" height="500">
-<img src="/assets/gif.gif" width="300" height="500">
-<img src="/assets/gif.gif" width="300" height="500">
+<img src="/assets/gif.gif" width="300" height="500"><img src="/assets/gif.gif" width="300" height="500"><img src="/assets/gif.gif" width="300" height="500">
 
 <table>
   <tr>
