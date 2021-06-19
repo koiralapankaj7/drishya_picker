@@ -1,4 +1,4 @@
-import 'package:drishya_picker/src/entities/entities.dart';
+import 'package:drishya_picker/src/gallery/entities.dart';
 import 'package:flutter/material.dart';
 
 import '../drishya_picker.dart';

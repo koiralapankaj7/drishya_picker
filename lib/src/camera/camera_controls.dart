@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:drishya_picker/src/entities/custom_icons.dart';
+import 'package:drishya_picker/src/camera/custom_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

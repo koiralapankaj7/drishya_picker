@@ -1,20 +1,20 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/application/media_fetcher.dart';
+import 'package:drishya_picker/src/gallery/drishya_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'camera/camera_view.dart';
-import 'drishya_controller_provider.dart';
-import 'entities/entities.dart';
+import 'gallery/drishya_controller_provider.dart';
+import 'gallery/entities.dart';
 import 'gallery/albums.dart';
 import 'gallery/buttons.dart';
 import 'gallery/header.dart';
 import 'gallery/media_tile.dart';
+import 'gallery/permission_view.dart';
 import 'slidable_panel/slidable_panel.dart';
 
 ///
@@ -53,7 +53,6 @@ class _DrishyaPickerState extends State<DrishyaPicker>
     _controller = (widget.controller ?? DrishyaController())
       .._checkKeyboard.addListener(_init);
     _panelController = _controller.panelController;
-    mediaFetcher.getAlbumList(_controller.setting.requestType);
   }
 
   void _init() {
@@ -180,17 +179,34 @@ class _GalleryViewState extends State<GalleryView>
   late final PanelController _panelController;
   late final DrishyaController _controller;
 
+  late final DrishyaRepository _repository;
   late final ValueNotifier<bool> _dropdownNotifier;
+  late final ValueNotifier<AlbumsType> _albumsNotifier;
+  late final ValueNotifier<AlbumType> _albumNotifier;
+  late final ValueNotifier<EntitiesType> _entitiesNotifier;
+
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _dropdownNotifier = ValueNotifier<bool>(true);
     _controller = widget.controller ?? DrishyaController();
-    mediaFetcher.getAlbumList(_controller.setting.requestType);
     _panelController = _controller.panelController;
+
+    _dropdownNotifier = ValueNotifier<bool>(true);
+    _albumsNotifier = ValueNotifier(BaseState());
+    _albumNotifier = ValueNotifier(BaseState());
+    _entitiesNotifier = ValueNotifier(BaseState());
+
+    _repository = DrishyaRepository(
+      albumsNotifier: _albumsNotifier,
+      albumNotifier: _albumNotifier,
+      entitiesNotifier: _entitiesNotifier,
+    );
+
+    _repository.fetchAlbums(_controller.setting.requestType);
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -210,6 +226,9 @@ class _GalleryViewState extends State<GalleryView>
   void dispose() {
     _animationController.dispose();
     _dropdownNotifier.dispose();
+    _albumsNotifier.dispose();
+    _albumNotifier.dispose();
+    _entitiesNotifier.dispose();
     super.dispose();
   }
 
@@ -261,6 +280,7 @@ class _GalleryViewState extends State<GalleryView>
             // Header
             Header(
               controller: _controller,
+              albumNotifier: _albumNotifier,
               dropdownNotifier: _dropdownNotifier,
               panelSetting: _setting,
               toogleAlbumList: _toogleAlbumList,
@@ -297,23 +317,25 @@ class _GalleryViewState extends State<GalleryView>
                 Expanded(
                   child: Container(
                     color: _setting.foregroundColor,
-                    child: ValueListenableBuilder<List<AssetEntity>>(
-                      valueListenable: albumEntities,
-                      builder: (context, entities, child) {
+                    child: ValueListenableBuilder<EntitiesType>(
+                      valueListenable: _entitiesNotifier,
+                      builder: (context, state, child) {
                         // Loading state
-                        //         if (state.isLoading) {
-                        //           return const Center(
-                        //             child: CircularProgressIndicator(),
-                        //           );
-                        //         }
+                        if (state.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                        //         if (state.hasError) {
-                        //           if (!state.hasPermission) {
-                        //             return const PermissionRequest();
-                        //           }
-                        //         }
+                        // Error
+                        if (state.hasError) {
+                          if (!state.hasPermission) {
+                            return const PermissionRequest();
+                          }
+                        }
 
-                        if (entities.isEmpty) {
+                        // No data
+                        if (state.data?.isEmpty ?? true) {
                           return const Center(
                             child: Text(
                               'No media available',
@@ -324,6 +346,8 @@ class _GalleryViewState extends State<GalleryView>
                             ),
                           );
                         }
+
+                        final entities = state.data!;
 
                         return GridView.builder(
                           controller: _panelController.scrollController,
@@ -398,9 +422,10 @@ class _GalleryViewState extends State<GalleryView>
               },
               child: AlbumList(
                 height: albumListHeight,
+                albumsNotifier: _albumsNotifier,
                 onPressed: (album) {
                   _toogleAlbumList();
-                  mediaFetcher.getAssetsFor(album);
+                  _repository.fetchAssetsFor(album);
                   _dropdownNotifier.value = !_dropdownNotifier.value;
                 },
               ),
@@ -582,8 +607,9 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     }
     if (entity != null) {
       _onChanged?.call(entity, false);
-      _onSubmitted?.call([entity]);
-      _completer.complete([entity]);
+      final items = [...setting.selectedItems, entity];
+      _onSubmitted?.call(items);
+      _completer.complete(items);
     }
   }
 

@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:drishya_picker/src/application/media_fetcher.dart';
-import 'package:drishya_picker/src/entities/entities.dart';
+import 'package:drishya_picker/src/gallery/drishya_repository.dart';
+import 'package:drishya_picker/src/gallery/entities.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,6 +16,7 @@ class Header extends StatefulWidget {
     required this.controller,
     required this.panelSetting,
     required this.dropdownNotifier,
+    required this.albumNotifier,
     this.headerSubtitle,
     this.toogleAlbumList,
     this.onClosePressed,
@@ -27,6 +28,9 @@ class Header extends StatefulWidget {
 
   ///
   final PanelSetting panelSetting;
+
+  ///
+  final ValueNotifier<AlbumType> albumNotifier;
 
   ///
   final String? headerSubtitle;
@@ -143,7 +147,10 @@ class _HeaderState extends State<Header> {
                 ),
 
                 // Album name and media receiver name
-                _AlbumDetail(subtitle: widget.headerSubtitle),
+                _AlbumDetail(
+                  subtitle: widget.headerSubtitle,
+                  albumNotifier: widget.albumNotifier,
+                ),
 
                 // Dropdown
                 Expanded(
@@ -251,9 +258,13 @@ class _AlbumDetail extends StatelessWidget {
   const _AlbumDetail({
     Key? key,
     this.subtitle,
+    required this.albumNotifier,
   }) : super(key: key);
 
   final String? subtitle;
+
+  ///
+  final ValueNotifier<AlbumType> albumNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -261,11 +272,11 @@ class _AlbumDetail extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Album name
-        ValueListenableBuilder<AssetPathEntity?>(
-          valueListenable: currentAlbum,
+        ValueListenableBuilder<AlbumType>(
+          valueListenable: albumNotifier,
           builder: (context, album, child) {
             return Text(
-              album?.name ?? 'Unknown',
+              album.data?.name ?? 'Unknown',
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

@@ -1,24 +1,33 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/src/application/media_fetcher.dart';
+import 'package:drishya_picker/src/gallery/drishya_repository.dart';
 import 'package:drishya_picker/src/gallery/permission_view.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+///
 class AlbumList extends StatelessWidget {
+  ///
   const AlbumList({
     Key? key,
     required this.height,
+    required this.albumsNotifier,
     this.onPressed,
   }) : super(key: key);
 
+  ///
+  final ValueNotifier<AlbumsType> albumsNotifier;
+
+  ///
   final double height;
+
+  ///
   final Function(AssetPathEntity album)? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<MediaValue>(
-      valueListenable: mediaFetcher,
+    return ValueListenableBuilder<AlbumsType>(
+      valueListenable: albumsNotifier,
       builder: (context, state, child) {
         // Loading
         if (state.isLoading) {
@@ -41,15 +50,27 @@ class AlbumList extends StatelessWidget {
           );
         }
 
+        if (state.data?.isEmpty ?? true) {
+          return Center(
+            child: Text(
+              'No data',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
+
         // Album list
         return Container(
           height: height,
           color: Colors.black,
           child: ListView.builder(
             padding: const EdgeInsets.only(top: 16.0),
-            itemCount: state.albums.length,
+            itemCount: state.data!.length,
             itemBuilder: (context, index) {
-              final entity = state.albums[index];
+              final entity = state.data![index];
               return _Album(
                 entity: entity,
                 onPressed: onPressed,
