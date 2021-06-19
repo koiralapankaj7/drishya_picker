@@ -4,19 +4,14 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'grid_view_widget.dart';
 
 ///
-class Picker1 extends StatefulWidget {
+class ControllerPicker extends StatefulWidget {
   @override
-  _Picker1State createState() => _Picker1State();
+  _ControllerPickerState createState() => _ControllerPickerState();
 }
 
-class _Picker1State extends State<Picker1> {
+class _ControllerPickerState extends State<ControllerPicker> {
   final notifier = ValueNotifier(<AssetEntity>[]);
   final controller = DrishyaController();
-
-  Future<void> _pickData({DrishyaSetting? setting}) async {
-    final data = await controller.pickDrishya(setting: setting);
-    notifier.value = data;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,23 +49,26 @@ class _Picker1State extends State<Picker1> {
                   CircleAvatar(
                     backgroundColor: Colors.cyan,
                     minRadius: 10.0,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        _pickData(
-                          setting: DrishyaSetting(
-                            selectedItems: notifier.value,
-                            maximum: 10,
-                            albumSubtitle: 'image only',
-                            source: DrishyaSource.gallery,
-                            fullScreenMode: true,
-                          ),
-                        );
-                      },
-                    ),
+                    child: Builder(builder: (ctx) {
+                      return IconButton(
+                        icon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                        onPressed: () async {
+                          final data = await controller.pickFromGallery(
+                            ctx,
+                            setting: DrishyaSetting(
+                              selectedItems: notifier.value,
+                              maximum: 10,
+                              albumSubtitle: 'image only',
+                              source: DrishyaSource.gallery,
+                            ),
+                          );
+                          notifier.value = data ?? [];
+                        },
+                      );
+                    }),
                   ),
                 ],
               ),

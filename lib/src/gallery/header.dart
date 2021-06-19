@@ -1,9 +1,10 @@
 import 'dart:math';
 
-import 'package:drishya_picker/src/application/media_cubit.dart';
+import 'package:drishya_picker/src/application/media_fetcher.dart';
 import 'package:drishya_picker/src/entities/entities.dart';
+import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import '../drishya_picker.dart';
 
@@ -12,8 +13,9 @@ class Header extends StatefulWidget {
   ///
   const Header({
     Key? key,
-    required this.drishyaController,
-    this.background,
+    required this.controller,
+    required this.panelSetting,
+    required this.dropdownNotifier,
     this.headerSubtitle,
     this.toogleAlbumList,
     this.onClosePressed,
@@ -21,10 +23,10 @@ class Header extends StatefulWidget {
   }) : super(key: key);
 
   ///
-  final DrishyaController drishyaController;
+  final DrishyaController controller;
 
   ///
-  final Color? background;
+  final PanelSetting panelSetting;
 
   ///
   final String? headerSubtitle;
@@ -37,6 +39,9 @@ class Header extends StatefulWidget {
 
   ///
   final void Function()? onSelectionClear;
+
+  /// Dropdown notifiler
+  final ValueNotifier<bool> dropdownNotifier;
 
   @override
   _HeaderState createState() => _HeaderState();
@@ -95,18 +100,25 @@ class _HeaderState extends State<Header> {
 
   @override
   Widget build(BuildContext context) {
-    final drishyaController = widget.drishyaController;
-
     return Container(
-      color: widget.background ?? Colors.black,
       constraints: BoxConstraints(
-        minHeight: drishyaController.panelController.headerMinHeight!,
-        maxHeight: drishyaController.panelController.headerMaxHeight!,
+        minHeight: widget.panelSetting.headerMinHeight,
+        maxHeight: widget.panelSetting.headerMaxHeight,
+      ),
+      decoration: BoxDecoration(
+        color: widget.panelSetting.headerBackground,
+        border: Border(
+          bottom: BorderSide(color: Colors.lightBlue.shade300, width: 0.2),
+        ),
       ),
       child: Column(
         children: [
           // Handler
-          _Handler(height: drishyaController.panelController.headerMinHeight),
+          if (!widget.controller.fullScreenMode)
+            _Handler(height: widget.panelSetting.headerMinHeight),
+
+          if (widget.controller.fullScreenMode)
+            SizedBox(height: MediaQuery.of(context).padding.top),
 
           // Details and controls
           Expanded(
@@ -117,7 +129,7 @@ class _HeaderState extends State<Header> {
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: drishyaController,
+                      valueListenable: widget.controller,
                       builder: (context, value, child) {
                         return _IconButton(
                           iconData: Icons.close,
@@ -139,12 +151,13 @@ class _HeaderState extends State<Header> {
                     alignment: Alignment.topLeft,
                     padding: const EdgeInsets.only(left: 16.0),
                     child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: drishyaController,
+                      valueListenable: widget.controller,
                       builder: (context, value, child) {
                         return Opacity(
                           opacity: value.entities.isEmpty ? 1.0 : 0.0,
                           child: _AnimatedDropdown(
                             onPressed: widget.toogleAlbumList,
+                            notifier: widget.dropdownNotifier,
                           ),
                         );
                       },
@@ -164,41 +177,40 @@ class _HeaderState extends State<Header> {
   }
 }
 
-class _AnimatedDropdown extends StatefulWidget {
+class _AnimatedDropdown extends StatelessWidget {
   const _AnimatedDropdown({
     Key? key,
     this.onPressed,
+    required this.notifier,
   }) : super(key: key);
 
   final Function? onPressed;
+  final ValueNotifier<bool> notifier;
 
-  @override
-  _AnimatedDropdownState createState() => _AnimatedDropdownState();
-}
-
-class _AnimatedDropdownState extends State<_AnimatedDropdown> {
-  bool isDown = true;
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder(
-      tween: Tween(begin: isDown ? 1.0 : 0.0, end: isDown ? 0.0 : 1.0),
-      duration: const Duration(milliseconds: 300),
-      builder: (context, double value, child) {
-        return Transform.rotate(
-          angle: pi * value,
-          child: child,
+    return ValueListenableBuilder<bool>(
+      valueListenable: notifier,
+      builder: (context, isDown, child) {
+        return TweenAnimationBuilder(
+          tween: Tween(begin: isDown ? 1.0 : 0.0, end: isDown ? 0.0 : 1.0),
+          duration: const Duration(milliseconds: 300),
+          builder: (context, double value, child) {
+            return Transform.rotate(
+              angle: pi * value,
+              child: child,
+            );
+          },
+          child: _IconButton(
+            iconData: Icons.keyboard_arrow_down,
+            onPressed: () {
+              onPressed?.call();
+              notifier.value = !notifier.value;
+            },
+            size: 34.0,
+          ),
         );
       },
-      child: _IconButton(
-        iconData: Icons.keyboard_arrow_down,
-        onPressed: () {
-          widget.onPressed?.call();
-          setState(() {
-            isDown = !isDown;
-          });
-        },
-        size: 34.0,
-      ),
     );
   }
 }
@@ -249,11 +261,11 @@ class _AlbumDetail extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Album name
-
-        BlocBuilder<CurrentAlbumCubit, CurrentAlbumState>(
-          builder: (context, state) {
+        ValueListenableBuilder<AssetPathEntity?>(
+          valueListenable: currentAlbum,
+          builder: (context, album, child) {
             return Text(
-              state.name,
+              album?.name ?? 'Unknown',
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

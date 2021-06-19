@@ -1,11 +1,8 @@
-import 'dart:ui';
-
-import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/collapsable_gallery.dart';
+import 'package:example/controller_picker.dart';
+import 'package:example/fillscreen_gallery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-import 'picker_1.dart';
-import 'picker_2.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,10 +43,10 @@ class _PickerDemo extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Picker1()),
+                MaterialPageRoute(builder: (context) => FullscreenGallery()),
               );
             },
-            child: const Text('Pick using controller'),
+            child: const Text('Full screen mode'),
             style: TextButton.styleFrom(
               primary: Colors.white,
               backgroundColor: Colors.green,
@@ -60,10 +57,10 @@ class _PickerDemo extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Picker2()),
+                MaterialPageRoute(builder: (context) => CollapsableGallery()),
               );
             },
-            child: const Text('Pick without controller'),
+            child: const Text('Collapsable mode'),
             style: TextButton.styleFrom(
               primary: Colors.white,
               backgroundColor: Colors.green,

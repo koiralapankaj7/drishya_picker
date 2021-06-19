@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:developer';
 
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/application/media_fetcher.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import 'application/media_cubit.dart';
 import 'camera/camera_view.dart';
 import 'drishya_controller_provider.dart';
 import 'entities/entities.dart';
@@ -13,7 +14,6 @@ import 'gallery/albums.dart';
 import 'gallery/buttons.dart';
 import 'gallery/header.dart';
 import 'gallery/media_tile.dart';
-import 'gallery/permission_view.dart';
 import 'slidable_panel/slidable_panel.dart';
 
 ///
@@ -41,63 +41,27 @@ class DrishyaPicker extends StatefulWidget {
 
 class _DrishyaPickerState extends State<DrishyaPicker>
     with WidgetsBindingObserver {
-  late final PanelSetting _setting;
   late final DrishyaController _controller;
   late final PanelController _panelController;
-
-  late AlbumCollectionCubit _albumCollectionCubit;
-  late CurrentAlbumCubit _currentAlbumCubit;
-  late GalleryCubit _galleryCubit;
-
-  late double _panelMaxHeight;
-  late double _panelMinHeight;
   var _keyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _setting = widget.panelSetting ?? const PanelSetting();
     _controller = (widget.controller ?? DrishyaController())
-      .._init(context)
       .._checkKeyboard.addListener(_init);
-
     _panelController = _controller.panelController;
-    _galleryCubit = GalleryCubit();
-
-    _currentAlbumCubit = CurrentAlbumCubit()
-      ..stream.listen((state) {
-        if (state.hasData) {
-          _galleryCubit.fetchAssets(state.album!);
-        }
-      });
-    _albumCollectionCubit = AlbumCollectionCubit()
-      ..fetchAlbums(_controller.setting.requestType)
-      ..stream.listen((state) {
-        if (state.hasData) {
-          if (state.isEmpty) {
-            _galleryCubit.empty();
-          } else {
-            _currentAlbumCubit.changeAlbum(state.albums.first);
-          }
-        }
-      });
+    mediaFetcher.getAlbumList(_controller.setting.requestType);
   }
 
   void _init() {
-    log('Listener =======>>');
     if (_controller._checkKeyboard.value) {
       if (_keyboardVisible) {
         FocusScope.of(context).unfocus();
         Future.delayed(
           const Duration(milliseconds: 180),
-          () {
-            if (_controller.setting.fullScreenMode) {
-              _panelController.maximizePanel();
-            } else {
-              _panelController.openPanel();
-            }
-          },
+          _panelController.openPanel,
         );
       } else {
         _panelController.openPanel();
@@ -133,19 +97,22 @@ class _DrishyaPickerState extends State<DrishyaPicker>
         controller: _controller,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            _panelMaxHeight =
-                (_setting.panelMaxHeight ?? constraints.maxHeight) -
-                    (_setting.topMargin ?? 0.0);
-            _panelMinHeight = _setting.panelMinHeight ?? _panelMaxHeight * 0.35;
-
+            final s = widget.panelSetting ?? PanelSetting();
+            final _panelMaxHeight =
+                (s.maxHeight ?? constraints.maxHeight) - (s.topMargin);
+            final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
+            final _setting = s.copyWith(
+              maxHeight: _panelMaxHeight,
+              minHeight: _panelMinHeight,
+            );
             return Stack(
-              // fit: StackFit.expand,
               children: [
                 // Child i.e, Back view
                 Column(
                   children: [
                     Expanded(
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: _panelController.isVisible ? _cancel : null,
                         child: widget.child ?? const SizedBox(),
                       ),
@@ -161,34 +128,12 @@ class _DrishyaPickerState extends State<DrishyaPicker>
                 ),
 
                 // Custom media picker view i.e, Front view
-                MultiBlocProvider(
-                  providers: [
-                    BlocProvider<AlbumCollectionCubit>(
-                      create: (context) => _albumCollectionCubit,
-                    ),
-                    BlocProvider<CurrentAlbumCubit>(
-                      create: (context) => _currentAlbumCubit,
-                    ),
-                    BlocProvider<GalleryCubit>(
-                      create: (context) => _galleryCubit,
-                    ),
-                  ],
-                  child: Center(
-                    child: SlidablePanel(
-                      controller: _panelController,
-                      panelHeaderMaxHeight: _setting.panelHeaderMaxHeight,
-                      panelHeaderMinHeight: _setting.panelHeaderMinHeight,
-                      panelMinHeight: _panelMinHeight,
-                      panelMaxHeight: _panelMaxHeight,
-                      snapingPoint: _setting.snapingPoint,
-                      child: GalleryView(
-                        controller: _controller,
-                        headerBackground: _setting.panelHeaderBackground ??
-                            _setting.background,
-                        panelBackground:
-                            _setting.panelBackground ?? _setting.background,
-                      ),
-                    ),
+                SlidablePanel(
+                  setting: _setting,
+                  controller: _panelController,
+                  child: GalleryView(
+                    panelSetting: _setting,
+                    controller: _controller,
                   ),
                 ),
 
@@ -209,19 +154,17 @@ class GalleryView extends StatefulWidget {
   ///
   const GalleryView({
     Key? key,
-    required this.controller,
-    this.headerBackground,
-    this.panelBackground,
+    this.controller,
+    this.panelSetting,
   }) : super(key: key);
 
   ///
-  final Color? headerBackground;
+  final PanelSetting? panelSetting;
 
   ///
-  final Color? panelBackground;
+  final DrishyaController? controller;
 
-  ///
-  final DrishyaController controller;
+  static const String name = 'GalleryView';
 
   @override
   _GalleryViewState createState() => _GalleryViewState();
@@ -232,13 +175,16 @@ class _GalleryViewState extends State<GalleryView>
   late final PanelController _panelController;
   late final DrishyaController _controller;
 
+  late final ValueNotifier<bool> _dropdownNotifier;
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller;
+    _dropdownNotifier = ValueNotifier<bool>(true);
+    _controller = widget.controller ?? DrishyaController();
+    mediaFetcher.getAlbumList(_controller.setting.requestType);
     _panelController = _controller.panelController;
     _animationController = AnimationController(
       vsync: this,
@@ -258,14 +204,11 @@ class _GalleryViewState extends State<GalleryView>
   @override
   void dispose() {
     _animationController.dispose();
+    _dropdownNotifier.dispose();
     super.dispose();
   }
 
   void _toogleAlbumList() {
-    final gState = context.read<GalleryCubit>().state;
-
-    if (!gState.hasPermission || gState.items.isEmpty) return;
-
     if (_animationController.isAnimating) return;
     _panelController.isGestureEnabled = _animationController.value == 1.0;
     if (_animationController.value == 1.0) {
@@ -281,7 +224,11 @@ class _GalleryViewState extends State<GalleryView>
       _animationController.reverse();
       _panelController.isGestureEnabled = true;
     } else {
-      _panelController.minimizePanel();
+      if (_controller.fullScreenMode) {
+        Navigator.of(context).pop();
+      } else {
+        _panelController.minimizePanel();
+      }
     }
   }
 
@@ -292,177 +239,187 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    final albumListHeight =
-        _panelController.panelMaxHeight! - _panelController.headerMaxHeight!;
+    var s = widget.panelSetting ?? PanelSetting();
+    final _panelMaxHeight =
+        (s.maxHeight ?? MediaQuery.of(context).size.height) - (s.topMargin);
+    final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
+    final _setting =
+        s.copyWith(maxHeight: _panelMinHeight, minHeight: _panelMinHeight);
+    final albumListHeight = _panelMaxHeight - s.headerMaxHeight;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Header
-        Header(
-          drishyaController: _controller,
-          background: widget.headerBackground,
-          toogleAlbumList: _toogleAlbumList,
-          onClosePressed: _onClosePressed,
-          headerSubtitle: _controller.setting.albumSubtitle,
-          onSelectionClear: _onSelectionClear,
-        ),
-
-        // Gallery
-        Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        body: Stack(
+          clipBehavior: Clip.none,
           children: [
-            // Space for header
-            ValueListenableBuilder<SliderValue>(
-              valueListenable: _panelController,
-              builder: (context, SliderValue value, child) {
-                final num height = (_panelController.headerMinHeight! +
-                        (_panelController.headerMaxHeight! -
-                                _panelController.headerMinHeight!) *
-                            value.factor *
-                            1.2)
-                    .clamp(
-                  _panelController.headerMinHeight!,
-                  _panelController.headerMaxHeight!,
-                );
-                return SizedBox(height: height as double?);
-              },
+            // Header
+            Header(
+              controller: _controller,
+              dropdownNotifier: _dropdownNotifier,
+              panelSetting: _setting,
+              toogleAlbumList: _toogleAlbumList,
+              onClosePressed: _onClosePressed,
+              headerSubtitle: _controller.setting.albumSubtitle,
+              onSelectionClear: _onSelectionClear,
             ),
 
-            // Gallery view
-            Expanded(
-              child: Container(
-                color: widget.panelBackground ?? Colors.black,
-                child: BlocConsumer<GalleryCubit, GalleryState>(
-                  listener: (context, state) {
-                    // PhotoManager.requestPermission();
-                    // if (s.paginationFailure != null) {
-                    //   ScaffoldMessenger.of(context)
-                    //.showSnackBar(SnackBar(
-                    //       content: Text(s.paginationFailure.message)));
-                    // }
-                  },
-                  builder: (context, state) {
-                    // Loading state
-                    if (state.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
+            // Gallery
+            Column(
+              children: [
+                // Space for header
+                if (!_controller._fullScreenMode)
+                  ValueListenableBuilder<SliderValue>(
+                    valueListenable: _panelController,
+                    builder: (context, SliderValue value, child) {
+                      final num height = (_setting.headerMinHeight +
+                              (_setting.headerMaxHeight -
+                                      _setting.headerMinHeight) *
+                                  value.factor *
+                                  1.2)
+                          .clamp(
+                        _setting.headerMinHeight,
+                        _setting.headerMaxHeight,
                       );
-                    }
+                      return SizedBox(height: height as double?);
+                    },
+                  ),
 
-                    if (state.hasError) {
-                      if (!state.hasPermission) {
-                        return const PermissionRequest();
-                      }
-                    }
+                if (_controller._fullScreenMode)
+                  SizedBox(height: _setting.headerMaxHeight),
 
-                    if (state.items.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No media available',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      );
-                    }
+                // Gallery view
+                Expanded(
+                  child: Container(
+                    color: _setting.foregroundColor,
+                    child: ValueListenableBuilder<List<AssetEntity>>(
+                      valueListenable: albumEntities,
+                      builder: (context, entities, child) {
+                        // Loading state
+                        //         if (state.isLoading) {
+                        //           return const Center(
+                        //             child: CircularProgressIndicator(),
+                        //           );
+                        //         }
 
-                    return GridView.builder(
-                      controller: _panelController.scrollController,
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 1.0,
-                        mainAxisSpacing: 1.0,
-                      ),
-                      itemCount: state.count + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return InkWell(
-                            onTap: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return CameraView();
-                                }),
-                              );
-                            },
-                            child: Container(
-                              color: Colors.cyan,
-                              child: Icon(Icons.add),
+                        //         if (state.hasError) {
+                        //           if (!state.hasPermission) {
+                        //             return const PermissionRequest();
+                        //           }
+                        //         }
+
+                        if (entities.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No media available',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           );
                         }
-                        final entity = state.items[index - 1];
-                        return MediaTile(
-                          drishyaController: _controller,
-                          entity: entity,
-                          onSelect: () {
-                            _controller._select(entity);
+
+                        return GridView.builder(
+                          controller: _panelController.scrollController,
+                          padding: const EdgeInsets.all(0.0),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 1.0,
+                            mainAxisSpacing: 1.0,
+                          ),
+                          itemCount: _controller.setting.enableCamera
+                              ? entities.length + 1
+                              : entities.length,
+                          itemBuilder: (context, index) {
+                            if (_controller.setting.enableCamera &&
+                                index == 0) {
+                              return InkWell(
+                                onTap: () async {
+                                  _controller._openCameraFromGallery(context);
+                                },
+                                child: Container(
+                                  child: Icon(
+                                    CupertinoIcons.camera,
+                                    color: Colors.lightBlue.shade300,
+                                    size: 26.0,
+                                  ),
+                                ),
+                              );
+                            }
+                            final ind = _controller.setting.enableCamera
+                                ? index - 1
+                                : index;
+                            final entity = entities[ind];
+                            return MediaTile(
+                              drishyaController: _controller,
+                              entity: entity,
+                              onSelect: () {
+                                _controller._select(entity, context);
+                              },
+                            );
                           },
                         );
                       },
-                    );
-                  },
+                    ),
+                  ),
                 ),
+
+                //
+              ],
+            ),
+
+            // Send and edit button
+            Positioned(
+              bottom: 0.0,
+              child: Buttons(
+                drishyaController: _controller,
+                onEdit: (context) {},
+                onSubmit: _controller._submit,
+              ),
+            ),
+
+            // Album List
+            AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                return Positioned(
+                  bottom: albumListHeight * (_animation.value - 1),
+                  left: 0.0,
+                  right: 0.0,
+                  child: child!,
+                );
+              },
+              child: AlbumList(
+                height: albumListHeight,
+                onPressed: (album) {
+                  _toogleAlbumList();
+                  mediaFetcher.getAssetsFor(album);
+                  _dropdownNotifier.value = !_dropdownNotifier.value;
+                },
               ),
             ),
 
             //
           ],
         ),
-
-        // Send and edit button
-        Positioned(
-          bottom: 0.0,
-          child: Buttons(
-            drishyaController: _controller,
-            onEdit: () {},
-            onSubmit: _controller._submit,
-          ),
-        ),
-
-        // Album List
-        AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return Positioned(
-              bottom: albumListHeight * (_animation.value - 1),
-              left: 0.0,
-              right: 0.0,
-              child: child!,
-            );
-          },
-          child: AlbumList(
-            height: albumListHeight,
-            onPressed: (album) {
-              context.read<CurrentAlbumCubit>().changeAlbum(album);
-              _toogleAlbumList();
-            },
-          ),
-        ),
-
-        //
-      ],
+      ),
     );
   }
 }
 
-///
-class DrishyaPickerField extends StatefulWidget {
+/// Widget which pick media from gallery
+class GalleryPicker extends StatelessWidget {
   ///
-  const DrishyaPickerField({
+  const GalleryPicker({
     Key? key,
     this.onChanged,
     this.onSubmitted,
     this.setting,
     this.child,
-    this.source = DrishyaSource.gallery,
   }) : super(key: key);
 
-  ///
-  /// If source is [DrishyaSource.camera] [removed] will be always false
   ///
   /// While picking drishya using gallery [removed] will be true if,
   /// previously selected drishya is unselected otherwise false.
@@ -479,42 +436,50 @@ class DrishyaPickerField extends StatefulWidget {
   final DrishyaSetting? setting;
 
   ///
-  /// Camera, Gallery
-  final DrishyaSource source;
-
-  ///
   final Widget? child;
-
-  @override
-  _DrishyaPickerFieldState createState() => _DrishyaPickerFieldState();
-}
-
-///
-class _DrishyaPickerFieldState extends State<DrishyaPickerField> {
-  late final DrishyaController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      _controller = (context.drishyaController ?? DrishyaController())
-        .._init(context);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _controller._fromPicker(
-          widget.onChanged,
-          widget.onSubmitted,
-          widget.setting,
-          widget.source,
-          context,
-        );
+        (context.drishyaController ?? DrishyaController())
+          .._openGallery(
+            onChanged,
+            onSubmitted,
+            setting,
+            context,
+          );
       },
-      child: widget.child,
+      child: child,
+    );
+  }
+}
+
+///
+/// Widget to pick media using camera
+class CameraPicker extends StatelessWidget {
+  ///
+  const CameraPicker({
+    Key? key,
+    this.onCapture,
+    this.child,
+  }) : super(key: key);
+
+  ///
+  /// Triggered when picker capture media
+  ///
+  final void Function(AssetEntity entity)? onCapture;
+
+  ///
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        DrishyaController()._openCamera(onCapture, context);
+      },
+      child: child,
     );
   }
 }
@@ -530,30 +495,29 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   final PanelController _panelController;
   final ValueNotifier<bool> _checkKeyboard;
   late Completer<List<AssetEntity>> _completer;
-  late BuildContext _context;
-
-  void _init(BuildContext context) {
-    _context = context;
-  }
 
   // When clearing all selected entities on changed need to notify current
   // status of last selected asset
   AssetEntity? _lastSelectedEntity;
+
   void Function(AssetEntity entity, bool removed)? _onChanged;
   void Function(List<AssetEntity> entities)? _onSubmitted;
 
   // Media setting
   DrishyaSetting _setting = DrishyaSetting();
+  var _fullScreenMode = false;
+
+  bool get fullScreenMode => _fullScreenMode;
 
   // Selecting and unselecting entities
-  void _select(AssetEntity entity) {
+  void _select(AssetEntity entity, BuildContext context) {
     final selectedList = value.entities.toList();
     if (selectedList.contains(entity)) {
       selectedList.remove(entity);
       _onChanged?.call(entity, true);
     } else {
       if (reachedMaximumLimit) {
-        ScaffoldMessenger.of(_context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Maximum selection limit reached!')),
         );
         return;
@@ -576,10 +540,14 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   }
 
   // When selection is completed
-  void _submit() {
-    _panelController.closePanel();
-    _completer.complete(value.entities);
-    _checkKeyboard.value = false;
+  void _submit(BuildContext context) {
+    if (_fullScreenMode) {
+      Navigator.of(context).pop();
+    } else {
+      _panelController.closePanel();
+      _completer.complete(value.entities);
+      _checkKeyboard.value = false;
+    }
     _onSubmitted?.call(value.entities);
     value = const DrishyaValue();
   }
@@ -593,35 +561,44 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     value = const DrishyaValue();
   }
 
-  ///
-  void _fromPicker(
-    void Function(AssetEntity entity, bool removed)? onChanged,
-    final void Function(List<AssetEntity> entities)? onSubmitted,
-    DrishyaSetting? setting,
-    DrishyaSource source,
-    BuildContext context,
-  ) {
-    _onChanged = onChanged;
-    _onSubmitted = onSubmitted;
-    if (source == DrishyaSource.camera) {
-      pickFromCamera(context);
-    }
-
-    if (source == DrishyaSource.gallery) {
-      pickFromGallery(context);
-    }
-    // pickDrishya(setting: setting);
-  }
-
-  /// Pick drishya from camera
-  Future<AssetEntity?> pickFromCamera(BuildContext context) async {
-    final entity = await Navigator.of(context).push<AssetEntity?>(
-      MaterialPageRoute(builder: (context) => CameraView()),
+  void _openCameraFromGallery(BuildContext context) async {
+    final entity = await Navigator.of(context).pushReplacement(
+      _route<AssetEntity?>(CameraView(), horizontal: true),
     );
     if (entity != null) {
       _onChanged?.call(entity, false);
       _onSubmitted?.call([entity]);
+      _completer.complete([entity]);
     }
+  }
+
+  void _openCamera(
+    final void Function(AssetEntity entity)? onCapture,
+    BuildContext context,
+  ) async {
+    final entity = await pickFromCamera(context);
+    if (entity != null) {
+      onCapture?.call(entity);
+    }
+  }
+
+  ///
+  void _openGallery(
+    void Function(AssetEntity entity, bool removed)? onChanged,
+    final void Function(List<AssetEntity> entities)? onSubmitted,
+    DrishyaSetting? setting,
+    BuildContext context,
+  ) {
+    _onChanged = onChanged;
+    _onSubmitted = onSubmitted;
+    pickFromGallery(context, setting: setting);
+  }
+
+  /// Pick drishya from camera
+  Future<AssetEntity?> pickFromCamera(BuildContext context) async {
+    final entity = await Navigator.of(context).push(
+      _route<AssetEntity?>(CameraView(), name: CameraView.name),
+    );
     return entity;
   }
 
@@ -630,16 +607,21 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     BuildContext context, {
     DrishyaSetting? setting,
   }) async {
-    _completer = Completer<List<AssetEntity>>();
+    if (setting != null) {
+      _setting = setting;
+    }
     // If widget is not wrapped by drishya picker
     if (context.drishyaController == null) {
-      final entities = await Navigator.of(_context).push<List<AssetEntity>?>(
-        MaterialPageRoute(
-          builder: (context) => DrishyaPicker(controller: this),
+      _fullScreenMode = true;
+      Navigator.of(context).push(
+        _route<List<AssetEntity>?>(
+          GalleryView(controller: this),
+          name: GalleryView.name,
         ),
       );
-      return entities;
     } else {
+      _fullScreenMode = false;
+      _completer = Completer<List<AssetEntity>>();
       _checkKeyboard.value = true;
       if (_setting.selectedItems.isNotEmpty) {
         value = value.copyWith(
@@ -649,36 +631,6 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
       }
       return _completer.future;
     }
-  }
-
-  /// Pick media
-  Future<List<AssetEntity>> pickDrishya({DrishyaSetting? setting}) async {
-    if (setting != null) {
-      _setting = setting;
-    }
-    // Gallery picker
-    if (_setting.source == DrishyaSource.gallery) {
-      // If widget is not wrapped by drishya picker
-      if (_context.drishyaController == null) {
-        Navigator.of(_context).push<List<AssetEntity>?>(
-          MaterialPageRoute(
-            builder: (context) => DrishyaPicker(controller: this),
-          ),
-        );
-      } else {
-        _completer = Completer<List<AssetEntity>>();
-        _checkKeyboard.value = true;
-        if (_setting.selectedItems.isNotEmpty) {
-          value = value.copyWith(
-            entities: _setting.selectedItems,
-            previousSelection: true,
-          );
-        }
-        return _completer.future;
-      }
-    }
-
-    return [];
   }
 
   /// Panel controller
@@ -703,4 +655,25 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   }
 
   //
+}
+
+Route<T> _route<T>(
+  Widget page, {
+  bool horizontal = false,
+  String name = '',
+}) {
+  return PageRouteBuilder<T>(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    settings: RouteSettings(name: name),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = horizontal ? Offset(1.0, 0.0) : Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

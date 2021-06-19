@@ -24,13 +24,95 @@ enum SlidingState {
 }
 
 ///
-const double kDefaultSnapingPoint = 0.4;
-
+/// Settings for gallery panel
 ///
-const double kPanelHeaderMinHeight = 25.0;
+class PanelSetting {
+  ///
+  const PanelSetting({
+    this.topMargin = 0.0,
+    this.headerMaxHeight = 75.0,
+    this.headerMinHeight = 25.0,
+    this.minHeight,
+    this.maxHeight,
+    this.snapingPoint = 0.4,
+    this.headerBackground = Colors.black,
+    this.foregroundColor = Colors.black,
+    this.backgroundColor = Colors.black,
+  }) : assert(
+          snapingPoint >= 0.0 && snapingPoint <= 1.0,
+          '[snapingPoint] value must be between 1.0 and 0.0',
+        );
 
-///
-const double kPanelHeaderMaxHeight = 75.0;
+  /// Margin for panel top. Which can be used to show status bar if you need
+  /// to show panel above scaffold.
+  final double topMargin;
+
+  /// Panel maximum height
+  ///
+  /// mediaQuery = MediaQuery.of(context)
+  /// Default: mediaQuery.size.height -  mediaQuery.padding.top
+  final double? maxHeight;
+
+  /// Panel minimum height
+  /// Default: 35% of [maxHeight]
+  final double? minHeight;
+
+  /// Panel header maximum size
+  ///
+  /// Default: 75.0 px
+  final double headerMaxHeight;
+
+  /// Panel header minimum size,
+  ///
+  /// which will be use as panel scroll handler
+  /// Default: 25.0 px
+  final double headerMinHeight;
+
+  /// Point from where panel will start fling animation to snap it's height
+  ///
+  /// Value must be between 0.0 - 1.0
+  /// Default: 0.4
+  final double snapingPoint;
+
+  /// Background color for panel header,
+  /// Default: [Colors.black]
+  final Color headerBackground;
+
+  /// Background color for panel,
+  /// Default: [Colors.black]
+  final Color foregroundColor;
+
+  /// If [headerBackground] is missing [backgroundColor] will be applied
+  /// If [foregroundColor] is missing [backgroundColor] will be applied
+  ///
+  /// Default: [Colors.black]
+  final Color backgroundColor;
+
+  /// Helper function
+  PanelSetting copyWith({
+    double? topMargin,
+    double? headerMaxHeight,
+    double? headerMinHeight,
+    double? minHeight,
+    double? maxHeight,
+    double? snapingPoint,
+    Color? headerBackground,
+    Color? foregroundColor,
+    Color? backgroundColor,
+  }) {
+    return PanelSetting(
+      topMargin: topMargin ?? this.topMargin,
+      headerMaxHeight: headerMaxHeight ?? this.headerMaxHeight,
+      headerMinHeight: headerMinHeight ?? this.headerMinHeight,
+      minHeight: minHeight ?? this.minHeight,
+      maxHeight: maxHeight ?? this.maxHeight,
+      snapingPoint: snapingPoint ?? this.snapingPoint,
+      headerBackground: headerBackground ?? this.headerBackground,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+    );
+  }
+}
 
 ///
 class SlidablePanel extends StatefulWidget {
@@ -38,31 +120,15 @@ class SlidablePanel extends StatefulWidget {
   const SlidablePanel({
     Key? key,
     this.controller,
-    this.panelHeaderMaxHeight,
-    this.panelHeaderMinHeight,
-    this.panelMinHeight,
-    this.panelMaxHeight,
-    this.snapingPoint,
+    this.setting,
     this.child,
   }) : super(key: key);
 
   ///
+  final PanelSetting? setting;
+
+  ///
   final Widget? child;
-
-  ///
-  final double? panelHeaderMaxHeight;
-
-  ///
-  final double? panelHeaderMinHeight;
-
-  ///
-  final double? panelMinHeight;
-
-  ///
-  final double? panelMaxHeight;
-
-  /// Between 0.0 and 1.0
-  final double? snapingPoint;
 
   ///
   final PanelController? controller;
@@ -73,12 +139,11 @@ class SlidablePanel extends StatefulWidget {
 
 class _SlidablePanelState extends State<SlidablePanel>
     with TickerProviderStateMixin {
-  late double _panelHeaderMinHeight;
-  late double _panelHeaderMaxHeight;
   late double _panelMinHeight;
   late double _panelMaxHeight;
   late double _remainingSpace;
   late MediaQueryData _mediaQuery;
+  late PanelSetting _setting;
 
   //
   late PanelController _panelController;
@@ -106,18 +171,12 @@ class _SlidablePanelState extends State<SlidablePanel>
 
   // true, if pointer is above halfway of the screen, false otherwise.
   bool get _aboveHalfWay =>
-      _panelController.value.factor >
-      (widget.snapingPoint ?? kDefaultSnapingPoint);
+      _panelController.value.factor > (_setting.snapingPoint);
 
   @override
   void initState() {
     super.initState();
-    _panelHeaderMinHeight =
-        widget.panelHeaderMinHeight ?? kPanelHeaderMinHeight;
-    _panelHeaderMaxHeight =
-        widget.panelHeaderMaxHeight ?? kPanelHeaderMaxHeight;
-    _panelMaxHeight = widget.panelMaxHeight!;
-    _panelMinHeight = widget.panelMinHeight!;
+    _setting = widget.setting ?? PanelSetting();
 
     // Initialization of panel controller
     _panelController = (widget.controller ?? PanelController()).._init(this);
@@ -179,7 +238,7 @@ class _SlidablePanelState extends State<SlidablePanel>
       // _scrollToBottom = isHandler || isControllerOffsetZero;
 
       final headerMinPosition = _mediaQuery.size.height - _panelMaxHeight;
-      final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
+      final headerMaxPosition = headerMinPosition + _setting.headerMaxHeight;
       final isHandler = event.position.dy >= headerMinPosition &&
           event.position.dy <= headerMaxPosition;
       _scrollToBottom = isHandler || isControllerOffsetZero;
@@ -191,7 +250,7 @@ class _SlidablePanelState extends State<SlidablePanel>
     if (_scrollToTop || _scrollToBottom) {
       final startingPX = event.position.dy -
           (_scrollToTop
-              ? _panelHeaderMinHeight
+              ? _setting.headerMinHeight
               : _pointerPositionBeforeScroll.dy);
       final num remainingPX =
           (_remainingSpace - startingPX).clamp(0.0, _remainingSpace);
@@ -257,10 +316,9 @@ class _SlidablePanelState extends State<SlidablePanel>
   @override
   Widget build(BuildContext context) {
     _mediaQuery = MediaQuery.of(context);
-
-    /// When making slidable different package then only set size from here
-    // _panelMaxHeight = widget.panelMaxHeight ?? constraints.maxHeight;
-    // _panelMinHeight = widget.panelMinHeight ?? _panelMaxHeight * 0.35;
+    _panelMaxHeight =
+        (_setting.maxHeight ?? _mediaQuery.size.height) - _setting.topMargin;
+    _panelMinHeight = _setting.minHeight ?? _panelMaxHeight * 0.35;
     _remainingSpace = _panelMaxHeight - _panelMinHeight;
 
     return ValueListenableBuilder<bool>(
@@ -331,18 +389,6 @@ class PanelController extends ValueNotifier<SliderValue> {
   // bool get
 
   bool _gesture = true;
-
-  ///
-  double? get headerMinHeight => _state._panelHeaderMinHeight;
-
-  ///
-  double? get headerMaxHeight => _state._panelHeaderMaxHeight;
-
-  ///
-  double? get panelMinHeight => _state._panelMinHeight;
-
-  ///
-  double? get panelMaxHeight => _state._panelMaxHeight;
 
   ///
   SlidingState get panelState => value.state;

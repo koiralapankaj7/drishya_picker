@@ -1,38 +1,35 @@
-import 'package:flutter/material.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:flutter/material.dart';
 
 import 'grid_view_widget.dart';
 
 ///
-class Picker2 extends StatefulWidget {
+class FullscreenGallery extends StatefulWidget {
   @override
-  _Picker2State createState() => _Picker2State();
+  _FullscreenGalleryState createState() => _FullscreenGalleryState();
 }
 
-class _Picker2State extends State<Picker2> {
-  final notifier = ValueNotifier<List<AssetEntity>?>(<AssetEntity>[]);
+class _FullscreenGalleryState extends State<FullscreenGallery> {
+  final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.pink,
       appBar: AppBar(
-        title: const Text('Pick using picker view'),
+        title: const Text('Fullscreen gallery picker'),
       ),
       body: Column(
         children: [
           // Grid view
-          Expanded(
-            child: Container(
-              child: GridViewWidget(notifier: notifier),
-            ),
-          ),
+          Expanded(child: GridViewWidget(notifier: notifier)),
 
           // Textfield
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
+                // Textfield
                 const Expanded(
                   child: TextField(
                     decoration: InputDecoration(
@@ -40,18 +37,30 @@ class _Picker2State extends State<Picker2> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16.0),
+
+                // Camera field..
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CameraPicker(
+                    onCapture: (entity) {
+                      notifier.value = [...notifier.value, entity];
+                    },
+                    child: Icon(Icons.camera),
+                  ),
+                ),
+
+                // Gallery field
                 ValueListenableBuilder<List<AssetEntity>?>(
                   valueListenable: notifier,
                   builder: (context, list, child) {
-                    return DrishyaPickerField(
+                    return GalleryPicker(
                       setting: DrishyaSetting(
                         selectedItems: list ?? [],
                         maximum: 5,
                         albumSubtitle: 'common',
                       ),
                       onChanged: (entity, isRemoved) {
-                        final value = notifier.value?.toList() ?? [];
+                        final value = notifier.value.toList();
                         if (isRemoved) {
                           value.remove(entity);
                         } else {
@@ -65,15 +74,10 @@ class _Picker2State extends State<Picker2> {
                       child: child,
                     );
                   },
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.cyan,
-                    minRadius: 24.0,
-                    child: Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: Icon(Icons.photo),
                 ),
+
+                //
               ],
             ),
           ),

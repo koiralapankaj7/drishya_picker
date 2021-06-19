@@ -15,7 +15,6 @@ import 'package:drishya_picker/src/camera/text_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:video_player/video_player.dart';
 
 import 'camera_controls.dart';
 
@@ -25,6 +24,8 @@ class CameraView extends StatefulWidget {
   const CameraView({
     Key? key,
   }) : super(key: key);
+
+  static const String name = 'CameraView';
 
   @override
   _CameraViewState createState() {
@@ -43,7 +44,7 @@ void logError(String code, String? message) {
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? controller;
-  VideoPlayerController? videoController;
+  // VideoPlayerController? videoController;
   bool enableAudio = true;
   List<CameraDescription> cameras = <CameraDescription>[];
   late final InputTypeController inputTypeController;
@@ -261,13 +262,13 @@ class _CameraViewState extends State<CameraView>
   void _onTakePictureButtonPressed() {
     _takePicture().then((AssetEntity? entity) {
       if (mounted) {
-        setState(() {
-          videoController?.dispose();
-          videoController = null;
-        });
+        // setState(() {
+        //   videoController?.dispose();
+        //   videoController = null;
+        // });
 
         if (entity != null) {
-          // Navigator.of(context).pop(entity);
+          Navigator.of(context).pop(entity);
         }
         // showInSnackBar('Picture saved to ${entity.relativePath}');
       }
@@ -303,24 +304,8 @@ class _CameraViewState extends State<CameraView>
 
     try {
       XFile file = await ctrl.takePicture();
-      final time = await file.lastModified();
-      final entity = AssetEntity(
-        id: time.millisecond.toString(),
-        height: 1080,
-        width: 1920,
-        typeInt: 1,
-        mimeType: file.mimeType,
-        createDtSecond: time.second,
-        modifiedDateSecond: time.second,
-        title: file.name,
-        relativePath: file.path,
-        orientation: ctrl.description.sensorOrientation,
-      );
-
-      final f = await entity.loadFile();
-      final dd = await File(file.path);
-
-      log('$f : ${dd}');
+      final data = await file.readAsBytes();
+      final entity = await PhotoManager.editor.saveImage(data);
       return entity;
     } on CameraException catch (e) {
       log('Exception occured while capturing picture : $e');

@@ -12,8 +12,8 @@ class Buttons extends StatefulWidget {
   }) : super(key: key);
 
   final DrishyaController drishyaController;
-  final void Function()? onEdit;
-  final void Function()? onSubmit;
+  final void Function(BuildContext context)? onEdit;
+  final void Function(BuildContext context)? onSubmit;
 
   @override
   ButtonsState createState() => ButtonsState();
@@ -123,7 +123,7 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                     width: buttonWidth,
                     child: _TextButton(
                       onPressed: () {
-                        //
+                        widget.onEdit?.call(context);
                       },
                       label: 'EDIT',
                       background: Colors.white,
@@ -163,7 +163,9 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                       );
                     },
                     child: _TextButton(
-                      onPressed: widget.onSubmit,
+                      onPressed: () {
+                        widget.onSubmit?.call(context);
+                      },
                       label: 'SELECT',
                     ),
                   ),

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:photo_manager/photo_manager.dart';
 
 ///
@@ -19,7 +17,7 @@ class DrishyaSetting {
     this.selectedItems = const <AssetEntity>[],
     this.maximum = 20,
     this.albumSubtitle = 'Select Media',
-    this.fullScreenMode = false,
+    this.enableCamera = true,
   });
 
   ///
@@ -53,76 +51,8 @@ class DrishyaSetting {
   final String albumSubtitle;
 
   ///
-  /// Gallery view screen mode.
-  /// Gallery view will be collapsable by default.
-  /// Set [fullScreenMode] true for full screen mode
-  final bool fullScreenMode;
-}
-
-///
-/// Settings for gallery panel
-///
-class PanelSetting {
-  ///
-  const PanelSetting({
-    this.panelHeaderMaxHeight,
-    this.panelHeaderMinHeight,
-    this.panelHeaderBackground,
-    this.panelMinHeight,
-    this.panelMaxHeight,
-    this.panelBackground,
-    this.snapingPoint,
-    this.background,
-    this.topMargin,
-  }) : assert(
-          snapingPoint == null || (snapingPoint >= 0.0 && snapingPoint <= 1.0),
-          '[snapingPoint] value must be between 1.0 and 0.0',
-        );
-
-  /// Panel maximum height
-  ///
-  /// mediaQuery = MediaQuery.of(context)
-  /// Default: mediaQuery.size.height -  mediaQuery.padding.top
-  final double? panelMaxHeight;
-
-  /// Panel minimum height
-  /// Default: 35% of [panelMaxHeight]
-  final double? panelMinHeight;
-
-  /// Panel header maximum size
-  ///
-  /// Default: 75.0 px
-  final double? panelHeaderMaxHeight;
-
-  /// Panel header minimum size,
-  ///
-  /// which will be use as panel scroll handler
-  /// Default: 25.0 px
-  final double? panelHeaderMinHeight;
-
-  /// Background color for panel header,
-  /// Default: [Colors.black]
-  final Color? panelHeaderBackground;
-
-  /// Background color for panel,
-  /// Default: [Colors.black]
-  final Color? panelBackground;
-
-  /// Point from where panel will start fling animation to snap it's height
-  ///
-  /// Value must be between 0.0 - 1.0
-  /// Default: 0.4
-  final double? snapingPoint;
-
-  /// If [panelHeaderBackground] is missing [background] will be applied
-  /// If [panelBackground] is missing [background] will be applied
-  ///
-  /// Default: [Colors.black]
-  final Color? background;
-
-  /// Margin for panel top. Which can be used to show status bar if you need
-  /// to show panel above scaffold.
-  final double? topMargin;
+  /// Set false to hide camera from gallery view
+  final bool enableCamera;
 }
 
 ///

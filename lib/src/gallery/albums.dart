@@ -1,9 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/src/application/media_cubit.dart';
+import 'package:drishya_picker/src/application/media_fetcher.dart';
 import 'package:drishya_picker/src/gallery/permission_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class AlbumList extends StatelessWidget {
@@ -18,8 +17,9 @@ class AlbumList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AlbumCollectionCubit, AlbumCollectionState>(
-      builder: (context, state) {
+    return ValueListenableBuilder<MediaValue>(
+      valueListenable: mediaFetcher,
+      builder: (context, state, child) {
         // Loading
         if (state.isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -47,7 +47,7 @@ class AlbumList extends StatelessWidget {
           color: Colors.black,
           child: ListView.builder(
             padding: const EdgeInsets.only(top: 16.0),
-            itemCount: state.count,
+            itemCount: state.albums.length,
             itemBuilder: (context, index) {
               final entity = state.albums[index];
               return _Album(
