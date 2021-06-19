@@ -4,7 +4,6 @@ import 'package:drishya_picker/src/gallery/drishya_repository.dart';
 import 'package:drishya_picker/src/gallery/entities.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../drishya_picker.dart';
 
@@ -96,7 +95,7 @@ class _HeaderState extends State<Header> {
       ),
     );
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => alertDialog,
     );
@@ -191,7 +190,7 @@ class _AnimatedDropdown extends StatelessWidget {
     required this.notifier,
   }) : super(key: key);
 
-  final Function? onPressed;
+  final void Function()? onPressed;
   final ValueNotifier<bool> notifier;
 
   @override

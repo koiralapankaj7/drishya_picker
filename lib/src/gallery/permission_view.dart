@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+///
 class PermissionRequest extends StatelessWidget {
-  const PermissionRequest();
+  ///
+  const PermissionRequest({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: const [
           // Heading
           Text(
             'Access Your Album',
@@ -21,7 +25,7 @@ class PermissionRequest extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 8.0),
+          SizedBox(height: 8.0),
 
           // Description
           Text(
@@ -29,7 +33,7 @@ class PermissionRequest extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 8.0),
+          SizedBox(height: 8.0),
 
           // Allow access button
           TextButton(

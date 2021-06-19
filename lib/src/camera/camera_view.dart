@@ -6,7 +6,6 @@
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
@@ -35,9 +34,9 @@ class CameraView extends StatefulWidget {
 
 void logError(String code, String? message) {
   if (message != null) {
-    print('Error: $code\nError Message: $message');
+    log('Error: $code\nError Message: $message');
   } else {
-    print('Error: $code');
+    log('Error: $code');
   }
 }
 
@@ -54,7 +53,7 @@ class _CameraViewState extends State<CameraView>
 
   var _minAvailableExposureOffset = 0.0;
   var _maxAvailableExposureOffset = 0.0;
-  var _currentExposureOffset = 0.0;
+  final _currentExposureOffset = 0.0;
 
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
@@ -80,7 +79,7 @@ class _CameraViewState extends State<CameraView>
         cameras[0],
         ResolutionPreset.veryHigh,
       );
-      controller?.initialize().then((_) {
+      await controller?.initialize().then((_) {
         if (!mounted) {
           return;
         }
@@ -101,7 +100,7 @@ class _CameraViewState extends State<CameraView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = controller;
+    final cameraController = controller;
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
       return;
@@ -303,7 +302,7 @@ class _CameraViewState extends State<CameraView>
     }
 
     try {
-      XFile file = await ctrl.takePicture();
+      final file = await ctrl.takePicture();
       final data = await file.readAsBytes();
       final entity = await PhotoManager.editor.saveImage(data);
       return entity;
@@ -377,7 +376,8 @@ class _CameraViewState extends State<CameraView>
     //   } else {
     //     await cameraController.lockCaptureOrientation();
     //     showInSnackBar(
-    //         'Capture orientation locked to ${cameraController.value.lockedCaptureOrientation.toString().split('.').last}');
+    //         'Capture orientation locked to ${cameraController.value.
+    // lockedCaptureOrientation.toString().split('.').last}');
     //   }
     // }
   }
@@ -385,7 +385,8 @@ class _CameraViewState extends State<CameraView>
   void _onSetExposureModeButtonPressed(ExposureMode mode) {
     // setExposureMode(mode).then((_) {
     //   if (mounted) setState(() {});
-    //   showInSnackBar('Exposure mode set to ${mode.toString().split('.').last}');
+    //   showInSnackBar('Exposure mode set to ${mode.toString()
+    // .split('.').last}');
     // });
   }
 
@@ -467,7 +468,8 @@ class _CameraViewState extends State<CameraView>
   Future<XFile?> _stopVideoRecording() async {
     // final CameraController? cameraController = controller;
 
-    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    // if (cameraController == null || !cameraController.value.
+    //isRecordingVideo) {
     //   return null;
     // }
 
@@ -482,7 +484,8 @@ class _CameraViewState extends State<CameraView>
   Future<void> _pauseVideoRecording() async {
     // final CameraController? cameraController = controller;
 
-    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    // if (cameraController == null || !cameraController.value
+    //.isRecordingVideo) {
     //   return null;
     // }
 
@@ -497,7 +500,8 @@ class _CameraViewState extends State<CameraView>
   Future<void> _resumeVideoRecording() async {
     // final CameraController? cameraController = controller;
 
-    // if (cameraController == null || !cameraController.value.isRecordingVideo) {
+    // if (cameraController == null || !cameraController.value.
+    //isRecordingVideo) {
     //   return null;
     // }
 
@@ -549,7 +553,8 @@ class _CameraViewState extends State<CameraView>
     // await vController.play();
   }
 
-  /// Display the preview from the camera (or a message if the preview is not available).
+  /// Display the preview from the camera (or a message if
+  /// the preview is not available).
   // Widget _cameraPreviewWidget() {
   //   final CameraController? cameraController = controller;
 
@@ -620,7 +625,7 @@ class _CameraPreview extends StatelessWidget {
           child: CameraPreview(
             controller,
             child: ConstrainedBox(
-              constraints: BoxConstraints.expand(),
+              constraints: const BoxConstraints.expand(),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   return GestureDetector(

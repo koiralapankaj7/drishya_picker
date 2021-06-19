@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../drishya_picker.dart';
 
+///
 class Buttons extends StatefulWidget {
+  ///
   const Buttons({
     Key? key,
     required this.drishyaController,
@@ -11,14 +13,20 @@ class Buttons extends StatefulWidget {
     this.onSubmit,
   }) : super(key: key);
 
+  ///
   final DrishyaController drishyaController;
+
+  ///
   final void Function(BuildContext context)? onEdit;
+
+  ///
   final void Function(BuildContext context)? onSubmit;
 
   @override
   ButtonsState createState() => ButtonsState();
 }
 
+///
 class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
   late AnimationController _editOpaController;
   late AnimationController _selectOpaController;
@@ -199,12 +207,6 @@ class _TextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed as void Function()?,
-      child: Text(
-        label ?? '',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: labelColor ?? Colors.white,
-            ),
-      ),
       style: TextButton.styleFrom(
         primary: Colors.black,
         backgroundColor: background ?? Colors.lightBlue,
@@ -212,6 +214,12 @@ class _TextButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.0),
         ),
         padding: const EdgeInsets.symmetric(vertical: 14.0),
+      ),
+      child: Text(
+        label ?? '',
+        style: Theme.of(context).textTheme.button!.copyWith(
+              color: labelColor ?? Colors.white,
+            ),
       ),
     );
   }

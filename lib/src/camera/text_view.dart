@@ -4,7 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+///
 class TextView extends StatefulWidget {
+  ///
+  const TextView({
+    Key? key,
+  }) : super(key: key);
+
   @override
   _TextViewState createState() => _TextViewState();
 }

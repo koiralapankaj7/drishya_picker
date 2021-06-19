@@ -2,8 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+///
 typedef AlbumsType = BaseState<List<AssetPathEntity>>;
+
+///
 typedef AlbumType = BaseState<AssetPathEntity>;
+
+///
 typedef EntitiesType = BaseState<List<AssetEntity>>;
 
 ///
@@ -26,9 +31,9 @@ class DrishyaRepository {
 
   /// Get album list
   void fetchAlbums(RequestType type) async {
-    albumsNotifier.value = BaseState(isLoading: true);
-    albumNotifier.value = BaseState(isLoading: true);
-    entitiesNotifier.value = BaseState(isLoading: true);
+    albumsNotifier.value = const BaseState(isLoading: true);
+    albumNotifier.value = const BaseState(isLoading: true);
+    entitiesNotifier.value = const BaseState(isLoading: true);
 
     final state = await PhotoManager.requestPermissionExtend();
     if (state == PermissionState.authorized) {
@@ -57,11 +62,11 @@ class DrishyaRepository {
         );
       }
     } else {
-      albumsNotifier.value = BaseState(
+      albumsNotifier.value = const BaseState(
         hasError: true,
         error: 'Permission denied',
       );
-      entitiesNotifier.value = BaseState(
+      entitiesNotifier.value = const BaseState(
         hasError: true,
         error: 'Permission denied',
       );
@@ -84,7 +89,7 @@ class DrishyaRepository {
         );
       }
     } else {
-      entitiesNotifier.value = BaseState(
+      entitiesNotifier.value = const BaseState(
         hasError: true,
         error: 'Permission denied',
       );

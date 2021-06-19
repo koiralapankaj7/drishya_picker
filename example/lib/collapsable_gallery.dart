@@ -5,6 +5,10 @@ import 'grid_view_widget.dart';
 
 ///
 class CollapsableGallery extends StatefulWidget {
+  ///
+  const CollapsableGallery({
+    Key? key,
+  }) : super(key: key);
   @override
   _CollapsableGalleryState createState() => _CollapsableGalleryState();
 }
@@ -46,7 +50,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                       onCapture: (entity) {
                         notifier.value = [...notifier.value, entity];
                       },
-                      child: Icon(Icons.camera),
+                      child: const Icon(Icons.camera),
                     ),
                   ),
 
@@ -75,7 +79,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                         child: child,
                       );
                     },
-                    child: Icon(Icons.photo),
+                    child: const Icon(Icons.photo),
                   ),
 
                   //

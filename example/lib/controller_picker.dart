@@ -5,6 +5,11 @@ import 'grid_view_widget.dart';
 
 ///
 class ControllerPicker extends StatefulWidget {
+  ///
+  const ControllerPicker({
+    Key? key,
+  }) : super(key: key);
+
   @override
   _ControllerPickerState createState() => _ControllerPickerState();
 }

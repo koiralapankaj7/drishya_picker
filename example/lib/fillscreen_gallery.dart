@@ -5,6 +5,11 @@ import 'grid_view_widget.dart';
 
 ///
 class FullscreenGallery extends StatefulWidget {
+  ///
+  const FullscreenGallery({
+    Key? key,
+  }) : super(key: key);
+
   @override
   _FullscreenGalleryState createState() => _FullscreenGalleryState();
 }
@@ -45,7 +50,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                     onCapture: (entity) {
                       notifier.value = [...notifier.value, entity];
                     },
-                    child: Icon(Icons.camera),
+                    child: const Icon(Icons.camera),
                   ),
                 ),
 
@@ -74,7 +79,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                       child: child,
                     );
                   },
-                  child: Icon(Icons.photo),
+                  child: const Icon(Icons.photo),
                 ),
 
                 //

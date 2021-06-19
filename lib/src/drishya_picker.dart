@@ -8,10 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'camera/camera_view.dart';
-import 'gallery/drishya_controller_provider.dart';
-import 'gallery/entities.dart';
 import 'gallery/albums.dart';
 import 'gallery/buttons.dart';
+import 'gallery/drishya_controller_provider.dart';
+import 'gallery/entities.dart';
 import 'gallery/header.dart';
 import 'gallery/media_tile.dart';
 import 'gallery/permission_view.dart';
@@ -20,7 +20,7 @@ import 'slidable_panel/slidable_panel.dart';
 ///
 class DrishyaPicker extends StatefulWidget {
   ///
-  DrishyaPicker({
+  const DrishyaPicker({
     Key? key,
     this.child,
     this.controller,
@@ -97,7 +97,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
         controller: _controller,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final s = widget.panelSetting ?? PanelSetting();
+            final s = widget.panelSetting ?? const PanelSetting();
             final _panelMaxHeight =
                 (s.maxHeight ?? constraints.maxHeight) - (s.topMargin);
             final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
@@ -168,6 +168,7 @@ class GalleryView extends StatefulWidget {
   ///
   final DrishyaController? controller;
 
+  ///
   static const String name = 'GalleryView';
 
   @override
@@ -195,9 +196,9 @@ class _GalleryViewState extends State<GalleryView>
     _panelController = _controller.panelController;
 
     _dropdownNotifier = ValueNotifier<bool>(true);
-    _albumsNotifier = ValueNotifier(BaseState());
-    _albumNotifier = ValueNotifier(BaseState());
-    _entitiesNotifier = ValueNotifier(BaseState());
+    _albumsNotifier = ValueNotifier(const BaseState());
+    _albumNotifier = ValueNotifier(const BaseState());
+    _entitiesNotifier = ValueNotifier(const BaseState());
 
     _repository = DrishyaRepository(
       albumsNotifier: _albumsNotifier,
@@ -263,7 +264,7 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    var s = widget.panelSetting ?? PanelSetting();
+    var s = widget.panelSetting ?? const PanelSetting();
     final _panelMaxHeight =
         (s.maxHeight ?? MediaQuery.of(context).size.height) - (s.topMargin);
     final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
@@ -368,12 +369,10 @@ class _GalleryViewState extends State<GalleryView>
                                 onTap: () async {
                                   _controller._openCameraFromGallery(context);
                                 },
-                                child: Container(
-                                  child: Icon(
-                                    CupertinoIcons.camera,
-                                    color: Colors.lightBlue.shade300,
-                                    size: 26.0,
-                                  ),
+                                child: Icon(
+                                  CupertinoIcons.camera,
+                                  color: Colors.lightBlue.shade300,
+                                  size: 26.0,
                                 ),
                               );
                             }
@@ -451,7 +450,7 @@ class GalleryPicker extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  /// While picking drishya using gallery [removed] will be true if,
+  /// While picking drishya using gallery removed will be true if,
   /// previously selected drishya is unselected otherwise false.
   ///
   final void Function(AssetEntity entity, bool removed)? onChanged;
@@ -472,13 +471,12 @@ class GalleryPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        (context.drishyaController ?? DrishyaController())
-          .._openGallery(
-            onChanged,
-            onSubmitted,
-            setting,
-            context,
-          );
+        (context.drishyaController ?? DrishyaController())._openGallery(
+          onChanged,
+          onSubmitted,
+          setting,
+          context,
+        );
       },
       child: child,
     );
@@ -534,9 +532,10 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   void Function(List<AssetEntity> entities)? _onSubmitted;
 
   // Media setting
-  DrishyaSetting _setting = DrishyaSetting();
+  DrishyaSetting _setting = const DrishyaSetting();
   var _fullScreenMode = false;
 
+  ///
   bool get fullScreenMode => _fullScreenMode;
 
   // Selecting and unselecting entities
@@ -591,18 +590,26 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     value = const DrishyaValue();
   }
 
+  ///
+  void _closeOnCameraSelect() {
+    _panelController.closePanel();
+    _checkKeyboard.value = false;
+    value = const DrishyaValue();
+  }
+
   /// Open camera from [GalleryView]
   void _openCameraFromGallery(BuildContext context) async {
     AssetEntity? entity;
     if (_fullScreenMode) {
       final e = await Navigator.of(context).pushReplacement(
-        _route<AssetEntity?>(CameraView(), horizontal: true),
+        _route<AssetEntity?>(const CameraView(), horizontal: true),
       );
       entity = e;
     } else {
       final e = await Navigator.of(context).push(
-        _route<AssetEntity?>(CameraView(), horizontal: true),
+        _route<AssetEntity?>(const CameraView(), horizontal: true),
       );
+      _closeOnCameraSelect();
       entity = e;
     }
     if (entity != null) {
@@ -639,7 +646,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   /// Pick drishya from camera
   Future<AssetEntity?> pickFromCamera(BuildContext context) async {
     final entity = await Navigator.of(context).push(
-      _route<AssetEntity?>(CameraView(), name: CameraView.name),
+      _route<AssetEntity?>(const CameraView(), name: CameraView.name),
     );
     return entity;
   }
@@ -654,7 +661,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     }
     if (context.drishyaController == null) {
       _fullScreenMode = true;
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         _route<List<AssetEntity>?>(
           GalleryView(controller: this),
           name: GalleryView.name,
@@ -708,7 +715,7 @@ Route<T> _route<T>(
     pageBuilder: (context, animation, secondaryAnimation) => page,
     settings: RouteSettings(name: name),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var begin = horizontal ? Offset(1.0, 0.0) : Offset(0.0, 1.0);
+      var begin = horizontal ? const Offset(1.0, 0.0) : const Offset(0.0, 1.0);
       var end = Offset.zero;
       var curve = Curves.ease;
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));

@@ -176,7 +176,7 @@ class _SlidablePanelState extends State<SlidablePanel>
   @override
   void initState() {
     super.initState();
-    _setting = widget.setting ?? PanelSetting();
+    _setting = widget.setting ?? const PanelSetting();
 
     // Initialization of panel controller
     _panelController = (widget.controller ?? PanelController()).._init(this);

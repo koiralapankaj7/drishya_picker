@@ -39,10 +39,12 @@ class AlbumList extends StatelessWidget {
           if (!state.hasPermission) {
             return const PermissionRequest();
           }
-          return Center(
+          return Container(
+            alignment: Alignment.center,
+            color: Colors.black,
             child: Text(
               state.error ?? 'Something went wrong',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -51,8 +53,10 @@ class AlbumList extends StatelessWidget {
         }
 
         if (state.data?.isEmpty ?? true) {
-          return Center(
-            child: Text(
+          return Container(
+            alignment: Alignment.center,
+            color: Colors.black,
+            child: const Text(
               'No data',
               style: TextStyle(
                 color: Colors.white,

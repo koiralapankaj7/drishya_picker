@@ -9,7 +9,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+///
 class CameraAction extends StatefulWidget {
+  ///
   const CameraAction({
     Key? key,
     required this.controller,
@@ -22,13 +24,28 @@ class CameraAction extends StatefulWidget {
     this.inputTypeController,
   }) : super(key: key);
 
+  ///
   final CameraController controller;
+
+  ///
   final void Function(FlashMode mode)? onFalshIconPressed;
+
+  ///
   final void Function(CameraLensDirection direction)? onCameraRotatePressed;
+
+  ///
   final void Function()? onCaptureImagePressed;
+
+  ///
   final void Function()? onPreviewMediaPressed;
+
+  ///
   final void Function(_InputItem type)? onInputTypeChanged;
+
+  ///
   final void Function()? onPopRequest;
+
+  ///
   final InputTypeController? inputTypeController;
 
   @override
@@ -108,7 +125,7 @@ class _CameraActionState extends State<CameraAction> {
                   child: Container(
                     height: 60.0,
                     width: 60.0,
-                    padding: EdgeInsets.all(3.0),
+                    padding: const EdgeInsets.all(3.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(40.0),
                       border: Border.all(
@@ -121,9 +138,9 @@ class _CameraActionState extends State<CameraAction> {
                       child: Builder(builder: (context) {
                         switch (type) {
                           case InputType.selfi:
-                            return Icon(CupertinoIcons.person_fill);
+                            return const Icon(CupertinoIcons.person_fill);
                           case InputType.video:
-                            return Icon(Icons.circle);
+                            return const Icon(Icons.circle);
                           default:
                             return const SizedBox();
                         }
@@ -141,7 +158,7 @@ class _CameraActionState extends State<CameraAction> {
         // preview, input type page view and camera
         Container(
           height: 60.0,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
@@ -195,14 +212,17 @@ class _CameraActionState extends State<CameraAction> {
                     const SizedBox(height: 8.0),
 
                     //
-                    Container(
+                    SizedBox(
                       height: 12.0,
                       width: 20.0,
                       child: FittedBox(
                         fit: BoxFit.fill,
                         child: Transform.rotate(
                           angle: -pi / 2,
-                          child: Icon(CustomIcons.play, color: Colors.white),
+                          child: const Icon(
+                            CustomIcons.play,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -296,7 +316,7 @@ class __ItemsPageViewState extends State<_ItemsPageView> {
       },
       itemBuilder: (context, position) {
         final type = InputType.values[position];
-        double activePercent = 0.0;
+        var activePercent = 0.0;
         if (position == pageValue.floor()) {
           activePercent = 1 - (pageValue - position).clamp(0.0, 1.0);
         } else if (position == pageValue.floor() + 1) {
@@ -360,6 +380,7 @@ class _InputItem extends StatelessWidget {
   }
 }
 
+///
 class InputType {
   const InputType._internal(this.value, this.index);
 
@@ -388,7 +409,9 @@ class InputType {
   static List<InputType> get values => [text, normal, video, selfi];
 }
 
+///
 class InputTypeBuilder extends StatelessWidget {
+  ///
   const InputTypeBuilder({
     Key? key,
     required this.controller,
@@ -396,8 +419,13 @@ class InputTypeBuilder extends StatelessWidget {
     this.child,
   }) : super(key: key);
 
+  ///
   final InputTypeController controller;
+
+  ///
   final Widget Function(BuildContext, InputType, Widget?) builder;
+
+  ///
   final Widget? child;
 
   @override
@@ -410,7 +438,9 @@ class InputTypeBuilder extends StatelessWidget {
   }
 }
 
+///
 class InputTypeController extends ValueNotifier<InputType> {
+  ///
   InputTypeController({InputType? initialType})
       : super(initialType ?? InputType.normal);
 }

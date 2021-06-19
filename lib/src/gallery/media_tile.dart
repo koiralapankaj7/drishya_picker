@@ -6,7 +6,9 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../drishya_picker.dart';
 import '../drishya_picker.dart';
 
+///
 class MediaTile extends StatefulWidget {
+  ///
   const MediaTile({
     Key? key,
     required this.entity,
@@ -14,6 +16,7 @@ class MediaTile extends StatefulWidget {
     required this.onSelect,
   }) : super(key: key);
 
+  ///
   final DrishyaController drishyaController;
 
   ///
@@ -26,6 +29,7 @@ class MediaTile extends StatefulWidget {
   MediaTileState createState() => MediaTileState();
 }
 
+///
 class MediaTileState extends State<MediaTile>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;

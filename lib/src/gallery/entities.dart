@@ -4,7 +4,13 @@ import 'package:photo_manager/photo_manager.dart';
 /// Source of drishya
 /// [camera], [gallery]
 ///
-enum DrishyaSource { camera, gallery }
+enum DrishyaSource {
+  ///
+  camera,
+
+  ///
+  gallery,
+}
 
 ///
 /// Setting for drishya picker
