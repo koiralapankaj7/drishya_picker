@@ -250,7 +250,7 @@ class _GalleryViewState extends State<GalleryView>
       _panelController.isGestureEnabled = true;
     } else {
       if (_controller.fullScreenMode) {
-        Navigator.of(context).pop();
+        _controller._submit(context);
       } else {
         _panelController.minimizePanel();
       }
@@ -515,46 +515,61 @@ class CameraPicker extends StatelessWidget {
 ///
 class DrishyaController extends ValueNotifier<DrishyaValue> {
   ///
+  /// Drishya controller
   DrishyaController()
       : _panelController = PanelController(),
         _checkKeyboard = ValueNotifier(false),
         super(const DrishyaValue());
 
+  // Flag to handle updating controller value internally
+  var _internal = false;
+
+  // Panel controller
   final PanelController _panelController;
+
+  // Handling keyboard and collapsable gallery view
   final ValueNotifier<bool> _checkKeyboard;
+
+  // Completer for gallerry picker controller
   late Completer<List<AssetEntity>> _completer;
 
-  // When clearing all selected entities on changed need to notify current
-  // status of last selected asset
-  AssetEntity? _lastSelectedEntity;
+  // Flag for handling when user cleared all selected medias
+  var _clearedSelection = false;
 
+  // Gallery picker on changed event callback handler
   void Function(AssetEntity entity, bool removed)? _onChanged;
+
+  //  Gallery picker on submitted event callback handler
   void Function(List<AssetEntity> entities)? _onSubmitted;
 
   // Media setting
   DrishyaSetting _setting = const DrishyaSetting();
-  var _fullScreenMode = false;
 
-  ///
-  bool get fullScreenMode => _fullScreenMode;
+  // Full screen mode or collapsable mode
+  var _fullScreenMode = false;
 
   // Selecting and unselecting entities
   void _select(AssetEntity entity, BuildContext context) {
+    _clearedSelection = false;
     final selectedList = value.entities.toList();
     if (selectedList.contains(entity)) {
       selectedList.remove(entity);
       _onChanged?.call(entity, true);
     } else {
       if (reachedMaximumLimit) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Maximum selection limit reached!')),
-        );
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(
+              content: Text(
+            'Maximum selection limit of '
+            '${setting.maximum} has been reached!',
+          )));
         return;
       }
       selectedList.add(entity);
       _onChanged?.call(entity, false);
-      _lastSelectedEntity = entity;
     }
+    _internal = true;
     value = value.copyWith(
       entities: selectedList,
       previousSelection: false,
@@ -563,8 +578,9 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
 
   // Clear selected entities
   void _clearSelection() {
-    _onChanged?.call(_lastSelectedEntity!, true);
-    _onSubmitted?.call(value.entities);
+    _onSubmitted?.call([]);
+    _clearedSelection = true;
+    _internal = true;
     value = const DrishyaValue();
   }
 
@@ -574,26 +590,32 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
       Navigator.of(context).pop();
     } else {
       _panelController.closePanel();
-      _completer.complete(value.entities);
       _checkKeyboard.value = false;
     }
     _onSubmitted?.call(value.entities);
+    _completer.complete(value.entities);
+    _internal = true;
     value = const DrishyaValue();
   }
 
   // When panel closed without any selection
   void _cancel() {
     _panelController.closePanel();
-    _completer.complete(setting.selectedItems);
+    final entities = (_clearedSelection || value.entities.isEmpty)
+        ? <AssetEntity>[]
+        : setting.selectedItems;
+    _completer.complete(entities);
+    _onSubmitted?.call(entities);
     _checkKeyboard.value = false;
-    _onSubmitted?.call(setting.selectedItems);
+    _internal = true;
     value = const DrishyaValue();
   }
 
-  ///
+  /// Close collapsable panel if camera is selected from inside gallery view
   void _closeOnCameraSelect() {
     _panelController.closePanel();
     _checkKeyboard.value = false;
+    _internal = true;
     value = const DrishyaValue();
   }
 
@@ -643,7 +665,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     pickFromGallery(context, setting: setting);
   }
 
-  /// Pick drishya from camera
+  /// Pick drishya using camera
   Future<AssetEntity?> pickFromCamera(BuildContext context) async {
     final entity = await Navigator.of(context).push(
       _route<AssetEntity?>(const CameraView(), name: CameraView.name),
@@ -651,7 +673,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     return entity;
   }
 
-  /// Pick drishya from gallery
+  /// Pick drishya using gallery
   Future<List<AssetEntity>?> pickFromGallery(
     BuildContext context, {
     DrishyaSetting? setting,
@@ -659,6 +681,14 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     if (setting != null) {
       _setting = setting;
     }
+    if (_setting.selectedItems.isNotEmpty) {
+      _internal = true;
+      value = value.copyWith(
+        entities: _setting.selectedItems,
+        previousSelection: true,
+      );
+    }
+    _completer = Completer<List<AssetEntity>>();
     if (context.drishyaController == null) {
       _fullScreenMode = true;
       await Navigator.of(context).push(
@@ -667,19 +697,18 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
           name: GalleryView.name,
         ),
       );
+      if (value.entities.isEmpty) {
+        //
+      }
     } else {
       _fullScreenMode = false;
-      _completer = Completer<List<AssetEntity>>();
       _checkKeyboard.value = true;
-      if (_setting.selectedItems.isNotEmpty) {
-        value = value.copyWith(
-          entities: _setting.selectedItems,
-          previousSelection: true,
-        );
-      }
-      return _completer.future;
     }
+    return _completer.future;
   }
+
+  /// return true if drishya picker is in full screen mode,
+  bool get fullScreenMode => _fullScreenMode;
 
   /// Panel controller
   PanelController get panelController => _panelController;
@@ -687,12 +716,15 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   /// Media setting
   DrishyaSetting get setting => _setting;
 
-  ///
+  /// return true if selected media reached to maximum selection limit
   bool get reachedMaximumLimit => value.entities.length == setting.maximum;
 
   @override
   set value(DrishyaValue newValue) {
-    super.value = newValue;
+    if (_internal) {
+      super.value = newValue;
+      _internal = false;
+    }
   }
 
   @override

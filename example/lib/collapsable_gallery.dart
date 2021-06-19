@@ -15,6 +15,7 @@ class CollapsableGallery extends StatefulWidget {
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
   final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
+  final controller = DrishyaController();
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +25,34 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
         title: const Text('Pick using picker view'),
       ),
       body: DrishyaPicker(
+        controller: controller,
         child: Column(
           children: [
             // Grid view
             Expanded(child: GridViewWidget(notifier: notifier)),
+
+            //
+            Builder(builder: (context) {
+              return TextButton(
+                onPressed: () async {
+                  final entities = await controller.pickFromGallery(
+                    context,
+                    setting: DrishyaSetting(
+                      selectedItems: notifier.value,
+                      maximum: 10,
+                      albumSubtitle: 'Image only',
+                      requestType: RequestType.image,
+                    ),
+                  );
+                  notifier.value = entities ?? [];
+                },
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Colors.green,
+                ),
+                child: const Text('Use Controller'),
+              );
+            }),
 
             // Textfield
             Padding(

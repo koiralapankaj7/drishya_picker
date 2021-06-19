@@ -20,7 +20,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink,
+      backgroundColor: Colors.yellow,
       appBar: AppBar(
         title: const Text('Fullscreen gallery picker'),
       ),
@@ -28,6 +28,26 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
         children: [
           // Grid view
           Expanded(child: GridViewWidget(notifier: notifier)),
+
+          TextButton(
+            onPressed: () async {
+              final entities = await DrishyaController().pickFromGallery(
+                context,
+                setting: DrishyaSetting(
+                  selectedItems: notifier.value,
+                  maximum: 10,
+                  albumSubtitle: 'Image only',
+                  requestType: RequestType.image,
+                ),
+              );
+              notifier.value = entities ?? [];
+            },
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Use Controller'),
+          ),
 
           // Textfield
           Padding(
@@ -61,8 +81,8 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                     return GalleryPicker(
                       setting: DrishyaSetting(
                         selectedItems: list ?? [],
-                        maximum: 5,
-                        albumSubtitle: 'common',
+                        maximum: 10,
+                        albumSubtitle: 'Common',
                       ),
                       onChanged: (entity, isRemoved) {
                         final value = notifier.value.toList();
