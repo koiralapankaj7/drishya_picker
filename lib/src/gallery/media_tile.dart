@@ -111,32 +111,32 @@ class MediaTileState extends State<MediaTile>
                       ),
 
                     // Image selection overlay
-                    ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: drishyaController,
-                      builder: (context, value, child) {
-                        final isSelected =
-                            value.entities.contains(widget.entity);
-
-                        if (!isSelected) return const SizedBox();
-
-                        return Container(
-                          color: Colors.white54,
-                          child: Center(
-                            child: CircleAvatar(
-                              backgroundColor: Colors.blueAccent,
-                              radius: 14.0,
-                              child: Text(
-                                '${value.entities.indexOf(widget.entity) + 1}',
-                                style: const TextStyle(
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.w600,
+                    if (!drishyaController.singleSelection)
+                      ValueListenableBuilder<DrishyaValue>(
+                        valueListenable: drishyaController,
+                        builder: (context, value, child) {
+                          final isSelected =
+                              value.entities.contains(widget.entity);
+                          if (!isSelected) return const SizedBox();
+                          final index = value.entities.indexOf(widget.entity);
+                          return Container(
+                            color: Colors.white54,
+                            child: Center(
+                              child: CircleAvatar(
+                                backgroundColor: Colors.blueAccent,
+                                radius: 14.0,
+                                child: Text(
+                                  '${index + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      ),
 
                     //
                   ],

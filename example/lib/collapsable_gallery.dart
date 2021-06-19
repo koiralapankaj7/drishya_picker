@@ -39,7 +39,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                     context,
                     setting: DrishyaSetting(
                       selectedItems: notifier.value,
-                      maximum: 10,
+                      maximum: 1,
                       albumSubtitle: 'Image only',
                       requestType: RequestType.image,
                     ),

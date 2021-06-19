@@ -548,34 +548,6 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   // Full screen mode or collapsable mode
   var _fullScreenMode = false;
 
-  // Selecting and unselecting entities
-  void _select(AssetEntity entity, BuildContext context) {
-    _clearedSelection = false;
-    final selectedList = value.entities.toList();
-    if (selectedList.contains(entity)) {
-      selectedList.remove(entity);
-      _onChanged?.call(entity, true);
-    } else {
-      if (reachedMaximumLimit) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(
-              content: Text(
-            'Maximum selection limit of '
-            '${setting.maximum} has been reached!',
-          )));
-        return;
-      }
-      selectedList.add(entity);
-      _onChanged?.call(entity, false);
-    }
-    _internal = true;
-    value = value.copyWith(
-      entities: selectedList,
-      previousSelection: false,
-    );
-  }
-
   // Clear selected entities
   void _clearSelection() {
     _onSubmitted?.call([]);
@@ -584,16 +556,54 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     value = const DrishyaValue();
   }
 
+  // Selecting and unselecting entities
+  void _select(AssetEntity entity, BuildContext context) {
+    if (singleSelection) {
+      _handelSingleSelection(context, entity);
+    } else {
+      _clearedSelection = false;
+      final selectedList = value.entities.toList();
+      if (selectedList.contains(entity)) {
+        selectedList.remove(entity);
+        _onChanged?.call(entity, true);
+      } else {
+        if (reachedMaximumLimit) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(
+                content: Text(
+              'Maximum selection limit of '
+              '${setting.maximum} has been reached!',
+            )));
+          return;
+        }
+        selectedList.add(entity);
+        _onChanged?.call(entity, false);
+      }
+      _internal = true;
+      value = value.copyWith(
+        entities: selectedList,
+        previousSelection: false,
+      );
+    }
+  }
+
+  // Single selection handler
+  void _handelSingleSelection(BuildContext context, AssetEntity entity) {
+    _onChanged?.call(entity, false);
+    _submit(context, entities: [entity]);
+  }
+
   // When selection is completed
-  void _submit(BuildContext context) {
+  void _submit(BuildContext context, {List<AssetEntity>? entities}) {
     if (_fullScreenMode) {
       Navigator.of(context).pop();
     } else {
       _panelController.closePanel();
       _checkKeyboard.value = false;
     }
-    _onSubmitted?.call(value.entities);
-    _completer.complete(value.entities);
+    _onSubmitted?.call(entities ?? value.entities);
+    _completer.complete(entities ?? value.entities);
     _internal = true;
     value = const DrishyaValue();
   }
@@ -718,6 +728,9 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
 
   /// return true if selected media reached to maximum selection limit
   bool get reachedMaximumLimit => value.entities.length == setting.maximum;
+
+  ///
+  bool get singleSelection => setting.maximum == 1;
 
   @override
   set value(DrishyaValue newValue) {

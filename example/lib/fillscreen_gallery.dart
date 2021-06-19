@@ -81,7 +81,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                     return GalleryPicker(
                       setting: DrishyaSetting(
                         selectedItems: list ?? [],
-                        maximum: 10,
+                        maximum: 1,
                         albumSubtitle: 'Common',
                       ),
                       onChanged: (entity, isRemoved) {
