@@ -2,6 +2,9 @@
 
 Messanger like media picker
 
+!["Container transform gallery - normal speed and slow motion"](/assets/gif.gif)
+_Examples of the container transform:_
+
 <table>
   <tr>
     <td><img src="/assets/gif.gif" width="300" height="500"></td>
