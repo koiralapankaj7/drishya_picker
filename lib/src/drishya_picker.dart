@@ -591,7 +591,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   // Single selection handler
   void _handelSingleSelection(BuildContext context, AssetEntity entity) {
     _onChanged?.call(entity, false);
-    _submit(context, entities: [entity]);
+    _submit(context, entities: [...setting.selectedItems, entity]);
   }
 
   // When selection is completed
