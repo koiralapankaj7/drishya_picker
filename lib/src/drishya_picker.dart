@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/application/media_fetcher.dart';
@@ -113,7 +114,11 @@ class _DrishyaPickerState extends State<DrishyaPicker>
                     Expanded(
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: _panelController.isVisible ? _cancel : null,
+                        onTap: () {
+                          if (_panelController.isVisible) {
+                            _cancel();
+                          }
+                        },
                         child: widget.child ?? const SizedBox(),
                       ),
                     ),
@@ -555,16 +560,26 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   // When panel closed without any selection
   void _cancel() {
     _panelController.closePanel();
-    _completer.complete(<AssetEntity>[]);
+    _completer.complete(setting.selectedItems);
     _checkKeyboard.value = false;
-    _onSubmitted?.call(<AssetEntity>[]);
+    _onSubmitted?.call(setting.selectedItems);
     value = const DrishyaValue();
   }
 
+  /// Open camera from [GalleryView]
   void _openCameraFromGallery(BuildContext context) async {
-    final entity = await Navigator.of(context).pushReplacement(
-      _route<AssetEntity?>(CameraView(), horizontal: true),
-    );
+    AssetEntity? entity;
+    if (_fullScreenMode) {
+      final e = await Navigator.of(context).pushReplacement(
+        _route<AssetEntity?>(CameraView(), horizontal: true),
+      );
+      entity = e;
+    } else {
+      final e = await Navigator.of(context).push(
+        _route<AssetEntity?>(CameraView(), horizontal: true),
+      );
+      entity = e;
+    }
     if (entity != null) {
       _onChanged?.call(entity, false);
       _onSubmitted?.call([entity]);
@@ -572,6 +587,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     }
   }
 
+  /// Open camera from [CameraPicker]
   void _openCamera(
     final void Function(AssetEntity entity)? onCapture,
     BuildContext context,
@@ -582,7 +598,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     }
   }
 
-  ///
+  /// Open gallery from [GalleryPicker]
   void _openGallery(
     void Function(AssetEntity entity, bool removed)? onChanged,
     final void Function(List<AssetEntity> entities)? onSubmitted,
@@ -610,7 +626,6 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     if (setting != null) {
       _setting = setting;
     }
-    // If widget is not wrapped by drishya picker
     if (context.drishyaController == null) {
       _fullScreenMode = true;
       Navigator.of(context).push(
@@ -657,6 +672,7 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
   //
 }
 
+/// Camera and gallery route
 Route<T> _route<T>(
   Widget page, {
   bool horizontal = false,
