@@ -2,7 +2,7 @@
 
 Messanger like media picker
 
-<img src="/assets/gif.gif" width="300" height="500">
+<img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/gif.gif" width="300" height="500">
 
 <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/1.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/2.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/3.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/4.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/5.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankajgit/drishya_picker/main/assets/6.jpg" width="300" height="500">
     
