@@ -2,7 +2,7 @@
 
 Messanger like media picker
 
-!["Container transform gallery - normal speed and slow motion"](assets/gif.gif =300x500)
+!["Container transform gallery - normal speed and slow motion"](assets/gif.gif  | width=100)
 _Examples of the container transform:_
 
 <table>
