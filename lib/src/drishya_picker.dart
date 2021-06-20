@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/drishya_repository.dart';
+import 'package:drishya_picker/src/gallery/gallery_grid.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,8 +14,6 @@ import 'gallery/buttons.dart';
 import 'gallery/drishya_controller_provider.dart';
 import 'gallery/entities.dart';
 import 'gallery/header.dart';
-import 'gallery/media_tile.dart';
-import 'gallery/permission_view.dart';
 import 'slidable_panel/slidable_panel.dart';
 
 ///
@@ -273,7 +272,7 @@ class _GalleryViewState extends State<GalleryView>
     final albumListHeight = _panelMaxHeight - s.headerMaxHeight;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: _setting.overlayStyle,
       child: Scaffold(
         body: Stack(
           clipBehavior: Clip.none,
@@ -290,7 +289,7 @@ class _GalleryViewState extends State<GalleryView>
               onSelectionClear: _onSelectionClear,
             ),
 
-            // Gallery
+            // Body
             Column(
               children: [
                 // Space for header
@@ -316,81 +315,12 @@ class _GalleryViewState extends State<GalleryView>
 
                 // Gallery view
                 Expanded(
-                  child: Container(
-                    color: _setting.foregroundColor,
-                    child: ValueListenableBuilder<EntitiesType>(
-                      valueListenable: _entitiesNotifier,
-                      builder: (context, state, child) {
-                        // Loading state
-                        if (state.isLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-
-                        // Error
-                        if (state.hasError) {
-                          if (!state.hasPermission) {
-                            return const PermissionRequest();
-                          }
-                        }
-
-                        // No data
-                        if (state.data?.isEmpty ?? true) {
-                          return const Center(
-                            child: Text(
-                              'No media available',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          );
-                        }
-
-                        final entities = state.data!;
-
-                        return GridView.builder(
-                          controller: _panelController.scrollController,
-                          padding: const EdgeInsets.all(0.0),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 1.0,
-                            mainAxisSpacing: 1.0,
-                          ),
-                          itemCount: _controller.setting.enableCamera
-                              ? entities.length + 1
-                              : entities.length,
-                          itemBuilder: (context, index) {
-                            if (_controller.setting.enableCamera &&
-                                index == 0) {
-                              return InkWell(
-                                onTap: () async {
-                                  _controller._openCameraFromGallery(context);
-                                },
-                                child: Icon(
-                                  CupertinoIcons.camera,
-                                  color: Colors.lightBlue.shade300,
-                                  size: 26.0,
-                                ),
-                              );
-                            }
-                            final ind = _controller.setting.enableCamera
-                                ? index - 1
-                                : index;
-                            final entity = entities[ind];
-                            return MediaTile(
-                              drishyaController: _controller,
-                              entity: entity,
-                              onSelect: () {
-                                _controller._select(entity, context);
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
+                  child: GalleryGrid(
+                    controller: _controller,
+                    panelSetting: _setting,
+                    entitiesNotifier: _entitiesNotifier,
+                    onCameraPressed: _controller._openCameraFromGallery,
+                    onMediaSelect: _controller._select,
                   ),
                 ),
 

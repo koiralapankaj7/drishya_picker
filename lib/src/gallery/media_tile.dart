@@ -152,6 +152,17 @@ class MediaTileState extends State<MediaTile>
 }
 
 ///
+class Loader extends StatelessWidget {
+  ///
+  const Loader({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(color: Colors.grey.shade700);
+  }
+}
+
+///
 extension on int {
   String get formatedDuration {
     final duration = Duration(seconds: this);

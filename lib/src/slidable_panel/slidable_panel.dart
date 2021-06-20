@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
 
 ///
 enum SlidingState {
@@ -38,6 +39,7 @@ class PanelSetting {
     this.headerBackground = Colors.black,
     this.foregroundColor = Colors.black,
     this.backgroundColor = Colors.black,
+    this.overlayStyle = SystemUiOverlayStyle.light,
   }) : assert(
           snapingPoint >= 0.0 && snapingPoint <= 1.0,
           '[snapingPoint] value must be between 1.0 and 0.0',
@@ -87,6 +89,9 @@ class PanelSetting {
   ///
   /// Default: [Colors.black]
   final Color backgroundColor;
+
+  ///
+  final SystemUiOverlayStyle overlayStyle;
 
   /// Helper function
   PanelSetting copyWith({
