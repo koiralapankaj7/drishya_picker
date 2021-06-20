@@ -1,3 +1,4 @@
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:example/collapsable_gallery.dart';
 import 'package:example/fillscreen_gallery.dart';
 import 'package:flutter/material.dart';
@@ -35,40 +36,47 @@ class _Home extends StatelessWidget {
 class _PickerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-            onPressed: () {
-              Navigator.push<void>(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const FullscreenGallery()),
-              );
-            },
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.green,
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FullscreenGallery()),
+                );
+              },
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.green,
+              ),
+              child: const Text('Full screen mode'),
             ),
-            child: const Text('Full screen mode'),
-          ),
-          const SizedBox(height: 20.0),
-          TextButton(
-            onPressed: () {
-              Navigator.push<void>(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CollapsableGallery()),
-              );
-            },
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.green,
+            const SizedBox(height: 20.0),
+            TextButton(
+              onPressed: () {
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const CollapsableGallery()),
+                );
+              },
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.green,
+              ),
+              child: const Text('Collapsable mode'),
             ),
-            child: const Text('Collapsable mode'),
-          ),
-        ],
+            CircularProgressView(
+              progress: 0.5,
+              child: Center(child: Text('')),
+            ),
+          ],
+        ),
       ),
     );
   }
