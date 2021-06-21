@@ -1,7 +1,8 @@
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/camera/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/camera/widgets/camera_icon_button.dart';
 import 'package:drishya_picker/src/camera/widgets/camera_type_scroller.dart';
-import 'package:drishya_picker/src/camera/widgets/capture_button.dart';
+import 'package:drishya_picker/src/camera/widgets/capture_view.dart';
 import 'package:drishya_picker/src/camera/widgets/close_icon_button.dart';
 import 'package:drishya_picker/src/camera/widgets/flash_icon_button.dart';
 import 'package:drishya_picker/src/camera/widgets/gallery_preview.dart';
@@ -20,7 +21,10 @@ class CameraAction extends StatelessWidget {
     required this.onFlashChange,
     required this.cameraTypeNotifier,
     required this.onCameraRotate,
-    required this.onCapture,
+    required this.onImageCapture,
+    required this.videoDuration,
+    required this.onRecordingStart,
+    required this.onRecordingStop,
   }) : super(key: key);
 
   ///
@@ -36,88 +40,110 @@ class CameraAction extends StatelessWidget {
   final void Function(CameraLensDirection direction) onCameraRotate;
 
   ///
-  final void Function() onCapture;
+  final void Function() onImageCapture;
+
+  ///
+  final Duration videoDuration;
+
+  ///
+  final void Function() onRecordingStart;
+
+  ///
+  final void Function() onRecordingStop;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: MediaQuery.of(context).padding.top),
+    return CameraBuilder(
+      controller: controller,
+      builder: (context, value, child) {
+        return Column(
+          children: [
+            SizedBox(height: MediaQuery.of(context).padding.top),
 
-        // Close and flash
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Close button
-              const CloseIconButton(),
+            // Close and flash
+            if (!value.isRecordingVideo)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    // Close button
+                    const CloseIconButton(),
 
-              const Expanded(child: SizedBox()),
+                    const Expanded(child: SizedBox()),
 
-              // Flash button
-              FlashIconButton(
-                controller: controller,
-                onPressed: onFlashChange,
-                cameraTypeNotifier: cameraTypeNotifier,
-              ),
-            ],
-          ),
-        ),
-
-        // Expanded
-        const Expanded(child: SizedBox()),
-
-        // Capture button
-        CaptureButton(
-          onPressed: onCapture,
-          cameraTypeNotifier: cameraTypeNotifier,
-        ),
-
-        const SizedBox(height: 4.0),
-
-        // preview, input type page view and camera
-        Container(
-          height: 60.0,
-          decoration: const BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 12.0,
-                spreadRadius: 1.0,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Gallery preview
-              GalleryPreview(cameraTypeNotifier: cameraTypeNotifier),
-
-              // Margin
-              const SizedBox(width: 8.0),
-
-              // Camera type scroller
-              Expanded(
-                child: CameraTypeScroller(
-                  controller: controller,
-                  notifier: cameraTypeNotifier,
-                  rotateCamera: onCameraRotate,
+                    // Flash button
+                    FlashIconButton(
+                      controller: controller,
+                      onPressed: onFlashChange,
+                      cameraTypeNotifier: cameraTypeNotifier,
+                    ),
+                  ],
                 ),
               ),
 
-              // Switch camera
-              CameraIconButton(
-                controller: controller,
-                cameraTypeNotifier: cameraTypeNotifier,
-                onPressed: onCameraRotate,
+            // Expanded
+            const Expanded(child: SizedBox()),
+
+            // Capture button
+            CaptureView(
+              controller: controller,
+              cameraTypeNotifier: cameraTypeNotifier,
+              onImageCapture: onImageCapture,
+              videoDuration: videoDuration,
+              onRecordingStart: onRecordingStart,
+              onRecordingStop: onRecordingStop,
+            ),
+
+            const SizedBox(height: 4.0),
+
+            // preview, input type page view and camera
+            Container(
+              height: 60.0,
+              decoration: const BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 12.0,
+                    spreadRadius: 1.0,
+                  ),
+                ],
               ),
+              child: Row(
+                children: [
+                  if (!value.isRecordingVideo)
+                    // Gallery preview
+                    GalleryPreview(cameraTypeNotifier: cameraTypeNotifier),
 
-              //
-            ],
-          ),
-        ),
+                  // Margin
+                  const SizedBox(width: 8.0),
 
-        //
-      ],
+                  // Camera type scroller
+                  Expanded(
+                    child: value.isRecordingVideo
+                        ? const SizedBox()
+                        : CameraTypeScroller(
+                            controller: controller,
+                            notifier: cameraTypeNotifier,
+                            rotateCamera: onCameraRotate,
+                          ),
+                  ),
+
+                  // Switch camera
+                  CameraIconButton(
+                    controller: controller,
+                    cameraTypeNotifier: cameraTypeNotifier,
+                    onPressed: onCameraRotate,
+                  ),
+
+                  //
+                ],
+              ),
+            ),
+
+            //
+          ],
+        );
+      },
     );
   }
 }

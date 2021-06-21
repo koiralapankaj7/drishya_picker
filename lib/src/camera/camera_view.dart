@@ -157,7 +157,7 @@ class _CameraViewState extends State<CameraView>
 
     final cameraController = CameraController(
       description,
-      ResolutionPreset.veryHigh,
+      ResolutionPreset.medium,
       enableAudio: enableAudio,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
@@ -246,42 +246,6 @@ class _CameraViewState extends State<CameraView>
       await controller.startVideoRecording();
     } on CameraException catch (e) {
       _showErrorSnackbar(e);
-      return;
-    }
-  }
-
-  // Pause video recording
-  void _pauseVideoRecording() async {
-    final controller = cameraNotifier.value.controller;
-
-    if (cameraNotifier.value.initialized &&
-        controller!.value.isRecordingVideo) {
-      try {
-        await controller.pauseVideoRecording();
-      } on CameraException catch (e) {
-        _showErrorSnackbar(e);
-        rethrow;
-      }
-    } else {
-      _showSnackBar('Couldn\'t paused the video!');
-      return;
-    }
-  }
-
-  // Resume video recording
-  void _resumeVideoRecording() async {
-    final controller = cameraNotifier.value.controller;
-
-    if (cameraNotifier.value.initialized &&
-        controller!.value.isRecordingPaused) {
-      try {
-        await controller.resumeVideoRecording();
-      } on CameraException catch (e) {
-        _showErrorSnackbar(e);
-        rethrow;
-      }
-    } else {
-      _showSnackBar('Couldn\'t resume the video!');
       return;
     }
   }
@@ -405,7 +369,10 @@ class _CameraViewState extends State<CameraView>
                   cameraTypeNotifier: cameraTypeNotifier,
                   onFlashChange: _setFlashMode,
                   onCameraRotate: _switchCameraDirection,
-                  onCapture: _takePicture,
+                  onImageCapture: _takePicture,
+                  videoDuration: const Duration(seconds: 10),
+                  onRecordingStart: _startVideoRecording,
+                  onRecordingStop: _stopVideoRecording,
                 ),
               ],
             );
@@ -417,7 +384,41 @@ class _CameraViewState extends State<CameraView>
     );
   }
 
-  String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
+  // // Pause video recording
+  // void _pauseVideoRecording() async {
+  //   final controller = cameraNotifier.value.controller;
+
+  //   if (cameraNotifier.value.initialized &&
+  //       controller!.value.isRecordingVideo) {
+  //     try {
+  //       await controller.pauseVideoRecording();
+  //     } on CameraException catch (e) {
+  //       _showErrorSnackbar(e);
+  //       rethrow;
+  //     }
+  //   } else {
+  //     _showSnackBar('Couldn\'t paused the video!');
+  //     return;
+  //   }
+  // }
+
+  // // Resume video recording
+  // void _resumeVideoRecording() async {
+  //   final controller = cameraNotifier.value.controller;
+
+  //   if (cameraNotifier.value.initialized &&
+  //       controller!.value.isRecordingPaused) {
+  //     try {
+  //       await controller.resumeVideoRecording();
+  //     } on CameraException catch (e) {
+  //       _showErrorSnackbar(e);
+  //       rethrow;
+  //     }
+  //   } else {
+  //     _showSnackBar('Couldn\'t resume the video!');
+  //     return;
+  //   }
+  // }
 
   // // Set exposure mode
   // Future<void> _setExposureMode(ExposureMode mode) async {

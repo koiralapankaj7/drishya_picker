@@ -1,4 +1,3 @@
-import 'package:drishya_picker/drishya_picker.dart';
 import 'package:example/collapsable_gallery.dart';
 import 'package:example/fillscreen_gallery.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +36,7 @@ class _PickerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.cyan,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,10 +70,7 @@ class _PickerDemo extends StatelessWidget {
               ),
               child: const Text('Collapsable mode'),
             ),
-            CircularProgressView(
-              progress: 0.5,
-              child: Center(child: Text('')),
-            ),
+            const SizedBox(height: 20.0),
           ],
         ),
       ),
