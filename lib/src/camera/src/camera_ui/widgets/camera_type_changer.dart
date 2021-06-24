@@ -1,12 +1,10 @@
 import 'dart:math';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 import '../../entities/camera_type.dart';
 import '../../utils/custom_icons.dart';
 import '../builders/action_detector.dart';
-import '../builders/camera_action_provider.dart';
 
 ///
 class CameraTypeChanger extends StatelessWidget {
@@ -15,61 +13,57 @@ class CameraTypeChanger extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // Text scroller
-        Expanded(
-          child: ActionDetector(builder: (action, constraints) {
-            return _TypesPageView(
-              notifier: action.cameraType,
-              onChanged: (type) {
-                final action = context.action;
-                final canSwitch = action != null &&
-                    type == CameraType.selfi &&
-                    action.controller.description.lensDirection !=
-                        CameraLensDirection.front;
-                if (canSwitch) {
-                  action!.switchCameraDirection(CameraLensDirection.front);
-                }
-              },
-            );
-          }),
-        ),
+    return ActionBuilder(builder: (action, value, child) {
+      if (value.isRecordingVideo) {
+        return const SizedBox();
+      }
 
-        const SizedBox(height: 8.0),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Text scroller
+          Expanded(
+            child: _TypesPageView(
+              initialType: value.cameraType,
+              onChanged: action.changeCameraType,
+            ),
+          ),
 
-        //
-        SizedBox(
-          height: 12.0,
-          width: 20.0,
-          child: FittedBox(
-            fit: BoxFit.fill,
-            child: Transform.rotate(
-              angle: -pi / 2,
-              child: const Icon(
-                CustomIcons.play,
-                color: Colors.white,
+          const SizedBox(height: 8.0),
+
+          // Arrow indicator
+          SizedBox(
+            height: 12.0,
+            width: 20.0,
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: Transform.rotate(
+                angle: -pi / 2,
+                child: const Icon(
+                  CustomIcons.play,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
-        ),
 
-        //
-      ],
-    );
+          //
+        ],
+      );
+    });
   }
 }
 
 class _TypesPageView extends StatefulWidget {
   const _TypesPageView({
     Key? key,
-    required this.notifier,
+    required this.initialType,
     required this.onChanged,
   }) : super(key: key);
 
-  final ValueNotifier<CameraType> notifier;
   final void Function(CameraType type) onChanged;
+
+  final CameraType initialType;
 
   @override
   _TypesPageViewState createState() => _TypesPageViewState();
@@ -82,9 +76,9 @@ class _TypesPageViewState extends State<_TypesPageView> {
   @override
   void initState() {
     super.initState();
-    pageValue = widget.notifier.value.index.toDouble();
+    pageValue = widget.initialType.index.toDouble();
     pageController = PageController(
-      initialPage: widget.notifier.value.index,
+      initialPage: widget.initialType.index,
       viewportFraction: 0.25,
     )..addListener(() {
         setState(() {
@@ -101,7 +95,6 @@ class _TypesPageViewState extends State<_TypesPageView> {
       onPageChanged: (index) {
         final type = CameraType.values[index];
         widget.onChanged(type);
-        widget.notifier.value = type;
       },
       itemBuilder: (context, position) {
         final type = CameraType.values[position];

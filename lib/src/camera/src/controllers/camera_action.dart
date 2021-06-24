@@ -20,16 +20,12 @@ class CameraAction extends ValueNotifier<ActionValue> {
     required BuildContext context,
   })  : _controllerNotifier = controllerNotifier,
         _uiHandler = UIHandler(context),
-        cameraType = ValueNotifier(CameraType.normal),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
         super(ActionValue());
 
   final ControllerNotifier _controllerNotifier;
   final UIHandler _uiHandler;
-
-  ///
-  final ValueNotifier<CameraType> cameraType;
 
   ///
   final Zoom zoom;
@@ -55,10 +51,19 @@ class CameraAction extends ValueNotifier<ActionValue> {
 
   @override
   void dispose() {
-    cameraType.dispose();
     zoom.dispose();
     exposure.dispose();
     super.dispose();
+  }
+
+  ///
+  void changeCameraType(CameraType type) {
+    final canSwitch =
+        type == CameraType.selfi && lensDirection != CameraLensDirection.front;
+    if (canSwitch) {
+      switchCameraDirection(CameraLensDirection.front);
+    }
+    value = value.copyWith(cameraType: type);
   }
 
   /// Create new camera
@@ -341,6 +346,7 @@ class ActionValue {
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
+    this.cameraType = CameraType.normal,
     this.flashMode = FlashMode.off,
     this.resolutionPreset = ResolutionPreset.medium,
     this.imageFormatGroup = ImageFormatGroup.jpeg,
@@ -354,6 +360,9 @@ class ActionValue {
 
   ///
   final List<CameraDescription> cameras;
+
+  ///
+  final CameraType cameraType;
 
   ///
   final bool enableAudio;
@@ -380,6 +389,7 @@ class ActionValue {
   ActionValue copyWith({
     CameraDescription? cameraDescription,
     List<CameraDescription>? cameras,
+    CameraType? cameraType,
     bool? enableAudio,
     FlashMode? flashMode,
     bool? isTakingPicture,
@@ -389,6 +399,7 @@ class ActionValue {
     return ActionValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
       cameras: cameras ?? this.cameras,
+      cameraType: cameraType ?? this.cameraType,
       enableAudio: enableAudio ?? this.enableAudio,
       flashMode: flashMode ?? this.flashMode,
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../entities/camera_type.dart';
 import '../../utils/custom_icons.dart';
-import '../builders/camera_type_builder.dart';
+import '../builders/action_detector.dart';
 
 ///
 class FlashButton extends StatelessWidget {
@@ -14,9 +14,13 @@ class FlashButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CameraTypeBuilder(
-      builder: (action, type, child) {
-        if (type == CameraType.text || type == CameraType.selfi) {
+    return ActionBuilder(
+      builder: (action, value, child) {
+        if (value.cameraType == CameraType.text ||
+            (value.cameraType == CameraType.selfi &&
+                action.lensDirection != CameraLensDirection.back) ||
+            action.lensDirection != CameraLensDirection.back ||
+            value.isRecordingVideo) {
           return const SizedBox();
         }
         final isOn = action.value.flashMode != FlashMode.off;

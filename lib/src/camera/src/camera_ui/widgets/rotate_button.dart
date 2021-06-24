@@ -15,18 +15,20 @@ class RotateButton extends StatelessWidget {
       padding: const EdgeInsets.only(top: 10.0),
       width: 54.0,
       alignment: Alignment.center,
-      child: ActionDetector(
-        onPressed: (action) {
-          action.switchCameraDirection(action.oppositeLensDirection);
-        },
-        builder: (action, constraints) {
-          if (action.cameraType.value == CameraType.text) {
+      child: ActionBuilder(
+        builder: (action, value, child) {
+          if (value.isRecordingVideo || value.cameraType == CameraType.text) {
             return const SizedBox();
           }
 
-          return const Icon(
-            CustomIcons.cameraRotate,
-            color: Colors.white,
+          return GestureDetector(
+            onTap: () {
+              action.switchCameraDirection(action.oppositeLensDirection);
+            },
+            child: const Icon(
+              CustomIcons.cameraRotate,
+              color: Colors.white,
+            ),
           );
         },
       ),

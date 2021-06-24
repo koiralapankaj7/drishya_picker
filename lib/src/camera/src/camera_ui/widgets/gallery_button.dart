@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../entities/camera_type.dart';
-import '../builders/camera_type_builder.dart';
+import '../builders/action_detector.dart';
 
 ///
 class GalleryButton extends StatelessWidget {
@@ -16,9 +16,11 @@ class GalleryButton extends StatelessWidget {
       height: 54.0,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
-        child: CameraTypeBuilder(
-          builder: (action, type, child) {
-            if (type == CameraType.text) return const SizedBox();
+        child: ActionBuilder(
+          builder: (action, value, child) {
+            if (value.cameraType == CameraType.text || value.isRecordingVideo) {
+              return const SizedBox();
+            }
             return child!;
           },
           child: Container(color: Colors.white),

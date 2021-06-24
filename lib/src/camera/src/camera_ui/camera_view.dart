@@ -1,80 +1,50 @@
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/camera/src/controllers/camera_action.dart';
 import 'package:flutter/material.dart';
-
-import 'builders/action_detector.dart';
 
 ///
 class CameraView extends StatelessWidget {
   ///
-  const CameraView({Key? key}) : super(key: key);
+  const CameraView({
+    Key? key,
+    required this.action,
+  }) : super(key: key);
+
+  ///
+  final CameraAction action;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return ActionBuilder(
-        builder: (action, type, child) {
-          final size = constraints.biggest;
-          final scale =
-              1 / (action.controller.value.aspectRatio * size.aspectRatio);
+      final size = constraints.biggest;
+      final scale =
+          1 / (action.controller.value.aspectRatio * size.aspectRatio);
 
-          return ClipRect(
-            clipper: _Clipper(size),
-            child: Transform.scale(
-              scale: scale,
-              alignment: Alignment.topCenter,
-              child: Listener(
-                onPointerDown: action.zoom.addPointer,
-                onPointerUp: action.zoom.removePointer,
-                child: CameraPreview(
-                  action.controller,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints.expand(),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onScaleStart: action.zoom.initZoom,
-                      onScaleUpdate: action.zoom.startZooming,
-                      onTapDown: (details) => action.exposure
-                          .setExposureAndFocus(details, constraints),
-                    ),
-                  ),
+      return ClipRect(
+        clipper: _Clipper(size),
+        child: Transform.scale(
+          scale: scale,
+          alignment: Alignment.topCenter,
+          child: Listener(
+            onPointerDown: action.zoom.addPointer,
+            onPointerUp: action.zoom.removePointer,
+            child: CameraPreview(
+              action.controller,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onScaleStart: action.zoom.initZoom,
+                  onScaleUpdate: action.zoom.startZooming,
+                  onTapDown: (details) =>
+                      action.exposure.setExposureAndFocus(details, constraints),
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
       );
     });
-
-    // return ActionDetector(builder: (action, constraints) {
-    //   final size = constraints.biggest;
-    //   final scale =
-    //       1 / (action.controller.value.aspectRatio * size.aspectRatio);
-    //   return ClipRect(
-    //     clipper: _Clipper(size),
-    //     child: Transform.scale(
-    //       scale: scale,
-    //       alignment: Alignment.topCenter,
-    //       child: Listener(
-    //         onPointerDown: action.zoom.addPointer,
-    //         onPointerUp: action.zoom.removePointer,
-    //         child: CameraPreview(
-    //           action.controller,
-    //           child: ConstrainedBox(
-    //             constraints: const BoxConstraints.expand(),
-    //             child: GestureDetector(
-    //               behavior: HitTestBehavior.opaque,
-    //               onScaleStart: action.zoom.initZoom,
-    //               onScaleUpdate: action.zoom.startZooming,
-    //               onTapDown: (details) =>
-    //                   action.exposure.setExposureAndFocus
-    //(details, constraints),
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //   );
-    // });
   }
 }
 

@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../entities/camera_type.dart';
+import '../builders/action_detector.dart';
 import '../builders/camera_action_provider.dart';
-import '../builders/camera_type_builder.dart';
 
 ///
 class CaptureWithFilter extends StatelessWidget {
@@ -173,12 +173,12 @@ class _CaptureButtonState extends State<_CaptureButton>
                 ),
 
                 // Icon
-                CameraTypeBuilder(
-                  builder: (action, type, child) {
-                    _cameraType = type;
+                ActionBuilder(
+                  builder: (action, value, child) {
+                    _cameraType = value.cameraType;
                     return Builder(
                       builder: (context) {
-                        switch (type) {
+                        switch (_cameraType) {
                           case CameraType.selfi:
                             return const Icon(
                               CupertinoIcons.person_fill,

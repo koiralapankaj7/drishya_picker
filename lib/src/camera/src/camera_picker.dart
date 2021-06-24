@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
 import 'package:drishya_picker/src/widgets/slide_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'camera_ui/builders/camera_action_provider.dart';
-import 'camera_ui/builders/camera_type_builder.dart';
 import 'camera_ui/builders/controller_builder.dart';
 import 'camera_ui/camera_view.dart';
 import 'camera_ui/control_view.dart';
@@ -111,6 +111,7 @@ class _CameraPickerState extends State<CameraPicker>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: ControllerBuilder(
         controllerNotifier: _controllerNotifier,
         builder: (controller) {
@@ -119,13 +120,13 @@ class _CameraPickerState extends State<CameraPicker>
             child: Stack(
               children: [
                 // Camera type specific view
-                CameraTypeBuilder(
-                  builder: (action, type, child) {
-                    switch (type) {
+                ActionBuilder(
+                  builder: (action, value, child) {
+                    switch (_cameraAction.value.cameraType) {
                       case CameraType.text:
                         return const TextView();
                       default:
-                        return const CameraView();
+                        return CameraView(action: action);
                     }
                   },
                 ),
