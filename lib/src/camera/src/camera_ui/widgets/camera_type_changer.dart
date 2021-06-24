@@ -3,27 +3,15 @@ import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-import '../custom_icons.dart';
-import 'camera_type.dart';
+import '../../entities/camera_type.dart';
+import '../../utils/custom_icons.dart';
+import '../builders/action_detector.dart';
+import '../builders/camera_action_provider.dart';
 
 ///
-class CameraTypeScroller extends StatelessWidget {
+class CameraTypeChanger extends StatelessWidget {
   ///
-  const CameraTypeScroller({
-    Key? key,
-    required this.notifier,
-    required this.controller,
-    required this.rotateCamera,
-  }) : super(key: key);
-
-  ///
-  final ValueNotifier<CameraType> notifier;
-
-  ///
-  final CameraController controller;
-
-  ///
-  final void Function(CameraLensDirection direction) rotateCamera;
+  const CameraTypeChanger({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +20,21 @@ class CameraTypeScroller extends StatelessWidget {
       children: [
         // Text scroller
         Expanded(
-          child: _TypesPageView(
-            notifier: notifier,
-            onChanged: (type) {
-              if (type == CameraType.selfi &&
-                  controller.description.lensDirection !=
-                      CameraLensDirection.front) {
-                rotateCamera(CameraLensDirection.front);
-              }
-            },
-          ),
+          child: ActionDetector(builder: (action, constraints) {
+            return _TypesPageView(
+              notifier: action.cameraType,
+              onChanged: (type) {
+                final action = context.action;
+                final canSwitch = action != null &&
+                    type == CameraType.selfi &&
+                    action.controller.description.lensDirection !=
+                        CameraLensDirection.front;
+                if (canSwitch) {
+                  action!.switchCameraDirection(CameraLensDirection.front);
+                }
+              },
+            );
+          }),
         ),
 
         const SizedBox(height: 8.0),

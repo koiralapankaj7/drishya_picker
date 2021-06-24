@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 ///
 class CameraType {
   const CameraType._internal(this.value, this.index);
@@ -27,33 +25,4 @@ class CameraType {
 
   ///
   static List<CameraType> get values => [text, normal, video, selfi];
-}
-
-///
-class CameraTypeBuilder extends StatelessWidget {
-  ///
-  const CameraTypeBuilder({
-    Key? key,
-    required this.notifier,
-    required this.builder,
-    this.child,
-  }) : super(key: key);
-
-  ///
-  final ValueNotifier<CameraType> notifier;
-
-  ///
-  final Widget Function(BuildContext, CameraType, Widget?) builder;
-
-  ///
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<CameraType>(
-      valueListenable: notifier,
-      builder: builder,
-      child: child,
-    );
-  }
 }

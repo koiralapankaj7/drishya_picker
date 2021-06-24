@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'camera_type.dart';
+import '../../entities/camera_type.dart';
+import '../builders/camera_type_builder.dart';
 
 ///
-class GalleryPreview extends StatelessWidget {
+class GalleryButton extends StatelessWidget {
   ///
-  const GalleryPreview({
-    Key? key,
-    required this.cameraTypeNotifier,
-  }) : super(key: key);
-
-  ///
-  final ValueNotifier<CameraType> cameraTypeNotifier;
+  const GalleryButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +17,7 @@ class GalleryPreview extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: CameraTypeBuilder(
-          notifier: cameraTypeNotifier,
-          builder: (context, type, child) {
+          builder: (action, type, child) {
             if (type == CameraType.text) return const SizedBox();
             return child!;
           },

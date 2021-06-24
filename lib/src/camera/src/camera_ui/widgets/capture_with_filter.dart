@@ -1,38 +1,19 @@
 import 'dart:math';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'camera_type.dart';
+import '../../entities/camera_type.dart';
+import '../builders/camera_action_provider.dart';
+import '../builders/camera_type_builder.dart';
 
 ///
-class CaptureView extends StatelessWidget {
+class CaptureWithFilter extends StatelessWidget {
   ///
-  const CaptureView({
+  const CaptureWithFilter({
     Key? key,
-    required this.controller,
-    required this.cameraTypeNotifier,
-    required this.onImageCapture,
-    required this.onRecordingStart,
-    required this.onRecordingStop,
     required this.videoDuration,
   }) : super(key: key);
-
-  ///
-  final CameraController controller;
-
-  ///
-  final ValueNotifier<CameraType> cameraTypeNotifier;
-
-  ///
-  final void Function() onImageCapture;
-
-  ///
-  final void Function() onRecordingStart;
-
-  ///
-  final void Function() onRecordingStop;
 
   ///
   final Duration videoDuration;
@@ -42,13 +23,7 @@ class CaptureView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _CaptureButton(
-          cameraTypeNotifier: cameraTypeNotifier,
-          onImageCapture: onImageCapture,
-          onRecordingStart: onRecordingStart,
-          onRecordingStop: onRecordingStop,
-          videoDuration: videoDuration,
-        ),
+        _CaptureButton(videoDuration: videoDuration),
       ],
     );
   }
@@ -57,19 +32,11 @@ class CaptureView extends StatelessWidget {
 class _CaptureButton extends StatefulWidget {
   const _CaptureButton({
     Key? key,
-    required this.cameraTypeNotifier,
-    required this.onImageCapture,
-    required this.onRecordingStart,
-    required this.onRecordingStop,
     required this.videoDuration,
     this.size = 70.0,
   }) : super(key: key);
 
-  final ValueNotifier<CameraType> cameraTypeNotifier;
   final Duration videoDuration;
-  final void Function() onImageCapture;
-  final void Function() onRecordingStart;
-  final void Function() onRecordingStop;
   final double size;
 
   @override
@@ -120,7 +87,7 @@ class _CaptureButtonState extends State<_CaptureButton>
   }
 
   void _startRecording() {
-    widget.onRecordingStart();
+    context.action!.startVideoRecording();
     _pulseController.forward(from: 0.2);
     setState(() {
       strokeWidth = 3;
@@ -130,7 +97,7 @@ class _CaptureButtonState extends State<_CaptureButton>
   }
 
   void _stopRecording() {
-    widget.onRecordingStop();
+    context.action!.stopVideoRecording();
     _pulseController.reverse();
     _controller.reset();
     setState(() {
@@ -149,8 +116,8 @@ class _CaptureButtonState extends State<_CaptureButton>
   }
 
   void _cameraButtonPressed() {
+    context.action!.takePicture();
     _pulseController.forward(from: 0.2);
-    widget.onImageCapture();
   }
 
   bool get _isRecording => _controller.status == AnimationStatus.forward;
@@ -207,8 +174,7 @@ class _CaptureButtonState extends State<_CaptureButton>
 
                 // Icon
                 CameraTypeBuilder(
-                  notifier: widget.cameraTypeNotifier,
-                  builder: (context, type, child) {
+                  builder: (action, type, child) {
                     _cameraType = type;
                     return Builder(
                       builder: (context) {

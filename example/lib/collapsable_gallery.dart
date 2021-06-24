@@ -71,7 +71,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   // Camera field..
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: CameraPicker(
+                    child: CameraPickerField(
                       onCapture: (entity) {
                         notifier.value = [...notifier.value, entity];
                       },
@@ -83,7 +83,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   ValueListenableBuilder<List<AssetEntity>?>(
                     valueListenable: notifier,
                     builder: (context, list, child) {
-                      return GalleryPicker(
+                      return GalleryPickerField(
                         setting: DrishyaSetting(
                           selectedItems: list ?? [],
                           maximum: 5,

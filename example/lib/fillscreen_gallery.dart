@@ -66,7 +66,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 // Camera field..
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: CameraPicker(
+                  child: CameraPickerField(
                     onCapture: (entity) {
                       notifier.value = [...notifier.value, entity];
                     },
@@ -78,7 +78,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 ValueListenableBuilder<List<AssetEntity>?>(
                   valueListenable: notifier,
                   builder: (context, list, child) {
-                    return GalleryPicker(
+                    return GalleryPickerField(
                       setting: DrishyaSetting(
                         selectedItems: list ?? [],
                         maximum: 1,

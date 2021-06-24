@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../custom_icons.dart';
+import '../../utils/custom_icons.dart';
 
 ///
-class CloseIconButton extends StatelessWidget {
+class CloseButton extends StatelessWidget {
   ///
-  const CloseIconButton({Key? key}) : super(key: key);
+  const CloseButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

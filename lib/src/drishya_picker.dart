@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import 'camera/camera_view.dart';
+import 'camera/src/camera_picker.dart';
 import 'gallery/albums.dart';
 import 'gallery/buttons.dart';
 import 'gallery/drishya_controller_provider.dart';
@@ -134,7 +134,7 @@ class _DrishyaPickerState extends State<DrishyaPicker>
                 SlidablePanel(
                   setting: _setting,
                   controller: _panelController,
-                  child: GalleryView(
+                  child: GalleryPicker(
                     panelSetting: _setting,
                     controller: _controller,
                   ),
@@ -153,9 +153,9 @@ class _DrishyaPickerState extends State<DrishyaPicker>
 }
 
 ///
-class GalleryView extends StatefulWidget {
+class GalleryPicker extends StatefulWidget {
   ///
-  const GalleryView({
+  const GalleryPicker({
     Key? key,
     this.controller,
     this.panelSetting,
@@ -171,10 +171,10 @@ class GalleryView extends StatefulWidget {
   static const String name = 'GalleryView';
 
   @override
-  _GalleryViewState createState() => _GalleryViewState();
+  _GalleryPickerState createState() => _GalleryPickerState();
 }
 
-class _GalleryViewState extends State<GalleryView>
+class _GalleryPickerState extends State<GalleryPicker>
     with SingleTickerProviderStateMixin {
   late final PanelController _panelController;
   late final DrishyaController _controller;
@@ -369,9 +369,9 @@ class _GalleryViewState extends State<GalleryView>
 }
 
 /// Widget which pick media from gallery
-class GalleryPicker extends StatelessWidget {
+class GalleryPickerField extends StatelessWidget {
   ///
-  const GalleryPicker({
+  const GalleryPickerField({
     Key? key,
     this.onChanged,
     this.onSubmitted,
@@ -415,9 +415,9 @@ class GalleryPicker extends StatelessWidget {
 
 ///
 /// Widget to pick media using camera
-class CameraPicker extends StatelessWidget {
+class CameraPickerField extends StatelessWidget {
   ///
-  const CameraPicker({
+  const CameraPickerField({
     Key? key,
     this.onCapture,
     this.child,
@@ -559,17 +559,17 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
     value = const DrishyaValue();
   }
 
-  /// Open camera from [GalleryView]
+  /// Open camera from [GalleryPicker]
   void _openCameraFromGallery(BuildContext context) async {
     AssetEntity? entity;
     if (_fullScreenMode) {
       final e = await Navigator.of(context).pushReplacement(
-        _route<AssetEntity?>(const CameraView(), horizontal: true),
+        _route<AssetEntity?>(const CameraPicker(), horizontal: true),
       );
       entity = e;
     } else {
       final e = await Navigator.of(context).push(
-        _route<AssetEntity?>(const CameraView(), horizontal: true),
+        _route<AssetEntity?>(const CameraPicker(), horizontal: true),
       );
       _closeOnCameraSelect();
       entity = e;
@@ -607,9 +607,10 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
 
   /// Pick drishya using camera
   Future<AssetEntity?> pickFromCamera(BuildContext context) async {
-    final entity = await Navigator.of(context).push(
-      _route<AssetEntity?>(const CameraView(), name: CameraView.name),
-    );
+    final entity = CameraPicker.pick(context);
+    // await Navigator.of(context).push(
+    //   _route<AssetEntity?>(const CameraView(), name: CameraView.name),
+    // );
     return entity;
   }
 
@@ -633,8 +634,8 @@ class DrishyaController extends ValueNotifier<DrishyaValue> {
       _fullScreenMode = true;
       await Navigator.of(context).push(
         _route<List<AssetEntity>?>(
-          GalleryView(controller: this),
-          name: GalleryView.name,
+          GalleryPicker(controller: this),
+          name: GalleryPicker.name,
         ),
       );
       if (value.entities.isEmpty) {
