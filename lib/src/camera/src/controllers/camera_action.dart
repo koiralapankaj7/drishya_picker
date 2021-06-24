@@ -346,7 +346,7 @@ class ActionValue {
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
-    this.cameraType = CameraType.normal,
+    this.cameraType = CameraType.text,
     this.flashMode = FlashMode.off,
     this.resolutionPreset = ResolutionPreset.medium,
     this.imageFormatGroup = ImageFormatGroup.jpeg,

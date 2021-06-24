@@ -8,9 +8,9 @@ import '../builders/action_detector.dart';
 import '../builders/camera_action_provider.dart';
 
 ///
-class CaptureWithFilter extends StatelessWidget {
+class ShutterView extends StatelessWidget {
   ///
-  const CaptureWithFilter({
+  const ShutterView({
     Key? key,
     required this.videoDuration,
   }) : super(key: key);
@@ -23,14 +23,14 @@ class CaptureWithFilter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _CaptureButton(videoDuration: videoDuration),
+        _ShutterButton(videoDuration: videoDuration),
       ],
     );
   }
 }
 
-class _CaptureButton extends StatefulWidget {
-  const _CaptureButton({
+class _ShutterButton extends StatefulWidget {
+  const _ShutterButton({
     Key? key,
     required this.videoDuration,
     this.size = 70.0,
@@ -40,10 +40,10 @@ class _CaptureButton extends StatefulWidget {
   final double size;
 
   @override
-  _CaptureButtonState createState() => _CaptureButtonState();
+  _ShutterButtonState createState() => _ShutterButtonState();
 }
 
-class _CaptureButtonState extends State<_CaptureButton>
+class _ShutterButtonState extends State<_ShutterButton>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _pulseController;

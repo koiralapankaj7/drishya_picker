@@ -6,6 +6,7 @@ import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector
 import 'package:drishya_picker/src/widgets/slide_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'camera_ui/builders/camera_action_provider.dart';
@@ -110,33 +111,48 @@ class _CameraPickerState extends State<CameraPicker>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: ControllerBuilder(
-        controllerNotifier: _controllerNotifier,
-        builder: (controller) {
-          return CameraActionProvider(
-            action: _cameraAction,
-            child: Stack(
-              children: [
-                // Camera type specific view
-                ActionBuilder(
-                  builder: (action, value, child) {
-                    switch (_cameraAction.value.cameraType) {
-                      case CameraType.text:
-                        return const TextView();
-                      default:
-                        return CameraView(action: action);
-                    }
-                  },
-                ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: ControllerBuilder(
+          controllerNotifier: _controllerNotifier,
+          builder: (controller) {
+            return CameraActionProvider(
+              action: _cameraAction,
+              child: Stack(
+                children: [
+                  // Camera type specific view
 
-                // Camera control view
-                const ControlView(videoDuration: Duration(seconds: 10)),
-              ],
-            ),
-          );
-        },
+                  ActionBuilder(
+                    builder: (action, value, child) {
+                      // return AnimatedCrossFade(
+                      //   firstChild: const TextView(),
+                      //   secondChild: CameraView(action: action),
+                      //   crossFadeState: value.cameraType == CameraType.text
+                      //       ? CrossFadeState.showFirst
+                      //       : CrossFadeState.showSecond,
+                      //   duration: const Duration(milliseconds: 400),
+                      // );
+
+                      switch (_cameraAction.value.cameraType) {
+                        case CameraType.text:
+                          return const TextView();
+                        default:
+                          return CameraView(action: action);
+                      }
+                    },
+                  ),
+
+                  // Camera control view
+                  const ControlView(videoDuration: Duration(seconds: 10)),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
