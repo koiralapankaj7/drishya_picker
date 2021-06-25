@@ -57,6 +57,11 @@ class CameraAction extends ValueNotifier<ActionValue> {
   }
 
   ///
+  void changeCameraTypeSliderVisibility(bool status) {
+    value = value.copyWith(enableCameraTypeSlider: status);
+  }
+
+  ///
   void changeCameraType(CameraType type) {
     final canSwitch =
         type == CameraType.selfi && lensDirection != CameraLensDirection.front;
@@ -353,6 +358,7 @@ class ActionValue {
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
+    this.enableCameraTypeSlider = true,
   });
 
   ///
@@ -386,6 +392,9 @@ class ActionValue {
   final bool isRecordingPaused;
 
   ///
+  final bool enableCameraTypeSlider;
+
+  ///
   ActionValue copyWith({
     CameraDescription? cameraDescription,
     List<CameraDescription>? cameras,
@@ -395,6 +404,7 @@ class ActionValue {
     bool? isTakingPicture,
     bool? isRecordingVideo,
     bool? isRecordingPaused,
+    bool? enableCameraTypeSlider,
   }) {
     return ActionValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
@@ -405,6 +415,8 @@ class ActionValue {
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
+      enableCameraTypeSlider:
+          enableCameraTypeSlider ?? this.enableCameraTypeSlider,
     );
   }
 }
