@@ -12,7 +12,7 @@ class CloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionBuilder(
       builder: (action, value, child) {
-        if (value.hasFocus) return const SizedBox();
+        if (action.hideCloseButton) return const SizedBox();
 
         return child!;
       },

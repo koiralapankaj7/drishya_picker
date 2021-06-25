@@ -1,5 +1,4 @@
 import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
-import 'package:drishya_picker/src/camera/src/entities/camera_type.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -34,7 +33,7 @@ class GradientBackgroundChanger extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionBuilder(
       builder: (action, value, child) {
-        if (value.cameraType != CameraType.text) {
+        if (action.hideBackgroundChangerButton) {
           return const SizedBox();
         }
         return GestureDetector(

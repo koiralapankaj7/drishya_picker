@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../entities/camera_type.dart';
 import '../../utils/custom_icons.dart';
 import '../builders/action_detector.dart';
 
@@ -17,7 +16,7 @@ class RotateButton extends StatelessWidget {
       alignment: Alignment.center,
       child: ActionBuilder(
         builder: (action, value, child) {
-          if (value.isRecordingVideo || value.cameraType == CameraType.text) {
+          if (action.hideCameraRotationButton) {
             return const SizedBox();
           }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../entities/camera_type.dart';
 import '../builders/action_detector.dart';
 
 ///
@@ -18,7 +17,7 @@ class GalleryButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         child: ActionBuilder(
           builder: (action, value, child) {
-            if (value.cameraType == CameraType.text || value.isRecordingVideo) {
+            if (action.hideGalleryPreviewButton) {
               return const SizedBox();
             }
             return child!;

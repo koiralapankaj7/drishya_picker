@@ -1,55 +1,66 @@
+import 'dart:developer';
+
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_value.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/draggable_resizable.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/entities/photo_asset.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+///
+typedef UuidGetter = String Function();
 
 ///
 class StickerboothController extends ValueNotifier<StickerboothValue> {
   ///
-  StickerboothController() : super(const StickerboothValue());
+  StickerboothController([UuidGetter? uuid])
+      : uuid = uuid ?? const Uuid().v4,
+        super(const StickerboothValue());
+
+  ///
+  final UuidGetter uuid;
 
   /// sticker tapped
-  void addSticker(Asset sticker) {
-    final newSticker = PhotoAsset(id: '1', asset: sticker);
-    final list = List.of(value.stickers)..add(newSticker);
+  void addSticker(Sticker sticker) {
+    final assets = StickerAsset(id: uuid(), sticker: sticker);
     value = value.copyWith(
-      stickers: list,
-      selectedAssetId: newSticker.id,
+      assets: List.of(value.assets)..add(assets),
+      selectedAssetId: assets.id,
     );
   }
 
   /// sticker dragged
   void dragSticker({
-    required PhotoAsset sticker,
+    required StickerAsset asset,
     required DragUpdate update,
   }) {
-    final asset = sticker;
-    final stickers = List.of(value.stickers);
-    final index = stickers.indexWhere((element) => element.id == asset.id);
-    final removedSticker = stickers.removeAt(index);
-    stickers.add(
-      removedSticker.copyWith(
-        angle: update.angle,
-        position: PhotoAssetPosition(
-          dx: update.position.dx,
-          dy: update.position.dy,
+    Future.delayed(const Duration(milliseconds: 16), () {
+      final assets = List.of(value.assets);
+      final index = assets.indexWhere((element) => element.id == asset.id);
+      final sticker = assets.removeAt(index);
+      assets.add(
+        sticker.copyWith(
+          angle: update.angle,
+          position: StickerPosition(
+            dx: update.position.dx,
+            dy: update.position.dy,
+          ),
+          size: StickerSize(
+            width: update.size.width,
+            height: update.size.height,
+          ),
+          constraint: StickerConstraint(
+            width: update.constraints.width,
+            height: update.constraints.height,
+          ),
         ),
-        size: PhotoAssetSize(
-          width: update.size.width,
-          height: update.size.height,
-        ),
-        constraint: PhotoConstraint(
-          width: update.constraints.width,
-          height: update.constraints.height,
-        ),
-      ),
-    );
-    value = value.copyWith(stickers: stickers, selectedAssetId: asset.id);
+      );
+      value = value.copyWith(assets: assets, selectedAssetId: asset.id);
+    });
   }
 
   /// remove selected sticker
   void deleteSticker() {
-    final stickers = List.of(value.stickers);
+    final stickers = List.of(value.assets);
     final index = stickers.indexWhere(
       (element) => element.id == value.selectedAssetId,
     );
@@ -58,7 +69,7 @@ class StickerboothController extends ValueNotifier<StickerboothValue> {
       stickers.removeAt(index);
     }
     value = value.copyWith(
-      stickers: stickers,
+      assets: stickers,
       selectedAssetId: emptyAssetId,
     );
   }

@@ -1,4 +1,4 @@
-import 'package:drishya_picker/src/draggable_resizable/src/entities/photo_asset.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 
 ///
 const emptyAssetId = '';
@@ -8,33 +8,15 @@ class StickerboothValue {
   ///
   const StickerboothValue({
     this.aspectRatio = 3 / 4,
-    this.stickers = const <PhotoAsset>[],
+    this.assets = const <StickerAsset>[],
     this.selectedAssetId = emptyAssetId,
-    this.imageId = '',
   });
-
-  // bool get isDashSelected => characters.containsAsset(named: 'dash');
-
-  // bool get isAndroidSelected => characters.containsAsset(named: 'android');
-
-  // bool get isSparkySelected => characters.containsAsset(named: 'sparky');
-
-  // bool get isDinoSelected => characters.containsAsset(named: 'dino');
-
-  // ///
-  // bool get isAnyCharacterSelected => characters.isNotEmpty;
-
-  // ///
-  // List<PhotoAsset> get assets => characters + stickers;
 
   ///
   final double aspectRatio;
 
   ///
-  final String imageId;
-
-  ///
-  final List<PhotoAsset> stickers;
+  final List<StickerAsset> assets;
 
   ///
   final String selectedAssetId;
@@ -42,24 +24,21 @@ class StickerboothValue {
   ///
   StickerboothValue copyWith({
     double? aspectRatio,
-    String? imageId,
-    List<PhotoAsset>? characters,
-    List<PhotoAsset>? stickers,
+    List<StickerAsset>? assets,
     String? selectedAssetId,
   }) {
     return StickerboothValue(
       aspectRatio: aspectRatio ?? this.aspectRatio,
-      imageId: imageId ?? this.imageId,
-      stickers: stickers ?? this.stickers,
+      assets: assets ?? this.assets,
       selectedAssetId: selectedAssetId ?? this.selectedAssetId,
     );
   }
 }
 
 ///
-extension PhotoAssetsX on List<PhotoAsset> {
+extension PhotoAssetsX on List<StickerAsset> {
   ///
   bool containsAsset({required String named}) {
-    return indexWhere((e) => e.asset.name == named) != -1;
+    return indexWhere((e) => e.sticker.name == named) != -1;
   }
 }

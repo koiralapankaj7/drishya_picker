@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/src/camera/src/entities/gradient_color.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
@@ -23,6 +25,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
         _uiHandler = UIHandler(context),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
+        stickerController = StickerboothController(),
         super(ActionValue());
 
   final ControllerNotifier _controllerNotifier;
@@ -33,6 +36,9 @@ class CameraAction extends ValueNotifier<ActionValue> {
 
   ///
   final Exposure exposure;
+
+  ///
+  final StickerboothController stickerController;
 
   ///
   bool get initialized => _controllerNotifier.initialized;
@@ -50,11 +56,58 @@ class CameraAction extends ValueNotifier<ActionValue> {
           ? CameraLensDirection.front
           : CameraLensDirection.back;
 
+  /// Hide close button on textfield has focus or while editing stickers
+  bool get hideCloseButton =>
+      value.hasFocus || value.editingMode || value.isRecordingVideo;
+
+  /// Hive gradient background changer button
+  bool get hideBackgroundChangerButton =>
+      value.editingMode || value.cameraType != CameraType.text;
+
+  /// Hide flash button
+  bool get hideFlashButton =>
+      value.cameraType == CameraType.text ||
+      (value.cameraType == CameraType.selfi &&
+          lensDirection != CameraLensDirection.back) ||
+      lensDirection != CameraLensDirection.back ||
+      value.isRecordingVideo;
+
+  /// Hide sticker's editing button's
+  bool get hideStickerEditingButton =>
+      value.editingMode || value.cameraType != CameraType.text;
+
+  /// Hive shutter view on Textview
+  bool get hideShutterView => value.cameraType == CameraType.text;
+
+  /// Hide camera type slider view
+  bool get hideCameraTypeScroller =>
+      value.hasFocus || value.editingMode || value.isRecordingVideo;
+
+  /// Hide gallery preview button
+  bool get hideGalleryPreviewButton =>
+      value.cameraType == CameraType.text || value.isRecordingVideo;
+
+  /// Hide gallery preview button
+  bool get hideCameraRotationButton =>
+      value.cameraType == CameraType.text || value.isRecordingVideo;
+
+  /// Show sticker delete popup
+  bool get showStickerDeletePopup => value.editingMode;
+
+  /// Show screenshot capture view on Textview
+  bool get showScreenshotCaptureView => value.stickers.isNotEmpty;
+
   @override
   void dispose() {
     zoom.dispose();
     exposure.dispose();
+    stickerController.dispose();
     super.dispose();
+  }
+
+  /// Change Textview editing mode
+  void changeEditingStatus(bool isEditing) {
+    value = value.copyWith(editingMode: isEditing);
   }
 
   /// Change text field focus from Textview
@@ -369,6 +422,8 @@ class ActionValue {
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
     this.hasFocus = false,
+    this.editingMode = false,
+    this.stickers = const [],
     GradientColor? background,
   }) : background = background ?? gradients[0];
 
@@ -406,6 +461,12 @@ class ActionValue {
   final bool hasFocus;
 
   ///
+  final bool editingMode;
+
+  ///
+  final List<StickerAsset> stickers;
+
+  ///
   final GradientColor background;
 
   ///
@@ -419,6 +480,8 @@ class ActionValue {
     bool? isRecordingVideo,
     bool? isRecordingPaused,
     bool? hasFocus,
+    bool? editingMode,
+    List<StickerAsset>? stickers,
     GradientColor? background,
   }) {
     return ActionValue(
@@ -431,6 +494,8 @@ class ActionValue {
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       hasFocus: hasFocus ?? this.hasFocus,
+      editingMode: editingMode ?? this.editingMode,
+      stickers: stickers ?? this.stickers,
       background: background ?? this.background,
     );
   }

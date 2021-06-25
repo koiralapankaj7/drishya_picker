@@ -20,11 +20,19 @@ class ShutterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _ShutterButton(videoDuration: videoDuration),
-      ],
+    return ActionBuilder(
+      builder: (action, value, child) {
+        if (action.hideShutterView) {
+          return const SizedBox();
+        }
+        return child!;
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _ShutterButton(videoDuration: videoDuration),
+        ],
+      ),
     );
   }
 }
@@ -131,83 +139,75 @@ class _ShutterButtonState extends State<_ShutterButton>
 
   @override
   Widget build(BuildContext context) {
-    return ActionBuilder(
-      builder: (action, value, child) {
-        if (value.cameraType == CameraType.text) {
-          return const SizedBox();
-        }
-
-        return SizedBox(
-          height: widget.size,
-          width: widget.size,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: EdgeInsets.all(margin),
-            child: AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: _CustomPainter(
-                    progress: _animation.value,
-                    strokeWidth: strokeWidth,
-                  ),
-                  child: child,
-                );
-              },
-              child: GestureDetector(
-                onTap: () {
-                  _cameraType == CameraType.video
-                      ? _videoButtonPressed()
-                      : _cameraButtonPressed();
-                },
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Background
-                    Container(
-                      margin: const EdgeInsets.all(7.0),
-                      decoration: const BoxDecoration(
-                        color: Colors.white70,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-
-                    // Pulse animation
-                    _Pulse(
-                      controller: _pulseController,
-                      size: widget.size - strokeWidth - margin - 4,
-                    ),
-
-                    // Icon
-                    ActionBuilder(
-                      builder: (action, value, child) {
-                        _cameraType = value.cameraType;
-                        return Builder(
-                          builder: (context) {
-                            switch (_cameraType) {
-                              case CameraType.selfi:
-                                return const Icon(
-                                  CupertinoIcons.person_fill,
-                                  color: Colors.blue,
-                                );
-                              case CameraType.video:
-                                return _VideoIcon(radius: _videoIconRadius);
-                              default:
-                                return const SizedBox();
-                            }
-                          },
-                        );
-                      },
-                    ),
-
-                    //
-                  ],
-                ),
+    return SizedBox(
+      height: widget.size,
+      width: widget.size,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: EdgeInsets.all(margin),
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return CustomPaint(
+              painter: _CustomPainter(
+                progress: _animation.value,
+                strokeWidth: strokeWidth,
               ),
+              child: child,
+            );
+          },
+          child: GestureDetector(
+            onTap: () {
+              _cameraType == CameraType.video
+                  ? _videoButtonPressed()
+                  : _cameraButtonPressed();
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background
+                Container(
+                  margin: const EdgeInsets.all(7.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.white70,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+
+                // Pulse animation
+                _Pulse(
+                  controller: _pulseController,
+                  size: widget.size - strokeWidth - margin - 4,
+                ),
+
+                // Icon
+                ActionBuilder(
+                  builder: (action, value, child) {
+                    _cameraType = value.cameraType;
+                    return Builder(
+                      builder: (context) {
+                        switch (_cameraType) {
+                          case CameraType.selfi:
+                            return const Icon(
+                              CupertinoIcons.person_fill,
+                              color: Colors.blue,
+                            );
+                          case CameraType.video:
+                            return _VideoIcon(radius: _videoIconRadius);
+                          default:
+                            return const SizedBox();
+                        }
+                      },
+                    );
+                  },
+                ),
+
+                //
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

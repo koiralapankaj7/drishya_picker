@@ -1,12 +1,14 @@
+import 'dart:developer';
+
+import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
 import 'package:drishya_picker/src/camera/src/camera_ui/widgets/gradient_background.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_value.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/draggable_resizable.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/entities/photo_asset.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-const _initialStickerScale = 0.25;
+// const _initialStickerScale = 0.25;
 const _minStickerScale = 0.05;
 
 ///
@@ -21,40 +23,16 @@ class TextView extends StatefulWidget {
 }
 
 class _TextViewState extends State<TextView> {
-  final _key = GlobalKey();
-
-  late final StickerboothController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = StickerboothController();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
-        children: [
+        children: const [
           // background
-          const GradientBackground(),
+          GradientBackground(),
 
-          _Stickers(controller: controller),
-
-          // Align(
-          //   alignment: Alignment.topCenter,
-          //   child: FloatingActionButton(
-          //     onPressed: () {
-          //       controller.addSticker(Asset(
-          //         name: 'Demo',
-          //         path: 'https://img.icons8.com/color/480/dart.png',
-          //         size: Size(100.0, 100.0),
-          //       ));
-          //     },
-          //     child: Icon(Icons.add),
-          //   ),
-          // ),
+          _Stickers(),
 
           //
         ],
@@ -63,74 +41,153 @@ class _TextViewState extends State<TextView> {
   }
 }
 
-extension on PhotoAsset {
-  BoxConstraints getImageConstraints() {
-    return BoxConstraints(
-      minWidth: asset.size.width * _minStickerScale,
-      minHeight: asset.size.height * _minStickerScale,
-      maxWidth: double.infinity,
-      maxHeight: double.infinity,
+class _Stickers extends StatefulWidget {
+  const _Stickers({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  __StickersState createState() => __StickersState();
+}
+
+class __StickersState extends State<_Stickers> {
+  final _deleteKey = GlobalKey();
+
+  var _collied = false;
+
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    // if (!_collied) {
+    final deleteBox =
+        _deleteKey.currentContext?.findRenderObject() as RenderBox?;
+    // final stickerBox = key.currentContext?.findRenderObject() as RenderBox?;
+
+    if (deleteBox != null) {
+      final deleteSize = deleteBox.size;
+
+      final deletePos = deleteBox.localToGlobal(Offset.zero);
+
+      final stickerPos = details.focalPoint;
+
+      final collide = (deletePos.dx < stickerPos.dx &&
+          deletePos.dx + deleteSize.width > stickerPos.dx &&
+          deletePos.dy < stickerPos.dy &&
+          deletePos.dy + deleteSize.height > stickerPos.dy);
+
+      setState(() {
+        _collied = collide;
+      });
+
+      // if (collide) {
+      //   log('Asset offset : ${stickerPos.dx} : ${stickerPos.dy}');
+      //   log('.');
+      //   log('Delete offset : ${deletePos.dx} : ${deletePos.dy}');
+      // }
+    }
+    // }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionBuilder(
+      builder: (action, value, child) {
+        return ValueListenableBuilder<StickerboothValue>(
+          valueListenable: action.stickerController,
+          builder: (context, stickerValue, child) {
+            if (stickerValue.assets.isEmpty) return const SizedBox();
+            return Center(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Positioned.fill(
+                        child: GestureDetector(
+                          onTap: action.stickerController.outsideTapped,
+                        ),
+                      ),
+
+                      // Stickers
+                      for (final asset in stickerValue.assets)
+                        DraggableResizable(
+                          key: Key(asset.id),
+                          canTransform:
+                              asset.id == stickerValue.selectedAssetId,
+                          onStart: () {
+                            action.changeEditingStatus(true);
+                          },
+                          onEnd: () {
+                            Future.delayed(const Duration(milliseconds: 50),
+                                () {
+                              if (_collied) {
+                                action.stickerController.deleteSticker();
+                              }
+                              action.changeEditingStatus(false);
+                              _collied = false;
+                            });
+                          },
+                          onUpdate: (update, key) {
+                            action.stickerController
+                                .dragSticker(asset: asset, update: update);
+                          },
+                          onScaleUpdate: _onScaleUpdate,
+                          size: asset.sticker.size,
+                          constraints: asset.getImageConstraints(),
+                          child: Opacity(
+                            opacity: _collied ? 0.3 : 1.0,
+                            child: Image.network(
+                              'https://media.giphy.com/media/fSM1fAZJOixky6npXS/giphy.gif',
+                              fit: BoxFit.fill,
+                              gaplessPlayback: true,
+                            ),
+                            // child: CircleAvatar(
+                            //   backgroundColor: Colors.green,
+                            // ),
+                          ),
+                        ),
+
+                      // Delete popup area
+                      if (value.editingMode)
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: AnimatedContainer(
+                            key: _deleteKey,
+                            duration: const Duration(milliseconds: 100),
+                            height: _collied ? 60.0 : 48.0,
+                            width: _collied ? 60.0 : 48.0,
+                            margin: const EdgeInsets.only(bottom: 60.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black45,
+                            ),
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: _collied ? 32.0 : 24.0,
+                            ),
+                          ),
+                        ),
+
+                      //
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
 
-class _Stickers extends StatelessWidget {
-  const _Stickers({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final StickerboothController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<StickerboothValue>(
-      valueListenable: controller,
-      builder: (context, value, child) {
-        if (value.stickers.isEmpty) return const SizedBox();
-        return Center(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: controller.outsideTapped,
-                    ),
-                  ),
-                  for (final sticker in value.stickers)
-                    DraggableResizable(
-                      canTransform: sticker.id == value.selectedAssetId,
-                      onUpdate: (update) => controller.dragSticker(
-                        sticker: sticker,
-                        update: update,
-                      ),
-                      onDelete: controller.deleteSticker,
-                      size: sticker.asset.size,
-                      constraints: sticker.getImageConstraints(),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: double.infinity,
-                        child: Container(
-                          color: Colors.red,
-                        ),
-                        // child: Image.network(
-                        //   sticker.asset.path,
-                        //   fit: BoxFit.fill,
-                        //   gaplessPlayback: true,
-                        // ),
-                      ),
-                    ),
-
-                  //
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+extension on StickerAsset {
+  BoxConstraints getImageConstraints() {
+    return BoxConstraints(
+      minWidth: sticker.size.width * _minStickerScale,
+      minHeight: sticker.size.height * _minStickerScale,
+      maxWidth: double.infinity,
+      maxHeight: double.infinity,
     );
   }
 }

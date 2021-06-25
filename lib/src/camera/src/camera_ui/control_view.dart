@@ -1,6 +1,7 @@
 import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
 import 'package:drishya_picker/src/camera/src/camera_ui/widgets/gradient_background.dart';
 import 'package:drishya_picker/src/camera/src/entities/camera_type.dart';
+import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -47,6 +48,8 @@ class _ControlViewState extends State<ControlView> {
     super.dispose();
   }
 
+  void _onTextSubmit(String value) {}
+
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top + 4.0;
@@ -54,7 +57,10 @@ class _ControlViewState extends State<ControlView> {
       fit: StackFit.expand,
       children: [
         // Textfield
-        _TextEditor(focusNode: _focusNode),
+        // _TextEditor(
+        //   focusNode: _focusNode,
+        //   onSubmitted: _onTextSubmit,
+        // ),
 
         // preview, input type page view and camera
         Positioned(
@@ -63,7 +69,7 @@ class _ControlViewState extends State<ControlView> {
           right: 0.0,
           child: ActionBuilder(
             builder: (action, value, child) {
-              if (value.hasFocus) {
+              if (action.hideCameraTypeScroller) {
                 return const SizedBox();
               }
               return Container(
@@ -113,7 +119,7 @@ class _ControlViewState extends State<ControlView> {
           child: const FlashButton(),
         ),
 
-        // Capture button
+        // Shutter view
         Positioned(
           left: 0.0,
           right: 0.0,
@@ -145,9 +151,11 @@ class _TextEditor extends StatelessWidget {
   const _TextEditor({
     Key? key,
     required this.focusNode,
+    this.onSubmitted,
   }) : super(key: key);
 
   final FocusNode focusNode;
+  final void Function(String value)? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +197,7 @@ class _TextEditor extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                onSubmitted: onSubmitted,
               ),
             ),
           ),
@@ -210,7 +219,7 @@ class _StickerButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionBuilder(
       builder: (action, value, child) {
-        if (value.cameraType != CameraType.text) {
+        if (action.hideStickerEditingButton) {
           return const SizedBox();
         }
 
@@ -248,6 +257,15 @@ class _StickerButtons extends StatelessWidget {
             _StickerIconButton(
               isVisible: !hasFocus,
               iconData: Icons.emoji_emotions,
+              onPressed: () {
+                final sticker = Sticker(
+                  name: '',
+                  widget: CircleAvatar(
+                    child: Icon(Icons.emoji_emotions),
+                  ),
+                );
+                action.stickerController.addSticker(sticker);
+              },
             ),
           ],
         );
