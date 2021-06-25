@@ -76,9 +76,7 @@ class ActionBuilder extends StatelessWidget {
       builder: (action, constraints) {
         return ValueListenableBuilder<ActionValue>(
           valueListenable: action,
-          builder: (context, value, child) {
-            return builder(action, value, child);
-          },
+          builder: (context, v, c) => builder(action, v, c),
           child: child,
         );
       },

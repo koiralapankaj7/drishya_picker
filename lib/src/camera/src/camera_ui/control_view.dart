@@ -1,4 +1,5 @@
 import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
+import 'package:drishya_picker/src/camera/src/camera_ui/widgets/gradient_background.dart';
 import 'package:drishya_picker/src/camera/src/entities/camera_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,22 +31,18 @@ class ControlView extends StatefulWidget {
 
 class _ControlViewState extends State<ControlView> {
   late final FocusNode _focusNode;
-  late final ValueNotifier<bool> _focusNotifier;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
-    _focusNotifier = ValueNotifier(false);
     _focusNode.addListener(() {
-      context.action?.changeCameraTypeSliderVisibility(!_focusNode.hasFocus);
-      _focusNotifier.value = _focusNode.hasFocus;
+      context.action?.changeFocus(_focusNode.hasFocus);
     });
   }
 
   @override
   void dispose() {
-    _focusNotifier.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -56,27 +53,8 @@ class _ControlViewState extends State<ControlView> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Close button
-        Positioned(
-          left: 8.0,
-          top: top,
-          child: const cb.CloseButton(),
-        ),
-
-        // Flash Light
-        Positioned(
-          right: 8.0,
-          top: top,
-          child: const FlashButton(),
-        ),
-
-        // Capture button
-        Positioned(
-          left: 0.0,
-          right: 0.0,
-          bottom: 64.0,
-          child: ShutterView(videoDuration: widget.videoDuration),
-        ),
+        // Textfield
+        _TextEditor(focusNode: _focusNode),
 
         // preview, input type page view and camera
         Positioned(
@@ -85,7 +63,7 @@ class _ControlViewState extends State<ControlView> {
           right: 0.0,
           child: ActionBuilder(
             builder: (action, value, child) {
-              if (!value.enableCameraTypeSlider) {
+              if (value.hasFocus) {
                 return const SizedBox();
               }
               return Container(
@@ -121,27 +99,40 @@ class _ControlViewState extends State<ControlView> {
           ),
         ),
 
-        // Textfield
-        _TextEditor(
-          focusNotifier: _focusNotifier,
-          focusNode: _focusNode,
+        // Close button
+        Positioned(
+          left: 8.0,
+          top: top,
+          child: const cb.CloseButton(),
+        ),
+
+        // Flash Light
+        Positioned(
+          right: 8.0,
+          top: top,
+          child: const FlashButton(),
+        ),
+
+        // Capture button
+        Positioned(
+          left: 0.0,
+          right: 0.0,
+          bottom: 64.0,
+          child: ShutterView(videoDuration: widget.videoDuration),
         ),
 
         // Background changer
         const Positioned(
           left: 16.0,
           bottom: 16.0,
-          child: _BackgroundChanged(),
+          child: GradientBackgroundChanger(),
         ),
 
         // Sticker buttons
         Positioned(
           right: 16.0,
           top: top,
-          child: _StickerButtons(
-            focusNode: _focusNode,
-            focusNotifier: _focusNotifier,
-          ),
+          child: _StickerButtons(focusNode: _focusNode),
         ),
 
         //
@@ -150,56 +141,13 @@ class _ControlViewState extends State<ControlView> {
   }
 }
 
-class _BackgroundChanged extends StatelessWidget {
-  const _BackgroundChanged({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionBuilder(
-      builder: (action, value, child) {
-        if (value.cameraType != CameraType.text) {
-          return const SizedBox();
-        }
-
-        return Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(
-            side: BorderSide(
-              color: Colors.white,
-              width: 2.0,
-            ),
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: Container(
-            width: 54.0,
-            height: 54.0,
-            decoration: BoxDecoration(
-              color: Colors.red,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.lightBlue.shade300,
-                  Colors.blue,
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _TextEditor extends StatelessWidget {
   const _TextEditor({
     Key? key,
     required this.focusNode,
-    required this.focusNotifier,
   }) : super(key: key);
 
   final FocusNode focusNode;
-  final ValueNotifier<bool> focusNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -209,43 +157,41 @@ class _TextEditor extends StatelessWidget {
           return const SizedBox();
         }
 
-        return ValueListenableBuilder<bool>(
-          valueListenable: focusNotifier,
-          builder: (context, hasFocus, child) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              alignment: Alignment.center,
-              color: hasFocus ? Colors.black38 : Colors.transparent,
-              child: ColoredBox(
-                color: Colors.transparent,
-                child: TextField(
-                  focusNode: focusNode,
-                  textAlign: TextAlign.center,
-                  autocorrect: false,
-                  minLines: null,
-                  smartDashesType: SmartDashesType.disabled,
-                  style: const TextStyle(
-                    textBaseline: TextBaseline.ideographic,
-                    color: Colors.white,
+        return GestureDetector(
+          onTap: focusNode.unfocus,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.center,
+            color: value.hasFocus ? Colors.black38 : Colors.transparent,
+            child: ColoredBox(
+              color: Colors.transparent,
+              child: TextField(
+                focusNode: focusNode,
+                textAlign: TextAlign.center,
+                autocorrect: false,
+                minLines: null,
+                smartDashesType: SmartDashesType.disabled,
+                style: const TextStyle(
+                  textBaseline: TextBaseline.ideographic,
+                  color: Colors.white,
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.none,
+                  decorationColor: Colors.transparent,
+                  decorationThickness: 0.0,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Tap to type...',
+                  hintStyle: TextStyle(
+                    color: Colors.white70,
                     fontSize: 28.0,
                     fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.none,
-                    decorationColor: Colors.transparent,
-                    decorationThickness: 0.0,
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Tap to type...',
-                    hintStyle: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.w600,
-                    ),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
@@ -255,11 +201,9 @@ class _TextEditor extends StatelessWidget {
 class _StickerButtons extends StatelessWidget {
   const _StickerButtons({
     Key? key,
-    required this.focusNotifier,
     required this.focusNode,
   }) : super(key: key);
 
-  final ValueNotifier<bool> focusNotifier;
   final FocusNode focusNode;
 
   @override
@@ -269,45 +213,43 @@ class _StickerButtons extends StatelessWidget {
         if (value.cameraType != CameraType.text) {
           return const SizedBox();
         }
-        return ValueListenableBuilder<bool>(
-          valueListenable: focusNotifier,
-          builder: (context, hasFocus, child) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _DoneButton(
-                  onPressed: focusNode.unfocus,
-                  isVisible: hasFocus,
-                ),
-                _StickerIconButton(
-                  label: 'Aa',
-                  sizeFactor: hasFocus ? 1.1 : 1.0,
-                  background: hasFocus ? Colors.white : Colors.black,
-                  labelColor: hasFocus ? Colors.black : Colors.white,
-                  onPressed: () {
-                    if (focusNode.hasFocus) {
-                      focusNode.unfocus();
-                    } else {
-                      focusNode.requestFocus();
-                    }
-                  },
-                ),
-                _StickerIconButton(
-                  isVisible: hasFocus,
-                  iconData: Icons.format_align_center,
-                ),
-                _StickerIconButton(
-                  iconData: Icons.border_outer_outlined,
-                  isVisible: hasFocus,
-                ),
-                _StickerIconButton(
-                  isVisible: !hasFocus,
-                  iconData: Icons.emoji_emotions,
-                ),
-              ],
-            );
-          },
+
+        final hasFocus = value.hasFocus;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _DoneButton(
+              onPressed: focusNode.unfocus,
+              isVisible: hasFocus,
+            ),
+            _StickerIconButton(
+              label: 'Aa',
+              size: hasFocus ? 48.0 : 44.0,
+              fontSize: hasFocus ? 24.0 : 20.0,
+              background: hasFocus ? Colors.white : Colors.black38,
+              labelColor: hasFocus ? Colors.black : Colors.white,
+              onPressed: () {
+                if (focusNode.hasFocus) {
+                  focusNode.unfocus();
+                } else {
+                  focusNode.requestFocus();
+                }
+              },
+            ),
+            _StickerIconButton(
+              isVisible: hasFocus,
+              iconData: Icons.format_align_center,
+            ),
+            _StickerIconButton(
+              iconData: Icons.border_outer_outlined,
+              isVisible: hasFocus,
+            ),
+            _StickerIconButton(
+              isVisible: !hasFocus,
+              iconData: Icons.emoji_emotions,
+            ),
+          ],
         );
       },
     );
@@ -317,7 +259,6 @@ class _StickerButtons extends StatelessWidget {
 class _StickerIconButton extends StatelessWidget {
   const _StickerIconButton({
     Key? key,
-    this.sizeFactor = 1.0,
     this.isVisible = true,
     this.iconData,
     this.background,
@@ -325,9 +266,10 @@ class _StickerIconButton extends StatelessWidget {
     this.label,
     this.labelColor,
     this.onPressed,
+    this.size,
+    this.fontSize,
   }) : super(key: key);
 
-  final double sizeFactor;
   final bool isVisible;
   final IconData? iconData;
   final String? label;
@@ -335,6 +277,8 @@ class _StickerIconButton extends StatelessWidget {
   final Color? background;
   final double margin;
   final void Function()? onPressed;
+  final double? size;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -347,7 +291,7 @@ class _StickerIconButton extends StatelessWidget {
       label ?? 'Aa',
       style: TextStyle(
         fontWeight: FontWeight.w800,
-        fontSize: 17.0 * sizeFactor,
+        fontSize: fontSize ?? 20.0,
         color: labelColor ?? Colors.white,
       ),
     );
@@ -355,15 +299,15 @@ class _StickerIconButton extends StatelessWidget {
     final icon = Icon(
       iconData ?? Icons.emoji_emotions,
       color: Colors.white,
-      size: 22.0 * sizeFactor,
+      size: 24.0,
     );
 
     return InkWell(
       onTap: onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        height: 40.0 * sizeFactor,
-        width: 40.0 * sizeFactor,
+        height: size ?? 44.0,
+        width: size ?? 44.0,
         alignment: Alignment.center,
         margin: EdgeInsets.only(bottom: margin),
         decoration: BoxDecoration(
@@ -402,7 +346,7 @@ class _DoneButton extends StatelessWidget {
           'DONE',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18.0,
+            fontSize: 17.0,
             fontWeight: FontWeight.w500,
           ),
         ),

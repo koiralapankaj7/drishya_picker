@@ -1,12 +1,10 @@
-import 'dart:developer';
-
+import 'package:drishya_picker/src/camera/src/camera_ui/widgets/gradient_background.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_value.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/draggable_resizable.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/entities/photo_asset.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 const _initialStickerScale = 0.25;
 const _minStickerScale = 0.05;
@@ -40,18 +38,7 @@ class _TextViewState extends State<TextView> {
         fit: StackFit.expand,
         children: [
           // background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.lightBlue.shade300,
-                  Colors.blue,
-                ],
-              ),
-            ),
-          ),
+          const GradientBackground(),
 
           _Stickers(controller: controller),
 

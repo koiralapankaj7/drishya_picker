@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/camera/src/entities/gradient_color.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
@@ -56,9 +57,18 @@ class CameraAction extends ValueNotifier<ActionValue> {
     super.dispose();
   }
 
-  ///
-  void changeCameraTypeSliderVisibility(bool status) {
-    value = value.copyWith(enableCameraTypeSlider: status);
+  /// Change text field focus from Textview
+  void changeFocus(bool hasFocus) {
+    value = value.copyWith(hasFocus: hasFocus);
+  }
+
+  /// Change Textview background
+  void changeBackground() {
+    final current = value.background;
+    final index = gradients.indexOf(current);
+    final hasMatch = index != -1;
+    final nextIndex = hasMatch && index + 1 < gradients.length ? index + 1 : 0;
+    value = value.copyWith(background: gradients[nextIndex]);
   }
 
   ///
@@ -358,8 +368,9 @@ class ActionValue {
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
-    this.enableCameraTypeSlider = true,
-  });
+    this.hasFocus = false,
+    GradientColor? background,
+  }) : background = background ?? gradients[0];
 
   ///
   final CameraDescription? cameraDescription;
@@ -392,7 +403,10 @@ class ActionValue {
   final bool isRecordingPaused;
 
   ///
-  final bool enableCameraTypeSlider;
+  final bool hasFocus;
+
+  ///
+  final GradientColor background;
 
   ///
   ActionValue copyWith({
@@ -404,7 +418,8 @@ class ActionValue {
     bool? isTakingPicture,
     bool? isRecordingVideo,
     bool? isRecordingPaused,
-    bool? enableCameraTypeSlider,
+    bool? hasFocus,
+    GradientColor? background,
   }) {
     return ActionValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
@@ -415,8 +430,8 @@ class ActionValue {
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
-      enableCameraTypeSlider:
-          enableCameraTypeSlider ?? this.enableCameraTypeSlider,
+      hasFocus: hasFocus ?? this.hasFocus,
+      background: background ?? this.background,
     );
   }
 }
