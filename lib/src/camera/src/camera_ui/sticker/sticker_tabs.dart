@@ -1,3 +1,5 @@
+import 'package:drishya_picker/src/camera/src/utils/animated_cross_fade.dart';
+import 'package:drishya_picker/src/camera/src/utils/progress_indicator.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
 
@@ -32,7 +34,7 @@ class _StickersTabsState extends State<StickersTabs>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 5,
+      length: 2,
       vsync: this,
       initialIndex: widget.initialIndex,
     );
@@ -66,53 +68,25 @@ class _StickersTabsState extends State<StickersTabs>
               key: Key('stickersTabs_hatsTab'),
               assetPath: 'assets/icons/hats_icon.png',
             ),
-            StickersTab(
-              key: Key('stickersTabs_eyewearTab'),
-              assetPath: 'assets/icons/eyewear_icon.png',
-            ),
-            StickersTab(
-              key: Key('stickersTabs_foodTab'),
-              assetPath: 'assets/icons/food_icon.png',
-            ),
-            StickersTab(
-              key: Key('stickersTabs_shapesTab'),
-              assetPath: 'assets/icons/shapes_icon.png',
-            ),
           ],
         ),
-        const Divider(),
-        // Expanded(
-        //   child: TabBarView(
-        //     controller: _tabController,
-        //     children: [
-        //       StickersTabBarView(
-        //         key: const Key('stickersTabs_googleTabBarView'),
-        //         stickers: Assets.googleProps,
-        //         onStickerSelected: widget.onStickerSelected,
-        //       ),
-        //       StickersTabBarView(
-        //         key: const Key('stickersTabs_hatsTabBarView'),
-        //         stickers: Assets.hatProps,
-        //         onStickerSelected: widget.onStickerSelected,
-        //       ),
-        //       StickersTabBarView(
-        //         key: const Key('stickersTabs_eyewearTabBarView'),
-        //         stickers: Assets.eyewearProps,
-        //         onStickerSelected: widget.onStickerSelected,
-        //       ),
-        //       StickersTabBarView(
-        //         key: const Key('stickersTabs_foodTabBarView'),
-        //         stickers: Assets.foodProps,
-        //         onStickerSelected: widget.onStickerSelected,
-        //       ),
-        //       StickersTabBarView(
-        //         key: const Key('stickersTabs_shapesTabBarView'),
-        //         stickers: Assets.shapeProps,
-        //         onStickerSelected: widget.onStickerSelected,
-        //       ),
-        //     ],
-        //   ),
-        // ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              StickersTabBarView(
+                key: const Key('stickersTabs_googleTabBarView'),
+                stickers: animatedStickers.take(15).toSet(),
+                onStickerSelected: widget.onStickerSelected,
+              ),
+              StickersTabBarView(
+                key: const Key('stickersTabs_hatsTabBarView'),
+                stickers: animatedStickers.skip(15).toSet(),
+                onStickerSelected: widget.onStickerSelected,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -139,13 +113,11 @@ class _StickersTabState extends State<StickersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Tab(
-      iconMargin: const EdgeInsets.only(bottom: 24),
-      icon: Image.asset(
-        widget.assetPath,
-        width: 30,
-        height: 30,
-        color: IconTheme.of(context).color,
+    return const Tab(
+      iconMargin: EdgeInsets.only(bottom: 24),
+      icon: Icon(
+        Icons.emoji_emotions,
+        color: Colors.black,
       ),
     );
   }
@@ -177,22 +149,21 @@ class StickersTabBarView extends StatelessWidget {
     crossAxisSpacing: 24,
   );
 
-  static const _defaultGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: 150,
-    childAspectRatio: 1,
-    mainAxisSpacing: 64,
-    crossAxisSpacing: 42,
-  );
+  // static const _defaultGridDelegate =
+  // SliverGridDelegateWithMaxCrossAxisExtent(
+  //   maxCrossAxisExtent: 150,
+  //   childAspectRatio: 1,
+  //   mainAxisSpacing: 64,
+  //   crossAxisSpacing: 42,
+  // );
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     const gridDelegate = _smallGridDelegate;
-    // _defaultGridDelegate;
     return GridView.builder(
       key: PageStorageKey<String>('$key'),
       gridDelegate: gridDelegate,
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
+      padding: const EdgeInsets.all(32),
       itemCount: stickers.length,
       itemBuilder: (context, index) {
         final sticker = stickers.elementAt(index);
@@ -223,29 +194,52 @@ class StickerChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox();
-    // return Image.asset(
-    //   asset.path,
-    //   frameBuilder: (
-    //     BuildContext context,
-    //     Widget child,
-    //     int? frame,
-    //     bool wasSynchronouslyLoaded,
-    //   ) {
-    //     return AppAnimatedCrossFade(
-    //       firstChild: SizedBox.fromSize(
-    //         size: const Size(20, 20),
-    //         child: const AppCircularProgressIndicator(strokeWidth: 2),
-    //       ),
-    //       secondChild: InkWell(
-    //         onTap: onPressed,
-    //         child: child,
-    //       ),
-    //       crossFadeState: frame == null
-    //           ? CrossFadeState.showFirst
-    //           : CrossFadeState.showSecond,
-    //     );
-    //   },
-    // );
+    switch (asset.pathType) {
+      case StickerPathType.networkImg:
+        return _Network(
+          url: asset.path!,
+          onPressed: onPressed,
+        );
+      default:
+        return const SizedBox();
+    }
+  }
+}
+
+class _Network extends StatelessWidget {
+  const _Network({
+    Key? key,
+    required this.url,
+    this.onPressed,
+  }) : super(key: key);
+
+  final String url;
+  final void Function()? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      url,
+      frameBuilder: (
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        return AppAnimatedCrossFade(
+          firstChild: SizedBox.fromSize(
+            size: const Size(20, 20),
+            child: const AppCircularProgressIndicator(strokeWidth: 2),
+          ),
+          secondChild: InkWell(
+            onTap: onPressed,
+            child: child,
+          ),
+          crossFadeState: frame == null
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond,
+        );
+      },
+    );
   }
 }

@@ -32,8 +32,7 @@ class StickerPicker extends StatelessWidget {
     return PageStorage(
       bucket: bucket,
       child: Container(
-        margin: const EdgeInsets.only(top: 30),
-        height: screenHeight, // screenHeight * 0.75,
+        height: screenHeight * 0.90,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
@@ -42,13 +41,13 @@ class StickerPicker extends StatelessWidget {
           children: [
             Column(
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.topLeft,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 24.0),
                     child: Text(
-                      'Add props',
+                      'Add sticker',
                       style: Theme.of(context)
                           .textTheme
                           .headline3
@@ -56,7 +55,7 @@ class StickerPicker extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 35),
+                const SizedBox(height: 8),
                 Flexible(
                   child: StickersTabs(
                     initialIndex: initialIndex,
@@ -67,8 +66,8 @@ class StickerPicker extends StatelessWidget {
               ],
             ),
             Positioned(
-              right: 24,
-              top: 24,
+              right: 16,
+              top: 8,
               child: IconButton(
                 key: const Key('stickersDrawer_close_iconButton'),
                 icon: const Icon(

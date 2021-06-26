@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'builders/camera_action_provider.dart';
+import 'sticker/sticker_picker.dart';
 import 'widgets/camera_type_changer.dart';
 import 'widgets/close_button.dart' as cb;
 import 'widgets/flash_button.dart';
@@ -57,6 +58,10 @@ class _ControlViewState extends State<ControlView> {
       fit: StackFit.expand,
       children: [
         // Textfield
+        const Align(
+          alignment: Alignment.center,
+          child: _TextInputModeTextButton(),
+        ),
         // _TextEditor(
         //   focusNode: _focusNode,
         //   onSubmitted: _onTextSubmit,
@@ -147,6 +152,33 @@ class _ControlViewState extends State<ControlView> {
   }
 }
 
+class _TextInputModeTextButton extends StatelessWidget {
+  const _TextInputModeTextButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionBuilder(
+      builder: (action, value, child) {
+        if (value.hasFocus || value.editingMode || value.stickers.isNotEmpty) {
+          return const SizedBox();
+        }
+
+        return GestureDetector(
+          onTap: () {},
+          child: const Text(
+            'Tap to type...',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 28.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _TextEditor extends StatelessWidget {
   const _TextEditor({
     Key? key,
@@ -208,12 +240,14 @@ class _TextEditor extends StatelessWidget {
 }
 
 class _StickerButtons extends StatelessWidget {
-  const _StickerButtons({
+  _StickerButtons({
     Key? key,
     required this.focusNode,
   }) : super(key: key);
 
   final FocusNode focusNode;
+
+  final PageStorageBucket _bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
@@ -258,13 +292,21 @@ class _StickerButtons extends StatelessWidget {
               isVisible: !hasFocus,
               iconData: Icons.emoji_emotions,
               onPressed: () {
-                final sticker = Sticker(
-                  name: '',
-                  widget: CircleAvatar(
-                    child: Icon(Icons.emoji_emotions),
+                showModalBottomSheet<Sticker>(
+                  context: context,
+                  barrierColor: Colors.black.withOpacity(0.75),
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (_) => StickerPicker(
+                    initialIndex: 0,
+                    bucket: _bucket,
+                    onTabChanged: (index) {},
+                    onStickerSelected: (sticker) {
+                      action.stickerController.addSticker(sticker);
+                      Navigator.of(context).pop();
+                    },
                   ),
                 );
-                action.stickerController.addSticker(sticker);
               },
             ),
           ],

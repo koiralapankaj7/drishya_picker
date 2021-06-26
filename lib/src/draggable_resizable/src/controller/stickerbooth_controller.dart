@@ -19,6 +19,16 @@ class StickerboothController extends ValueNotifier<StickerboothValue> {
   ///
   final UuidGetter uuid;
 
+  ///
+  void setStickers(List<StickerAsset> stickers) {
+    Future.delayed(const Duration(milliseconds: 16), () {
+      value = value.copyWith(
+        assets: List.from(stickers),
+        selectedAssetId: emptyAssetId,
+      );
+    });
+  }
+
   /// sticker tapped
   void addSticker(Sticker sticker) {
     final assets = StickerAsset(id: uuid(), sticker: sticker);

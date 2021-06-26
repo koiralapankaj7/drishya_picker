@@ -105,6 +105,11 @@ class CameraAction extends ValueNotifier<ActionValue> {
     super.dispose();
   }
 
+  /// Update stickers
+  void updateStickers(List<StickerAsset> stickers) {
+    value = value.copyWith(stickers: stickers);
+  }
+
   /// Change Textview editing mode
   void changeEditingStatus(bool isEditing) {
     value = value.copyWith(editingMode: isEditing);
