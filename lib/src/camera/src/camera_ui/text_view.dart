@@ -26,17 +26,20 @@ class TextView extends StatefulWidget {
 class _TextViewState extends State<TextView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: const [
-          // background
-          GradientBackground(),
+    return RepaintBoundary(
+      key: context.action?.screenshotKey,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: const [
+            // background
+            GradientBackground(),
 
-          _Stickers(),
+            _Stickers(),
 
-          //
-        ],
+            //
+          ],
+        ),
       ),
     );
   }
@@ -182,32 +185,3 @@ extension on StickerAsset {
     );
   }
 }
-
-///
-// Future<void> capturePng() async {
-//   final boundary =
-//       _key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-
-//   if (boundary != null) {
-//     final image = await boundary.toImage();
-
-//     final date = DateTime.now();
-
-//     final entity = AssetEntity(
-//       id: date.millisecond.toString(),
-//       height: image.height,
-//       width: image.width,
-//       typeInt: 1,
-//       mimeType: 'image/png',
-//       createDtSecond: date.second,
-//       modifiedDateSecond: date.second,
-//     );
-
-//     log('$entity');
-
-//     // final  byteData =
-//     //     await image.toByteData(format: ui.ImageByteFormat.png);
-//     // final Uint8List pngBytes = byteData!.buffer.asUint8List();
-//     // print(pngBytes);
-//   }
-// }

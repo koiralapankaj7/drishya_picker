@@ -1,6 +1,7 @@
 import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
 import 'package:drishya_picker/src/camera/src/camera_ui/widgets/gradient_background.dart';
 import 'package:drishya_picker/src/camera/src/entities/camera_type.dart';
+import 'package:drishya_picker/src/camera/src/utils/custom_icons.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +139,13 @@ class _ControlViewState extends State<ControlView> {
           left: 16.0,
           bottom: 16.0,
           child: GradientBackgroundChanger(),
+        ),
+
+        // Screenshot capture button
+        const Positioned(
+          right: 16.0,
+          bottom: 16.0,
+          child: _ScreenshotCaptureButton(),
         ),
 
         // Sticker buttons
@@ -413,6 +421,38 @@ class _DoneButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ScreenshotCaptureButton extends StatelessWidget {
+  const _ScreenshotCaptureButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionBuilder(
+      builder: (action, value, child) {
+        if (action.hideScreenshotCaptureView) {
+          return const SizedBox();
+        }
+
+        return GestureDetector(
+          onTap: action.captureScreenshot,
+          child: Container(
+            width: 56.0,
+            height: 56.0,
+            padding: const EdgeInsets.only(left: 4.0),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+            child: const Icon(
+              CustomIcons.send,
+              color: Colors.blue,
+            ),
+          ),
+        );
+      },
     );
   }
 }

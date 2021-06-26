@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/src/camera/src/entities/gradient_color.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -22,6 +24,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
     required BuildContext context,
   })  : _controllerNotifier = controllerNotifier,
         _uiHandler = UIHandler(context),
+        _screenshotKey = GlobalKey(),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
         stickerController = StickerboothController(),
@@ -29,6 +32,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
 
   final ControllerNotifier _controllerNotifier;
   final UIHandler _uiHandler;
+  final GlobalKey _screenshotKey;
 
   ///
   final Zoom zoom;
@@ -38,6 +42,9 @@ class CameraAction extends ValueNotifier<ActionValue> {
 
   ///
   final StickerboothController stickerController;
+
+  ///
+  GlobalKey get screenshotKey => _screenshotKey;
 
   ///
   bool get initialized => _controllerNotifier.initialized;
@@ -103,7 +110,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
   bool get showStickerDeletePopup => value.editingMode;
 
   /// Show screenshot capture view on Textview
-  bool get showScreenshotCaptureView => value.hasStickers;
+  bool get hideScreenshotCaptureView => value.editingMode || !value.hasStickers;
 
   @override
   void dispose() {
@@ -209,6 +216,50 @@ class CameraAction extends ValueNotifier<ActionValue> {
     return controller;
 
     //
+  }
+
+  ///
+  Future<void> captureScreenshot() async {
+    try {
+      final boundary = _screenshotKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+
+      if (boundary != null) {
+        final image = await boundary.toImage();
+
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        final data = byteData!.buffer.asUint8List();
+
+        // final date = DateTime.now();
+
+        // final entity = AssetEntity(
+        //   id: date.millisecond.toString(),
+        //   height: image.height,
+        //   width: image.width,
+        //   typeInt: 1,
+        //   mimeType: 'image/png',
+        //   createDtSecond: date.second,
+        //   modifiedDateSecond: date.second,
+        // );
+
+        // final  byteData =
+        //     await image.toByteData(format: ui.ImageByteFormat.png);
+        // final Uint8List pngBytes = byteData!.buffer.asUint8List();
+        // print(pngBytes);
+
+        final entity = await PhotoManager.editor.saveImage(data);
+
+        if (entity != null) {
+          _uiHandler.pop<AssetEntity>(entity);
+        } else {
+          _uiHandler.showSnackBar('Something went wrong! Please try again');
+          value = value.copyWith(isTakingPicture: false);
+          return;
+        }
+      }
+    } catch (e) {
+      _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
+    }
   }
 
   /// Take picture
