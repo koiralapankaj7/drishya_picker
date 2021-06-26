@@ -39,7 +39,7 @@ class _ControlViewState extends State<ControlView> {
     super.initState();
     _focusNode = FocusNode();
     _focusNode.addListener(() {
-      context.action?.changeFocus(_focusNode.hasFocus);
+      context.action?.updateValue(hasFocus: _focusNode.hasFocus);
     });
   }
 
@@ -57,11 +57,12 @@ class _ControlViewState extends State<ControlView> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Textfield
+        // Textfield open button
         const Align(
           alignment: Alignment.center,
           child: _TextInputModeTextButton(),
         ),
+
         // _TextEditor(
         //   focusNode: _focusNode,
         //   onSubmitted: _onTextSubmit,
@@ -159,7 +160,7 @@ class _TextInputModeTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionBuilder(
       builder: (action, value, child) {
-        if (value.hasFocus || value.editingMode || value.stickers.isNotEmpty) {
+        if (action.hideEditingTextButton) {
           return const SizedBox();
         }
 
@@ -303,6 +304,7 @@ class _StickerButtons extends StatelessWidget {
                     onTabChanged: (index) {},
                     onStickerSelected: (sticker) {
                       action.stickerController.addSticker(sticker);
+                      action.updateValue(hasStickers: true);
                       Navigator.of(context).pop();
                     },
                   ),

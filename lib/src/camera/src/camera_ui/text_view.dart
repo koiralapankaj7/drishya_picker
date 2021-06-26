@@ -48,22 +48,13 @@ class _Stickers extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  __StickersState createState() => __StickersState();
+  _StickersState createState() => _StickersState();
 }
 
-class __StickersState extends State<_Stickers> {
+class _StickersState extends State<_Stickers> {
   final _deleteKey = GlobalKey();
 
   var _collied = false;
-
-  @override
-  void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      final action = context.action;
-      action?.stickerController.setStickers(action.value.stickers);
-    });
-    super.initState();
-  }
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final deleteBox =
@@ -117,17 +108,19 @@ class __StickersState extends State<_Stickers> {
                         key: Key(asset.id),
                         canTransform: isSelected,
                         onStart: () {
-                          action.changeEditingStatus(true);
+                          action.updateValue(isEditing: true);
                         },
                         onEnd: () {
                           Future.delayed(const Duration(milliseconds: 50), () {
                             if (_collied) {
                               action.stickerController.deleteSticker();
+                              action.updateValue(
+                                hasStickers: stickerValue.assets.length > 1,
+                              );
+                              _collied = false;
                             }
-                            action.changeEditingStatus(false);
-                            _collied = false;
-                            action.updateStickers(stickerValue.assets);
                           });
+                          action.updateValue(isEditing: false);
                         },
                         onUpdate: (update, key) {
                           action.stickerController

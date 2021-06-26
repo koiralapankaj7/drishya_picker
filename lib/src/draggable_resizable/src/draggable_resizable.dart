@@ -36,6 +36,7 @@ class DraggableResizable extends StatefulWidget {
     required this.child,
     required this.size,
     BoxConstraints? constraints,
+    this.initialPosition = Offset.zero,
     this.onUpdate,
     this.onScaleUpdate,
     this.onStart,
@@ -63,6 +64,9 @@ class DraggableResizable extends StatefulWidget {
   /// Defaults to false.
   final bool canTransform;
 
+  /// Initial position of widget
+  final Offset initialPosition;
+
   /// The child's original size.
   final Size size;
 
@@ -83,13 +87,14 @@ class _DraggableResizableState extends State<DraggableResizable> {
 
   bool get isTouchInputSupported => true;
 
-  Offset position = Offset.zero;
+  late Offset position;
 
   final key = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+    position = widget.initialPosition;
     size = widget.size;
     constraints = const BoxConstraints.expand(width: 1, height: 1);
     angle = 0;

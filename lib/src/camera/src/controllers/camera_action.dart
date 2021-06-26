@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/src/camera/src/entities/gradient_color.dart';
 import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
@@ -76,12 +75,21 @@ class CameraAction extends ValueNotifier<ActionValue> {
   bool get hideStickerEditingButton =>
       value.editingMode || value.cameraType != CameraType.text;
 
+  /// Hide tab to type text button
+  bool get hideEditingTextButton =>
+      value.cameraType != CameraType.text ||
+      value.hasFocus ||
+      value.hasStickers;
+
   /// Hive shutter view on Textview
   bool get hideShutterView => value.cameraType == CameraType.text;
 
   /// Hide camera type slider view
   bool get hideCameraTypeScroller =>
-      value.hasFocus || value.editingMode || value.isRecordingVideo;
+      value.hasFocus ||
+      value.editingMode ||
+      value.isRecordingVideo ||
+      value.hasStickers;
 
   /// Hide gallery preview button
   bool get hideGalleryPreviewButton =>
@@ -95,7 +103,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
   bool get showStickerDeletePopup => value.editingMode;
 
   /// Show screenshot capture view on Textview
-  bool get showScreenshotCaptureView => value.stickers.isNotEmpty;
+  bool get showScreenshotCaptureView => value.hasStickers;
 
   @override
   void dispose() {
@@ -105,19 +113,17 @@ class CameraAction extends ValueNotifier<ActionValue> {
     super.dispose();
   }
 
-  /// Update stickers
-  void updateStickers(List<StickerAsset> stickers) {
-    value = value.copyWith(stickers: stickers);
-  }
-
-  /// Change Textview editing mode
-  void changeEditingStatus(bool isEditing) {
-    value = value.copyWith(editingMode: isEditing);
-  }
-
-  /// Change text field focus from Textview
-  void changeFocus(bool hasFocus) {
-    value = value.copyWith(hasFocus: hasFocus);
+  /// Update controller value
+  void updateValue({
+    bool? hasStickers,
+    bool? isEditing,
+    bool? hasFocus,
+  }) {
+    value = value.copyWith(
+      hasStickers: hasStickers,
+      editingMode: isEditing,
+      hasFocus: hasFocus,
+    );
   }
 
   /// Change Textview background
@@ -428,7 +434,7 @@ class ActionValue {
     this.isRecordingPaused = false,
     this.hasFocus = false,
     this.editingMode = false,
-    this.stickers = const [],
+    this.hasStickers = false,
     GradientColor? background,
   }) : background = background ?? gradients[0];
 
@@ -469,7 +475,7 @@ class ActionValue {
   final bool editingMode;
 
   ///
-  final List<StickerAsset> stickers;
+  final bool hasStickers;
 
   ///
   final GradientColor background;
@@ -486,7 +492,7 @@ class ActionValue {
     bool? isRecordingPaused,
     bool? hasFocus,
     bool? editingMode,
-    List<StickerAsset>? stickers,
+    bool? hasStickers,
     GradientColor? background,
   }) {
     return ActionValue(
@@ -500,7 +506,7 @@ class ActionValue {
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       hasFocus: hasFocus ?? this.hasFocus,
       editingMode: editingMode ?? this.editingMode,
-      stickers: stickers ?? this.stickers,
+      hasStickers: hasStickers ?? this.hasStickers,
       background: background ?? this.background,
     );
   }
