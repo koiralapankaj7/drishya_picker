@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/ui_handler.dart';
+import '../widgets/ui_handler.dart';
 import 'controller_notifier.dart';
 
 ///

@@ -1,8 +1,8 @@
-import 'package:drishya_picker/src/camera/src/camera_ui/playground/src/widgets/playground_sticker_picker.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
+import 'playground_sticker_picker.dart';
 
 ///
 class PlaygroundButtonCollection extends StatelessWidget {

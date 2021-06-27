@@ -8,7 +8,7 @@ class PlaygroundControllerProvider extends InheritedWidget {
   /// Creates a widget that associates a [PlaygroundController] with a subtree.
   const PlaygroundControllerProvider({
     Key? key,
-    required PlaygroundController this.action,
+    required PlaygroundController this.controller,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -16,12 +16,12 @@ class PlaygroundControllerProvider extends InheritedWidget {
   const PlaygroundControllerProvider.none({
     Key? key,
     required Widget child,
-  })  : action = null,
+  })  : controller = null,
         super(key: key, child: child);
 
   /// The [PlaygroundController] associated with the subtree.
   ///
-  final PlaygroundController? action;
+  final PlaygroundController? controller;
 
   /// Returns the [PlaygroundController] most closely associated with the given
   /// context.
@@ -31,19 +31,19 @@ class PlaygroundControllerProvider extends InheritedWidget {
   static PlaygroundController? of(BuildContext context) {
     final result = context
         .dependOnInheritedWidgetOfExactType<PlaygroundControllerProvider>();
-    return result?.action;
+    return result?.controller;
   }
 
   @override
   bool updateShouldNotify(covariant PlaygroundControllerProvider oldWidget) =>
-      action != oldWidget.action;
+      controller != oldWidget.controller;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<PlaygroundController>(
       'controller',
-      action,
+      controller,
       ifNull: 'no controller',
       showName: false,
     ));

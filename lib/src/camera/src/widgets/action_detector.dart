@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/camera_action.dart';
-import 'camera_action_provider.dart';
+import '../controllers/action_notifier.dart';
+import '../widgets/action_notifier_provider.dart';
 
 ///
 class ActionDetector extends StatelessWidget {
@@ -14,10 +14,10 @@ class ActionDetector extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final void Function(CameraAction action)? onPressed;
+  final void Function(ActionNotifier action)? onPressed;
 
   ///
-  final Widget Function(CameraAction action, BoxConstraints constraints)?
+  final Widget Function(ActionNotifier action, BoxConstraints constraints)?
       builder;
 
   ///
@@ -64,7 +64,7 @@ class ActionBuilder extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final Widget Function(CameraAction action, ActionValue value, Widget? child)
+  final Widget Function(ActionNotifier action, ActionValue value, Widget? child)
       builder;
 
   ///

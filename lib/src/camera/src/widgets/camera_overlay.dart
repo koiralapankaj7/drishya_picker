@@ -1,15 +1,14 @@
-import 'package:drishya_picker/src/camera/src/camera_ui/builders/action_detector.dart';
-import 'package:drishya_picker/src/camera/src/controllers/camera_action.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'widgets/camera_type_changer.dart';
-import 'widgets/close_button.dart' as cb;
-import 'widgets/flash_button.dart';
-import 'widgets/gallery_button.dart';
-import 'widgets/rotate_button.dart';
-import 'widgets/shutter_view.dart';
+import '../controllers/action_notifier.dart';
+import 'camera_close_button.dart';
+import 'camera_type_changer.dart';
+import 'flash_button.dart';
+import 'gallery_button.dart';
+import 'rotate_button.dart';
+import 'shutter_view.dart';
 
 ///
 class CameraOverlay extends StatelessWidget {
@@ -24,7 +23,7 @@ class CameraOverlay extends StatelessWidget {
   final Duration videoDuration;
 
   ///
-  final CameraAction action;
+  final ActionNotifier action;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +37,8 @@ class CameraOverlay extends StatelessWidget {
           bottom: 0.0,
           left: 0.0,
           right: 0.0,
-          child: ActionBuilder(
-            builder: (action, value, child) {
+          child: Builder(
+            builder: (context) {
               if (action.hideCameraTypeScroller) {
                 return const SizedBox();
               }
@@ -55,18 +54,18 @@ class CameraOverlay extends StatelessWidget {
                   ],
                 ),
                 child: Row(
-                  children: const [
+                  children: [
                     // Gallery preview
-                    GalleryButton(),
+                    GalleryButton(action: action),
 
                     // Margin
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
 
                     // Camera type scroller
-                    Expanded(child: CameraTypeChanger()),
+                    Expanded(child: CameraTypeChanger(action: action)),
 
                     // Switch camera
-                    RotateButton(),
+                    RotateButton(action: action),
 
                     //
                   ],
@@ -80,14 +79,14 @@ class CameraOverlay extends StatelessWidget {
         Positioned(
           left: 8.0,
           top: top,
-          child: const cb.CloseButton(),
+          child: CameraCloseButton(action: action),
         ),
 
         // Flash Light
         Positioned(
           right: 8.0,
           top: top,
-          child: const FlashButton(),
+          child: FlashButton(action: action),
         ),
 
         // Shutter view
@@ -95,7 +94,10 @@ class CameraOverlay extends StatelessWidget {
           left: 0.0,
           right: 0.0,
           bottom: 64.0,
-          child: ShutterView(videoDuration: videoDuration),
+          child: ShutterView(
+            videoDuration: videoDuration,
+            action: action,
+          ),
         ),
 
         //

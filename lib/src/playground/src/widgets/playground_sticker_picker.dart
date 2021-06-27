@@ -1,5 +1,4 @@
-import 'package:drishya_picker/src/camera/src/utils/animated_cross_fade.dart';
-import 'package:drishya_picker/src/camera/src/utils/progress_indicator.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 

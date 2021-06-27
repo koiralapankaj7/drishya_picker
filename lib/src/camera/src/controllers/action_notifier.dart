@@ -1,29 +1,27 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:drishya_picker/src/camera/src/camera_ui/playground/playground.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/camera_type.dart';
-import '../utils/ui_handler.dart';
+import '../widgets/ui_handler.dart';
 import 'controller_notifier.dart';
 import 'exposure.dart';
 import 'zoom.dart';
 
 ///
-class CameraAction extends ValueNotifier<ActionValue> {
+class ActionNotifier extends ValueNotifier<ActionValue> {
   ///
-  CameraAction({
+  ActionNotifier({
     required ControllerNotifier controllerNotifier,
     required BuildContext context,
   })  : _controllerNotifier = controllerNotifier,
         _uiHandler = UIHandler(context),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
-        playgroundController = PlaygroundController(),
         super(ActionValue());
 
   ///
@@ -31,9 +29,6 @@ class CameraAction extends ValueNotifier<ActionValue> {
 
   ///
   final UIHandler _uiHandler;
-
-  ///
-  final PlaygroundController playgroundController;
 
   ///
   final Zoom zoom;
@@ -45,7 +40,6 @@ class CameraAction extends ValueNotifier<ActionValue> {
   void dispose() {
     zoom.dispose();
     exposure.dispose();
-    playgroundController.dispose();
     super.dispose();
   }
 

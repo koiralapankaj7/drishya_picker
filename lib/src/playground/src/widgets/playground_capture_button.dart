@@ -1,4 +1,4 @@
-import 'package:drishya_picker/src/camera/src/utils/custom_icons.dart';
+import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';

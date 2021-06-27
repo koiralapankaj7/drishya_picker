@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-import '../../controllers/controller_notifier.dart';
+import '../controllers/controller_notifier.dart';
 
 ///
 class ControllerBuilder extends StatelessWidget {

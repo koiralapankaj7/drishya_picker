@@ -1,56 +1,60 @@
 import 'dart:math';
 
+import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
 
-import '../../entities/camera_type.dart';
-import '../../utils/custom_icons.dart';
-import '../builders/action_detector.dart';
+import '../controllers/action_notifier.dart';
+import '../entities/camera_type.dart';
 
 ///
 class CameraTypeChanger extends StatelessWidget {
   ///
-  const CameraTypeChanger({Key? key}) : super(key: key);
+  const CameraTypeChanger({
+    Key? key,
+    required this.action,
+  }) : super(key: key);
+
+  ///
+  final ActionNotifier action;
 
   @override
   Widget build(BuildContext context) {
-    return ActionBuilder(builder: (action, value, child) {
-      if (value.isRecordingVideo) {
-        return const SizedBox();
-      }
+    if (action.hideCameraTypeScroller) {
+      return const SizedBox();
+    }
 
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Text scroller
-          Expanded(
-            child: _TypesPageView(
-              initialType: value.cameraType,
-              onChanged: action.changeCameraType,
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Text scroller
+        Expanded(
+          child: _TypesPageView(
+            initialType: action.value.cameraType,
+            onChanged: action.changeCameraType,
           ),
+        ),
 
-          const SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
 
-          // Arrow indicator
-          SizedBox(
-            height: 12.0,
-            width: 20.0,
-            child: FittedBox(
-              fit: BoxFit.fill,
-              child: Transform.rotate(
-                angle: -pi / 2,
-                child: const Icon(
-                  CustomIcons.play,
-                  color: Colors.white,
-                ),
+        // Arrow indicator
+        SizedBox(
+          height: 12.0,
+          width: 20.0,
+          child: FittedBox(
+            fit: BoxFit.fill,
+            child: Transform.rotate(
+              angle: -pi / 2,
+              child: const Icon(
+                CustomIcons.play,
+                color: Colors.white,
               ),
             ),
           ),
+        ),
 
-          //
-        ],
-      );
-    });
+        //
+      ],
+    );
   }
 }
 

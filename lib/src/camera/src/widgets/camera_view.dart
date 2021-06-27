@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
-import 'package:drishya_picker/src/camera/src/controllers/camera_action.dart';
 import 'package:flutter/material.dart';
+
+import '../controllers/action_notifier.dart';
 
 ///
 class CameraView extends StatelessWidget {
@@ -11,7 +12,7 @@ class CameraView extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final CameraAction action;
+  final ActionNotifier action;
 
   @override
   Widget build(BuildContext context) {

@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../entities/camera_type.dart';
-import '../builders/action_detector.dart';
-import '../builders/camera_action_provider.dart';
+import '../controllers/action_notifier.dart';
+import '../entities/camera_type.dart';
+import 'action_detector.dart';
+import 'action_notifier_provider.dart';
 
 ///
 class ShutterView extends StatelessWidget {
@@ -13,26 +14,26 @@ class ShutterView extends StatelessWidget {
   const ShutterView({
     Key? key,
     required this.videoDuration,
+    required this.action,
   }) : super(key: key);
 
   ///
   final Duration videoDuration;
 
+  ///
+  final ActionNotifier action;
+
   @override
   Widget build(BuildContext context) {
-    return ActionBuilder(
-      builder: (action, value, child) {
-        if (action.hideShutterView) {
-          return const SizedBox();
-        }
-        return child!;
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _ShutterButton(videoDuration: videoDuration),
-        ],
-      ),
+    if (action.hideShutterView) {
+      return const SizedBox();
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _ShutterButton(videoDuration: videoDuration),
+      ],
     );
   }
 }
