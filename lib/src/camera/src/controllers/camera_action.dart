@@ -1,11 +1,8 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
-import 'package:drishya_picker/src/camera/src/entities/gradient_color.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_controller.dart';
+import 'package:drishya_picker/src/camera/src/camera_ui/playground/playground.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -24,15 +21,19 @@ class CameraAction extends ValueNotifier<ActionValue> {
     required BuildContext context,
   })  : _controllerNotifier = controllerNotifier,
         _uiHandler = UIHandler(context),
-        _screenshotKey = GlobalKey(),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
-        stickerController = StickerboothController(),
+        playgroundController = PlaygroundController(),
         super(ActionValue());
 
+  ///
   final ControllerNotifier _controllerNotifier;
+
+  ///
   final UIHandler _uiHandler;
-  final GlobalKey _screenshotKey;
+
+  ///
+  final PlaygroundController playgroundController;
 
   ///
   final Zoom zoom;
@@ -40,11 +41,13 @@ class CameraAction extends ValueNotifier<ActionValue> {
   ///
   final Exposure exposure;
 
-  ///
-  final StickerboothController stickerController;
-
-  ///
-  GlobalKey get screenshotKey => _screenshotKey;
+  @override
+  void dispose() {
+    zoom.dispose();
+    exposure.dispose();
+    playgroundController.dispose();
+    super.dispose();
+  }
 
   ///
   bool get initialized => _controllerNotifier.initialized;
@@ -63,12 +66,7 @@ class CameraAction extends ValueNotifier<ActionValue> {
           : CameraLensDirection.back;
 
   /// Hide close button on textfield has focus or while editing stickers
-  bool get hideCloseButton =>
-      value.hasFocus || value.editingMode || value.isRecordingVideo;
-
-  /// Hive gradient background changer button
-  bool get hideBackgroundChangerButton =>
-      value.editingMode || value.cameraType != CameraType.text;
+  bool get hideCloseButton => value.isRecordingVideo;
 
   /// Hide flash button
   bool get hideFlashButton =>
@@ -78,25 +76,16 @@ class CameraAction extends ValueNotifier<ActionValue> {
       lensDirection != CameraLensDirection.back ||
       value.isRecordingVideo;
 
-  /// Hide sticker's editing button's
-  bool get hideStickerEditingButton =>
-      value.editingMode || value.cameraType != CameraType.text;
-
-  /// Hide tab to type text button
-  bool get hideEditingTextButton =>
-      value.cameraType != CameraType.text ||
-      value.hasFocus ||
-      value.hasStickers;
-
   /// Hive shutter view on Textview
   bool get hideShutterView => value.cameraType == CameraType.text;
 
   /// Hide camera type slider view
   bool get hideCameraTypeScroller =>
-      value.hasFocus ||
-      value.editingMode ||
-      value.isRecordingVideo ||
-      value.hasStickers;
+      value.isRecordingVideo || value.hideCameraChanger;
+  // tfController.value.hasFocus ||
+  // value.editingMode ||
+  // value.isRecordingVideo ||
+  // value.hasStickers;
 
   /// Hide gallery preview button
   bool get hideGalleryPreviewButton =>
@@ -105,42 +94,6 @@ class CameraAction extends ValueNotifier<ActionValue> {
   /// Hide gallery preview button
   bool get hideCameraRotationButton =>
       value.cameraType == CameraType.text || value.isRecordingVideo;
-
-  /// Show sticker delete popup
-  bool get showStickerDeletePopup => value.editingMode;
-
-  /// Show screenshot capture view on Textview
-  bool get hideScreenshotCaptureView => value.editingMode || !value.hasStickers;
-
-  @override
-  void dispose() {
-    zoom.dispose();
-    exposure.dispose();
-    stickerController.dispose();
-    super.dispose();
-  }
-
-  /// Update controller value
-  void updateValue({
-    bool? hasStickers,
-    bool? isEditing,
-    bool? hasFocus,
-  }) {
-    value = value.copyWith(
-      hasStickers: hasStickers,
-      editingMode: isEditing,
-      hasFocus: hasFocus,
-    );
-  }
-
-  /// Change Textview background
-  void changeBackground() {
-    final current = value.background;
-    final index = gradients.indexOf(current);
-    final hasMatch = index != -1;
-    final nextIndex = hasMatch && index + 1 < gradients.length ? index + 1 : 0;
-    value = value.copyWith(background: gradients[nextIndex]);
-  }
 
   ///
   void changeCameraType(CameraType type) {
@@ -216,50 +169,6 @@ class CameraAction extends ValueNotifier<ActionValue> {
     return controller;
 
     //
-  }
-
-  ///
-  Future<void> captureScreenshot() async {
-    try {
-      final boundary = _screenshotKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
-
-      if (boundary != null) {
-        final image = await boundary.toImage();
-
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-        final data = byteData!.buffer.asUint8List();
-
-        // final date = DateTime.now();
-
-        // final entity = AssetEntity(
-        //   id: date.millisecond.toString(),
-        //   height: image.height,
-        //   width: image.width,
-        //   typeInt: 1,
-        //   mimeType: 'image/png',
-        //   createDtSecond: date.second,
-        //   modifiedDateSecond: date.second,
-        // );
-
-        // final  byteData =
-        //     await image.toByteData(format: ui.ImageByteFormat.png);
-        // final Uint8List pngBytes = byteData!.buffer.asUint8List();
-        // print(pngBytes);
-
-        final entity = await PhotoManager.editor.saveImage(data);
-
-        if (entity != null) {
-          _uiHandler.pop<AssetEntity>(entity);
-        } else {
-          _uiHandler.showSnackBar('Something went wrong! Please try again');
-          value = value.copyWith(isTakingPicture: false);
-          return;
-        }
-      }
-    } catch (e) {
-      _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
-    }
   }
 
   /// Take picture
@@ -483,11 +392,8 @@ class ActionValue {
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
-    this.hasFocus = false,
-    this.editingMode = false,
-    this.hasStickers = false,
-    GradientColor? background,
-  }) : background = background ?? gradients[0];
+    this.hideCameraChanger = false,
+  });
 
   ///
   final CameraDescription? cameraDescription;
@@ -520,16 +426,7 @@ class ActionValue {
   final bool isRecordingPaused;
 
   ///
-  final bool hasFocus;
-
-  ///
-  final bool editingMode;
-
-  ///
-  final bool hasStickers;
-
-  ///
-  final GradientColor background;
+  final bool hideCameraChanger;
 
   ///
   ActionValue copyWith({
@@ -541,10 +438,7 @@ class ActionValue {
     bool? isTakingPicture,
     bool? isRecordingVideo,
     bool? isRecordingPaused,
-    bool? hasFocus,
-    bool? editingMode,
-    bool? hasStickers,
-    GradientColor? background,
+    bool? hideCameraChanger,
   }) {
     return ActionValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
@@ -555,10 +449,7 @@ class ActionValue {
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
-      hasFocus: hasFocus ?? this.hasFocus,
-      editingMode: editingMode ?? this.editingMode,
-      hasStickers: hasStickers ?? this.hasStickers,
-      background: background ?? this.background,
+      hideCameraChanger: hideCameraChanger ?? this.hideCameraChanger,
     );
   }
 }

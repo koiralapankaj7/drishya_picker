@@ -1,4 +1,4 @@
-import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
+import '../entities/sticker_asset.dart';
 
 ///
 const emptyAssetId = '';

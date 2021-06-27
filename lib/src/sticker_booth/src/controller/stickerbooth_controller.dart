@@ -1,10 +1,9 @@
-import 'dart:developer';
-
-import 'package:drishya_picker/src/draggable_resizable/src/controller/stickerbooth_value.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/draggable_resizable.dart';
-import 'package:drishya_picker/src/draggable_resizable/src/entities/sticker_asset.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+
+import '../draggable_resizable.dart';
+import '../entities/sticker_asset.dart';
+import '../entities/stickerbooth_value.dart';
 
 ///
 typedef UuidGetter = String Function();
@@ -85,10 +84,17 @@ class StickerboothController extends ValueNotifier<StickerboothValue> {
   }
 
   /// clear stickers tapped
-  void clearStickers() {}
+  void clearStickers() {
+    value = value.copyWith(
+      assets: [],
+      selectedAssetId: emptyAssetId,
+    );
+  }
 
   /// PhotoTapped
-  void outsideTapped() {
+  void unselectSticker() {
     value = value.copyWith(selectedAssetId: emptyAssetId);
   }
+
+//
 }

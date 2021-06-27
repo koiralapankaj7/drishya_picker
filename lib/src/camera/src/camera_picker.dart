@@ -11,9 +11,9 @@ import 'package:photo_manager/photo_manager.dart';
 
 import 'camera_ui/builders/camera_action_provider.dart';
 import 'camera_ui/builders/controller_builder.dart';
+import 'camera_ui/camera_overlay.dart';
 import 'camera_ui/camera_view.dart';
-import 'camera_ui/control_view.dart';
-import 'camera_ui/text_view.dart';
+import 'camera_ui/playground/playground.dart';
 import 'controllers/camera_action.dart';
 import 'controllers/controller_notifier.dart';
 import 'entities/camera_type.dart';
@@ -139,7 +139,7 @@ class _CameraPickerState extends State<CameraPicker>
 
                       switch (_cameraAction.value.cameraType) {
                         case CameraType.text:
-                          return const TextView();
+                          return const Playground();
                         default:
                           return CameraView(action: action);
                       }
@@ -147,7 +147,10 @@ class _CameraPickerState extends State<CameraPicker>
                   ),
 
                   // Camera control view
-                  const ControlView(videoDuration: Duration(seconds: 10)),
+                  CameraOverlay(
+                    action: _cameraAction,
+                    videoDuration: const Duration(seconds: 10),
+                  ),
                 ],
               ),
             );

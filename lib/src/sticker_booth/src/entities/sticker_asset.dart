@@ -129,8 +129,8 @@ enum StickerPathType {
   none,
 }
 
-//
-const animatedStickers = {
+///
+const gifs = {
   Sticker(
     name: 'No Way',
     path: 'https://media.giphy.com/media/USUIWSteF8DJoc5Snd/giphy.gif',
@@ -216,40 +216,161 @@ const animatedStickers = {
     path: 'https://media.giphy.com/media/xT0GqKaASLordVtYCk/giphy.gif',
     pathType: StickerPathType.networkImg,
   ),
+};
+
+///
+const arts = {
   Sticker(
-    name: '',
+    name: 'Multiple circles',
     path:
-        'https://e7.pngegg.com/pngimages/857/954/png-clipart-tattoo-others-miscellaneous-3d-computer-graphics.png',
+        'https://static.vecteezy.com/system/resources/previews/001/192/216/original/circle-png.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Red color',
+    path:
+        'https://www.pngarts.com/files/2/Blood-Red-Smoke-PNG-Background-Image.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Flowers',
+    path: 'https://freepngimg.com/thumb/vector/5-2-vector-high-quality-png.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Multiple colors splash',
+    path:
+        ' https://img.pngio.com/millions-of-png-images-backgrounds-and-vectors-for-free-download-holi-background-png-640_640.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Circle drops',
+    path:
+        'https://www.freepnglogos.com/uploads/bubbles-png/bubbles-png-transparent-image-pngpix-4.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Eagle Wings',
+    path: 'https://www.freeiconspng.com/uploads/angel-png-1.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Cloud',
+    path:
+        'https://i.pinimg.com/originals/19/8d/ae/198daeda14097d45e417e62ff283f10e.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Wings',
+    path:
+        'https://cdn.pixabay.com/photo/2017/07/04/23/41/white-wings-2473023__480.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Abstract art',
+    path:
+        'https://freepngimg.com/download/graphic/53280-2-abstract-art-hd-free-png-hq.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Love hearts',
+    path: 'https://www.pngarts.com/files/4/Love-Heart-PNG-Free-Download.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Hair',
+    path:
+        'https://cdn.statically.io/img/kreditings.com/wp-content/uploads/2020/09/hair-png.png?quality=100&f=auto',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Hair',
+    path:
+        'https://i.pinimg.com/originals/df/8b/f1/df8bf1a18047ff20d3f82e0f47dbe683.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Hair',
+    path:
+        'https://i.dlpng.com/static/png/1357097-cb-hair-png-hair-png-521_500_preview.png',
     pathType: StickerPathType.networkImg,
   ),
   Sticker(
     name: '',
-    path:
-        'https://static4.depositphotos.com/1006994/298/v/600/depositphotos_2983099-stock-illustration-grunge-design.jpg',
+    path: 'https://freepngimg.com/thumb/hair/21-women-hair-png-image-thumb.png',
     pathType: StickerPathType.networkImg,
   ),
   Sticker(
-    name: '',
-    path:
-        'https://toppng.com/uploads/preview/blue-paint-drip-png-black-paint-drips-1156289356992eulaf4l6.png',
+    name: 'Hair',
+    path: 'https://pngimg.com/uploads/hair/hair_PNG5637.png',
     pathType: StickerPathType.networkImg,
   ),
   Sticker(
-    name: '',
-    path:
-        'https://w7.pngwing.com/pngs/841/943/png-transparent-lion-euclidean-ink-jet-ink-effect-splash.png',
+    name: 'Hair',
+    path: 'https://www.pngarts.com/files/4/Picsart-PNG-Background-Image.png',
     pathType: StickerPathType.networkImg,
   ),
   Sticker(
-    name: '',
-    path:
-        'https://i.pinimg.com/originals/0a/1f/82/0a1f820e29719c7b67e9d5aa44241155.png',
+    name: 'Color splash',
+    path: 'https://pngimage.net/wp-content/uploads/2018/06/png-arts-6.png',
     pathType: StickerPathType.networkImg,
   ),
   Sticker(
-    name: '',
+    name: 'Smoke',
     path:
-        'https://w7.pngwing.com/pngs/114/579/png-transparent-pink-cross-stroke-ink-brush-pen-red-ink-brush-ink-leave-the-material-text.png',
+        ' https://i.dlpng.com/static/png/6242591-pink-smoke-png-background-image-png-arts-pink-smoke-png-738_733_preview.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Colors',
+    path: 'https://pngimage.net/wp-content/uploads/2018/05/colors-png-1.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Art',
+    path: 'https://i.dlpng.com/static/png/6719469_preview.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Paint splatter',
+    path:
+        'https://pngimage.net/wp-content/uploads/2018/06/paint-splatter-png-6.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Quincea',
+    path:
+        'https://pngimage.net/wp-content/uploads/2018/06/vector-quincea%C3%B1era-png-1.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Red lines',
+    path:
+        'https://www.downloadclipart.net/large/red-abstract-lines-png-image.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Smoke',
+    path:
+        'https://pngimage.net/wp-content/uploads/2018/06/%D1%87%D0%B5%D1%80%D0%BD%D1%8B%D0%B9-%D0%B4%D1%8B%D0%BC-png-2.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Eagle',
+    path:
+        'https://www.pngkey.com/png/full/0-9646_american-eagle-logo-png-eagle-holding-lombardi-trophy.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Bird',
+    path:
+        'https://storage.needpix.com/rsynced_images/no-background-2997564_1280.png',
+    pathType: StickerPathType.networkImg,
+  ),
+  Sticker(
+    name: 'Eagle',
+    path:
+        'https://cdn.pixabay.com/photo/2017/12/13/23/27/no-background-3017971_1280.png',
     pathType: StickerPathType.networkImg,
   ),
 };

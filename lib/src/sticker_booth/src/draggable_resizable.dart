@@ -35,6 +35,7 @@ class DraggableResizable extends StatefulWidget {
     Key? key,
     required this.child,
     required this.size,
+    this.onTap,
     BoxConstraints? constraints,
     this.initialPosition = Offset.zero,
     this.onUpdate,
@@ -47,6 +48,9 @@ class DraggableResizable extends StatefulWidget {
 
   /// The child which will be draggable/resizable.
   final Widget child;
+
+  /// Drag/Resize end callback
+  final VoidCallback? onTap;
 
   /// Drag/Resize start callback
   final VoidCallback? onStart;
@@ -168,6 +172,7 @@ class _DraggableResizableState extends State<DraggableResizable> {
                   key: const Key('draggableResizable_child_draggablePoint'),
                   onScaleUpdate: widget.onScaleUpdate,
                   onTap: () {
+                    widget.onTap?.call();
                     onUpdate(normalizedLeft, normalizedTop);
                   },
                   onStart: widget.onStart,
