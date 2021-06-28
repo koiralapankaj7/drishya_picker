@@ -25,10 +25,6 @@ class ShutterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (action.hideShutterView) {
-      return const SizedBox();
-    }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

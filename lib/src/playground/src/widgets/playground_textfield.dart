@@ -1,9 +1,10 @@
+import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
 
 ///
-class PlaygroundTextfield extends StatefulWidget {
+class PlaygroundTextfield extends StatelessWidget {
   ///
   const PlaygroundTextfield({
     Key? key,
@@ -13,52 +14,45 @@ class PlaygroundTextfield extends StatefulWidget {
   ///
   final PlaygroundController controller;
 
-  @override
-  _PlaygroundTextfieldState createState() => _PlaygroundTextfieldState();
-}
+  void _addSticker(GlobalKey key) {
+    final box = key.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null) {
+      final sticker = Sticker(
+        name: '',
+        size: box.size,
+        widget: key.currentWidget,
+      );
+      controller.stickerController.addSticker(sticker);
+    }
+  }
 
-class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
-  Widget? sticker;
-
-  // void _addSticker(CameraAction action, GlobalKey key) {
-  //   final box = key.currentContext?.findRenderObject() as RenderBox?;
-  //   if (box != null) {
-  //     final sticker = Sticker(
-  //       name: '',
-  //       size: box.size,
-  //       widget: key.currentWidget,
-  //     );
-  //     action.stickerController.addSticker(sticker);
-  //   }
-  // }
-
-  // void _onTextChanged(BuildContext context, GlobalKey key) {
-  //   final box = key.currentContext?.findRenderObject() as RenderBox?;
-  //   if (box != null) {
-  //     final actualWidth = MediaQuery.of(context).size.width;
-  //     final currentWidth = box.size.width;
-  //     widget.controller.value = widget.controller.value.copyWith(
-  //       maxLines: currentWidth >= actualWidth ? null : 1,
-  //     );
-  //   }
-  // }
+  void _onTextChanged(BuildContext context, GlobalKey key) {
+    final box = key.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null) {
+      final actualWidth = MediaQuery.of(context).size.width;
+      final currentWidth = box.size.width;
+      controller.value = controller.value.copyWith(
+        maxLines: currentWidth >= actualWidth ? null : 1,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox();
-    // return TextSticker(
-    //   hasFocus: actionValue.hasFocus,
-    //   fillColor: value.fillColor,
-    //   textAlign: value.textAlign,
-    //   maxLines: value.maxLines.isNegative ? null : value.maxLines,
-    //   onChanged: _onTextChanged,
-    //   onPressedOutside: (createSticker, ctx, key) {
-    //     action.updateValue(hasFocus: false);
-    //     if (createSticker) {
-    //       _addSticker(action, key);
-    //     }
-    //   },
-    // );
+    final value = controller.value;
+    return TextSticker(
+      hasFocus: value.hasFocus,
+      fillColor: value.fillColor,
+      textAlign: value.textAlign,
+      maxLines: value.maxLines.isNegative ? null : value.maxLines,
+      onChanged: _onTextChanged,
+      onPressedOutside: (createSticker, ctx, key) {
+        controller.updateValue(hasFocus: false);
+        if (createSticker) {
+          _addSticker(key);
+        }
+      },
+    );
   }
 }
 

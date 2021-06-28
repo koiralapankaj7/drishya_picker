@@ -237,12 +237,12 @@ const arts = {
     path: 'https://freepngimg.com/thumb/vector/5-2-vector-high-quality-png.png',
     pathType: StickerPathType.networkImg,
   ),
-  Sticker(
-    name: 'Multiple colors splash',
-    path:
-        ' https://img.pngio.com/millions-of-png-images-backgrounds-and-vectors-for-free-download-holi-background-png-640_640.png',
-    pathType: StickerPathType.networkImg,
-  ),
+  // Sticker(
+  //   name: 'Multiple colors splash',
+  //   path:
+  //       ' https://img.pngio.com/millions-of-png-images-backgrounds-and-vectors-for-free-download-holi-background-png-640_640.png',
+  //   pathType: StickerPathType.networkImg,
+  // ),
   Sticker(
     name: 'Circle drops',
     path:
@@ -315,12 +315,12 @@ const arts = {
     path: 'https://pngimage.net/wp-content/uploads/2018/06/png-arts-6.png',
     pathType: StickerPathType.networkImg,
   ),
-  Sticker(
-    name: 'Smoke',
-    path:
-        ' https://i.dlpng.com/static/png/6242591-pink-smoke-png-background-image-png-arts-pink-smoke-png-738_733_preview.png',
-    pathType: StickerPathType.networkImg,
-  ),
+  // Sticker(
+  //   name: 'Smoke',
+  //   path:
+  //       ' https://i.dlpng.com/static/png/6242591-pink-smoke-png-background-image-png-arts-pink-smoke-png-738_733_preview.png',
+  //   pathType: StickerPathType.networkImg,
+  // ),
   Sticker(
     name: 'Colors',
     path: 'https://pngimage.net/wp-content/uploads/2018/05/colors-png-1.png',

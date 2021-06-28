@@ -99,7 +99,9 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     },
                     onUpdate: (update, key) {
                       stickerController.dragSticker(
-                          asset: asset, update: update);
+                        asset: asset,
+                        update: update,
+                      );
                     },
                     onScaleUpdate: _onScaleUpdate,
                     size: asset.sticker.size,
@@ -113,7 +115,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
               ),
 
               // Delete popup area
-              if (controller.value.editingMode)
+              if (controller.value.isEditing)
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: AnimatedContainer(
@@ -133,6 +135,8 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     ),
                   ),
                 ),
+
+              //
             ],
           ),
         );

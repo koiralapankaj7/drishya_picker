@@ -17,9 +17,6 @@ class FlashButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (action.hideFlashButton) {
-      return const SizedBox();
-    }
     final isOn = action.value.flashMode != FlashMode.off;
     return GestureDetector(
       onTap: action.changeFlashMode,

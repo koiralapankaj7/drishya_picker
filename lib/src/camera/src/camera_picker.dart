@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
@@ -88,11 +89,11 @@ class _CameraPickerState extends State<CameraPicker>
 
   void _playgroundListener() {
     final value = _playgroundController.value;
-    if (value.hasFocus || value.editingMode || value.hasStickers) {
-      _actionNotifier.value = _actionNotifier.value.copyWith(
-        hideCameraChanger: true,
-      );
-    }
+    final hide = value.hasFocus || value.isEditing || value.hasStickers;
+    _actionNotifier.value = _actionNotifier.value.copyWith(
+      hideCameraChanger: hide,
+    );
+    if (value.hasFocus || value.isEditing || value.hasStickers) {}
   }
 
   // Handle app life cycle
@@ -156,11 +157,14 @@ class _CameraPickerState extends State<CameraPicker>
                         },
                       ),
 
-                      // Camera control view
+                      // Camera control overlay
                       CameraOverlay(
                         action: _actionNotifier,
+                        playgroundCntroller: _playgroundController,
                         videoDuration: const Duration(seconds: 10),
                       ),
+
+                      //
                     ],
                   );
                 },

@@ -2,6 +2,7 @@ import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
+import 'playground_builder.dart';
 import 'playground_sticker_picker.dart';
 
 ///
@@ -63,46 +64,54 @@ class PlaygroundButtonCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasFocus = controller.value.hasFocus;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        _DoneButton(
-          onPressed: () {
-            controller.updateValue(hasFocus: false);
-          },
-          isVisible: hasFocus,
-        ),
-        _Button(
-          label: 'Aa',
-          size: hasFocus ? 48.0 : 44.0,
-          fontSize: hasFocus ? 24.0 : 20.0,
-          background: hasFocus ? Colors.white : Colors.black38,
-          labelColor: hasFocus ? Colors.black : Colors.white,
-          onPressed: () {
-            controller.updateValue(hasFocus: !hasFocus);
-          },
-        ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: _textAlignButtonPressed,
-          child: _TextAlignmentIcon(align: controller.value.textAlign),
-        ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: _textBackgroundButtonPressed,
-          child: _TextBackgroundIcon(
-            isSelected: controller.value.fillColor != Colors.transparent,
+    return PlaygroundBuilder(
+      controller: controller,
+      builder: (context, value, child) {
+        if (value.isEditing) return const SizedBox();
+        return child!;
+        //
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _DoneButton(
+            onPressed: () {
+              controller.updateValue(hasFocus: false);
+            },
+            isVisible: hasFocus,
           ),
-        ),
-        _Button(
-          isVisible: !hasFocus,
-          iconData: Icons.emoji_emotions,
-          onPressed: () {
-            _onStickerIconPressed(context);
-          },
-        ),
-      ],
+          _Button(
+            label: 'Aa',
+            size: hasFocus ? 48.0 : 44.0,
+            fontSize: hasFocus ? 24.0 : 20.0,
+            background: hasFocus ? Colors.white : Colors.black38,
+            labelColor: hasFocus ? Colors.black : Colors.white,
+            onPressed: () {
+              controller.updateValue(hasFocus: !hasFocus);
+            },
+          ),
+          _Button(
+            isVisible: hasFocus,
+            onPressed: _textAlignButtonPressed,
+            child: _TextAlignmentIcon(align: controller.value.textAlign),
+          ),
+          _Button(
+            isVisible: hasFocus,
+            onPressed: _textBackgroundButtonPressed,
+            child: _TextBackgroundIcon(
+              isSelected: controller.value.fillColor != Colors.transparent,
+            ),
+          ),
+          _Button(
+            isVisible: !hasFocus,
+            iconData: Icons.emoji_emotions,
+            onPressed: () {
+              _onStickerIconPressed(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

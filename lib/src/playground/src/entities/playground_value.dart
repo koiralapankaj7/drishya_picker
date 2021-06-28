@@ -10,7 +10,7 @@ class PlaygroundValue {
     this.fillColor = Colors.transparent,
     this.maxLines = 1,
     this.hasFocus = false,
-    this.editingMode = false,
+    // this.editingMode = false,
     this.hasStickers = false,
     this.isEditing = false,
     PlaygroundBackground? background,
@@ -29,7 +29,7 @@ class PlaygroundValue {
   final bool hasFocus;
 
   ///
-  final bool editingMode;
+  // final bool editingMode;
 
   ///
   final bool hasStickers;
@@ -58,7 +58,7 @@ class PlaygroundValue {
       textAlign: textAlign ?? this.textAlign,
       fillColor: fillColor ?? this.fillColor,
       hasFocus: hasFocus ?? this.hasFocus,
-      editingMode: editingMode ?? this.editingMode,
+      // editingMode: editingMode ?? this.editingMode,
       maxLines: maxLines ?? this.maxLines,
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,

@@ -19,10 +19,6 @@ class CameraTypeChanger extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (action.hideCameraTypeScroller) {
-      return const SizedBox();
-    }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [

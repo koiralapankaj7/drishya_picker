@@ -1,11 +1,10 @@
 //
-import 'package:drishya_picker/src/playground/src/entities/playground_value.dart';
-import 'package:drishya_picker/src/playground/src/widgets/playground_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'controller/playground_controller.dart';
 import 'entities/playground_background.dart';
+import 'entities/playground_value.dart';
 import 'widgets/playground_background.dart';
 import 'widgets/playground_controller_provider.dart';
 import 'widgets/playground_stickers.dart';
@@ -54,14 +53,11 @@ class _PlaygroundState extends State<Playground> {
               body: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // background
+                  // Playground background
                   background,
 
-                  //
+                  // Stickers
                   PlaygroundStickers(controller: _controller),
-
-                  //
-                  PlaygroundOverlay(controller: _controller),
 
                   //
                 ],

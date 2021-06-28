@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
 import '../entities/playground_background.dart';
+import 'playground_builder.dart';
 
 ///
 class GradientBackgroundView extends StatelessWidget {
@@ -70,28 +71,37 @@ class GradientBackgroundChanger extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = controller.value.background;
-    final isGradient = background is GradientBackground;
-    return GestureDetector(
-      onTap: controller.changeBackground,
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(
-          side: BorderSide(
-            color: Colors.white,
-            width: 2.0,
+    return PlaygroundBuilder(
+      controller: controller,
+      builder: (context, value, child) {
+        if (value.isEditing) return const SizedBox();
+
+        final background = controller.value.background;
+        final isGradient = background is GradientBackground;
+
+        return GestureDetector(
+          onTap: controller.changeBackground,
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(
+              side: BorderSide(
+                color: Colors.white,
+                width: 2.0,
+              ),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              width: 54.0,
+              height: 54.0,
+              child: GradientBackgroundView(
+                background: isGradient
+                    ? background as GradientBackground
+                    : gradients[0],
+              ),
+            ),
           ),
-        ),
-        clipBehavior: Clip.hardEdge,
-        child: SizedBox(
-          width: 54.0,
-          height: 54.0,
-          child: GradientBackgroundView(
-            background:
-                isGradient ? background as GradientBackground : gradients[0],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

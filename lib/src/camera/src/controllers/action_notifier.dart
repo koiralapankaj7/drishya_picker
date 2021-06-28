@@ -59,33 +59,28 @@ class ActionNotifier extends ValueNotifier<ActionValue> {
           ? CameraLensDirection.front
           : CameraLensDirection.back;
 
-  /// Hide close button on textfield has focus or while editing stickers
-  bool get hideCloseButton => value.isRecordingVideo;
+  ///
+  bool get showCloseButton =>
+      value.cameraType != CameraType.text && !value.isRecordingVideo;
 
-  /// Hide flash button
-  bool get hideFlashButton =>
-      value.cameraType == CameraType.text ||
-      (value.cameraType == CameraType.selfi &&
-          lensDirection != CameraLensDirection.back) ||
-      lensDirection != CameraLensDirection.back ||
-      value.isRecordingVideo;
+  ///
+  bool get showFlashButton =>
+      value.cameraType != CameraType.text &&
+      lensDirection == CameraLensDirection.back &&
+      !value.isRecordingVideo;
 
-  /// Hive shutter view on Textview
-  bool get hideShutterView => value.cameraType == CameraType.text;
+  ///
+  bool get showShutterView => value.cameraType != CameraType.text;
 
-  /// Hide camera type slider view
-  bool get hideCameraTypeScroller =>
-      value.isRecordingVideo || value.hideCameraChanger;
-  // tfController.value.hasFocus ||
-  // value.editingMode ||
-  // value.isRecordingVideo ||
-  // value.hasStickers;
+  ///
+  bool get showCameraTypeScroller =>
+      !value.isRecordingVideo && !value.hideCameraChanger;
 
-  /// Hide gallery preview button
+  ///
   bool get hideGalleryPreviewButton =>
       value.cameraType == CameraType.text || value.isRecordingVideo;
 
-  /// Hide gallery preview button
+  ///
   bool get hideCameraRotationButton =>
       value.cameraType == CameraType.text || value.isRecordingVideo;
 

@@ -16,8 +16,6 @@ class CameraCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (action.hideCloseButton) return const SizedBox();
-
     return InkWell(
       onTap: Navigator.of(context).pop,
       child: Container(
