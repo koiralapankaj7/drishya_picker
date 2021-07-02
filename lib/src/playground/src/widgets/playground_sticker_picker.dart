@@ -275,7 +275,7 @@ class StickerChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (asset.pathType) {
-      case StickerPathType.networkImg:
+      case PathType.networkImg:
         return _Network(
           url: asset.path!,
           onPressed: onPressed,

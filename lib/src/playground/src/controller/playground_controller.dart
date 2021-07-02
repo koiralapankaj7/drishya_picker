@@ -15,12 +15,16 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   PlaygroundController()
       : _playgroundKey = GlobalKey(),
         stickerController = StickerboothController(),
+        textController = TextEditingController(),
         super(PlaygroundValue());
 
   final GlobalKey _playgroundKey;
 
   ///
   final StickerboothController stickerController;
+
+  ///
+  final TextEditingController textController;
 
   ///
   GlobalKey get playgroundKey => _playgroundKey;

@@ -8,6 +8,7 @@ import 'entities/playground_value.dart';
 import 'widgets/playground_background.dart';
 import 'widgets/playground_controller_provider.dart';
 import 'widgets/playground_stickers.dart';
+import 'widgets/playground_textfield.dart';
 
 ///
 class Playground extends StatefulWidget {
@@ -58,6 +59,9 @@ class _PlaygroundState extends State<Playground> {
 
                   // Stickers
                   PlaygroundStickers(controller: _controller),
+
+                  // Textfield
+                  PlaygroundTextfield(controller: _controller),
 
                   //
                 ],

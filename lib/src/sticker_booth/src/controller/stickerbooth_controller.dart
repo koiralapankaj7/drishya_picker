@@ -45,6 +45,8 @@ class StickerboothController extends ValueNotifier<StickerboothValue> {
     Future.delayed(const Duration(milliseconds: 16), () {
       final assets = List.of(value.assets);
       final index = assets.indexWhere((element) => element.id == asset.id);
+      if (index.isNegative) return;
+
       final sticker = assets.removeAt(index);
       assets.add(
         sticker.copyWith(
@@ -68,15 +70,16 @@ class StickerboothController extends ValueNotifier<StickerboothValue> {
   }
 
   /// remove selected sticker
-  void deleteSticker() {
-    final stickers = List.of(value.assets);
-    final index = stickers.indexWhere(
-      (element) => element.id == value.selectedAssetId,
-    );
-    final stickerExists = index != -1;
-    if (stickerExists) {
-      stickers.removeAt(index);
-    }
+  void deleteSticker(StickerAsset asset) {
+    final stickers = List.of(value.assets)
+      ..removeWhere((element) => element.id == asset.id);
+    // final index = stickers.indexWhere(
+    //   (element) => element.id == value.selectedAssetId,
+    // );
+    // final stickerExists = index != -1;
+    // if (stickerExists) {
+    //   stickers.removeAt(index);
+    // }
     value = value.copyWith(
       assets: stickers,
       selectedAssetId: emptyAssetId,

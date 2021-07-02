@@ -19,7 +19,7 @@ class PlaygroundAddTextButton extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        if (value.hasStickers) return const SizedBox();
+        if (value.hasStickers || value.hasFocus) return const SizedBox();
 
         return child!;
       },

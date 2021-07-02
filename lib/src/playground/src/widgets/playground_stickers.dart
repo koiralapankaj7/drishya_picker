@@ -1,10 +1,10 @@
+import 'package:drishya_picker/src/playground/src/widgets/playground_textfield.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
 
-// const _initialStickerScale = 0.25;
-const _minStickerScale = 0.05;
+const _minStickerScale = 0.5;
 
 ///
 class PlaygroundStickers extends StatefulWidget {
@@ -22,9 +22,16 @@ class PlaygroundStickers extends StatefulWidget {
 }
 
 class _PlaygroundStickersState extends State<PlaygroundStickers> {
-  final _deleteKey = GlobalKey();
-
+  late final GlobalKey _deleteKey;
+  late final PlaygroundController _controller;
   var _collied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _deleteKey = GlobalKey();
+    _controller = widget.controller;
+  }
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final deleteBox =
@@ -48,10 +55,29 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
     }
   }
 
+  Widget? _stickerChild(Sticker sticker) {
+    if (sticker.pathType == PathType.networkImg) {
+      return Image.network(
+        sticker.path!,
+        fit: BoxFit.fill,
+        gaplessPlayback: true,
+      );
+    }
+
+    if (sticker.pathType == PathType.assetsImage) {
+      return Image.asset(
+        sticker.path!,
+        fit: BoxFit.fill,
+        gaplessPlayback: true,
+      );
+    }
+
+    return sticker.widget;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
-    final stickerController = controller.stickerController;
+    final stickerController = _controller.stickerController;
 
     return ValueListenableBuilder<StickerboothValue>(
       valueListenable: stickerController,
@@ -74,28 +100,31 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                 fit: StackFit.expand,
                 children: stickerValue.assets.map((asset) {
                   final isSelected = asset.id == stickerValue.selectedAssetId;
+
                   return DraggableResizable(
                     key: Key(asset.id),
                     canTransform: isSelected,
                     onTap: () {
-                      if (asset.sticker.pathType == StickerPathType.text) {
-                        controller.updateValue(hasFocus: true);
+                      asset.sticker.onPressed?.call(asset.sticker);
+                      if (asset.sticker.widget is TextStickerWrapper) {
+                        stickerController.deleteSticker(asset);
+                        _controller.updateValue(hasFocus: true);
                       }
                     },
                     onStart: () {
-                      controller.updateValue(isEditing: true);
+                      _controller.updateValue(isEditing: true);
                     },
                     onEnd: () {
                       Future.delayed(const Duration(milliseconds: 50), () {
                         if (_collied) {
-                          stickerController.deleteSticker();
-                          controller.updateValue(
+                          stickerController.deleteSticker(asset);
+                          _controller.updateValue(
                             hasStickers: stickerValue.assets.length > 1,
                           );
                           _collied = false;
                         }
                       });
-                      controller.updateValue(isEditing: false);
+                      _controller.updateValue(isEditing: false);
                     },
                     onUpdate: (update, key) {
                       stickerController.dragSticker(
@@ -108,14 +137,14 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     constraints: asset.getImageConstraints(),
                     child: Opacity(
                       opacity: isSelected && _collied ? 0.3 : 1.0,
-                      child: asset.widget,
+                      child: _stickerChild(asset.sticker),
                     ),
                   );
                 }).toList(),
               ),
 
               // Delete popup area
-              if (controller.value.isEditing)
+              if (_controller.value.isEditing)
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: AnimatedContainer(
@@ -153,29 +182,5 @@ extension on StickerAsset {
       maxWidth: double.infinity,
       maxHeight: double.infinity,
     );
-  }
-
-  Widget? get widget {
-    if (sticker.pathType == StickerPathType.networkImg) {
-      return Image.network(
-        sticker.path!,
-        fit: BoxFit.fill,
-        gaplessPlayback: true,
-      );
-    }
-
-    if (sticker.pathType == StickerPathType.assetsImage) {
-      return Image.asset(
-        sticker.path!,
-        fit: BoxFit.fill,
-        gaplessPlayback: true,
-      );
-    }
-
-    if (sticker.pathType == StickerPathType.text) {
-      //
-    }
-
-    return sticker.widget;
   }
 }

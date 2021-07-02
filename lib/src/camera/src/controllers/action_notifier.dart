@@ -108,7 +108,15 @@ class ActionNotifier extends ValueNotifier<ActionValue> {
     // Fetch camera descriptions is description is not available
     if (description == null) {
       cameras = await availableCameras();
-      description = cameras[0];
+      if (cameras.isNotEmpty) {
+        description = cameras[0];
+      } else {
+        description = CameraDescription(
+          name: 'Simulator',
+          lensDirection: CameraLensDirection.front,
+          sensorOrientation: 0,
+        );
+      }
     }
 
     // create camera controller

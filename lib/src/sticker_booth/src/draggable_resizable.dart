@@ -124,12 +124,13 @@ class _DraggableResizableState extends State<DraggableResizable> {
   @override
   Widget build(BuildContext context) {
     final aspectRatio = widget.size.width / widget.size.height;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         position = position == Offset.zero
             ? Offset(
-                constraints.maxWidth / 2 - (size.width / 2),
-                constraints.maxHeight / 2 - (size.height / 2),
+                (constraints.maxWidth - size.width) / 2,
+                (constraints.maxHeight - size.height) / 2,
               )
             : position;
 
@@ -137,20 +138,20 @@ class _DraggableResizableState extends State<DraggableResizable> {
         final normalizedHeight = normalizedWidth / aspectRatio;
         final newSize = Size(normalizedWidth, normalizedHeight);
 
-        if (widget.constraints.isSatisfiedBy(newSize)) size = newSize;
+        if (widget.constraints.isSatisfiedBy(newSize)) {
+          size = newSize;
+        }
 
         final normalizedLeft = position.dx;
         final normalizedTop = position.dy;
 
-        final decoratedChild = ConstrainedBox(
+        final decoratedChild = Container(
           constraints: BoxConstraints.expand(
             height: normalizedHeight,
             width: normalizedWidth,
           ),
-          child: SizedBox(
-            key: key,
-            child: widget.child,
-          ),
+          key: key,
+          child: widget.child,
         );
 
         if (this.constraints != constraints) {
