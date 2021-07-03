@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import '../controllers/controller_notifier.dart';
 
 ///
-class ControllerBuilder extends StatelessWidget {
+class CameraInitializer extends StatelessWidget {
   ///
-  const ControllerBuilder({
+  const CameraInitializer({
     Key? key,
     required this.controllerNotifier,
     required this.builder,

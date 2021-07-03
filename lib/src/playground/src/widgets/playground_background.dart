@@ -59,9 +59,9 @@ class PhotoBackgroundView extends StatelessWidget {
 }
 
 ///
-class GradientBackgroundChanger extends StatelessWidget {
+class PlaygroundGradientBackgroundChanger extends StatelessWidget {
   ///
-  const GradientBackgroundChanger({
+  const PlaygroundGradientBackgroundChanger({
     Key? key,
     required this.controller,
   }) : super(key: key);

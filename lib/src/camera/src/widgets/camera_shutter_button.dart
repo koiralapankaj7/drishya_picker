@@ -3,33 +3,44 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../controllers/action_notifier.dart';
+import '../controllers/cam_controller.dart';
 import '../entities/camera_type.dart';
-import 'action_detector.dart';
-import 'action_notifier_provider.dart';
+import 'camera_builder.dart';
 
 ///
-class ShutterView extends StatelessWidget {
+class CameraShutterButton extends StatelessWidget {
   ///
-  const ShutterView({
+  const CameraShutterButton({
     Key? key,
     required this.videoDuration,
-    required this.action,
+    required this.controller,
   }) : super(key: key);
 
   ///
   final Duration videoDuration;
 
   ///
-  final ActionNotifier action;
+  final CamController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _ShutterButton(videoDuration: videoDuration),
-      ],
+    return CameraBuilder(
+      controller: controller,
+      builder: (value, child) {
+        if (value.hideCameraShutterButton) {
+          return const SizedBox();
+        }
+        return child!;
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _ShutterButton(
+            videoDuration: videoDuration,
+            controller: controller,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -38,11 +49,13 @@ class _ShutterButton extends StatefulWidget {
   const _ShutterButton({
     Key? key,
     required this.videoDuration,
+    required this.controller,
     this.size = 70.0,
   }) : super(key: key);
 
   final Duration videoDuration;
   final double size;
+  final CamController controller;
 
   @override
   _ShutterButtonState createState() => _ShutterButtonState();
@@ -50,10 +63,10 @@ class _ShutterButton extends StatefulWidget {
 
 class _ShutterButtonState extends State<_ShutterButton>
     with TickerProviderStateMixin {
+  late CamController _camController;
   late final AnimationController _controller;
   late final AnimationController _pulseController;
   late final Animation<double> _animation;
-  late CameraType _cameraType;
 
   var margin = 0.0;
   var strokeWidth = 6.0;
@@ -62,7 +75,7 @@ class _ShutterButtonState extends State<_ShutterButton>
   @override
   void initState() {
     super.initState();
-
+    _camController = widget.controller;
     // Progress bar animation controller
     _controller = AnimationController(
       vsync: this,
@@ -80,7 +93,7 @@ class _ShutterButtonState extends State<_ShutterButton>
     ))
       ..addStatusListener((status) {
         if (_pulseController.status == AnimationStatus.completed) {
-          if (_cameraType == CameraType.video) {
+          if (_camController.value.cameraType == CameraType.video) {
             _controller.forward();
           } else {
             _pulseController.reverse();
@@ -92,7 +105,7 @@ class _ShutterButtonState extends State<_ShutterButton>
   }
 
   void _startRecording() {
-    context.action!.startVideoRecording();
+    _camController.startVideoRecording();
     _pulseController.forward(from: 0.2);
     setState(() {
       strokeWidth = 3;
@@ -102,7 +115,7 @@ class _ShutterButtonState extends State<_ShutterButton>
   }
 
   void _stopRecording() {
-    context.action!.stopVideoRecording();
+    _camController.stopVideoRecording();
     _pulseController.reverse();
     _controller.reset();
     setState(() {
@@ -121,7 +134,7 @@ class _ShutterButtonState extends State<_ShutterButton>
   }
 
   void _cameraButtonPressed() {
-    context.action!.takePicture();
+    _camController.takePicture();
     _pulseController.forward(from: 0.2);
   }
 
@@ -155,7 +168,7 @@ class _ShutterButtonState extends State<_ShutterButton>
           },
           child: GestureDetector(
             onTap: () {
-              _cameraType == CameraType.video
+              _camController.value.cameraType == CameraType.video
                   ? _videoButtonPressed()
                   : _cameraButtonPressed();
             },
@@ -178,24 +191,20 @@ class _ShutterButtonState extends State<_ShutterButton>
                 ),
 
                 // Icon
-                ActionBuilder(
-                  builder: (action, value, child) {
-                    _cameraType = value.cameraType;
-                    return Builder(
-                      builder: (context) {
-                        switch (_cameraType) {
-                          case CameraType.selfi:
-                            return const Icon(
-                              CupertinoIcons.person_fill,
-                              color: Colors.blue,
-                            );
-                          case CameraType.video:
-                            return _VideoIcon(radius: _videoIconRadius);
-                          default:
-                            return const SizedBox();
-                        }
-                      },
-                    );
+                CameraBuilder(
+                  controller: widget.controller,
+                  builder: (value, child) {
+                    switch (value.cameraType) {
+                      case CameraType.selfi:
+                        return const Icon(
+                          CupertinoIcons.person_fill,
+                          color: Colors.blue,
+                        );
+                      case CameraType.video:
+                        return _VideoIcon(radius: _videoIconRadius);
+                      default:
+                        return const SizedBox();
+                    }
                   },
                 ),
 

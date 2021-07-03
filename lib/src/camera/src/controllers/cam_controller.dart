@@ -13,9 +13,9 @@ import 'exposure.dart';
 import 'zoom.dart';
 
 ///
-class ActionNotifier extends ValueNotifier<ActionValue> {
+class CamController extends ValueNotifier<ActionValue> {
   ///
-  ActionNotifier({
+  CamController({
     required ControllerNotifier controllerNotifier,
     required BuildContext context,
   })  : _controllerNotifier = controllerNotifier,
@@ -50,44 +50,14 @@ class ActionNotifier extends ValueNotifier<ActionValue> {
   CameraController get controller => _controllerNotifier.value.controller!;
 
   ///
-  CameraLensDirection get lensDirection =>
-      value.cameraDescription?.lensDirection ?? CameraLensDirection.back;
-
-  ///
-  CameraLensDirection get oppositeLensDirection =>
-      lensDirection == CameraLensDirection.back
-          ? CameraLensDirection.front
-          : CameraLensDirection.back;
-
-  ///
-  bool get showCloseButton =>
-      value.cameraType != CameraType.text && !value.isRecordingVideo;
-
-  ///
-  bool get showFlashButton =>
-      value.cameraType != CameraType.text &&
-      lensDirection == CameraLensDirection.back &&
-      !value.isRecordingVideo;
-
-  ///
-  bool get showShutterView => value.cameraType != CameraType.text;
-
-  ///
-  bool get showCameraTypeScroller =>
-      !value.isRecordingVideo && !value.hideCameraChanger;
-
-  ///
-  bool get hideGalleryPreviewButton =>
-      value.cameraType == CameraType.text || value.isRecordingVideo;
-
-  ///
-  bool get hideCameraRotationButton =>
-      value.cameraType == CameraType.text || value.isRecordingVideo;
+  void update({bool? isPlaygroundActive}) {
+    value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
+  }
 
   ///
   void changeCameraType(CameraType type) {
-    final canSwitch =
-        type == CameraType.selfi && lensDirection != CameraLensDirection.front;
+    final canSwitch = type == CameraType.selfi &&
+        value.lensDirection != CameraLensDirection.front;
     if (canSwitch) {
       switchCameraDirection(CameraLensDirection.front);
     }
@@ -382,14 +352,14 @@ class ActionValue {
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
-    this.cameraType = CameraType.text,
+    this.cameraType = CameraType.normal,
     this.flashMode = FlashMode.off,
     this.resolutionPreset = ResolutionPreset.medium,
     this.imageFormatGroup = ImageFormatGroup.jpeg,
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
-    this.hideCameraChanger = false,
+    this.isPlaygroundActive = false,
   });
 
   ///
@@ -423,7 +393,7 @@ class ActionValue {
   final bool isRecordingPaused;
 
   ///
-  final bool hideCameraChanger;
+  final bool isPlaygroundActive;
 
   ///
   ActionValue copyWith({
@@ -435,7 +405,7 @@ class ActionValue {
     bool? isTakingPicture,
     bool? isRecordingVideo,
     bool? isRecordingPaused,
-    bool? hideCameraChanger,
+    bool? isPlaygroundActive,
   }) {
     return ActionValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
@@ -446,7 +416,77 @@ class ActionValue {
       isTakingPicture: isTakingPicture ?? this.isTakingPicture,
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
-      hideCameraChanger: hideCameraChanger ?? this.hideCameraChanger,
+      isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
     );
   }
+
+  //========================== GETTERS ==================================
+
+  ///
+  /// Current lense direction
+  ///
+  CameraLensDirection get lensDirection =>
+      cameraDescription?.lensDirection ?? CameraLensDirection.back;
+
+  ///
+  /// Opposite lense direction of current [lensDirection]
+  ///
+  CameraLensDirection get oppositeLensDirection =>
+      lensDirection == CameraLensDirection.back
+          ? CameraLensDirection.front
+          : CameraLensDirection.back;
+
+  ///
+  /// Hide camera close button if :-
+  ///
+  /// 1. Camera type is [CameraType.text]
+  /// 2. Video recoring is active [isRecordingVideo]
+  ///
+  bool get hideCameraCloseButton =>
+      cameraType == CameraType.text || isRecordingVideo;
+
+  ///
+  /// Hide camera flash button if :-
+  ///
+  /// 1. Camera type is [CameraType.text]
+  /// 2. Camera lense direction is front
+  /// 3. Video recoring is active [isRecordingVideo]
+  ///
+  bool get hideCameraFlashButton =>
+      cameraType == CameraType.text ||
+      lensDirection == CameraLensDirection.front ||
+      isRecordingVideo;
+
+  ///
+  /// Hide camera shutter button if :-
+  ///
+  /// 1. Camera type is [CameraType.text]
+  ///
+  bool get hideCameraShutterButton => cameraType == CameraType.text;
+
+  ///
+  /// Hide camera footer if :-
+  ///
+  /// 1. Video recoring is active [isRecordingVideo]
+  /// 2. When [CameraType.text] playground is in editing mode
+  ///
+  bool get hideCameraFooter => isRecordingVideo || isPlaygroundActive;
+
+  ///
+  /// Hide camera gallery  button if :-
+  ///
+  /// 1. Camera type is [CameraType.text]
+  /// 2. Video recoring is active [isRecordingVideo]
+  ///
+  bool get hideCameraGalleryButton =>
+      cameraType == CameraType.text || isRecordingVideo;
+
+  ///
+  /// Hide camera rotation button if :-
+  ///
+  /// 1. Camera type is [CameraType.text]
+  /// 2. Video recoring is active [isRecordingVideo]
+  ///
+  bool get hideCameraRotationButton =>
+      cameraType == CameraType.text || isRecordingVideo;
 }

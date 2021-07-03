@@ -53,7 +53,8 @@ class PlaygroundOverlay extends StatelessWidget {
             Positioned(
               left: 16.0,
               bottom: 16.0,
-              child: GradientBackgroundChanger(controller: controller),
+              child:
+                  PlaygroundGradientBackgroundChanger(controller: controller),
             ),
 
             // Screenshot capture button

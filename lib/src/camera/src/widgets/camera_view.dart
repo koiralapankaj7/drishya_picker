@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-import '../controllers/action_notifier.dart';
+import '../controllers/cam_controller.dart';
 
 ///
 class CameraView extends StatelessWidget {
@@ -12,7 +12,7 @@ class CameraView extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final ActionNotifier action;
+  final CamController action;
 
   @override
   Widget build(BuildContext context) {

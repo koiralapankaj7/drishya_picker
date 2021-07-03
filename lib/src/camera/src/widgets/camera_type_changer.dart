@@ -3,53 +3,59 @@ import 'dart:math';
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
 
-import '../controllers/action_notifier.dart';
+import '../controllers/cam_controller.dart';
 import '../entities/camera_type.dart';
+import 'camera_builder.dart';
 
 ///
 class CameraTypeChanger extends StatelessWidget {
   ///
   const CameraTypeChanger({
     Key? key,
-    required this.action,
+    required this.controller,
   }) : super(key: key);
 
   ///
-  final ActionNotifier action;
+  final CamController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // Text scroller
-        Expanded(
-          child: _TypesPageView(
-            initialType: action.value.cameraType,
-            onChanged: action.changeCameraType,
-          ),
-        ),
-
-        const SizedBox(height: 8.0),
-
-        // Arrow indicator
-        SizedBox(
-          height: 12.0,
-          width: 20.0,
-          child: FittedBox(
-            fit: BoxFit.fill,
-            child: Transform.rotate(
-              angle: -pi / 2,
-              child: const Icon(
-                CustomIcons.play,
-                color: Colors.white,
+    return CameraBuilder(
+      controller: controller,
+      builder: (value, child) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Text scroller
+            Expanded(
+              child: _TypesPageView(
+                initialType: controller.value.cameraType,
+                onChanged: controller.changeCameraType,
               ),
             ),
-          ),
-        ),
 
-        //
-      ],
+            const SizedBox(height: 8.0),
+
+            // Arrow indicator
+            SizedBox(
+              height: 12.0,
+              width: 20.0,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Transform.rotate(
+                  angle: -pi / 2,
+                  child: const Icon(
+                    CustomIcons.play,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+
+            //
+          ],
+        );
+      },
     );
   }
 }

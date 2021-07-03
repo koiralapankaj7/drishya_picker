@@ -3,19 +3,19 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import 'controllers/action_notifier.dart';
+import 'controllers/cam_controller.dart';
 import 'controllers/controller_notifier.dart';
 import 'entities/camera_type.dart';
-import 'widgets/action_notifier_provider.dart';
+import 'widgets/cam_controller_provider.dart';
 import 'widgets/camera_overlay.dart';
 import 'widgets/camera_view.dart';
-import 'widgets/controller_builder.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
 
@@ -70,29 +70,27 @@ class _CameraPickerState extends State<CameraPicker>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   late final ControllerNotifier _controllerNotifier;
   late final PlaygroundController _playgroundController;
-  late final ActionNotifier _actionNotifier;
+  late final CamController _camController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _controllerNotifier = ControllerNotifier();
-    _actionNotifier = ActionNotifier(
+    _camController = CamController(
       controllerNotifier: _controllerNotifier,
       context: context,
     );
     _playgroundController = PlaygroundController()
       ..addListener(_playgroundListener);
-    Future<void>.delayed(_kRouteDuration, _actionNotifier.createCamera);
+    Future<void>.delayed(_kRouteDuration, _camController.createCamera);
   }
 
   void _playgroundListener() {
     final value = _playgroundController.value;
-    final hide = value.hasFocus || value.isEditing || value.hasStickers;
-    _actionNotifier.value = _actionNotifier.value.copyWith(
-      hideCameraChanger: hide,
-    );
-    if (value.hasFocus || value.isEditing || value.hasStickers) {}
+    final isPlaygroundActive =
+        value.hasFocus || value.isEditing || value.hasStickers;
+    _camController.update(isPlaygroundActive: isPlaygroundActive);
   }
 
   // Handle app life cycle
@@ -108,7 +106,7 @@ class _CameraPickerState extends State<CameraPicker>
     if (state == AppLifecycleState.inactive) {
       _controllerNotifier.controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _actionNotifier.createCamera();
+      _camController.createCamera();
     }
   }
 
@@ -116,7 +114,7 @@ class _CameraPickerState extends State<CameraPicker>
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
     _controllerNotifier.dispose();
-    _actionNotifier.dispose();
+    _camController.dispose();
     _playgroundController
       ..removeListener(_playgroundListener)
       ..dispose();
@@ -131,45 +129,40 @@ class _CameraPickerState extends State<CameraPicker>
       ),
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: ControllerBuilder(
-          controllerNotifier: _controllerNotifier,
-          builder: (controller) {
-            return ActionNotifierProvider(
-              action: _actionNotifier,
-              child: ValueListenableBuilder<ActionValue>(
-                valueListenable: _actionNotifier,
-                builder: (context, value, child) {
-                  return Stack(
-                    children: [
-                      // Camera type specific view
-
-                      Builder(
-                        builder: (context) {
-                          switch (_actionNotifier.value.cameraType) {
-                            case CameraType.text:
-                              return Playground(
-                                controller: _playgroundController,
-                              );
-                            default:
-                              return CameraView(action: _actionNotifier);
-                          }
-                        },
-                      ),
-
-                      // Camera control overlay
-                      CameraOverlay(
-                        action: _actionNotifier,
-                        playgroundCntroller: _playgroundController,
-                        videoDuration: const Duration(seconds: 10),
-                      ),
-
-                      //
-                    ],
-                  );
-                },
-              ),
-            );
+        body: ValueListenableBuilder<ControllerValue>(
+          valueListenable: _controllerNotifier,
+          builder: (context, value, child) {
+            if (_controllerNotifier.initialized) {
+              return child!;
+            }
+            return const SizedBox();
           },
+          child: CamControllerProvider(
+            action: _camController,
+            child: Stack(
+              children: [
+                // Camera type specific view
+                CameraBuilder(
+                  controller: _camController,
+                  builder: (value, child) {
+                    if (value.cameraType == CameraType.text) {
+                      return Playground(controller: _playgroundController);
+                    }
+                    return CameraView(action: _camController);
+                  },
+                ),
+
+                // Camera control overlay
+                CameraOverlay(
+                  controller: _camController,
+                  playgroundCntroller: _playgroundController,
+                  videoDuration: const Duration(seconds: 10),
+                ),
+
+                //
+              ],
+            ),
+          ),
         ),
       ),
     );
