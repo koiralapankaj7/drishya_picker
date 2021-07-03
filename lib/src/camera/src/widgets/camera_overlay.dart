@@ -103,48 +103,48 @@ class _PlaygroundOverlay extends StatelessWidget {
         if (value.cameraType != CameraType.text) {
           return const SizedBox();
         }
-        return child!;
-      },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Add text button
-          Align(
-            alignment: Alignment.center,
-            child: PlaygroundAddTextButton(controller: playgroundCntroller),
-          ),
-
-          // Close button
-          Positioned(
-            left: 8.0,
-            top: top,
-            child: PlaygroundCloseButton(controller: playgroundCntroller),
-          ),
-
-          // Background changer
-          Positioned(
-            left: 16.0,
-            bottom: 16.0,
-            child: PlaygroundGradientBackgroundChanger(
-              controller: playgroundCntroller,
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Add text button
+            Align(
+              alignment: Alignment.center,
+              child: PlaygroundAddTextButton(controller: playgroundCntroller),
             ),
-          ),
 
-          // Screenshot capture button
-          Positioned(
-            right: 16.0,
-            bottom: 16.0,
-            child: PlaygroundCaptureButton(controller: playgroundCntroller),
-          ),
+            // Close button
+            Positioned(
+              left: 8.0,
+              top: top,
+              child: PlaygroundCloseButton(controller: playgroundCntroller),
+            ),
 
-          // Sticker buttons
-          Positioned(
-            right: 16.0,
-            top: top,
-            child: PlaygroundButtonCollection(controller: playgroundCntroller),
-          ),
-        ],
-      ),
+            // Background changer
+            Positioned(
+              left: 16.0,
+              bottom: 16.0,
+              child: PlaygroundGradientBackgroundChanger(
+                controller: playgroundCntroller,
+              ),
+            ),
+
+            // Screenshot capture button
+            Positioned(
+              right: 16.0,
+              bottom: 16.0,
+              child: PlaygroundCaptureButton(controller: playgroundCntroller),
+            ),
+
+            // Sticker buttons
+            Positioned(
+              right: 16.0,
+              top: top,
+              child:
+                  PlaygroundButtonCollection(controller: playgroundCntroller),
+            ),
+          ],
+        );
+      },
     );
   }
 }
