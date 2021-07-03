@@ -30,9 +30,9 @@ class PlaygroundAddTextButton extends StatelessWidget {
         child: const Text(
           'Tap to type...',
           style: TextStyle(
-            color: Colors.white70,
-            fontSize: 28.0,
-            fontWeight: FontWeight.w600,
+            color: Colors.white60,
+            fontSize: 30.0,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),

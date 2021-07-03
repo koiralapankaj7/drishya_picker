@@ -40,7 +40,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
 
   /// Update playground value
   void updateValue({
-    Color? fillColor,
+    bool? fillColor,
     int? maxLines,
     TextAlign? textAlign,
     bool? hasFocus,
@@ -78,7 +78,8 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
       final hasMatch = index != -1;
       final nextIndex =
           hasMatch && index + 1 < gradients.length ? index + 1 : 0;
-      value = value.copyWith(background: gradients[nextIndex]);
+      final bg = gradients[nextIndex];
+      value = value.copyWith(background: bg, textBackground: bg);
     }
   }
 

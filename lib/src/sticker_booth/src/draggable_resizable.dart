@@ -145,11 +145,9 @@ class _DraggableResizableState extends State<DraggableResizable> {
         final normalizedLeft = position.dx;
         final normalizedTop = position.dy;
 
-        final decoratedChild = Container(
-          constraints: BoxConstraints.expand(
-            height: normalizedHeight,
-            width: normalizedWidth,
-          ),
+        final decoratedChild = SizedBox(
+          height: normalizedHeight,
+          width: normalizedWidth,
           key: key,
           child: widget.child,
         );

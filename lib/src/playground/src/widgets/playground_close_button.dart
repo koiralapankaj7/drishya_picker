@@ -68,7 +68,7 @@ class _AppDialog extends StatelessWidget {
     final cancel = TextButton(
       onPressed: Navigator.of(context).pop,
       child: Text(
-        'CANCEL',
+        'NO',
         style: Theme.of(context).textTheme.button!.copyWith(
               color: Colors.lightBlue,
             ),
@@ -79,7 +79,7 @@ class _AppDialog extends StatelessWidget {
         Navigator.of(context).pop(true);
       },
       child: Text(
-        'USELECT ITEMS',
+        'DISCARD',
         style: Theme.of(context).textTheme.button!.copyWith(
               color: Colors.blue,
             ),
@@ -88,13 +88,13 @@ class _AppDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(
-        'Unselect these items?',
+        'Discard changes?',
         style: Theme.of(context).textTheme.headline6!.copyWith(
               color: Colors.white70,
             ),
       ),
       content: Text(
-        'Going back will undo the selections you made.',
+        'Are you sure you want to discard your changes?',
         style: Theme.of(context).textTheme.bodyText2!.copyWith(
               color: Colors.grey.shade600,
             ),

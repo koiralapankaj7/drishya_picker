@@ -1,10 +1,9 @@
-import 'package:drishya_picker/src/playground/src/widgets/playground_textfield.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
 
-const _minStickerScale = 0.5;
+const _minStickerScale = 1.0;
 
 ///
 class PlaygroundStickers extends StatefulWidget {
@@ -56,23 +55,43 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
   }
 
   Widget? _stickerChild(Sticker sticker) {
-    if (sticker.pathType == PathType.networkImg) {
+    if (sticker is ImageSticker && sticker.pathType == PathType.networkImg) {
       return Image.network(
-        sticker.path!,
+        sticker.path,
         fit: BoxFit.fill,
         gaplessPlayback: true,
       );
-    }
-
-    if (sticker.pathType == PathType.assetsImage) {
+    } else if (sticker is ImageSticker &&
+        sticker.pathType == PathType.assetsImage) {
       return Image.asset(
-        sticker.path!,
+        sticker.path,
         fit: BoxFit.fill,
         gaplessPlayback: true,
       );
+    } else if (sticker is TextSticker) {
+      return Container(
+        constraints: BoxConstraints.loose(sticker.size),
+        decoration: BoxDecoration(
+          color: sticker.withBackground
+              ? _controller.value.textBackground.colors.first
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: FittedBox(
+          alignment: Alignment.center,
+          child: Text(
+            sticker.text,
+            textAlign: sticker.textAlign,
+            style: sticker.style,
+          ),
+        ),
+      );
+    } else if (sticker is WidgetSticker) {
+      return sticker.child;
+    } else {
+      return const SizedBox();
     }
-
-    return sticker.widget;
   }
 
   @override
@@ -106,7 +125,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     canTransform: isSelected,
                     onTap: () {
                       asset.sticker.onPressed?.call(asset.sticker);
-                      if (asset.sticker.widget is TextStickerWrapper) {
+                      if (asset.sticker is TextSticker) {
                         stickerController.deleteSticker(asset);
                         _controller.updateValue(hasFocus: true);
                       }
@@ -152,7 +171,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     duration: const Duration(milliseconds: 100),
                     height: _collied ? 60.0 : 48.0,
                     width: _collied ? 60.0 : 48.0,
-                    margin: const EdgeInsets.only(bottom: 60.0),
+                    margin: const EdgeInsets.only(bottom: 24.0),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.black45,
@@ -160,7 +179,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     child: Icon(
                       Icons.delete,
                       color: Colors.white,
-                      size: _collied ? 32.0 : 24.0,
+                      size: _collied ? 36.0 : 30.0,
                     ),
                   ),
                 ),

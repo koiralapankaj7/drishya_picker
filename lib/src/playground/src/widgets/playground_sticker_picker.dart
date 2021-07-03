@@ -248,7 +248,7 @@ class StickersTabBarView extends StatelessWidget {
       itemBuilder: (context, index) {
         final sticker = stickers.elementAt(index);
         return StickerChoice(
-          asset: sticker,
+          sticker: sticker,
           onPressed: () => onStickerSelected(sticker),
         );
       },
@@ -262,26 +262,31 @@ class StickerChoice extends StatelessWidget {
   ///
   const StickerChoice({
     Key? key,
-    required this.asset,
+    required this.sticker,
     required this.onPressed,
   }) : super(key: key);
 
   ///
-  final Sticker asset;
+  final Sticker sticker;
 
   ///
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    switch (asset.pathType) {
-      case PathType.networkImg:
-        return _Network(
-          url: asset.path!,
-          onPressed: onPressed,
-        );
-      default:
-        return const SizedBox();
+    if (sticker is ImageSticker) {
+      final s = sticker as ImageSticker;
+      switch (s.pathType) {
+        case PathType.networkImg:
+          return _Network(
+            url: s.path,
+            onPressed: onPressed,
+          );
+        default:
+          return const SizedBox();
+      }
+    } else {
+      return const SizedBox();
     }
   }
 }

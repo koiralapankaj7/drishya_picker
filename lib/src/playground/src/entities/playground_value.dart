@@ -7,29 +7,27 @@ class PlaygroundValue {
   ///
   PlaygroundValue({
     this.textAlign = TextAlign.center,
-    this.fillColor = Colors.transparent,
+    this.fillColor = false,
     this.maxLines = 1,
     this.hasFocus = false,
-    // this.editingMode = false,
     this.hasStickers = false,
     this.isEditing = false,
     PlaygroundBackground? background,
-  }) : background = background ?? gradients[0];
+    GradientBackground? textBackground,
+  })  : background = background ?? gradients[0],
+        textBackground = textBackground ?? gradients[0];
 
   ///
   final TextAlign textAlign;
 
   ///
-  final Color fillColor;
+  final bool fillColor;
 
   /// treate -ve as null
   final int maxLines;
 
   ///
   final bool hasFocus;
-
-  ///
-  // final bool editingMode;
 
   ///
   final bool hasStickers;
@@ -40,29 +38,33 @@ class PlaygroundValue {
   ///
   final PlaygroundBackground background;
 
+  ///
+  final GradientBackground textBackground;
+
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   ///
   PlaygroundValue copyWith({
     TextAlign? textAlign,
-    Color? fillColor,
+    bool? fillColor,
     bool? hasFocus,
     bool? editingMode,
     int? maxLines,
     bool? hasStickers,
     bool? isEditing,
     PlaygroundBackground? background,
+    GradientBackground? textBackground,
   }) {
     return PlaygroundValue(
       textAlign: textAlign ?? this.textAlign,
       fillColor: fillColor ?? this.fillColor,
       hasFocus: hasFocus ?? this.hasFocus,
-      // editingMode: editingMode ?? this.editingMode,
       maxLines: maxLines ?? this.maxLines,
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,
       background: background ?? this.background,
+      textBackground: textBackground ?? this.textBackground,
     );
   }
 }

@@ -33,35 +33,19 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
     _textController = _controller.textController;
   }
 
-  Widget get _sticker {
-    return Container(
-      decoration: BoxDecoration(
-        color: _controller.value.fillColor,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Text(
-          _textController.text,
-          style: _textStickerStyle,
-          textAlign: _controller.value.textAlign,
-        ),
-      ),
-    );
-  }
-
   void _addSticker() {
     final box = _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
-      final sticker = Sticker(
-        name: '',
+      final sticker = TextSticker(
         size: box.size,
         extra: {'text': _textController.text},
         onPressed: (s) {
-          _textController.text = s.extra['text'] ?? '';
+          _textController.text = (s as TextSticker).text;
         },
-        widget: _sticker,
+        text: _textController.text,
+        style: _textStickerStyle,
+        textAlign: _controller.value.textAlign,
+        withBackground: _controller.value.fillColor,
       );
 
       _controller.updateValue(hasStickers: true);
@@ -73,16 +57,20 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
     }
   }
 
-  void _onTextChanged(String text) {
-    final box = _widthKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null) {
-      final actualWidth = MediaQuery.of(context).size.width;
-      final currentWidth = box.size.width;
-      widget.controller.value = widget.controller.value.copyWith(
-        maxLines: currentWidth >= actualWidth ? -1 : 1,
-      );
-    }
-  }
+  // void _onTextChanged(String text) {
+  //   final box = _widthKey.currentContext?.findRenderObject() as RenderBox?;
+  //   if (box != null) {
+  //     final actualWidth = MediaQuery.of(context).size.width;
+  //     final currentWidth = box.size.width;
+  //     if (currentWidth == actualWidth) {
+  //       log('Add new line...');
+  //     }
+
+  //     // widget.controller.value = widget.controller.value.copyWith(
+  //     //   maxLines: currentWidth >= actualWidth ? -1 : 1,
+  //     // );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -103,26 +91,37 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
         color: value.hasFocus ? Colors.black54 : Colors.transparent,
         child: IntrinsicWidth(
           key: _widthKey,
-          child: TextStickerWrapper(
-            color: value.fillColor,
-            child: TextField(
+          stepWidth: 20.0,
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 20.0),
+            margin: const EdgeInsets.symmetric(
+              horizontal: 60.0,
+              vertical: 30.0,
+            ),
+            child: TextFormField(
               key: _tfSizeKey,
               controller: _textController,
               autofocus: true,
               textAlign: value.textAlign,
               autocorrect: false,
-              minLines: null,
-              maxLines: value.convertedMaxLines,
+              minLines: 1,
+              maxLines: null,
+              // maxLines: value.convertedMaxLines,
               keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               smartDashesType: SmartDashesType.disabled,
               style: _textStickerStyle,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                isDense: true,
-                isCollapsed: true,
-                contentPadding: EdgeInsets.all(8.0),
+                contentPadding: const EdgeInsets.all(8.0),
+                filled: value.fillColor,
+                fillColor: value.textBackground.colors.first,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              onChanged: _onTextChanged,
+              // onChanged: _onTextChanged,
             ),
           ),
         ),
@@ -135,46 +134,9 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
 const _textStickerStyle = TextStyle(
   textBaseline: TextBaseline.ideographic,
   color: Colors.white,
-  fontSize: 28.0,
-  fontWeight: FontWeight.w600,
+  fontSize: 32.0,
+  fontWeight: FontWeight.w700,
   decoration: TextDecoration.none,
   decorationColor: Colors.transparent,
   decorationThickness: 0.0,
 );
-
-///
-class TextStickerWrapper extends StatelessWidget {
-  ///
-  const TextStickerWrapper({
-    Key? key,
-    required this.child,
-    required this.color,
-    this.alignment,
-  }) : super(key: key);
-
-  ///
-  final Widget child;
-
-  ///
-  final Color color;
-
-  ///
-  final Alignment? alignment;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 20.0),
-      margin: const EdgeInsets.symmetric(
-        horizontal: 60.0,
-        vertical: 30.0,
-      ),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      alignment: alignment,
-      child: child,
-    );
-  }
-}

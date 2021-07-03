@@ -54,11 +54,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
 
   void _textBackgroundButtonPressed() {
     final value = controller.value;
-    controller.value = value.copyWith(
-      fillColor: value.fillColor == Colors.transparent
-          ? Colors.indigo
-          : Colors.transparent,
-    );
+    controller.value = value.copyWith(fillColor: !value.fillColor);
   }
 
   @override
@@ -99,9 +95,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
           _Button(
             isVisible: hasFocus,
             onPressed: _textBackgroundButtonPressed,
-            child: _TextBackgroundIcon(
-              isSelected: controller.value.fillColor != Colors.transparent,
-            ),
+            child: _TextBackgroundIcon(isSelected: controller.value.fillColor),
           ),
           _Button(
             isVisible: !hasFocus,
