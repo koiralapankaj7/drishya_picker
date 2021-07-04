@@ -38,18 +38,15 @@ class CameraPicker extends StatefulWidget {
     BuildContext context, {
     Duration? videoDuration,
   }) async {
-    final result = await Navigator.of(
-      context,
-      rootNavigator: true,
-    ).push<AssetEntity>(
-      SlidePageTransitionBuilder<AssetEntity>(
+    return Navigator.of(context).push<AssetEntity>(
+      SlideTransitionPageRoute(
         builder: CameraPicker(videoDuration: videoDuration),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
         reverseTransitionDuration: _kRouteDuration,
+        settings: const RouteSettings(name: name),
       ),
     );
-    return result;
   }
 
   @override

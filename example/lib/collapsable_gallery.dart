@@ -15,7 +15,26 @@ class CollapsableGallery extends StatefulWidget {
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
   final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
-  final controller = DrishyaController();
+  late final GalleryController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = GalleryController(
+      gallerySetting: const GallerySetting(
+        albumSubtitle: 'Collapsable',
+        enableCamera: false,
+        maximum: 10,
+        requestType: RequestType.all,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +43,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
       appBar: AppBar(
         title: const Text('Pick using picker view'),
       ),
-      body: DrishyaPicker(
+      body: GalleryViewWrapper(
         controller: controller,
         child: Column(
           children: [
@@ -35,14 +54,9 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
             Builder(builder: (context) {
               return TextButton(
                 onPressed: () async {
-                  final entities = await controller.pickFromGallery(
+                  final entities = await controller.pick(
                     context,
-                    setting: DrishyaSetting(
-                      selectedItems: notifier.value,
-                      maximum: 1,
-                      albumSubtitle: 'Image only',
-                      requestType: RequestType.image,
-                    ),
+                    selectedEntities: notifier.value,
                   );
                   notifier.value = entities ?? [];
                 },
@@ -71,7 +85,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   // Camera field..
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: CameraPickerField(
+                    child: CameraViewField(
                       onCapture: (entity) {
                         notifier.value = [...notifier.value, entity];
                       },
@@ -83,12 +97,8 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   ValueListenableBuilder<List<AssetEntity>?>(
                     valueListenable: notifier,
                     builder: (context, list, child) {
-                      return GalleryPickerField(
-                        setting: DrishyaSetting(
-                          selectedItems: list ?? [],
-                          maximum: 5,
-                          albumSubtitle: 'common',
-                        ),
+                      return GalleryViewField(
+                        selectedEntities: list ?? [],
                         onChanged: (entity, isRemoved) {
                           final value = notifier.value.toList();
                           if (isRemoved) {

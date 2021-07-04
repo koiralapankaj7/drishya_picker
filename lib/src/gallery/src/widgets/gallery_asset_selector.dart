@@ -1,33 +1,25 @@
-import 'package:drishya_picker/src/gallery/entities.dart';
+import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
+import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:flutter/material.dart';
 
-import '../drishya_picker.dart';
-
 ///
-class Buttons extends StatefulWidget {
+class GalleryAssetSelector extends StatefulWidget {
   ///
-  const Buttons({
+  const GalleryAssetSelector({
     Key? key,
-    required this.drishyaController,
-    this.onEdit,
-    this.onSubmit,
+    required this.controller,
   }) : super(key: key);
 
   ///
-  final DrishyaController drishyaController;
-
-  ///
-  final void Function(BuildContext context)? onEdit;
-
-  ///
-  final void Function(BuildContext context)? onSubmit;
+  final GalleryController controller;
 
   @override
-  ButtonsState createState() => ButtonsState();
+  GalleryAssetSelectorState createState() => GalleryAssetSelectorState();
 }
 
 ///
-class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
+class GalleryAssetSelectorState extends State<GalleryAssetSelector>
+    with TickerProviderStateMixin {
   late AnimationController _editOpaController;
   late AnimationController _selectOpaController;
   late AnimationController _selectSizeController;
@@ -61,11 +53,11 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
       curve: Curves.easeIn,
     ));
 
-    widget.drishyaController.addListener(() {
+    widget.controller.addListener(() {
       if (mounted) {
-        final entities = widget.drishyaController.value.entities;
+        final entities = widget.controller.value.selectedEntities;
 
-        if (!widget.drishyaController.reachedMaximumLimit) {
+        if (!widget.controller.reachedMaximumLimit) {
           if (entities.isEmpty && _selectOpaController.value == 1.0) {
             _editOpaController.reverse();
             _selectOpaController.reverse();
@@ -103,8 +95,8 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
     const padding = 20.0 + 16.0 + 20.0;
     final buttonWidth = (size.width - padding) / 2;
 
-    return ValueListenableBuilder<DrishyaValue>(
-      valueListenable: widget.drishyaController,
+    return ValueListenableBuilder<GalleryValue>(
+      valueListenable: widget.controller,
       builder: (context, value, child) {
         return Container(
           padding: const EdgeInsets.all(20.0),
@@ -117,7 +109,7 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                 child: AnimatedBuilder(
                   animation: _editOpa,
                   builder: (context, child) {
-                    final hide = (value.entities.isEmpty &&
+                    final hide = (value.selectedEntities.isEmpty &&
                             !_editOpaController.isAnimating) ||
                         _editOpa.value == 0.0;
                     return hide
@@ -131,7 +123,7 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                     width: buttonWidth,
                     child: _TextButton(
                       onPressed: () {
-                        widget.onEdit?.call(context);
+                        //
                       },
                       label: 'EDIT',
                       background: Colors.white,
@@ -150,7 +142,7 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                 child: AnimatedBuilder(
                   animation: _selectOpa,
                   builder: (context, child) {
-                    final hide = (value.entities.isEmpty &&
+                    final hide = (value.selectedEntities.isEmpty &&
                             !_selectOpaController.isAnimating) ||
                         _selectOpa.value == 0.0;
 
@@ -172,7 +164,9 @@ class ButtonsState extends State<Buttons> with TickerProviderStateMixin {
                     },
                     child: _TextButton(
                       onPressed: () {
-                        widget.onSubmit?.call(context);
+                        final entities = value.selectedEntities;
+                        widget.controller
+                            .completeTask(context, entities: entities);
                       },
                       label: 'SELECT',
                     ),
@@ -201,12 +195,12 @@ class _TextButton extends StatelessWidget {
   final String? label;
   final Color? background;
   final Color? labelColor;
-  final Function? onPressed;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed as void Function()?,
+      onPressed: onPressed,
       style: TextButton.styleFrom(
         primary: Colors.black,
         backgroundColor: background ?? Colors.lightBlue,

@@ -17,6 +17,26 @@ class FullscreenGallery extends StatefulWidget {
 class _FullscreenGalleryState extends State<FullscreenGallery> {
   final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
 
+  late final GalleryController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    const setting = GallerySetting(
+      maximum: 1,
+      albumSubtitle: 'All',
+      requestType: RequestType.all,
+    );
+    controller = GalleryController(gallerySetting: setting);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    notifier.dispose();
+    controller.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,14 +51,9 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
 
           TextButton(
             onPressed: () async {
-              final entities = await DrishyaController().pickFromGallery(
+              final entities = await controller.pick(
                 context,
-                setting: DrishyaSetting(
-                  selectedItems: notifier.value,
-                  maximum: 10,
-                  albumSubtitle: 'Image only',
-                  requestType: RequestType.image,
-                ),
+                selectedEntities: notifier.value,
               );
               notifier.value = entities ?? [];
             },
@@ -66,7 +81,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 // Camera field..
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: CameraPickerField(
+                  child: CameraViewField(
                     onCapture: (entity) {
                       notifier.value = [...notifier.value, entity];
                     },
@@ -78,11 +93,12 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 ValueListenableBuilder<List<AssetEntity>?>(
                   valueListenable: notifier,
                   builder: (context, list, child) {
-                    return GalleryPickerField(
-                      setting: DrishyaSetting(
-                        selectedItems: list ?? [],
-                        maximum: 1,
-                        albumSubtitle: 'Common',
+                    return GalleryViewField(
+                      selectedEntities: list ?? [],
+                      gallerySetting: const GallerySetting(
+                        maximum: 10,
+                        albumSubtitle: 'Image only',
+                        requestType: RequestType.image,
                       ),
                       onChanged: (entity, isRemoved) {
                         final value = notifier.value.toList();

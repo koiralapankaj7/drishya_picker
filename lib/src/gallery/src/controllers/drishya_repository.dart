@@ -18,6 +18,7 @@ class DrishyaRepository {
     required this.albumsNotifier,
     required this.albumNotifier,
     required this.entitiesNotifier,
+    required this.recentEntitiesNotifier,
   });
 
   ///
@@ -28,6 +29,9 @@ class DrishyaRepository {
 
   ///
   final ValueNotifier<EntitiesType> entitiesNotifier;
+
+  ///
+  final ValueNotifier<EntitiesType> recentEntitiesNotifier;
 
   /// Get album list
   void fetchAlbums(RequestType type) async {
@@ -81,6 +85,8 @@ class DrishyaRepository {
       try {
         final entities = await album.assetList;
         entitiesNotifier.value = BaseState(data: entities, hasPermission: true);
+        recentEntitiesNotifier.value =
+            BaseState(data: entities, hasPermission: true);
       } catch (e) {
         entitiesNotifier.value = BaseState(
           hasPermission: true,

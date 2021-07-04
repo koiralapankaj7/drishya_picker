@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 ///
-class PermissionRequest extends StatelessWidget {
+class GalleryPermissionView extends StatelessWidget {
   ///
-  const PermissionRequest({
+  const GalleryPermissionView({
     Key? key,
   }) : super(key: key);
 

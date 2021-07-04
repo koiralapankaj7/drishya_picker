@@ -1,56 +1,39 @@
 import 'dart:math';
 
-import 'package:drishya_picker/src/gallery/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/entities.dart';
-import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
+import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
+import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
 import 'package:flutter/material.dart';
 
-import '../drishya_picker.dart';
+import 'gallery_builder.dart';
 
 ///
-class Header extends StatefulWidget {
+class GalleryHeader extends StatefulWidget {
   ///
-  const Header({
+  const GalleryHeader({
     Key? key,
     required this.controller,
-    required this.panelSetting,
-    required this.dropdownNotifier,
-    required this.albumNotifier,
     this.headerSubtitle,
-    this.toogleAlbumList,
-    this.onClosePressed,
-    this.onSelectionClear,
   }) : super(key: key);
 
   ///
-  final DrishyaController controller;
-
-  ///
-  final PanelSetting panelSetting;
-
-  ///
-  final ValueNotifier<AlbumType> albumNotifier;
+  final GalleryController controller;
 
   ///
   final String? headerSubtitle;
 
-  ///
-  final void Function()? toogleAlbumList;
-
-  ///
-  final void Function()? onClosePressed;
-
-  ///
-  final void Function()? onSelectionClear;
-
-  /// Dropdown notifiler
-  final ValueNotifier<bool> dropdownNotifier;
-
   @override
-  _HeaderState createState() => _HeaderState();
+  _GalleryHeaderState createState() => _GalleryHeaderState();
 }
 
-class _HeaderState extends State<Header> {
+class _GalleryHeaderState extends State<GalleryHeader> {
+  late final GalleryController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller;
+  }
+
   //
   void _showAlert() {
     final cancel = TextButton(
@@ -63,7 +46,7 @@ class _HeaderState extends State<Header> {
       ),
     );
     final unselectItems = TextButton(
-      onPressed: widget.onSelectionClear,
+      onPressed: _onSelectionClear,
       child: Text(
         'USELECT ITEMS',
         style: Theme.of(context).textTheme.button!.copyWith(
@@ -101,15 +84,37 @@ class _HeaderState extends State<Header> {
     );
   }
 
+  void _onClosePressed() {
+    final value = _controller.value;
+    if (value.isAlbumVisible) {
+      _controller.setAlbumVisibility(false);
+    } else if (value.selectedEntities.isNotEmpty) {
+      _showAlert();
+    } else {
+      if (_controller.fullScreenMode) {
+        Navigator.of(context).pop();
+      } else {
+        _controller.panelController.minimizePanel();
+      }
+    }
+  }
+
+  void _onSelectionClear() {
+    _controller.clearSelection();
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final panelSetting = _controller.panelSetting;
+
     return Container(
       constraints: BoxConstraints(
-        minHeight: widget.panelSetting.headerMinHeight,
-        maxHeight: widget.panelSetting.headerMaxHeight,
+        minHeight: panelSetting.headerMinHeight,
+        maxHeight: panelSetting.headerMaxHeight,
       ),
       decoration: BoxDecoration(
-        color: widget.panelSetting.headerBackground,
+        color: panelSetting.headerBackground,
         border: Border(
           bottom: BorderSide(color: Colors.lightBlue.shade300, width: 0.2),
         ),
@@ -117,11 +122,7 @@ class _HeaderState extends State<Header> {
       child: Column(
         children: [
           // Handler
-          if (!widget.controller.fullScreenMode)
-            _Handler(height: widget.panelSetting.headerMinHeight),
-
-          if (widget.controller.fullScreenMode)
-            SizedBox(height: MediaQuery.of(context).padding.top),
+          _Handler(controller: _controller),
 
           // Details and controls
           Expanded(
@@ -131,15 +132,12 @@ class _HeaderState extends State<Header> {
                 Expanded(
                   child: Align(
                     alignment: Alignment.topLeft,
-                    child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: widget.controller,
-                      builder: (context, value, child) {
+                    child: GalleryBuilder(
+                      controller: _controller,
+                      builder: (value, child) {
                         return _IconButton(
                           iconData: Icons.close,
-                          onPressed: value.entities.isEmpty ||
-                                  widget.controller.singleSelection
-                              ? widget.onClosePressed
-                              : _showAlert,
+                          onPressed: _onClosePressed,
                         );
                       },
                     ),
@@ -149,27 +147,16 @@ class _HeaderState extends State<Header> {
                 // Album name and media receiver name
                 _AlbumDetail(
                   subtitle: widget.headerSubtitle,
-                  albumNotifier: widget.albumNotifier,
+                  controller: _controller,
                 ),
 
                 // Dropdown
                 Expanded(
-                  child: Container(
+                  child: Align(
                     alignment: Alignment.topLeft,
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: ValueListenableBuilder<DrishyaValue>(
-                      valueListenable: widget.controller,
-                      builder: (context, value, child) {
-                        final visible = value.entities.isEmpty ||
-                            widget.controller.singleSelection;
-                        return Opacity(
-                          opacity: visible ? 1.0 : 0.0,
-                          child: _AnimatedDropdown(
-                            onPressed: visible ? widget.toogleAlbumList : null,
-                            notifier: widget.dropdownNotifier,
-                          ),
-                        );
-                      },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: _AnimatedDropdown(controller: _controller),
                     ),
                   ),
                 ),
@@ -189,34 +176,38 @@ class _HeaderState extends State<Header> {
 class _AnimatedDropdown extends StatelessWidget {
   const _AnimatedDropdown({
     Key? key,
-    this.onPressed,
-    required this.notifier,
+    required this.controller,
   }) : super(key: key);
 
-  final void Function()? onPressed;
-  final ValueNotifier<bool> notifier;
+  final GalleryController controller;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: notifier,
-      builder: (context, isDown, child) {
-        return TweenAnimationBuilder(
-          tween: Tween(begin: isDown ? 1.0 : 0.0, end: isDown ? 0.0 : 1.0),
-          duration: const Duration(milliseconds: 300),
-          builder: (context, double value, child) {
-            return Transform.rotate(
-              angle: pi * value,
-              child: child,
-            );
-          },
-          child: _IconButton(
-            iconData: Icons.keyboard_arrow_down,
-            onPressed: () {
-              onPressed?.call();
-              notifier.value = !notifier.value;
+      valueListenable: controller.albumVisibilityNotifier,
+      builder: (context, visible, child) {
+        return Visibility(
+          visible: !controller.singleSelection ||
+              controller.value.selectedEntities.isEmpty,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(
+              begin: visible ? 1.0 : 0.0,
+              end: visible ? 0.0 : 1.0,
+            ),
+            duration: const Duration(milliseconds: 300),
+            builder: (context, factor, child) {
+              return Transform.rotate(
+                angle: pi * factor,
+                child: child,
+              );
             },
-            size: 34.0,
+            child: _IconButton(
+              iconData: Icons.keyboard_arrow_down,
+              onPressed: () {
+                controller.setAlbumVisibility(!visible);
+              },
+              size: 34.0,
+            ),
           ),
         );
       },
@@ -260,13 +251,14 @@ class _AlbumDetail extends StatelessWidget {
   const _AlbumDetail({
     Key? key,
     this.subtitle,
-    required this.albumNotifier,
+    required this.controller,
   }) : super(key: key);
 
+  ///
   final String? subtitle;
 
   ///
-  final ValueNotifier<AlbumType> albumNotifier;
+  final GalleryController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +267,7 @@ class _AlbumDetail extends StatelessWidget {
       children: [
         // Album name
         ValueListenableBuilder<AlbumType>(
-          valueListenable: albumNotifier,
+          valueListenable: controller.albumNotifier,
           builder: (context, album, child) {
             return Text(
               album.data?.name ?? 'Unknown',
@@ -305,15 +297,19 @@ class _AlbumDetail extends StatelessWidget {
 class _Handler extends StatelessWidget {
   const _Handler({
     Key? key,
-    this.height,
+    required this.controller,
   }) : super(key: key);
 
-  final double? height;
+  final GalleryController controller;
 
   @override
   Widget build(BuildContext context) {
+    if (controller.fullScreenMode) {
+      return SizedBox(height: MediaQuery.of(context).padding.top);
+    }
+
     return SizedBox(
-      height: height,
+      height: controller.panelSetting.headerMinHeight,
       child: Center(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4.0),
