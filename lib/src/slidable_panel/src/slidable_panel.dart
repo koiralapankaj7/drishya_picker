@@ -30,7 +30,7 @@ enum SlidingState {
 class PanelSetting {
   ///
   const PanelSetting({
-    this.topMargin = 0.0,
+    this.topMargin,
     this.headerMaxHeight = 75.0,
     this.headerMinHeight = 25.0,
     this.minHeight,
@@ -47,7 +47,7 @@ class PanelSetting {
 
   /// Margin for panel top. Which can be used to show status bar if you need
   /// to show panel above scaffold.
-  final double topMargin;
+  final double? topMargin;
 
   /// Panel maximum height
   ///
@@ -235,7 +235,9 @@ class _SlidablePanelState extends State<SlidablePanel>
     if (!_scrollToBottom &&
         panelState == SlidingState.max &&
         state == SlidingState.slidingDown) {
-      final isControllerOffsetZero = _scrollController.offset == 0.0;
+      final isControllerOffsetZero = _scrollController.hasClients
+          ? _scrollController.offset == 0.0
+          : false;
       // final headerMinPosition = mediaQuery.padding.top;
       // final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
       // final isHandler = event.position.dy >= headerMinPosition &&
@@ -321,8 +323,9 @@ class _SlidablePanelState extends State<SlidablePanel>
   @override
   Widget build(BuildContext context) {
     _mediaQuery = MediaQuery.of(context);
-    _panelMaxHeight =
-        (_setting.maxHeight ?? _mediaQuery.size.height) - _setting.topMargin;
+    _panelMaxHeight = _setting.maxHeight ??
+        _mediaQuery.size.height -
+            (_setting.topMargin ?? _mediaQuery.padding.top);
     _panelMinHeight = _setting.minHeight ?? _panelMaxHeight * 0.35;
     _remainingSpace = _panelMaxHeight - _panelMinHeight;
 

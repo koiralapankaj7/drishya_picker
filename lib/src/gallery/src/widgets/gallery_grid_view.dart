@@ -22,7 +22,7 @@ class GalleryGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: controller.panelSetting.foregroundColor,
       child: ValueListenableBuilder<EntitiesType>(
         valueListenable: controller.entitiesNotifier,
@@ -59,9 +59,9 @@ class GalleryGridView extends StatelessWidget {
             controller: controller.panelController.scrollController,
             padding: const EdgeInsets.all(0.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 1.0,
-              mainAxisSpacing: 1.0,
+              crossAxisCount: 4,
+              crossAxisSpacing: 1.5,
+              mainAxisSpacing: 1.5,
             ),
             itemCount: itemCount,
             itemBuilder: (context, index) {
@@ -144,7 +144,7 @@ class _MediaTileState extends State<_MediaTile>
       onTap: () {
         widget.controller.select(widget.entity, context);
       },
-      child: Container(
+      child: ColoredBox(
         color: Colors.grey.shade700,
         child: FutureBuilder<Uint8List?>(
           future: widget.entity.thumbDataWithSize(

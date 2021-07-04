@@ -1,10 +1,6 @@
-import 'dart:developer';
-
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_overlay.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +9,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import 'widgets/gallery_album_view.dart';
 import 'widgets/gallery_asset_selector.dart';
+import 'widgets/gallery_grid_view.dart';
 
 ///
 class GalleryView extends StatefulWidget {
@@ -88,14 +85,14 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    var s = _controller.panelSetting;
-    final _panelMaxHeight =
-        (s.maxHeight ?? MediaQuery.of(context).size.height) - (s.topMargin);
-    final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
+    var ps = _controller.panelSetting;
+    final _panelMaxHeight = ps.maxHeight ??
+        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
+    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * 0.35;
     final _setting =
-        s.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
+        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
 
-    final albumListHeight = _panelMaxHeight - s.headerMaxHeight;
+    final albumListHeight = _panelMaxHeight - ps.headerMaxHeight;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _setting.overlayStyle,
@@ -138,6 +135,13 @@ class _GalleryViewState extends State<GalleryView>
                     );
 //
                   },
+                ),
+
+                // Divider
+                Divider(
+                  color: Colors.lightBlue.shade300,
+                  thickness: 0.3,
+                  height: 2.0,
                 ),
 
                 // Gallery grid

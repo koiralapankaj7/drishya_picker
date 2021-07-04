@@ -23,10 +23,11 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
     controller = GalleryController(
       gallerySetting: const GallerySetting(
         albumSubtitle: 'Collapsable',
-        enableCamera: false,
+        enableCamera: true,
         maximum: 10,
         requestType: RequestType.all,
       ),
+      panelSetting: const PanelSetting(topMargin: 24.0),
     );
   }
 
@@ -38,14 +39,14 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.pink,
-      appBar: AppBar(
-        title: const Text('Pick using picker view'),
-      ),
-      body: GalleryViewWrapper(
-        controller: controller,
-        child: Column(
+    return GalleryViewWrapper(
+      controller: controller,
+      child: Scaffold(
+        backgroundColor: Colors.amber,
+        appBar: AppBar(
+          title: const Text('Pick using picker view'),
+        ),
+        body: Column(
           children: [
             // Grid view
             Expanded(child: GridViewWidget(notifier: notifier)),

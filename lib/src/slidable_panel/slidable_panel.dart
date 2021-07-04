@@ -1,3 +1,3 @@
 library slidable_panel;
 
-export './src/slidable_panel.dart';
+export 'src/slidable_panel.dart';

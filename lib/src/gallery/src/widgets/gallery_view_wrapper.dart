@@ -73,58 +73,52 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper>
 
   @override
   Widget build(BuildContext context) {
+    var ps = _controller.panelSetting;
+    final _panelMaxHeight = ps.maxHeight ??
+        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
+    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * 0.35;
+    final _setting =
+        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
+
     return Material(
       key: _controller.wrapperKey,
       child: GalleryControllerProvider(
         controller: _controller,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final s = _controller.panelSetting;
-            final _panelMaxHeight =
-                (s.maxHeight ?? constraints.maxHeight) - (s.topMargin);
-            final _panelMinHeight = s.minHeight ?? _panelMaxHeight * 0.35;
-            final _setting = s.copyWith(
-              maxHeight: _panelMaxHeight,
-              minHeight: _panelMinHeight,
-            );
-
-            return Stack(
+        child: Stack(
+          children: [
+            // Parent view
+            Column(
               children: [
-                // Parent view
-                Column(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          if (_panelController.isVisible) {
-                            _controller.cancel();
-                          }
-                        },
-                        child: widget.child,
-                      ),
-                    ),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _panelController.panelVisibility,
-                      builder: (context, isVisible, child) {
-                        return isVisible ? child! : const SizedBox();
-                      },
-                      child: SizedBox(height: _panelMinHeight),
-                    ),
-                  ],
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (_panelController.isVisible) {
+                        _controller.cancel();
+                      }
+                    },
+                    child: widget.child,
+                  ),
                 ),
-
-                // Gallery view
-                SlidablePanel(
-                  setting: _setting,
-                  controller: _panelController,
-                  child: GalleryView(controller: _controller),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _panelController.panelVisibility,
+                  builder: (context, isVisible, child) {
+                    return isVisible ? child! : const SizedBox();
+                  },
+                  child: SizedBox(height: _panelMinHeight),
                 ),
-
-                //
               ],
-            );
-          },
+            ),
+
+            // Gallery view
+            SlidablePanel(
+              setting: _setting,
+              controller: _panelController,
+              child: GalleryView(controller: _controller),
+            ),
+
+            //
+          ],
         ),
       ),
     );

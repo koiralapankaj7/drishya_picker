@@ -86,7 +86,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
 
   void _onClosePressed() {
     final value = _controller.value;
-    if (value.isAlbumVisible) {
+    if (_controller.albumVisibilityNotifier.value) {
       _controller.setAlbumVisibility(false);
     } else if (value.selectedEntities.isNotEmpty) {
       _showAlert();
@@ -113,12 +113,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
         minHeight: panelSetting.headerMinHeight,
         maxHeight: panelSetting.headerMaxHeight,
       ),
-      decoration: BoxDecoration(
-        color: panelSetting.headerBackground,
-        border: Border(
-          bottom: BorderSide(color: Colors.lightBlue.shade300, width: 0.2),
-        ),
-      ),
+      color: panelSetting.headerBackground,
       child: Column(
         children: [
           // Handler
@@ -191,8 +186,8 @@ class _AnimatedDropdown extends StatelessWidget {
               controller.value.selectedEntities.isEmpty,
           child: TweenAnimationBuilder<double>(
             tween: Tween(
-              begin: visible ? 1.0 : 0.0,
-              end: visible ? 0.0 : 1.0,
+              begin: visible ? 0.0 : 1.0,
+              end: visible ? 1.0 : 0.0,
             ),
             duration: const Duration(milliseconds: 300),
             builder: (context, factor, child) {

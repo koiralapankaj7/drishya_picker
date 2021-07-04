@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
@@ -22,7 +23,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         albumNotifier = ValueNotifier(const BaseState()),
         entitiesNotifier = ValueNotifier(const BaseState()),
         recentEntitiesNotifier = ValueNotifier(const BaseState()),
-        albumVisibilityNotifier = ValueNotifier(true),
+        albumVisibilityNotifier = ValueNotifier(false),
         super(const GalleryValue()) {
     repository = DrishyaRepository(
       albumsNotifier: albumsNotifier,
