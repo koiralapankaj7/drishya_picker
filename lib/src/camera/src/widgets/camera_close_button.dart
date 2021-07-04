@@ -1,5 +1,6 @@
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controllers/cam_controller.dart';
 import 'camera_builder.dart';
@@ -26,7 +27,10 @@ class CameraCloseButton extends StatelessWidget {
         return child!;
       },
       child: InkWell(
-        onTap: Navigator.of(context).pop,
+        onTap: () {
+          SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+          Navigator.of(context).pop();
+        },
         child: Container(
           height: 36.0,
           width: 36.0,

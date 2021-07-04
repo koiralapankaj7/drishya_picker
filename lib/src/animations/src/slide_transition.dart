@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Built a slide page transition for the picker.
-/// 为选择器构造一个上下进出的页面过渡动画
 class SlidePageTransitionBuilder<T> extends PageRoute<T> {
   ///
   SlidePageTransitionBuilder({
     required this.builder,
     this.transitionCurve = Curves.easeIn,
-    this.transitionDuration = const Duration(milliseconds: 500),
+    this.transitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 400),
   });
 
   ///
@@ -18,6 +18,9 @@ class SlidePageTransitionBuilder<T> extends PageRoute<T> {
 
   @override
   final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   final bool opaque = true;

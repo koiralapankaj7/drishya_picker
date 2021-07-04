@@ -1,5 +1,6 @@
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controller/playground_controller.dart';
 import 'playground_builder.dart';
@@ -17,6 +18,7 @@ class PlaygroundCloseButton extends StatelessWidget {
 
   void _onPressed(BuildContext context) {
     if (controller.isPlaygroundEmpty) {
+      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
       Navigator.of(context).pop();
     } else {
       showDialog<bool>(
@@ -35,7 +37,7 @@ class PlaygroundCloseButton extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        if (value.isEditing) return const SizedBox();
+        if (value.isEditing || value.hasFocus) return const SizedBox();
         return child!;
       },
       child: InkWell(

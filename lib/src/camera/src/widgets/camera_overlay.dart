@@ -12,6 +12,9 @@ import 'camera_footer.dart';
 import 'camera_shutter_button.dart';
 
 ///
+const _top = 16.0;
+
+///
 class CameraOverlay extends StatelessWidget {
   ///
   const CameraOverlay({
@@ -32,8 +35,6 @@ class CameraOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.of(context).padding.top + 4.0;
-
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -48,14 +49,14 @@ class CameraOverlay extends StatelessWidget {
         // Close button
         Positioned(
           left: 8.0,
-          top: top,
+          top: _top,
           child: CameraCloseButton(controller: controller),
         ),
 
         // Flash Light
         Positioned(
           right: 8.0,
-          top: top,
+          top: _top,
           child: CameraFlashButton(controller: controller),
         ),
 
@@ -95,8 +96,6 @@ class _PlaygroundOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.of(context).padding.top + 4.0;
-
     return CameraBuilder(
       controller: controller,
       builder: (value, child) {
@@ -115,7 +114,7 @@ class _PlaygroundOverlay extends StatelessWidget {
             // Close button
             Positioned(
               left: 8.0,
-              top: top,
+              top: _top,
               child: PlaygroundCloseButton(controller: playgroundCntroller),
             ),
 
@@ -138,7 +137,7 @@ class _PlaygroundOverlay extends StatelessWidget {
             // Sticker buttons
             Positioned(
               right: 16.0,
-              top: top,
+              top: _top,
               child:
                   PlaygroundButtonCollection(controller: playgroundCntroller),
             ),

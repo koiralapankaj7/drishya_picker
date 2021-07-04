@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:camera/camera.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/playground/playground.dart';
@@ -18,13 +17,18 @@ import 'widgets/camera_overlay.dart';
 import 'widgets/camera_view.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
+const Duration _defaultVideoDuration = Duration(seconds: 10);
 
 ///
 class CameraPicker extends StatefulWidget {
   ///
   const CameraPicker({
     Key? key,
+    this.videoDuration,
   }) : super(key: key);
+
+  ///
+  final Duration? videoDuration;
 
   ///
   static const String name = 'CameraView';
@@ -32,29 +36,17 @@ class CameraPicker extends StatefulWidget {
   ///
   static Future<AssetEntity?> pick(
     BuildContext context, {
-    bool enableRecording = false,
-    bool onlyEnableRecording = false,
-    bool enableAudio = true,
-    bool enableSetExposure = true,
-    bool enableExposureControlOnPoint = true,
-    bool enablePinchToZoom = true,
-    bool shouldDeletePreviewFile = false,
-    bool shouldLockPortrait = true,
-    Duration maximumRecordingDuration = const Duration(seconds: 15),
-    ThemeData? theme,
-    int cameraQuarterTurns = 0,
-    ResolutionPreset resolutionPreset = ResolutionPreset.max,
-    ImageFormatGroup imageFormatGroup = ImageFormatGroup.unknown,
-    Widget Function(CameraValue)? foregroundBuilder,
+    Duration? videoDuration,
   }) async {
     final result = await Navigator.of(
       context,
       rootNavigator: true,
     ).push<AssetEntity>(
       SlidePageTransitionBuilder<AssetEntity>(
-        builder: const CameraPicker(),
+        builder: CameraPicker(videoDuration: videoDuration),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
+        reverseTransitionDuration: _kRouteDuration,
       ),
     );
     return result;
@@ -83,7 +75,10 @@ class _CameraPickerState extends State<CameraPicker>
     );
     _playgroundController = PlaygroundController()
       ..addListener(_playgroundListener);
-    Future<void>.delayed(_kRouteDuration, _camController.createCamera);
+    Future<void>.delayed(_kRouteDuration, () {
+      _hideSB();
+      _camController.createCamera();
+    });
   }
 
   void _playgroundListener() {
@@ -104,14 +99,23 @@ class _CameraPickerState extends State<CameraPicker>
     }
 
     if (state == AppLifecycleState.inactive) {
+      // _showSB();
       _controllerNotifier.controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
+      // _hideSB();
       _camController.createCamera();
     }
   }
 
   @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    SystemChrome.restoreSystemUIOverlays();
+  }
+
+  @override
   void dispose() {
+    _showSB();
     WidgetsBinding.instance?.removeObserver(this);
     _controllerNotifier.dispose();
     _camController.dispose();
@@ -121,12 +125,25 @@ class _CameraPickerState extends State<CameraPicker>
     super.dispose();
   }
 
+  ///
+  void _hideSB() {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+  }
+
+  ///
+  void _showSB() {
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+  }
+
+  Future<bool> _onWillPop() async {
+    _showSB();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-      ),
+    return WillPopScope(
+      onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: ValueListenableBuilder<ControllerValue>(
@@ -156,7 +173,7 @@ class _CameraPickerState extends State<CameraPicker>
                 CameraOverlay(
                   controller: _camController,
                   playgroundCntroller: _playgroundController,
-                  videoDuration: const Duration(seconds: 10),
+                  videoDuration: widget.videoDuration ?? _defaultVideoDuration,
                 ),
 
                 //
