@@ -53,8 +53,6 @@ class _GalleryViewState extends State<GalleryView>
     super.initState();
     _controller = (widget.controller ?? GalleryController());
 
-    _controller.albumVisibilityNotifier.addListener(_toogleAlbumList);
-
     _panelController = _controller.panelController;
 
     _animationController = AnimationController(
@@ -73,14 +71,92 @@ class _GalleryViewState extends State<GalleryView>
     );
   }
 
-  void _toogleAlbumList() {
+  void _toogleAlbumList(bool visible) {
     if (_animationController.isAnimating) return;
+    _controller.setAlbumVisibility(!visible);
     _panelController.isGestureEnabled = _animationController.value == 1.0;
     if (_animationController.value == 1.0) {
       _animationController.reverse();
     } else {
       _animationController.forward();
     }
+  }
+
+  //
+  void _showAlert() {
+    final cancel = TextButton(
+      onPressed: Navigator.of(context).pop,
+      child: Text(
+        'CANCEL',
+        style: Theme.of(context).textTheme.button!.copyWith(
+              color: Colors.lightBlue,
+            ),
+      ),
+    );
+    final unselectItems = TextButton(
+      onPressed: _onSelectionClear,
+      child: Text(
+        'USELECT ITEMS',
+        style: Theme.of(context).textTheme.button!.copyWith(
+              color: Colors.blue,
+            ),
+      ),
+    );
+
+    final alertDialog = AlertDialog(
+      title: Text(
+        'Unselect these items?',
+        style: Theme.of(context).textTheme.headline6!.copyWith(
+              color: Colors.white70,
+            ),
+      ),
+      content: Text(
+        'Going back will undo the selections you made.',
+        style: Theme.of(context).textTheme.bodyText2!.copyWith(
+              color: Colors.grey.shade600,
+            ),
+      ),
+      actions: [cancel, unselectItems],
+      backgroundColor: Colors.grey.shade900,
+      actionsPadding: const EdgeInsets.all(0.0),
+      titlePadding: const EdgeInsets.all(16.0),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 2.0,
+      ),
+    );
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => alertDialog,
+    );
+  }
+
+  void _onClosePressed() {
+    if (_animationController.isAnimating) return;
+    final value = _controller.value;
+    if (_controller.albumVisibilityNotifier.value) {
+      _toogleAlbumList(true);
+    } else if (value.selectedEntities.isNotEmpty) {
+      _showAlert();
+    } else {
+      if (_controller.fullScreenMode) {
+        Navigator.of(context).pop();
+      } else {
+        _controller.panelController.minimizePanel();
+      }
+    }
+  }
+
+  void _onSelectionClear() {
+    _controller.clearSelection();
+    Navigator.of(context).pop();
+  }
+
+  void _onALbumChange(AssetPathEntity album) {
+    if (_animationController.isAnimating) return;
+    _controller.repository.fetchAssetsFor(album);
+    _toogleAlbumList(true);
   }
 
   @override
@@ -105,7 +181,11 @@ class _GalleryViewState extends State<GalleryView>
             // Header
             Align(
               alignment: Alignment.topCenter,
-              child: GalleryHeader(controller: _controller),
+              child: GalleryHeader(
+                controller: _controller,
+                onClose: _onClosePressed,
+                onAlbumToggle: _toogleAlbumList,
+              ),
             ),
 
             // Body
@@ -170,6 +250,7 @@ class _GalleryViewState extends State<GalleryView>
                 height: albumListHeight,
                 child: GalleryAlbumView(
                   controller: _controller,
+                  onAlbumChange: _onALbumChange,
                 ),
               ),
             ),

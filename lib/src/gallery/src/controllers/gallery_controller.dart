@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
@@ -92,7 +91,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Change album
   void changeAlbum(AssetPathEntity album) {
     repository.fetchAssetsFor(album);
-    setAlbumVisibility(false);
   }
 
   /// Clear selected entities

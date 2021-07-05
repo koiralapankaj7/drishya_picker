@@ -58,8 +58,8 @@ class GalleryGridView extends StatelessWidget {
           return GridView.builder(
             controller: controller.panelController.scrollController,
             padding: const EdgeInsets.all(0.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: controller.setting.crossAxisCount ?? 3,
               crossAxisSpacing: 1.5,
               mainAxisSpacing: 1.5,
             ),

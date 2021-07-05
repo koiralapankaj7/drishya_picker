@@ -10,6 +10,7 @@ class GallerySetting {
     this.maximum = 20,
     this.albumSubtitle = 'Select Media',
     this.enableCamera = true,
+    this.crossAxisCount,
   });
 
   ///
@@ -31,4 +32,9 @@ class GallerySetting {
   ///
   /// Set false to hide camera from gallery view
   final bool enableCamera;
+
+  ///
+  /// Gallery cross axis count. Default is 3
+  ///
+  final int? crossAxisCount;
 }
