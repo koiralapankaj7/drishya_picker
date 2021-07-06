@@ -14,10 +14,12 @@ dependencies:
   cupertino_icons: ^1.0.2
   drishya_picker:
     path: ../
+  very_good_analysis: ^2.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
 
 flutter:
   uses-material-design: true

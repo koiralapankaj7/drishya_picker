@@ -2,6 +2,7 @@ library drishya_picker;
 
 export 'package:photo_manager/photo_manager.dart';
 
-export './src/drishya_picker.dart' hide Header, GalleryView;
-// export './src/widgets/media_controller_provider.dart';
-// export './src/widgets/slidable_panel.dart' show PanelController;
+export 'src/camera/camera_picker.dart';
+export 'src/drishya_picker.dart';
+export 'src/gallery/gallery_view.dart';
+export 'src/slidable_panel/slidable_panel.dart';

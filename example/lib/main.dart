@@ -1,14 +1,14 @@
+import 'package:example/collapsable_gallery.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-import 'picker_1.dart';
-import 'picker_2.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 ///
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -27,40 +27,50 @@ class _Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Media Picker'),
-      ),
+      body: _PickerDemo(),
+    );
+  }
+}
+
+class _PickerDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.cyan,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.push<void>(
                   context,
-                  MaterialPageRoute(builder: (context) => Picker1()),
+                  MaterialPageRoute(
+                      builder: (context) => const FullscreenGallery()),
                 );
               },
-              child: const Text('Pick using controller'),
               style: TextButton.styleFrom(
                 primary: Colors.white,
                 backgroundColor: Colors.green,
               ),
+              child: const Text('Full screen mode'),
             ),
             const SizedBox(height: 20.0),
             TextButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.push<void>(
                   context,
-                  MaterialPageRoute(builder: (context) => Picker2()),
+                  MaterialPageRoute(
+                      builder: (context) => const CollapsableGallery()),
                 );
               },
-              child: const Text('Pick without controller'),
               style: TextButton.styleFrom(
                 primary: Colors.white,
                 backgroundColor: Colors.green,
               ),
+              child: const Text('Collapsable mode'),
             ),
+            const SizedBox(height: 20.0),
           ],
         ),
       ),
