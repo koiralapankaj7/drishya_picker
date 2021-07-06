@@ -34,6 +34,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   void dispose() {
     controller.dispose();
+    notifier.dispose();
     super.dispose();
   }
 

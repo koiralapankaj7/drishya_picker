@@ -17,6 +17,116 @@ import 'widgets/gallery_asset_selector.dart';
 import 'widgets/gallery_controller_provider.dart';
 import 'widgets/gallery_grid_view.dart';
 
+const _defaultMin = 0.37;
+
+///
+///
+///
+///
+///
+class GalleryViewWrapper extends StatefulWidget {
+  ///
+  const GalleryViewWrapper({
+    Key? key,
+    required this.child,
+    this.controller,
+  }) : super(key: key);
+
+  ///
+  final Widget child;
+
+  ///
+  final GalleryController? controller;
+
+  @override
+  _GalleryViewWrapperState createState() => _GalleryViewWrapperState();
+}
+
+class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
+  late GalleryController _controller;
+  late final PanelController _panelController;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? GalleryController();
+    _panelController = _controller._panelController;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var ps = _controller.panelSetting;
+    final _panelMaxHeight = ps.maxHeight ??
+        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
+    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
+    final _setting =
+        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
+
+    final showPanel = MediaQuery.of(context).viewInsets.bottom == 0.0;
+
+    return GalleryControllerProvider(
+      controller: _controller,
+      child: Material(
+        child: Stack(
+          // fit: StackFit.expand,
+          children: [
+            // Parent view
+            Column(
+              children: [
+                //
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      final focusNode = FocusScope.of(context);
+                      if (focusNode.hasFocus) {
+                        focusNode.unfocus();
+                      }
+                      if (_panelController.isVisible) {
+                        _controller._closePanel();
+                      }
+                    },
+                    child: widget.child,
+                  ),
+                ),
+
+                // Space for panel min height
+                ValueListenableBuilder<bool>(
+                  valueListenable: _panelController.panelVisibility,
+                  builder: (context, isVisible, child) {
+                    return SizedBox(
+                      height: showPanel && isVisible ? _panelMinHeight : 0.0,
+                    );
+                  },
+                ),
+
+                //
+              ],
+            ),
+
+            // Gallery
+            SlidablePanel(
+              setting: _setting,
+              controller: _panelController,
+              child: GalleryView(controller: _controller),
+            ),
+
+            //
+          ],
+        ),
+      ),
+    );
+
+    //
+  }
+}
+
 ///
 ///
 ///
@@ -57,6 +167,8 @@ class _GalleryViewState extends State<GalleryView>
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
+  double albumHeight = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -80,9 +192,9 @@ class _GalleryViewState extends State<GalleryView>
     );
   }
 
-  void _toogleAlbumList(bool visible) {
+  void _toogleAlbumList(bool isVisible) {
     if (_animationController.isAnimating) return;
-    _controller._setAlbumVisibility(!visible);
+    _controller._setAlbumVisibility(!isVisible);
     _panelController.isGestureEnabled = _animationController.value == 1.0;
     if (_animationController.value == 1.0) {
       _animationController.reverse();
@@ -141,20 +253,34 @@ class _GalleryViewState extends State<GalleryView>
     );
   }
 
-  void _onClosePressed() {
-    if (_animationController.isAnimating) return;
+  Future<bool> _onClosePressed() async {
+    if (_animationController.isAnimating) return false;
+
+    final isPanelMax = _panelController.value.state == SlidingState.max;
+
     final value = _controller.value;
+
     if (_controller._albumVisibility.value) {
       _toogleAlbumList(true);
-    } else if (value.selectedEntities.isNotEmpty) {
+      return false;
+    }
+
+    if (value.selectedEntities.isNotEmpty) {
       _showAlert();
-    } else {
+      return false;
+    }
+
+    if (isPanelMax) {
       if (_controller.fullScreenMode) {
         Navigator.of(context).pop();
+        return true;
       } else {
         _controller._panelController.minimizePanel();
+        return false;
       }
     }
+
+    return true;
   }
 
   void _onSelectionClear() {
@@ -173,242 +299,118 @@ class _GalleryViewState extends State<GalleryView>
     var ps = _controller.panelSetting;
     final _panelMaxHeight = ps.maxHeight ??
         MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
-    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * 0.35;
+    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
     final _setting =
         ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
 
     final albumListHeight = _panelMaxHeight - ps.headerMaxHeight;
+    albumHeight = albumListHeight;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _setting.overlayStyle,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          clipBehavior: Clip.none,
-          fit: StackFit.expand,
-          children: [
-            // Header
-            Align(
-              alignment: Alignment.topCenter,
-              child: GalleryHeader(
-                controller: _controller,
-                albumNotifier: _controller._albumNotifier,
-                onClose: _onClosePressed,
-                onAlbumToggle: _toogleAlbumList,
-                albumVisibility: _controller._albumVisibility,
+      child: WillPopScope(
+        onWillPop: _onClosePressed,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            // fit: StackFit.expand,
+            children: [
+              // Header
+              Align(
+                alignment: Alignment.topCenter,
+                child: GalleryHeader(
+                  controller: _controller,
+                  albumNotifier: _controller._albumNotifier,
+                  onClose: _onClosePressed,
+                  onAlbumToggle: _toogleAlbumList,
+                  albumVisibility: _controller._albumVisibility,
+                ),
               ),
-            ),
 
-            // Body
-            Column(
-              children: [
-                // Header space
-                Builder(
-                  builder: (context) {
-                    if (_controller.fullScreenMode) {
-                      return SizedBox(height: _setting.headerMaxHeight);
-                    }
+              // Body
+              Column(
+                children: [
+                  // Header space
+                  Builder(
+                    builder: (context) {
+                      if (_controller.fullScreenMode) {
+                        return SizedBox(height: _setting.headerMaxHeight);
+                      }
 
-                    return ValueListenableBuilder<SliderValue>(
-                      valueListenable: _panelController,
-                      builder: (context, SliderValue value, child) {
-                        final height = (_setting.headerMinHeight +
-                                (_setting.headerMaxHeight -
-                                        _setting.headerMinHeight) *
-                                    value.factor *
-                                    1.2)
-                            .clamp(
-                          _setting.headerMinHeight,
-                          _setting.headerMaxHeight,
-                        );
-                        return SizedBox(height: height);
-                      },
-                    );
+                      return ValueListenableBuilder<SliderValue>(
+                        valueListenable: _panelController,
+                        builder: (context, SliderValue value, child) {
+                          final height = (_setting.headerMinHeight +
+                                  (_setting.headerMaxHeight -
+                                          _setting.headerMinHeight) *
+                                      value.factor *
+                                      1.2)
+                              .clamp(
+                            _setting.headerMinHeight,
+                            _setting.headerMaxHeight,
+                          );
+                          return SizedBox(height: height);
+                        },
+                      );
 //
-                  },
-                ),
-
-                // Divider
-                Divider(
-                  color: Colors.lightBlue.shade300,
-                  thickness: 0.3,
-                  height: 2.0,
-                ),
-
-                // Gallery grid
-                Expanded(
-                  child: GalleryGridView(
-                    controller: _controller,
-                    entitiesNotifier: _controller._entitiesNotifier,
-                    panelController: _controller._panelController,
-                    onCameraRequest: _controller._openCamera,
-                    onSelect: _controller._select,
+                    },
                   ),
-                ),
-              ],
-            ),
 
-            // Send and edit button
-            Positioned(
-              bottom: 0.0,
-              child: GalleryAssetSelector(
+                  // Divider
+                  Divider(
+                    color: Colors.lightBlue.shade300,
+                    thickness: 0.3,
+                    height: 2.0,
+                  ),
+
+                  // Gallery grid
+                  Expanded(
+                    child: GalleryGridView(
+                      controller: _controller,
+                      entitiesNotifier: _controller._entitiesNotifier,
+                      panelController: _controller._panelController,
+                      onCameraRequest: _controller._openCamera,
+                      onSelect: _controller._select,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Send and edit button
+              GalleryAssetSelector(
                 controller: _controller,
                 onEdit: (e) {},
                 onSubmit: _controller._completeTask,
               ),
-            ),
 
-            // Album List
-            AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                return Positioned(
-                  bottom: albumListHeight * (_animation.value - 1),
-                  left: 0.0,
-                  right: 0.0,
-                  child: child!,
-                );
-              },
-              child: SizedBox(
-                height: albumListHeight,
+              // Album list
+              AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  final offsetY = _setting.headerMaxHeight +
+                      (_panelMaxHeight - ps.headerMaxHeight) *
+                          (1 - _animation.value);
+                  return Visibility(
+                    visible: _animation.value > 0.0,
+                    child: Transform.translate(
+                      offset: Offset(0.0, offsetY),
+                      child: child,
+                    ),
+                  );
+                },
                 child: GalleryAlbumView(
                   albumsNotifier: _controller._albumsNotifier,
                   controller: _controller,
                   onAlbumChange: _onALbumChange,
                 ),
               ),
-            ),
 
-            //
-          ],
+              //
+            ],
+          ),
         ),
       ),
     );
-  }
-}
-
-///
-///
-///
-///
-///
-class GalleryViewWrapper extends StatefulWidget {
-  ///
-  const GalleryViewWrapper({
-    Key? key,
-    required this.child,
-    this.controller,
-  }) : super(key: key);
-
-  ///
-  final Widget child;
-
-  ///
-  final GalleryController? controller;
-
-  @override
-  _GalleryViewWrapperState createState() => _GalleryViewWrapperState();
-}
-
-class _GalleryViewWrapperState extends State<GalleryViewWrapper>
-    with WidgetsBindingObserver {
-  late final GalleryController _controller;
-  late final PanelController _panelController;
-  var _keyboardVisible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addObserver(this);
-    _controller = (widget.controller ?? GalleryController());
-    // .._checkKeyboard.addListener(_init);
-    _panelController = _controller._panelController;
-  }
-
-  // void _init() {
-  //   if (_controller._checkKeyboard.value) {
-  //     if (_keyboardVisible) {
-  //       FocusScope.of(context).unfocus();
-  //       Future.delayed(
-  //         const Duration(milliseconds: 180),
-  //         _panelController.openPanel,
-  //       );
-  //     } else {
-  //       _panelController.openPanel();
-  //     }
-  //   }
-  // }
-
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-    final bottomInset = WidgetsBinding.instance?.window.viewInsets.bottom;
-    _keyboardVisible = (bottomInset ?? 0.0) > 0.0;
-    if (_keyboardVisible && _panelController.isVisible) {
-      _controller._cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var ps = _controller.panelSetting;
-    final _panelMaxHeight = ps.maxHeight ??
-        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
-    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * 0.35;
-    final _setting =
-        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
-
-    return Material(
-      key: _controller._wrapperKey,
-      child: GalleryControllerProvider(
-        controller: _controller,
-        child: Stack(
-          children: [
-            // Parent view
-            Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      if (_panelController.isVisible) {
-                        _controller._cancel();
-                      }
-                    },
-                    child: widget.child,
-                  ),
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _panelController.panelVisibility,
-                  builder: (context, isVisible, child) {
-                    return isVisible ? child! : const SizedBox();
-                  },
-                  child: SizedBox(height: _panelMinHeight),
-                ),
-              ],
-            ),
-
-            // Gallery view
-            SlidablePanel(
-              setting: _setting,
-              controller: _panelController,
-              child: GalleryView(controller: _controller),
-            ),
-
-            //
-          ],
-        ),
-      ),
-    );
-
-    //
   }
 }
 
@@ -585,8 +587,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   // Full screen mode or collapsable mode
   var _fullScreenMode = false;
 
-  final _wrapperKey = GlobalKey();
-
   var _accessCamera = false;
 
   ///
@@ -651,7 +651,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   /// When panel closed without any selection
-  void _cancel() {
+  void _closePanel() {
     _panelController.closePanel();
     final entities = (_clearedSelection || value.selectedEntities.isEmpty)
         ? <AssetEntity>[]
@@ -721,7 +721,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }) {
     _completer = Completer<List<AssetEntity>>();
 
-    if (_wrapperKey.currentState == null) {
+    if (context.galleryController == null) {
       _fullScreenMode = true;
       final route = SlideTransitionPageRoute<List<AssetEntity>>(
         builder: GalleryView(controller: this),
@@ -735,7 +735,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     } else {
       _fullScreenMode = false;
       _panelController.openPanel();
-      // _checkKeyboard.value = true;
+      FocusScope.of(context).unfocus();
     }
     if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {
       _internal = true;
@@ -775,12 +775,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   @override
   void dispose() {
-    _panelController.dispose();
-    _albumsNotifier.dispose();
-    _albumNotifier.dispose();
-    _entitiesNotifier.dispose();
-    _recentEntities.dispose();
-    _albumVisibility.dispose();
+    // _panelController.dispose();
+    // _albumsNotifier.dispose();
+    // _albumNotifier.dispose();
+    // _entitiesNotifier.dispose();
+    // _recentEntities.dispose();
+    // _albumVisibility.dispose();
     super.dispose();
   }
 

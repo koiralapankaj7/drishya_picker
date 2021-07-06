@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
 import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
@@ -91,16 +92,18 @@ class GalleryGridView extends StatelessWidget {
                 );
               }
 
-              if (state.isLoading) return const _Loader();
-
               final ind = controller.setting.enableCamera ? index - 1 : index;
 
-              final entity = entities[ind];
+              final entity = state.isLoading ? null : entities[ind];
 
               return _MediaTile(
                 controller: controller,
                 entity: entity,
-                onPressed: () => onSelect(entity, context),
+                onPressed: () {
+                  if (entity != null) {
+                    onSelect(entity, context);
+                  }
+                },
               );
             },
           );
@@ -112,7 +115,8 @@ class GalleryGridView extends StatelessWidget {
   }
 }
 
-class _MediaTile extends StatefulWidget {
+///
+class _MediaTile extends StatelessWidget {
   ///
   const _MediaTile({
     Key? key,
@@ -125,146 +129,134 @@ class _MediaTile extends StatefulWidget {
   final GalleryController controller;
 
   ///
-  final AssetEntity entity;
+  final AssetEntity? entity;
 
   ///
   final VoidCallback onPressed;
 
   @override
-  _MediaTileState createState() => _MediaTileState();
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.grey.shade800,
+      child: FutureBuilder<Uint8List?>(
+        future: entity?.thumbDataWithSize(400, 400),
+        builder: (context, snapshot) {
+          final hasData = snapshot.connectionState == ConnectionState.done &&
+              snapshot.data != null;
+
+          if (hasData) {
+            return GestureDetector(
+              onTap: onPressed,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Image
+                  Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
+
+                  // Duration
+                  if (entity!.type == AssetType.video)
+                    Positioned(
+                      right: 4.0,
+                      bottom: 4.0,
+                      child: _VideoDuration(duration: entity!.duration),
+                    ),
+
+                  // Image selection overlay
+                  if (!controller.singleSelection)
+                    _SelectionCount(controller: controller, entity: entity!),
+
+                  //
+                ],
+              ),
+            );
+          }
+
+          return const SizedBox();
+        },
+      ),
+    );
+  }
 }
 
-///
-class _MediaTileState extends State<_MediaTile>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _VideoDuration extends StatelessWidget {
+  const _VideoDuration({
+    Key? key,
+    required this.duration,
+  }) : super(key: key);
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    )..forward();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    ));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final int duration;
 
   @override
   Widget build(BuildContext context) {
-    final drishyaController = widget.controller;
-
-    return GestureDetector(
-      onTap: widget.onPressed,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20.0),
       child: ColoredBox(
-        color: Colors.grey.shade700,
-        child: FutureBuilder<Uint8List?>(
-          future: widget.entity.thumbDataWithSize(
-            400,
-            400,
+        color: Colors.black.withOpacity(0.7),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+          child: Text(
+            duration.formatedDuration,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13.0,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.data != null) {
-              return AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return FadeTransition(
-                    opacity: _animation,
-                    child: child,
-                  );
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.memory(
-                      snapshot.data!,
-                      fit: BoxFit.cover,
-                    ),
-
-                    // Duration
-                    if (widget.entity.type == AssetType.video)
-                      Positioned(
-                        right: 4.0,
-                        bottom: 4.0,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
-                          child: Container(
-                            color: Colors.black.withOpacity(0.7),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6.0, vertical: 2.0),
-                            child: Text(
-                              widget.entity.duration.formatedDuration,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 13.0,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // Image selection overlay
-                    if (!drishyaController.singleSelection)
-                      ValueListenableBuilder<GalleryValue>(
-                        valueListenable: drishyaController,
-                        builder: (context, value, child) {
-                          final isSelected =
-                              value.selectedEntities.contains(widget.entity);
-                          if (!isSelected) return const SizedBox();
-                          final index =
-                              value.selectedEntities.indexOf(widget.entity);
-                          return Container(
-                            color: Colors.white54,
-                            child: Center(
-                              child: CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
-                                radius: 14.0,
-                                child: Text(
-                                  '${index + 1}',
-                                  style: const TextStyle(
-                                    fontSize: 13.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                    //
-                  ],
-                ),
-              );
-            }
-            return const SizedBox();
-          },
         ),
       ),
     );
   }
 }
 
-///
-class _Loader extends StatelessWidget {
-  ///
-  const _Loader({Key? key}) : super(key: key);
+class _SelectionCount extends StatelessWidget {
+  const _SelectionCount({
+    Key? key,
+    required this.controller,
+    required this.entity,
+  }) : super(key: key);
+
+  final GalleryController controller;
+  final AssetEntity entity;
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.grey.shade700);
+    return ValueListenableBuilder<GalleryValue>(
+      valueListenable: controller,
+      builder: (context, value, child) {
+        final isSelected = value.selectedEntities.contains(entity);
+        // if (!isSelected) return const SizedBox();
+        final index = value.selectedEntities.indexOf(entity);
+
+        final crossFadeState =
+            isSelected ? CrossFadeState.showFirst : CrossFadeState.showSecond;
+        final firstChild = ColoredBox(
+          color: Theme.of(context).primaryColor.withOpacity(0.3),
+          child: Center(
+            child: CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
+              radius: 14.0,
+              child: Text(
+                '${index + 1}',
+                style: Theme.of(context).textTheme.button?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+              ),
+            ),
+          ),
+        );
+        return AppAnimatedCrossFade(
+          firstChild: firstChild,
+          secondChild: const SizedBox(),
+          crossFadeState: crossFadeState,
+          duration: const Duration(milliseconds: 300),
+        );
+      },
+    );
   }
 }
 

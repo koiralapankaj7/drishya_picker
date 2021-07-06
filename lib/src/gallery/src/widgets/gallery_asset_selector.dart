@@ -109,83 +109,87 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
     return ValueListenableBuilder<GalleryValue>(
       valueListenable: widget.controller,
       builder: (context, value, child) {
-        return Container(
-          padding: const EdgeInsets.all(20.0),
-          width: size.width,
-          child: Stack(
-            children: [
-              // Edit button
-              Align(
-                alignment: Alignment.centerLeft,
-                child: AnimatedBuilder(
-                  animation: _editOpa,
-                  builder: (context, child) {
-                    final hide = (value.selectedEntities.isEmpty &&
-                            !_editOpaController.isAnimating) ||
-                        _editOpa.value == 0.0;
-                    return hide
-                        ? const SizedBox()
-                        : Opacity(
-                            opacity: _editOpa.value,
-                            child: child,
-                          );
-                  },
-                  child: SizedBox(
-                    width: buttonWidth,
-                    child: _TextButton(
-                      onPressed: () =>
-                          widget.onEdit(value.selectedEntities.first),
-                      label: 'EDIT',
-                      background: Colors.white,
-                      labelColor: Colors.black,
+        return Column(
+          children: [
+            const Expanded(child: SizedBox()),
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              width: size.width,
+              // color: Colors.cyan,
+              child: Stack(
+                children: [
+                  // Edit button
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedBuilder(
+                      animation: _editOpa,
+                      builder: (context, child) {
+                        final hide = (value.selectedEntities.isEmpty &&
+                                !_editOpaController.isAnimating) ||
+                            _editOpa.value == 0.0;
+                        return hide
+                            ? const SizedBox()
+                            : Opacity(
+                                opacity: _editOpa.value,
+                                child: child,
+                              );
+                      },
+                      child: SizedBox(
+                        width: buttonWidth,
+                        child: _TextButton(
+                          onPressed: () =>
+                              widget.onEdit(value.selectedEntities.first),
+                          label: 'EDIT',
+                          background: Colors.white,
+                          labelColor: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // Margin
-              const SizedBox(width: 16.0),
+                  // Margin
+                  const SizedBox(width: 16.0),
 
-              // Select
-              Align(
-                alignment: Alignment.centerRight,
-                child: AnimatedBuilder(
-                  animation: _selectOpa,
-                  builder: (context, child) {
-                    final hide = (value.selectedEntities.isEmpty &&
-                            !_selectOpaController.isAnimating) ||
-                        _selectOpa.value == 0.0;
+                  // Select
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AnimatedBuilder(
+                      animation: _selectOpa,
+                      builder: (context, child) {
+                        final hide = (value.selectedEntities.isEmpty &&
+                                !_selectOpaController.isAnimating) ||
+                            _selectOpa.value == 0.0;
 
-                    return hide
-                        ? const SizedBox()
-                        : Opacity(
-                            opacity: _selectOpa.value,
+                        return hide
+                            ? const SizedBox()
+                            : Opacity(
+                                opacity: _selectOpa.value,
+                                child: child,
+                              );
+                      },
+                      child: AnimatedBuilder(
+                        animation: _selectSize,
+                        builder: (context, child) {
+                          return SizedBox(
+                            width: buttonWidth +
+                                _selectSize.value * (buttonWidth + 20.0),
                             child: child,
                           );
-                  },
-                  child: AnimatedBuilder(
-                    animation: _selectSize,
-                    builder: (context, child) {
-                      return SizedBox(
-                        width: buttonWidth +
-                            _selectSize.value * (buttonWidth + 20.0),
-                        child: child,
-                      );
-                    },
-                    child: _TextButton(
-                      onPressed: () =>
-                          widget.onSubmit(context, value.selectedEntities),
-                      label: 'SELECT',
+                        },
+                        child: _TextButton(
+                          onPressed: () =>
+                              widget.onSubmit(context, value.selectedEntities),
+                          label: 'SELECT',
+                        ),
+                      ),
                     ),
                   ),
-                ),
+
+                  // Send Button
+                ],
               ),
-
-              ///
-
-              // Send Button
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
