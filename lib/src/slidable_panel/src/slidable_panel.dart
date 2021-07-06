@@ -330,7 +330,7 @@ class _SlidablePanelState extends State<SlidablePanel>
     _remainingSpace = _panelMaxHeight - _panelMinHeight;
 
     return ValueListenableBuilder<bool>(
-      valueListenable: _panelController.panelVisibility,
+      valueListenable: _panelController._panelVisibility,
       builder: (context, bool isVisible, child) {
         return isVisible ? child! : const SizedBox();
       },
@@ -379,30 +379,32 @@ class PanelController extends ValueNotifier<SliderValue> {
   PanelController({
     ScrollController? scrollController,
   })  : _scrollController = scrollController ?? ScrollController(),
+        _panelVisibility = ValueNotifier(false),
         super(SliderValue());
 
   final ScrollController _scrollController;
+  final ValueNotifier<bool> _panelVisibility;
 
-  ///
-  ScrollController get scrollController => _scrollController;
-
-  late final _SlidablePanelState _state;
+  late _SlidablePanelState _state;
 
   void _init(_SlidablePanelState state) {
     _state = state;
   }
 
-  /// todo : make this getter only
-  ValueNotifier<bool> panelVisibility = ValueNotifier(false);
-  // bool get
-
   bool _gesture = true;
+  bool _internal = true;
+
+  ///
+  ScrollController get scrollController => _scrollController;
+
+  ///
+  ValueNotifier<bool> get panelVisibility => _panelVisibility;
 
   ///
   SlidingState get panelState => value.state;
 
   /// If panel is open return true, otherwise false
-  bool get isVisible => panelVisibility.value;
+  bool get isVisible => _panelVisibility.value;
 
   ///
   bool get isGestureEnabled => _gesture;
@@ -414,6 +416,7 @@ class PanelController extends ValueNotifier<SliderValue> {
 
   /// Minimize panel
   void openPanel() {
+    _internal = true;
     if (value.state == SlidingState.min) return;
     value = value.copyWith(
       state: SlidingState.min,
@@ -421,8 +424,9 @@ class PanelController extends ValueNotifier<SliderValue> {
       offset: 0.0,
       position: Offset.zero,
     );
-    panelVisibility.value = true;
+    _panelVisibility.value = true;
     _gesture = true;
+    _internal = false;
   }
 
   /// Maximize panel
@@ -439,6 +443,7 @@ class PanelController extends ValueNotifier<SliderValue> {
 
   /// Close Panel
   void closePanel() {
+    _internal = true;
     if (value.state == SlidingState.close) return;
     value = value.copyWith(
       state: SlidingState.close,
@@ -446,35 +451,41 @@ class PanelController extends ValueNotifier<SliderValue> {
       offset: 0.0,
       position: Offset.zero,
     );
-    panelVisibility.value = false;
+    _panelVisibility.value = false;
     _gesture = false;
+    _internal = false;
   }
 
   ///
   void pausePanel() {
+    _internal = true;
     if (value.state == SlidingState.paused) return;
     value = value.copyWith(state: SlidingState.paused);
-    panelVisibility.value = false;
+    _panelVisibility.value = false;
+    _internal = false;
   }
 
   ///
   void attach(SliderValue sliderValue) {
+    _internal = true;
     value = value.copyWith(
       factor: sliderValue.factor,
       offset: sliderValue.offset,
       position: sliderValue.position,
       state: sliderValue.state,
     );
+    _internal = false;
   }
 
   @override
   set value(SliderValue newValue) {
+    if (!_internal) return;
     super.value = newValue;
   }
 
   @override
   void dispose() {
-    panelVisibility.dispose();
+    _panelVisibility.dispose();
     _scrollController.dispose();
     super.dispose();
   }

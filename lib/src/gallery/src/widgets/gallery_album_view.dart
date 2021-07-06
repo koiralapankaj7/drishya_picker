@@ -8,7 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../gallery_view.dart';
 
 ///
-class GalleryAlbumView extends StatefulWidget {
+class GalleryAlbumView extends StatelessWidget {
   ///
   const GalleryAlbumView({
     Key? key,
@@ -27,14 +27,9 @@ class GalleryAlbumView extends StatefulWidget {
   final ValueNotifier<AlbumsType> albumsNotifier;
 
   @override
-  _GalleryAlbumViewState createState() => _GalleryAlbumViewState();
-}
-
-class _GalleryAlbumViewState extends State<GalleryAlbumView> {
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AlbumsType>(
-      valueListenable: widget.albumsNotifier,
+      valueListenable: albumsNotifier,
       builder: (context, state, child) {
         // Loading
         if (state.isLoading) {
@@ -83,7 +78,7 @@ class _GalleryAlbumViewState extends State<GalleryAlbumView> {
               final entity = state.data![index];
               return _Album(
                 entity: entity,
-                onPressed: widget.onAlbumChange,
+                onPressed: onAlbumChange,
               );
             },
           ),
