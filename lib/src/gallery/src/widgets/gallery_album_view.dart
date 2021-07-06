@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+
+import '../gallery_view.dart';
 
 ///
 class GalleryAlbumView extends StatefulWidget {
@@ -13,6 +14,7 @@ class GalleryAlbumView extends StatefulWidget {
     Key? key,
     required this.controller,
     required this.onAlbumChange,
+    required this.albumsNotifier,
   }) : super(key: key);
 
   ///
@@ -20,6 +22,9 @@ class GalleryAlbumView extends StatefulWidget {
 
   ///
   final ValueSetter<AssetPathEntity> onAlbumChange;
+
+  ///
+  final ValueNotifier<AlbumsType> albumsNotifier;
 
   @override
   _GalleryAlbumViewState createState() => _GalleryAlbumViewState();
@@ -29,7 +34,7 @@ class _GalleryAlbumViewState extends State<GalleryAlbumView> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AlbumsType>(
-      valueListenable: widget.controller.albumsNotifier,
+      valueListenable: widget.albumsNotifier,
       builder: (context, state, child) {
         // Loading
         if (state.isLoading) {

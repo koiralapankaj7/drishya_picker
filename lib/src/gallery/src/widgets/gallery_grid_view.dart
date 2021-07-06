@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
 import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,17 +14,33 @@ class GalleryGridView extends StatelessWidget {
   const GalleryGridView({
     Key? key,
     required this.controller,
+    required this.onCameraRequest,
+    required this.onSelect,
+    required this.entitiesNotifier,
+    required this.panelController,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  ///
+  final ValueSetter<BuildContext> onCameraRequest;
+
+  ///
+  final void Function(AssetEntity, BuildContext) onSelect;
+
+  ///
+  final ValueNotifier<EntitiesType> entitiesNotifier;
+
+  ///
+  final PanelController panelController;
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: controller.panelSetting.foregroundColor,
       child: ValueListenableBuilder<EntitiesType>(
-        valueListenable: controller.entitiesNotifier,
+        valueListenable: entitiesNotifier,
         builder: (context, state, child) {
           // Error
           if (state.hasError) {
@@ -56,7 +71,7 @@ class GalleryGridView extends StatelessWidget {
                   : entities.length;
 
           return GridView.builder(
-            controller: controller.panelController.scrollController,
+            controller: panelController.scrollController,
             padding: const EdgeInsets.all(0.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: controller.setting.crossAxisCount ?? 3,
@@ -67,7 +82,7 @@ class GalleryGridView extends StatelessWidget {
             itemBuilder: (context, index) {
               if (controller.setting.enableCamera && index == 0) {
                 return InkWell(
-                  onTap: () => controller.openCamera(context),
+                  onTap: () => onCameraRequest(context),
                   child: Icon(
                     CupertinoIcons.camera,
                     color: Colors.lightBlue.shade300,
@@ -82,7 +97,11 @@ class GalleryGridView extends StatelessWidget {
 
               final entity = entities[ind];
 
-              return _MediaTile(controller: controller, entity: entity);
+              return _MediaTile(
+                controller: controller,
+                entity: entity,
+                onPressed: () => onSelect(entity, context),
+              );
             },
           );
 
@@ -99,6 +118,7 @@ class _MediaTile extends StatefulWidget {
     Key? key,
     required this.entity,
     required this.controller,
+    required this.onPressed,
   }) : super(key: key);
 
   ///
@@ -106,6 +126,9 @@ class _MediaTile extends StatefulWidget {
 
   ///
   final AssetEntity entity;
+
+  ///
+  final VoidCallback onPressed;
 
   @override
   _MediaTileState createState() => _MediaTileState();
@@ -141,9 +164,7 @@ class _MediaTileState extends State<_MediaTile>
     final drishyaController = widget.controller;
 
     return GestureDetector(
-      onTap: () {
-        widget.controller.select(widget.entity, context);
-      },
+      onTap: widget.onPressed,
       child: ColoredBox(
         color: Colors.grey.shade700,
         child: FutureBuilder<Uint8List?>(

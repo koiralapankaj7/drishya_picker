@@ -1,6 +1,7 @@
-import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
 import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:flutter/material.dart';
+
+import '../gallery_view.dart';
 
 ///
 class GalleryBuilder extends StatelessWidget {

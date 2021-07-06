@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../camera_picker.dart';
+
 ///
 /// Widget to pick media using camera
 class CameraViewField extends StatelessWidget {
@@ -9,6 +11,7 @@ class CameraViewField extends StatelessWidget {
     Key? key,
     this.onCapture,
     this.child,
+    this.videoDuration,
   }) : super(key: key);
 
   ///
@@ -17,13 +20,20 @@ class CameraViewField extends StatelessWidget {
   final void Function(AssetEntity entity)? onCapture;
 
   ///
+  final Duration? videoDuration;
+
+  ///
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        // DrishyaController()._openCamera(onCapture, context);
+      onTap: () {
+        CameraPicker.pick(context, videoDuration: videoDuration).then((value) {
+          if (value != null) {
+            onCapture?.call(value);
+          }
+        });
       },
       child: child,
     );

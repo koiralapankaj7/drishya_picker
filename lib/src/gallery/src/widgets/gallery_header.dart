@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:flutter/material.dart';
+
+import '../gallery_view.dart';
 
 ///
 class GalleryHeader extends StatefulWidget {
@@ -12,6 +14,8 @@ class GalleryHeader extends StatefulWidget {
     required this.controller,
     required this.onClose,
     required this.onAlbumToggle,
+    required this.albumVisibility,
+    required this.albumNotifier,
     this.headerSubtitle,
   }) : super(key: key);
 
@@ -26,6 +30,12 @@ class GalleryHeader extends StatefulWidget {
 
   ///
   final void Function(bool visible) onAlbumToggle;
+
+  ///
+  final ValueNotifier<bool> albumVisibility;
+
+  ///
+  final ValueNotifier<AlbumType> albumNotifier;
 
   @override
   _GalleryHeaderState createState() => _GalleryHeaderState();
@@ -74,6 +84,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 _AlbumDetail(
                   subtitle: widget.headerSubtitle,
                   controller: _controller,
+                  albumNotifier: widget.albumNotifier,
                 ),
 
                 // Dropdown
@@ -85,6 +96,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                       child: _AnimatedDropdown(
                         controller: _controller,
                         onPressed: widget.onAlbumToggle,
+                        albumVisibility: widget.albumVisibility,
                       ),
                     ),
                   ),
@@ -107,6 +119,7 @@ class _AnimatedDropdown extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.onPressed,
+    required this.albumVisibility,
   }) : super(key: key);
 
   final GalleryController controller;
@@ -114,15 +127,25 @@ class _AnimatedDropdown extends StatelessWidget {
   ///
   final void Function(bool visible) onPressed;
 
+  ///
+  final ValueNotifier<bool> albumVisibility;
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.albumVisibilityNotifier,
-      builder: (context, visible, child) {
-        return Visibility(
-          visible: !controller.singleSelection ||
-              controller.value.selectedEntities.isEmpty,
-          child: TweenAnimationBuilder<double>(
+    return GalleryBuilder(
+      controller: controller,
+      builder: (value, child) {
+        return AnimatedOpacity(
+          // visible: value.selectedEntities.isEmpty,
+          opacity: value.selectedEntities.isEmpty ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: child!,
+        );
+      },
+      child: ValueListenableBuilder<bool>(
+        valueListenable: albumVisibility,
+        builder: (context, visible, child) {
+          return TweenAnimationBuilder<double>(
             tween: Tween(
               begin: visible ? 0.0 : 1.0,
               end: visible ? 1.0 : 0.0,
@@ -136,12 +159,16 @@ class _AnimatedDropdown extends StatelessWidget {
             },
             child: _IconButton(
               iconData: Icons.keyboard_arrow_down,
-              onPressed: () => onPressed(visible),
+              onPressed: () {
+                if (controller.value.selectedEntities.isEmpty) {
+                  onPressed(visible);
+                }
+              },
               size: 34.0,
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -183,6 +210,7 @@ class _AlbumDetail extends StatelessWidget {
     Key? key,
     this.subtitle,
     required this.controller,
+    required this.albumNotifier,
   }) : super(key: key);
 
   ///
@@ -191,6 +219,9 @@ class _AlbumDetail extends StatelessWidget {
   ///
   final GalleryController controller;
 
+  ///
+  final ValueNotifier<AlbumType> albumNotifier;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -198,7 +229,7 @@ class _AlbumDetail extends StatelessWidget {
       children: [
         // Album name
         ValueListenableBuilder<AlbumType>(
-          valueListenable: controller.albumNotifier,
+          valueListenable: albumNotifier,
           builder: (context, album, child) {
             return Text(
               album.data?.name ?? 'Unknown',

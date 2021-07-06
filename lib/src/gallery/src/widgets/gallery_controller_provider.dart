@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../controllers/gallery_controller.dart';
+import '../gallery_view.dart';
 
 ///
 class GalleryControllerProvider extends InheritedWidget {

@@ -1,6 +1,8 @@
-import 'package:drishya_picker/src/gallery/src/controllers/gallery_controller.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:flutter/material.dart';
+
+import '../gallery_view.dart';
 
 ///
 class GalleryAssetSelector extends StatefulWidget {
@@ -8,10 +10,19 @@ class GalleryAssetSelector extends StatefulWidget {
   const GalleryAssetSelector({
     Key? key,
     required this.controller,
+    required this.onSubmit,
+    required this.onEdit,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  ///
+  final void Function(BuildContext context, List<AssetEntity> entities)
+      onSubmit;
+
+  ///
+  final ValueSetter<AssetEntity> onEdit;
 
   @override
   GalleryAssetSelectorState createState() => GalleryAssetSelectorState();
@@ -122,9 +133,8 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                   child: SizedBox(
                     width: buttonWidth,
                     child: _TextButton(
-                      onPressed: () {
-                        //
-                      },
+                      onPressed: () =>
+                          widget.onEdit(value.selectedEntities.first),
                       label: 'EDIT',
                       background: Colors.white,
                       labelColor: Colors.black,
@@ -163,16 +173,15 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                       );
                     },
                     child: _TextButton(
-                      onPressed: () {
-                        final entities = value.selectedEntities;
-                        widget.controller
-                            .completeTask(context, entities: entities);
-                      },
+                      onPressed: () =>
+                          widget.onSubmit(context, value.selectedEntities),
                       label: 'SELECT',
                     ),
                   ),
                 ),
               ),
+
+              ///
 
               // Send Button
             ],
