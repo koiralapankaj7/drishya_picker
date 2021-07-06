@@ -54,12 +54,6 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     var ps = _controller.panelSetting;
     final _panelMaxHeight = ps.maxHeight ??
@@ -70,11 +64,12 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
 
     final showPanel = MediaQuery.of(context).viewInsets.bottom == 0.0;
 
-    return GalleryControllerProvider(
-      controller: _controller,
-      child: Material(
+    return Material(
+      key: _controller._wrapperKey,
+      child: GalleryControllerProvider(
+        controller: _controller,
         child: Stack(
-          // fit: StackFit.expand,
+          fit: StackFit.expand,
           children: [
             // Parent view
             Column(
@@ -92,7 +87,7 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
                         _controller._closePanel();
                       }
                     },
-                    child: widget.child,
+                    child: Builder(builder: (_) => widget.child),
                   ),
                 ),
 
@@ -114,7 +109,9 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
             SlidablePanel(
               setting: _setting,
               controller: _panelController,
-              child: GalleryView(controller: _controller),
+              child: Builder(
+                builder: (_) => GalleryView(controller: _controller),
+              ),
             ),
 
             //
@@ -420,7 +417,7 @@ class _GalleryViewState extends State<GalleryView>
 ///
 ///
 ///
-class GalleryViewField extends StatefulWidget {
+class GalleryViewField extends StatelessWidget {
   ///
   /// Widget which pick media from gallery
   ///
@@ -473,42 +470,22 @@ class GalleryViewField extends StatefulWidget {
   final Widget? child;
 
   @override
-  _GalleryViewFieldState createState() => _GalleryViewFieldState();
-}
-
-class _GalleryViewFieldState extends State<GalleryViewField> {
-  late final GalleryController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      _controller = context.galleryController ??
-          GalleryController(
-            panelSetting: widget.panelSetting,
-            gallerySetting: widget.gallerySetting,
-          );
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _controller._openGallery(
-          widget.onChanged,
-          widget.onSubmitted,
-          widget.selectedEntities,
+        (context.galleryController ??
+                GalleryController(
+                  panelSetting: panelSetting,
+                  gallerySetting: gallerySetting,
+                ))
+            ._openGallery(
+          onChanged,
+          onSubmitted,
+          selectedEntities,
           context,
         );
       },
-      child: widget.child,
+      child: child,
     );
   }
 }
@@ -588,6 +565,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   var _fullScreenMode = false;
 
   var _accessCamera = false;
+
+  final _wrapperKey = GlobalKey();
 
   ///
   void _setAlbumVisibility(bool visible) {
@@ -721,7 +700,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }) {
     _completer = Completer<List<AssetEntity>>();
 
-    if (context.galleryController == null) {
+    if (_wrapperKey.currentState == null) {
       _fullScreenMode = true;
       final route = SlideTransitionPageRoute<List<AssetEntity>>(
         builder: GalleryView(controller: this),
@@ -775,12 +754,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   @override
   void dispose() {
-    // _panelController.dispose();
-    // _albumsNotifier.dispose();
-    // _albumNotifier.dispose();
-    // _entitiesNotifier.dispose();
-    // _recentEntities.dispose();
-    // _albumVisibility.dispose();
+    _panelController.dispose();
+    _albumsNotifier.dispose();
+    _albumNotifier.dispose();
+    _entitiesNotifier.dispose();
+    _recentEntities.dispose();
+    _albumVisibility.dispose();
     super.dispose();
   }
 
