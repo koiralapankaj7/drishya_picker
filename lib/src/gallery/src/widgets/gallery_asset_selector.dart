@@ -215,8 +215,7 @@ class _TextButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        primary: Colors.black,
-        backgroundColor: background ?? Colors.lightBlue,
+        backgroundColor: background ?? Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -225,7 +224,7 @@ class _TextButton extends StatelessWidget {
       child: Text(
         label ?? '',
         style: Theme.of(context).textTheme.button!.copyWith(
-              color: labelColor ?? Colors.white,
+              color: labelColor ?? Theme.of(context).colorScheme.onPrimary,
             ),
       ),
     );

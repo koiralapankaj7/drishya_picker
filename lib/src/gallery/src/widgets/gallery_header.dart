@@ -136,7 +136,6 @@ class _AnimatedDropdown extends StatelessWidget {
       controller: controller,
       builder: (value, child) {
         return AnimatedOpacity(
-          // visible: value.selectedEntities.isEmpty,
           opacity: value.selectedEntities.isEmpty ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 200),
           child: child!,
