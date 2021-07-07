@@ -253,28 +253,26 @@ class _GalleryViewState extends State<GalleryView>
   Future<bool> _onClosePressed() async {
     if (_animationController.isAnimating) return false;
 
-    final isPanelMax = _panelController.value.state == SlidingState.max;
-
-    final value = _controller.value;
-
     if (_controller._albumVisibility.value) {
       _toogleAlbumList(true);
       return false;
     }
 
-    if (value.selectedEntities.isNotEmpty) {
+    if (_controller.value.selectedEntities.isNotEmpty) {
       _showAlert();
       return false;
     }
 
-    if (isPanelMax) {
-      if (_controller.fullScreenMode) {
-        Navigator.of(context).pop();
-        return true;
-      } else {
-        _controller._panelController.minimizePanel();
-        return false;
-      }
+    if (_controller.fullScreenMode) {
+      Navigator.of(context).pop();
+      return true;
+    }
+
+    final isPanelMax = _panelController.value.state == SlidingState.max;
+
+    if (!_controller.fullScreenMode && isPanelMax) {
+      _controller._panelController.minimizePanel();
+      return false;
     }
 
     return true;
