@@ -15,9 +15,8 @@ class FullscreenGallery extends StatefulWidget {
 }
 
 class _FullscreenGalleryState extends State<FullscreenGallery> {
-  final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
-
   late final GalleryController controller;
+  late final ValueNotifier<List<AssetEntity>> notifier;
 
   @override
   void initState() {
@@ -28,6 +27,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
       requestType: RequestType.all,
     );
     controller = GalleryController(gallerySetting: setting);
+    notifier = ValueNotifier(<AssetEntity>[]);
   }
 
   @override

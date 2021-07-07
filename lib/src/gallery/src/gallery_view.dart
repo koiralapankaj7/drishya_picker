@@ -417,7 +417,7 @@ class _GalleryViewState extends State<GalleryView>
 ///
 ///
 ///
-class GalleryViewField extends StatelessWidget {
+class GalleryViewField extends StatefulWidget {
   ///
   /// Widget which pick media from gallery
   ///
@@ -470,22 +470,51 @@ class GalleryViewField extends StatelessWidget {
   final Widget? child;
 
   @override
+  _GalleryViewFieldState createState() => _GalleryViewFieldState();
+}
+
+class _GalleryViewFieldState extends State<GalleryViewField> {
+  late GalleryController _controller;
+  bool _dispose = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback(_init);
+  }
+
+  void _init(Duration timeStamp) {
+    if (context.galleryController == null) {
+      _controller = GalleryController(
+        panelSetting: widget.panelSetting,
+        gallerySetting: widget.gallerySetting,
+      );
+      _dispose = true;
+    } else {
+      _controller = context.galleryController!;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_dispose) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        (context.galleryController ??
-                GalleryController(
-                  panelSetting: panelSetting,
-                  gallerySetting: gallerySetting,
-                ))
-            ._openGallery(
-          onChanged,
-          onSubmitted,
-          selectedEntities,
+        _controller._openGallery(
+          widget.onChanged,
+          widget.onSubmitted,
+          widget.selectedEntities,
           context,
         );
       },
-      child: child,
+      child: widget.child,
     );
   }
 }
@@ -734,13 +763,19 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   List<AssetEntity>? get recentEntities => _recentEntities.value.data;
 
-  /// return true if drishya picker is in full screen mode,
+  ///
+  /// return true if gallery is in full screen mode,
+  ///
   bool get fullScreenMode => _fullScreenMode;
 
+  ///
   /// return true if selected media reached to maximum selection limit
+  ///
   bool get reachedMaximumLimit =>
       value.selectedEntities.length == setting.maximum;
 
+  ///
+  /// return true is gallery is in single selection mode
   ///
   bool get singleSelection => setting.maximum == 1;
 

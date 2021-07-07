@@ -5,9 +5,9 @@ class SlideTransitionPageRoute<T> extends PageRoute<T> {
   ///
   SlideTransitionPageRoute({
     required this.builder,
-    this.transitionCurve = Curves.easeIn,
+    this.transitionCurve = Curves.fastLinearToSlowEaseIn,
     this.transitionDuration = const Duration(milliseconds: 400),
-    this.reverseTransitionDuration = const Duration(milliseconds: 400),
+    this.reverseTransitionDuration = const Duration(milliseconds: 300),
     this.begainHorizontal = false,
     this.endHorizontal = false,
     RouteSettings? settings,
@@ -71,6 +71,7 @@ class SlideTransitionPageRoute<T> extends PageRoute<T> {
     var tween = Tween(begin: begin, end: Offset.zero).chain(
       CurveTween(curve: transitionCurve),
     );
+
     return SlideTransition(
       position: animation.drive(tween),
       child: child,
