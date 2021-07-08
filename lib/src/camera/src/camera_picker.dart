@@ -133,7 +133,7 @@ class _CameraPickerState extends State<CameraPicker>
   }
 
   Future<bool> _onWillPop() async {
-    _showSB();
+    _hideSB();
     return true;
   }
 
