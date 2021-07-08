@@ -7,74 +7,84 @@ Messanger like media picker
 <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/1.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/2.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/3.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/4.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/5.jpg" width="300" height="500">. <img src="https://raw.githubusercontent.com/koiralapankaj7/drishya_picker/main/assets/6.jpg" width="300" height="500">
     
     
-#### Using controller
+## Collapsible Gallery View
+---
+
 
 ```dart
 /// Media picker demo using controller
 class PickerDemo extends StatelessWidget {
-    final controller = DrishyaPickerController();
+  late final GalleryController controller;
 
-    // Call this method to pick data
-    Future<void> _pickData({DrishyaSetting? setting}) async {
-        final data = await controller.pickMedia(setting: setting);
-    }
+  @override
+  void initState() {
+    super.initState();
+    controller = GalleryController(
+      gallerySetting: const GallerySetting(
+        albumSubtitle: 'Collapsable',
+        enableCamera: true,
+        maximum: 10,
+        requestType: RequestType.all,
+      ),
+      panelSetting: const PanelSetting(topMargin: 24.0),
+    );
+  }
 
-    @override
-    Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: AppBar(
-                title: const Text('Pick using controller'),
-            ),
-            body: DrishyaPicker(
-                controller: controller,
-                child: ...
-            ),
-        );
-    }
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GalleryViewWrapper(
+      controller: controller,
+      child: Scaffold(
+        body: TextButton(
+           onPressed: () async {
+             final entities = await controller.pick(context);
+           },
+           style: TextButton.styleFrom(
+             primary: Colors.white,
+             backgroundColor: Colors.green,
+           ),
+           child: const Text('Pick'),
+         ),
+      ),
+    );
+  }
 }
 ```
 
-#### Using picker
+## Fullscreen Gallery View
 
+- Remove GalleryViewWrapper for fullscreen navigation
+---
 ```dart
-class PickerDemo extends StatefulWidget {
-    @override
-    _PickerDemoState createState() => _PickerDemoState();
-}
-
 /// Media picker demo using controller
-class _PickerDemoState extends State<PickerDemo> {
-    final controller = DrishyaPickerController();
-
-    // Call this method to pick data
-    Future<void> _pickData({DrishyaSetting? setting}) async {
-        final data = await controller.pickMedia(setting: setting);
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return DrishyaPicker(
-            requestType: RequestType.common,
-            topMargin: MediaQuery.of(context).padding.top,
-            child: Scaffold(
-                body: Center(
-                    child: MediaPicker(
-                        setting: DrishyaSetting(
-                            selected: list,
-                            maximum: 5,
-                            albumSubtitle: 'common',
-                        ),
-                        onChanged: (entity, isRemoved) {
-                            //
-                        },
-                        onSubmitted: (list) {
-                            //
-                        },
-                        child: child,
-                    ),
-                ),
-            ),
-        );
-    }
+class PickerDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: TextButton(
+           onPressed: () async {
+             final entities = await controller.pick(context);
+           },
+           style: TextButton.styleFrom(
+             primary: Colors.white,
+             backgroundColor: Colors.green,
+           ),
+           child: const Text('Pick'),
+       ),
+    );
+  }
 }
 ```
+
+---
+
+
+
+
