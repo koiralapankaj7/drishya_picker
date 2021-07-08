@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
+// import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/camera_type.dart';
@@ -119,14 +119,16 @@ class CamController extends ValueNotifier<ActionValue> {
       );
 
       if (controller.description.lensDirection == CameraLensDirection.back) {
-        unawaited(controller.setFlashMode(value.flashMode));
+        // ignore: unawaited_futures
+        controller.setFlashMode(value.flashMode);
       }
-      unawaited(Future.wait([
+      // ignore: unawaited_futures
+      Future.wait([
         controller.getMinExposureOffset().then(exposure.setMinExposure),
         controller.getMaxExposureOffset().then(exposure.setMaxExposure),
         controller.getMaxZoomLevel().then(zoom.setMaxZoom),
         controller.getMinZoomLevel().then(zoom.setMinZoom),
-      ]));
+      ]);
     } on CameraException catch (e) {
       _uiHandler.showExceptionSnackbar(e);
     } catch (e) {
@@ -163,7 +165,8 @@ class CamController extends ValueNotifier<ActionValue> {
       );
 
       if (file.existsSync()) {
-        unawaited(file.delete());
+        // ignore: unawaited_futures
+        file.delete();
       }
 
       // Update state
@@ -255,7 +258,8 @@ class CamController extends ValueNotifier<ActionValue> {
           title: path.basename(xfile.path),
         );
         if (file.existsSync()) {
-          unawaited(file.delete());
+          // ignore: unawaited_futures
+          file.delete();
         }
         // Update state
         value = value.copyWith(isRecordingVideo: false);
