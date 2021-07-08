@@ -149,67 +149,75 @@ class _ShutterButtonState extends State<_ShutterButton>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.size,
-      width: widget.size,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: EdgeInsets.all(margin),
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return CustomPaint(
-              painter: _CustomPainter(
-                progress: _animation.value,
-                strokeWidth: strokeWidth,
-              ),
-              child: child,
-            );
-          },
-          child: GestureDetector(
-            onTap: () {
-              _camController.value.cameraType == CameraType.video
-                  ? _videoButtonPressed()
-                  : _cameraButtonPressed();
+    return WillPopScope(
+      onWillPop: () async {
+        if (_isRecording) {
+          _stopRecording();
+        }
+        return false;
+      },
+      child: SizedBox(
+        height: widget.size,
+        width: widget.size,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: EdgeInsets.all(margin),
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: _CustomPainter(
+                  progress: _animation.value,
+                  strokeWidth: strokeWidth,
+                ),
+                child: child,
+              );
             },
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background
-                Container(
-                  margin: const EdgeInsets.all(7.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.white70,
-                    shape: BoxShape.circle,
+            child: GestureDetector(
+              onTap: () {
+                _camController.value.cameraType == CameraType.video
+                    ? _videoButtonPressed()
+                    : _cameraButtonPressed();
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Background
+                  Container(
+                    margin: const EdgeInsets.all(7.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.white70,
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
 
-                // Pulse animation
-                _Pulse(
-                  controller: _pulseController,
-                  size: widget.size - strokeWidth - margin - 4,
-                ),
+                  // Pulse animation
+                  _Pulse(
+                    controller: _pulseController,
+                    size: widget.size - strokeWidth - margin - 4,
+                  ),
 
-                // Icon
-                CameraBuilder(
-                  controller: widget.controller,
-                  builder: (value, child) {
-                    switch (value.cameraType) {
-                      case CameraType.selfi:
-                        return const Icon(
-                          CupertinoIcons.person_fill,
-                          color: Colors.blue,
-                        );
-                      case CameraType.video:
-                        return _VideoIcon(radius: _videoIconRadius);
-                      default:
-                        return const SizedBox();
-                    }
-                  },
-                ),
+                  // Icon
+                  CameraBuilder(
+                    controller: widget.controller,
+                    builder: (value, child) {
+                      switch (value.cameraType) {
+                        case CameraType.selfi:
+                          return const Icon(
+                            CupertinoIcons.person_fill,
+                            color: Colors.blue,
+                          );
+                        case CameraType.video:
+                          return _VideoIcon(radius: _videoIconRadius);
+                        default:
+                          return const SizedBox();
+                      }
+                    },
+                  ),
 
-                //
-              ],
+                  //
+                ],
+              ),
             ),
           ),
         ),
