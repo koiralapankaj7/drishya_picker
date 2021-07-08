@@ -8,3 +8,9 @@
 ## [1.0.0+1] -
 
 * Bug fixes
+
+## [1.0.1] - Breaking changes and feature upgrade
+
+* Added camera picker
+* Bug fixes
+* UI polishing

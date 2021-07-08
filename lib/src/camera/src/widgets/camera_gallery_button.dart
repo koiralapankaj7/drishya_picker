@@ -23,12 +23,14 @@ class CameraGalleryButton extends StatelessWidget {
           padding: const EdgeInsets.all(4.0),
           width: 54.0,
           height: 54.0,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: value.hideCameraGalleryButton
-                ? const SizedBox()
-                : Container(color: Colors.white),
-          ),
+          child: const SizedBox(),
+          // child: value.hideCameraGalleryButton
+          //     ? const SizedBox()
+          //     : GalleryViewField(
+          //       onChanged: (entity, _){
+          //         //
+          //       },
+          //     ),
         );
       },
     );

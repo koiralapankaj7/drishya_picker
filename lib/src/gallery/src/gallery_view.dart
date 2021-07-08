@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_picker.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_recent_preview.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -430,6 +432,8 @@ class GalleryViewField extends StatefulWidget {
     this.panelSetting,
     this.gallerySetting,
     this.child,
+    this.previewBuilder,
+    this.previewSize,
   }) : super(key: key);
 
   ///
@@ -466,6 +470,12 @@ class GalleryViewField extends StatefulWidget {
 
   ///
   final Widget? child;
+
+  ///
+  final Widget Function(Uint8List bytes)? previewBuilder;
+
+  ///
+  final Size? previewSize;
 
   @override
   _GalleryViewFieldState createState() => _GalleryViewFieldState();
@@ -512,7 +522,16 @@ class _GalleryViewFieldState extends State<GalleryViewField> {
           context,
         );
       },
-      child: widget.child,
+      child: widget.previewBuilder != null &&
+              (_controller.recentEntities?.isNotEmpty ?? false)
+          ? GalleryRecentPreview(
+              entity: _controller.recentEntities!.first,
+              builder: widget.previewBuilder,
+              height: widget.previewSize?.height,
+              width: widget.previewSize?.width,
+              child: widget.child,
+            )
+          : widget.child,
     );
   }
 }
