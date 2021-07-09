@@ -1,6 +1,6 @@
-import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
 import 'package:flutter/material.dart';
 
+import '../entities/gallery_value.dart';
 import '../gallery_view.dart';
 
 ///

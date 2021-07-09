@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/camera/camera_picker.dart';
+import 'package:drishya_picker/src/camera/camera_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_recent_preview.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import 'controllers/drishya_repository.dart';
+import 'controllers/gallery_repository.dart';
 import 'entities/gallery_setting.dart';
 import 'entities/gallery_value.dart';
 import 'widgets/gallery_album_view.dart';
@@ -557,7 +557,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         _recentEntities = ValueNotifier(const BaseState()),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue()) {
-    _repository = DrishyaRepository(
+    _repository = GalleryRepository(
       albumsNotifier: _albumsNotifier,
       albumNotifier: _albumNotifier,
       entitiesNotifier: _entitiesNotifier,
@@ -575,7 +575,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   final PanelController _panelController;
 
   /// Drishya repository
-  late final DrishyaRepository _repository;
+  late final GalleryRepository _repository;
 
   /// Albums notifier
   final ValueNotifier<AlbumsType> _albumsNotifier;
@@ -702,7 +702,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     AssetEntity? entity;
 
     final route = SlideTransitionPageRoute<AssetEntity>(
-      builder: const CameraPicker(),
+      builder: const CameraView(),
       begainHorizontal: true,
       endHorizontal: false,
       transitionDuration: const Duration(milliseconds: 300),

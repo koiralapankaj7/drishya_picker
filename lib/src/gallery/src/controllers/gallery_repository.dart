@@ -12,9 +12,9 @@ typedef AlbumType = BaseState<AssetPathEntity>;
 typedef EntitiesType = BaseState<List<AssetEntity>>;
 
 ///
-class DrishyaRepository {
+class GalleryRepository {
   ///
-  const DrishyaRepository({
+  const GalleryRepository({
     required this.albumsNotifier,
     required this.albumNotifier,
     required this.entitiesNotifier,

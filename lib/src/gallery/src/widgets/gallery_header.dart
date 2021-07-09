@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:flutter/material.dart';
 
+import '../controllers/gallery_repository.dart';
 import '../gallery_view.dart';
+import 'gallery_builder.dart';
 
 ///
 class GalleryHeader extends StatefulWidget {

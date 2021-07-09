@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../camera_picker.dart';
+import '../camera_view.dart';
 
 ///
 /// Widget to pick media using camera
@@ -29,7 +29,7 @@ class CameraViewField extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        CameraPicker.pick(context, videoDuration: videoDuration).then((value) {
+        CameraView.pick(context, videoDuration: videoDuration).then((value) {
           if (value != null) {
             onCapture?.call(value);
           }

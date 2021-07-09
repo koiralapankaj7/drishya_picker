@@ -1,13 +1,15 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/gallery/src/controllers/drishya_repository.dart';
-import 'package:drishya_picker/src/gallery/src/entities/gallery_value.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
+import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+
+import '../controllers/gallery_repository.dart';
+import '../entities/gallery_value.dart';
+import '../gallery_view.dart';
+import 'gallery_permission_view.dart';
 
 ///
 class GalleryGridView extends StatelessWidget {
