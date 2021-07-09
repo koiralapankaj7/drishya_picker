@@ -14,15 +14,15 @@ import 'controllers/controller_notifier.dart';
 import 'entities/camera_type.dart';
 import 'widgets/cam_controller_provider.dart';
 import 'widgets/camera_overlay.dart';
-import 'widgets/camera_view.dart';
+import 'widgets/raw_camera_view.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
 const Duration _defaultVideoDuration = Duration(seconds: 10);
 
 ///
-class CameraPicker extends StatefulWidget {
+class CameraView extends StatefulWidget {
   ///
-  const CameraPicker({
+  const CameraView({
     Key? key,
     this.videoDuration,
   }) : super(key: key);
@@ -40,7 +40,7 @@ class CameraPicker extends StatefulWidget {
   }) async {
     return Navigator.of(context).push<AssetEntity>(
       SlideTransitionPageRoute(
-        builder: CameraPicker(videoDuration: videoDuration),
+        builder: CameraView(videoDuration: videoDuration),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
         reverseTransitionDuration: _kRouteDuration,
@@ -50,12 +50,12 @@ class CameraPicker extends StatefulWidget {
   }
 
   @override
-  _CameraPickerState createState() {
-    return _CameraPickerState();
+  _CameraViewState createState() {
+    return _CameraViewState();
   }
 }
 
-class _CameraPickerState extends State<CameraPicker>
+class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   late final ControllerNotifier _controllerNotifier;
   late final PlaygroundController _playgroundController;
@@ -162,7 +162,7 @@ class _CameraPickerState extends State<CameraPicker>
                     if (value.cameraType == CameraType.text) {
                       return Playground(controller: _playgroundController);
                     }
-                    return CameraView(action: _camController);
+                    return RawCameraView(action: _camController);
                   },
                 ),
 

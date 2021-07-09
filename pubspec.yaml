@@ -1,7 +1,7 @@
 name: drishya_picker
 description: Messenger like image, video picker with two different option. 1.
   Using Controller 2. Using MediaPicker widget
-version: 1.0.1
+version: 1.0.1+1
 homepage: https://github.com/koiralapankaj7/drishya_picker
 
 environment:
@@ -13,6 +13,7 @@ dependencies:
   camera: ^0.8.1+3
   photo_manager: ^1.2.2
   uuid: ^3.0.3
+  path: ^1.8.0
 
 dev_dependencies:
   flutter_test:

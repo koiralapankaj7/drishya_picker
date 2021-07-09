@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 ///
 class GalleryRecentPreview extends StatelessWidget {
