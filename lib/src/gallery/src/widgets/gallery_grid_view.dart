@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
@@ -66,7 +64,7 @@ class GalleryGridView extends StatelessWidget {
             );
           }
 
-          final entities = state.isLoading ? <AssetEntity>[] : state.data!;
+          final entities = state.isLoading ? <DrishyaEntity>[] : state.data!;
 
           final itemCount = state.isLoading
               ? 20
@@ -130,7 +128,7 @@ class _MediaTile extends StatelessWidget {
   final GalleryController controller;
 
   ///
-  final AssetEntity? entity;
+  final DrishyaEntity? entity;
 
   ///
   final ValueSetter<DrishyaEntity> onPressed;
@@ -139,50 +137,84 @@ class _MediaTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.grey.shade800,
-      child: FutureBuilder<Uint8List?>(
-        future: entity?.thumbDataWithSize(400, 400),
-        builder: (context, snapshot) {
-          final hasData = snapshot.connectionState == ConnectionState.done &&
-              snapshot.data != null;
-
-          if (hasData) {
-            final dEntity =
-                DrishyaEntity(entity: entity!, bytes: snapshot.data!);
-            return GestureDetector(
+      child: entity == null
+          ? const SizedBox()
+          : GestureDetector(
               onTap: () {
-                onPressed(dEntity);
+                onPressed(entity!);
               },
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   // Image
                   Image.memory(
-                    snapshot.data!,
+                    entity!.bytes,
                     fit: BoxFit.cover,
                     gaplessPlayback: true,
                   ),
 
                   // Duration
-                  if (entity!.type == AssetType.video)
+                  if (entity!.entity.type == AssetType.video)
                     Positioned(
                       right: 4.0,
                       bottom: 4.0,
-                      child: _VideoDuration(duration: entity!.duration),
+                      child: _VideoDuration(duration: entity!.entity.duration),
                     ),
 
                   // Image selection overlay
                   if (!controller.singleSelection)
-                    _SelectionCount(controller: controller, entity: dEntity),
+                    _SelectionCount(controller: controller, entity: entity!),
 
                   //
                 ],
               ),
-            );
-          }
+            ),
+      // child: FutureBuilder<Uint8List?>(
+      //   future: entity?.thumbDataWithSize(400, 400),
+      //   builder: (context, snapshot) {
+      //     final hasData = snapshot.connectionState == ConnectionState.done &&
+      //         snapshot.data != null;
 
-          return const SizedBox();
-        },
-      ),
+      //     if (hasData) {
+      //       final dEntity =
+      //           DrishyaEntity(entity: entity!, bytes: snapshot.data!);
+      //       return
+      //       GestureDetector(
+      //         onTap: () {
+      //           onPressed(dEntity);
+      //         },
+      //         child: Stack(
+      //           fit: StackFit.expand,
+      //           children: [
+      //             // Image
+      //             Image.memory(
+      //               snapshot.data!,
+      //               fit: BoxFit.cover,
+      //               gaplessPlayback: true,
+      //             ),
+
+      //             // Duration
+      //             if (entity!.type == AssetType.video)
+      //               Positioned(
+      //                 right: 4.0,
+      //                 bottom: 4.0,
+      //                 child: _VideoDuration(duration: entity!.duration),
+      //               ),
+
+      //             // Image selection overlay
+      //             if (!controller.singleSelection)
+      //               _SelectionCount(controller: controller, entity: dEntity),
+
+      //             //
+      //           ],
+      //         ),
+      //       );
+
+      //     }
+
+      //     return const SizedBox();
+      //   },
+      // ),
     );
   }
 }

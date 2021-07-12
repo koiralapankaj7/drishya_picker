@@ -779,7 +779,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Recent entities list
   ///
-  List<AssetEntity>? get recentEntities => _recentEntities.value.data;
+  List<DrishyaEntity>? get recentEntities => _recentEntities.value.data;
 
   ///
   /// return true if gallery is in full screen mode,

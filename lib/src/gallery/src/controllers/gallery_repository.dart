@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../../drishya_entity.dart';
+
 ///
 typedef AlbumsType = BaseState<List<AssetPathEntity>>;
 
@@ -9,7 +11,7 @@ typedef AlbumsType = BaseState<List<AssetPathEntity>>;
 typedef AlbumType = BaseState<AssetPathEntity>;
 
 ///
-typedef EntitiesType = BaseState<List<AssetEntity>>;
+typedef EntitiesType = BaseState<List<DrishyaEntity>>;
 
 ///
 class GalleryRepository {
@@ -50,7 +52,11 @@ class GalleryRepository {
         // Update selected album
         albumNotifier.value = BaseState(data: album, hasPermission: true);
 
-        final entities = await album?.assetList ?? <AssetEntity>[];
+        final rawEntities = await album?.assetList ?? <AssetEntity>[];
+
+        final entities = await Future.wait(
+            rawEntities.take(5).map((e) async => await _entities(e)));
+
         // Update selected album entities list
         entitiesNotifier.value = BaseState(data: entities, hasPermission: true);
       } catch (e) {
@@ -83,7 +89,9 @@ class GalleryRepository {
     final state = await PhotoManager.requestPermissionExtend();
     if (state == PermissionState.authorized) {
       try {
-        final entities = await album.assetList;
+        final rawEntities = await album.assetList;
+        final entities =
+            await Future.wait(rawEntities.map((e) async => await _entities(e)));
         entitiesNotifier.value = BaseState(data: entities, hasPermission: true);
         recentEntitiesNotifier.value =
             BaseState(data: entities, hasPermission: true);
@@ -100,6 +108,11 @@ class GalleryRepository {
         error: 'Permission denied',
       );
     }
+  }
+
+  Future<DrishyaEntity> _entities(AssetEntity entity) async {
+    final bytes = await entity.thumbData;
+    return DrishyaEntity(entity: entity, bytes: bytes!);
   }
 
   ///

@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
+
+import '../../../drishya_entity.dart';
 
 ///
 class GalleryRecentPreview extends StatelessWidget {
@@ -22,7 +23,7 @@ class GalleryRecentPreview extends StatelessWidget {
   final Widget? child;
 
   ///
-  final AssetEntity entity;
+  final DrishyaEntity entity;
 
   ///
   final double? height;
@@ -39,25 +40,13 @@ class GalleryRecentPreview extends StatelessWidget {
         width: width ?? 54.0,
         child: ColoredBox(
           color: Colors.white,
-          child: FutureBuilder<Uint8List?>(
-            future: entity.thumbDataWithSize(
-              width?.toInt() ?? 100,
-              height?.toInt() ?? 100,
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done ||
-                  snapshot.data == null) {
-                return child ?? const SizedBox();
-              }
-              return builder?.call(snapshot.data!) ??
-                  child ??
-                  Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                  );
-            },
-          ),
+          child: builder?.call(entity.bytes) ??
+              child ??
+              Image.memory(
+                entity.bytes,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+              ),
         ),
       ),
     );
