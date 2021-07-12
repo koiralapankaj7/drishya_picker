@@ -14,12 +14,13 @@ class CollapsableGallery extends StatefulWidget {
 }
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
-  final notifier = ValueNotifier<List<AssetEntity>>(<AssetEntity>[]);
   late final GalleryController controller;
+  late final ValueNotifier<List<DrishyaEntity>> notifier;
 
   @override
   void initState() {
     super.initState();
+    notifier = ValueNotifier(<DrishyaEntity>[]);
     controller = GalleryController(
       gallerySetting: const GallerySetting(
         albumSubtitle: 'Collapsable',
@@ -60,7 +61,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                     context,
                     selectedEntities: notifier.value,
                   );
-                  notifier.value = entities ?? [];
+                  notifier.value = entities;
                 },
                 style: TextButton.styleFrom(
                   primary: Colors.white,
@@ -96,11 +97,11 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   ),
 
                   // Gallery field
-                  ValueListenableBuilder<List<AssetEntity>?>(
+                  ValueListenableBuilder<List<DrishyaEntity>>(
                     valueListenable: notifier,
                     builder: (context, list, child) {
                       return GalleryViewField(
-                        selectedEntities: list ?? [],
+                        selectedEntities: list,
                         onChanged: (entity, isRemoved) {
                           final value = notifier.value.toList();
                           if (isRemoved) {

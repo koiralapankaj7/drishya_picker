@@ -16,7 +16,7 @@ class FullscreenGallery extends StatefulWidget {
 
 class _FullscreenGalleryState extends State<FullscreenGallery> {
   late final GalleryController controller;
-  late final ValueNotifier<List<AssetEntity>> notifier;
+  late final ValueNotifier<List<DrishyaEntity>> notifier;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
       requestType: RequestType.all,
     );
     controller = GalleryController(gallerySetting: setting);
-    notifier = ValueNotifier(<AssetEntity>[]);
+    notifier = ValueNotifier(<DrishyaEntity>[]);
   }
 
   @override
@@ -55,7 +55,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 context,
                 selectedEntities: notifier.value,
               );
-              notifier.value = entities ?? [];
+              notifier.value = entities;
             },
             style: TextButton.styleFrom(
               primary: Colors.white,
@@ -90,11 +90,11 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 ),
 
                 // Gallery field
-                ValueListenableBuilder<List<AssetEntity>?>(
+                ValueListenableBuilder<List<DrishyaEntity>>(
                   valueListenable: notifier,
                   builder: (context, list, child) {
                     return GalleryViewField(
-                      selectedEntities: list ?? [],
+                      selectedEntities: list,
                       gallerySetting: const GallerySetting(
                         maximum: 10,
                         albumSubtitle: 'Image only',

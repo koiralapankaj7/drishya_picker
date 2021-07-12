@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import 'controllers/cam_controller.dart';
 import 'controllers/controller_notifier.dart';
@@ -34,11 +34,11 @@ class CameraView extends StatefulWidget {
   static const String name = 'CameraView';
 
   ///
-  static Future<AssetEntity?> pick(
+  static Future<DrishyaEntity?> pick(
     BuildContext context, {
     Duration? videoDuration,
   }) async {
-    return Navigator.of(context).push<AssetEntity>(
+    return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: CameraView(videoDuration: videoDuration),
         transitionCurve: Curves.easeIn,

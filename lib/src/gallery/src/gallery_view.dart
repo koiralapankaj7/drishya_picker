@@ -3,14 +3,13 @@ import 'dart:typed_data';
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_view.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_recent_preview.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../drishya_entity.dart';
 import 'controllers/gallery_repository.dart';
 import 'entities/gallery_setting.dart';
 import 'entities/gallery_value.dart';
@@ -18,6 +17,8 @@ import 'widgets/gallery_album_view.dart';
 import 'widgets/gallery_asset_selector.dart';
 import 'widgets/gallery_controller_provider.dart';
 import 'widgets/gallery_grid_view.dart';
+import 'widgets/gallery_header.dart';
+import 'widgets/gallery_recent_preview.dart';
 
 const _defaultMin = 0.37;
 
@@ -144,8 +145,8 @@ class GalleryView extends StatefulWidget {
   static const String name = 'GalleryView';
 
   ///
-  static Future<List<AssetEntity>?> pick(BuildContext context) {
-    return Navigator.of(context).push<List<AssetEntity>>(
+  static Future<List<DrishyaEntity>?> pick(BuildContext context) {
+    return Navigator.of(context).push<List<DrishyaEntity>>(
       SlideTransitionPageRoute(
         builder: const GalleryView(),
         transitionCurve: Curves.easeIn,
@@ -440,17 +441,17 @@ class GalleryViewField extends StatefulWidget {
   /// While picking drishya using gallery removed will be true if,
   /// previously selected drishya is unselected otherwise false.
   ///
-  final void Function(AssetEntity entity, bool removed)? onChanged;
+  final void Function(DrishyaEntity entity, bool removed)? onChanged;
 
   ///
   /// Triggered when picker complet its task.
   ///
-  final void Function(List<AssetEntity> entities)? onSubmitted;
+  final void Function(List<DrishyaEntity> entities)? onSubmitted;
 
   ///
   /// Pre selected entities
   ///
-  final List<AssetEntity>? selectedEntities;
+  final List<DrishyaEntity>? selectedEntities;
 
   ///
   /// If used [GalleryViewField] with [GalleryViewWrapper]
@@ -593,7 +594,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   final ValueNotifier<bool> _albumVisibility;
 
   // Completer for gallerry picker controller
-  late Completer<List<AssetEntity>> _completer;
+  late Completer<List<DrishyaEntity>> _completer;
 
   // Flag to handle updating controller value internally
   var _internal = false;
@@ -602,10 +603,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   var _clearedSelection = false;
 
   // Gallery picker on changed event callback handler
-  void Function(AssetEntity entity, bool removed)? _onChanged;
+  void Function(DrishyaEntity entity, bool removed)? _onChanged;
 
   //  Gallery picker on submitted event callback handler
-  void Function(List<AssetEntity> entities)? _onSubmitted;
+  void Function(List<DrishyaEntity> entities)? _onSubmitted;
 
   // Full screen mode or collapsable mode
   var _fullScreenMode = false;
@@ -629,7 +630,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   /// Selecting and unselecting entities
-  void _select(AssetEntity entity, BuildContext context) {
+  void _select(DrishyaEntity entity, BuildContext context) {
     if (singleSelection) {
       _onChanged?.call(entity, false);
       _completeTask(context, [entity]);
@@ -662,7 +663,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   /// When selection is completed
-  void _completeTask(BuildContext context, List<AssetEntity>? entities) {
+  void _completeTask(BuildContext context, List<DrishyaEntity>? entities) {
     if (_fullScreenMode) {
       Navigator.of(context).pop(entities);
     } else {
@@ -679,7 +680,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void _closePanel() {
     _panelController.closePanel();
     final entities = (_clearedSelection || value.selectedEntities.isEmpty)
-        ? <AssetEntity>[]
+        ? <DrishyaEntity>[]
         : value.selectedEntities;
     _completer.complete(entities);
     // _onSubmitted?.call(entities);
@@ -699,9 +700,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Open camera from [GalleryView]
   Future<void> _openCamera(BuildContext context) async {
     _accessCamera = true;
-    AssetEntity? entity;
+    DrishyaEntity? entity;
 
-    final route = SlideTransitionPageRoute<AssetEntity>(
+    final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: const CameraView(),
       begainHorizontal: true,
       endHorizontal: false,
@@ -727,9 +728,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   /// Open gallery using [GalleryViewField]
   void _openGallery(
-    void Function(AssetEntity entity, bool removed)? onChanged,
-    final void Function(List<AssetEntity> entities)? onSubmitted,
-    List<AssetEntity>? selectedEntities,
+    void Function(DrishyaEntity entity, bool removed)? onChanged,
+    final void Function(List<DrishyaEntity> entities)? onSubmitted,
+    List<DrishyaEntity>? selectedEntities,
     BuildContext context,
   ) {
     _onChanged = onChanged;
@@ -740,15 +741,15 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   // ===================== PUBLIC ==========================
 
   /// Pick assets
-  Future<List<AssetEntity>?> pick(
+  Future<List<DrishyaEntity>> pick(
     BuildContext context, {
-    List<AssetEntity>? selectedEntities,
+    List<DrishyaEntity>? selectedEntities,
   }) {
-    _completer = Completer<List<AssetEntity>>();
+    _completer = Completer<List<DrishyaEntity>>();
 
     if (_wrapperKey.currentState == null) {
       _fullScreenMode = true;
-      final route = SlideTransitionPageRoute<List<AssetEntity>>(
+      final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
         builder: GalleryView(controller: this),
       );
       Navigator.of(context).push(route).then((result) {

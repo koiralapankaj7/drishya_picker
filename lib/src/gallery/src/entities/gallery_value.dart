@@ -1,16 +1,16 @@
-import 'package:photo_manager/photo_manager.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 
 ///
 class GalleryValue {
   ///
   const GalleryValue({
-    this.selectedEntities = const <AssetEntity>[],
+    this.selectedEntities = const <DrishyaEntity>[],
     this.previousSelection = true,
     this.isAlbumVisible = false,
   });
 
   ///
-  final List<AssetEntity> selectedEntities;
+  final List<DrishyaEntity> selectedEntities;
 
   ///
   final bool previousSelection;
@@ -20,7 +20,7 @@ class GalleryValue {
 
   ///
   GalleryValue copyWith({
-    List<AssetEntity>? selectedEntities,
+    List<DrishyaEntity>? selectedEntities,
     bool? previousSelection,
     bool? isAlbumVisible,
   }) =>
