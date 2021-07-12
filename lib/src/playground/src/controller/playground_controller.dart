@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:ui' as ui;
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -84,7 +85,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   }
 
   /// Take screen shot of the playground
-  Future<AssetEntity?> takeScreenshot() async {
+  Future<DrishyaEntity?> takeScreenshot() async {
     try {
       final boundary = _playgroundKey.currentContext?.findRenderObject()
           as RenderRepaintBoundary?;
@@ -93,7 +94,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
         final entity = await PhotoManager.editor.saveImage(data);
-        return entity;
+        return DrishyaEntity(entity: entity!, bytes: data);
       }
     } catch (e) {
       log('Exception occured while capturing picture : $e');

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,7 +31,7 @@ class GalleryGridView extends StatelessWidget {
   final ValueSetter<BuildContext> onCameraRequest;
 
   ///
-  final void Function(AssetEntity, BuildContext) onSelect;
+  final void Function(DrishyaEntity, BuildContext) onSelect;
 
   ///
   final ValueNotifier<EntitiesType> entitiesNotifier;
@@ -101,10 +102,8 @@ class GalleryGridView extends StatelessWidget {
               return _MediaTile(
                 controller: controller,
                 entity: entity,
-                onPressed: () {
-                  if (entity != null) {
-                    onSelect(entity, context);
-                  }
+                onPressed: (entity) {
+                  onSelect(entity, context);
                 },
               );
             },
@@ -134,7 +133,7 @@ class _MediaTile extends StatelessWidget {
   final AssetEntity? entity;
 
   ///
-  final VoidCallback onPressed;
+  final ValueSetter<DrishyaEntity> onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -147,8 +146,12 @@ class _MediaTile extends StatelessWidget {
               snapshot.data != null;
 
           if (hasData) {
+            final dEntity =
+                DrishyaEntity(entity: entity!, bytes: snapshot.data!);
             return GestureDetector(
-              onTap: onPressed,
+              onTap: () {
+                onPressed(dEntity);
+              },
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -169,7 +172,7 @@ class _MediaTile extends StatelessWidget {
 
                   // Image selection overlay
                   if (!controller.singleSelection)
-                    _SelectionCount(controller: controller, entity: entity!),
+                    _SelectionCount(controller: controller, entity: dEntity),
 
                   //
                 ],
@@ -223,7 +226,7 @@ class _SelectionCount extends StatelessWidget {
   }) : super(key: key);
 
   final GalleryController controller;
-  final AssetEntity entity;
+  final DrishyaEntity entity;
 
   @override
   Widget build(BuildContext context) {

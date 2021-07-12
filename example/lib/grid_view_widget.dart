@@ -1,7 +1,5 @@
-import 'dart:typed_data';
-
-import 'package:flutter/material.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:flutter/material.dart';
 
 ///
 class GridViewWidget extends StatelessWidget {
@@ -12,14 +10,14 @@ class GridViewWidget extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final ValueNotifier<List<AssetEntity>?> notifier;
+  final ValueNotifier<List<DrishyaEntity>> notifier;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<AssetEntity>?>(
+    return ValueListenableBuilder<List<DrishyaEntity>>(
       valueListenable: notifier,
       builder: (context, list, child) {
-        if (list?.isEmpty ?? true) {
+        if (list.isEmpty) {
           return const Center(
             child: Text('No data'),
           );
@@ -32,52 +30,43 @@ class GridViewWidget extends StatelessWidget {
             crossAxisSpacing: 1.0,
             mainAxisSpacing: 1.0,
           ),
-          itemCount: list!.length,
+          itemCount: list.length,
           itemBuilder: (context, index) {
             final entity = list[index];
-            return FutureBuilder<Uint8List?>(
-              future: entity.thumbDataWithSize(400, 400),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.data != null) {
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Media
-                      Image.memory(
-                        snapshot.data!,
-                        fit: BoxFit.cover,
-                      ),
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                // Media
+                Image.memory(
+                  entity.bytes,
+                  fit: BoxFit.cover,
+                ),
 
-                      // For video duration
-                      // Duration
-                      if (entity.type == AssetType.video)
-                        Positioned(
-                          right: 4.0,
-                          bottom: 4.0,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
-                            child: Container(
-                              color: Colors.black.withOpacity(0.7),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6.0, vertical: 2.0),
-                              child: Text(
-                                entity.duration.formatedDuration,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 13.0,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                // For video duration
+                // Duration
+                if (entity.entity.type == AssetType.video)
+                  Positioned(
+                    right: 4.0,
+                    bottom: 4.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.7),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 2.0),
+                        child: Text(
+                          entity.entity.duration.formatedDuration,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                    ],
-                  );
-                }
-                return const SizedBox();
-              },
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         );

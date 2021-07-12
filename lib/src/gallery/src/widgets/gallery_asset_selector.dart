@@ -1,5 +1,5 @@
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/gallery_value.dart';
 import '../gallery_view.dart';
@@ -18,11 +18,11 @@ class GalleryAssetSelector extends StatefulWidget {
   final GalleryController controller;
 
   ///
-  final void Function(BuildContext context, List<AssetEntity> entities)
+  final void Function(BuildContext context, List<DrishyaEntity> entities)
       onSubmit;
 
   ///
-  final ValueSetter<AssetEntity> onEdit;
+  final ValueSetter<DrishyaEntity> onEdit;
 
   @override
   GalleryAssetSelectorState createState() => GalleryAssetSelectorState();

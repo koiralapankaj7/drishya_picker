@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 // import 'package:pedantic/pedantic.dart';
@@ -141,15 +142,15 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   /// Take picture
-  Future<void> takePicture() async {
+  Future<DrishyaEntity?> takePicture() async {
     if (!initialized) {
       _uiHandler.showSnackBar('Couldn\'t find the camera!');
-      return;
+      return null;
     }
 
     if (value.isTakingPicture) {
       _uiHandler.showSnackBar('Capturing is currently running..');
-      return;
+      return null;
     }
 
     try {
@@ -173,16 +174,21 @@ class CamController extends ValueNotifier<ActionValue> {
       value = value.copyWith(isTakingPicture: false);
 
       if (entity != null) {
-        _uiHandler.pop<AssetEntity>(entity);
+        final drishyaEntity = DrishyaEntity(entity: entity, bytes: data);
+        _uiHandler.pop<DrishyaEntity>(drishyaEntity);
+        return drishyaEntity;
       } else {
         _uiHandler.showSnackBar('Something went wrong! Please try again');
         value = value.copyWith(isTakingPicture: false);
-        return;
+        return null;
       }
     } on CameraException catch (e) {
       _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
       value = value.copyWith(isTakingPicture: false);
-      return;
+      return null;
+    } catch (e) {
+      _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
+      return null;
     }
   }
 
@@ -253,6 +259,7 @@ class CamController extends ValueNotifier<ActionValue> {
       try {
         final xfile = await controller.stopVideoRecording();
         final file = File(xfile.path);
+        final data = await file.readAsBytes();
         final entity = await PhotoManager.editor.saveVideo(
           file,
           title: path.basename(xfile.path),
@@ -265,7 +272,8 @@ class CamController extends ValueNotifier<ActionValue> {
         value = value.copyWith(isRecordingVideo: false);
 
         if (entity != null) {
-          _uiHandler.pop(entity);
+          final drishyaEntity = DrishyaEntity(entity: entity, bytes: data);
+          _uiHandler.pop<DrishyaEntity>(drishyaEntity);
           return;
         } else {
           _uiHandler.showSnackBar('Something went wrong! Please try again');

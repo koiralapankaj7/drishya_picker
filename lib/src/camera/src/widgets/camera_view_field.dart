@@ -1,5 +1,5 @@
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../camera_view.dart';
 
@@ -17,7 +17,7 @@ class CameraViewField extends StatelessWidget {
   ///
   /// Triggered when picker capture media
   ///
-  final void Function(AssetEntity entity)? onCapture;
+  final void Function(DrishyaEntity entity)? onCapture;
 
   ///
   final Duration? videoDuration;
