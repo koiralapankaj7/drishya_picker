@@ -16,3 +16,9 @@
 * UI polishing
 
 ## [1.0.1+1] - Updated readme
+
+## [1.0.1+2] - Breaking changes 
+
+* Picker will return DrishyaEntity
+* [Before] : AssetEntity
+* [Now]    : DrishyaEntity
