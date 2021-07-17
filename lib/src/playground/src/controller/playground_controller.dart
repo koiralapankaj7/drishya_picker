@@ -48,6 +48,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
     bool? editingMode,
     bool? hasStickers,
     bool? isEditing,
+    bool? stickerPickerView,
   }) {
     value = value.copyWith(
       fillColor: fillColor,
@@ -57,6 +58,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
       editingMode: editingMode,
       hasStickers: hasStickers,
       isEditing: isEditing,
+      stickerPickerView: stickerPickerView,
     );
   }
 

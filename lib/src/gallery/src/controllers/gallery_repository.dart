@@ -42,7 +42,17 @@ class GalleryRepository {
     final state = await PhotoManager.requestPermissionExtend();
     if (state == PermissionState.authorized) {
       try {
+        // final options = FilterOptionGroup()
+        //   ..setOption(
+        //     type.assetType,
+        //     const FilterOption(
+        //       needTitle: true,
+        //       sizeConstraint: SizeConstraint(ignoreSize: true),
+        //     ),
+        //   );
+
         final albums = await PhotoManager.getAssetPathList(type: type);
+
         // Update album list
         albumsNotifier.value = BaseState(data: albums, hasPermission: true);
 
@@ -146,4 +156,21 @@ class BaseState<T> {
         hasPermission: hasPermission ?? this.hasPermission,
         hasError: hasError ?? this.hasError,
       );
+}
+
+///
+extension RequestTypeExtension on RequestType {
+  ///
+  AssetType get assetType {
+    switch (this) {
+      case RequestType.image:
+        return AssetType.image;
+      case RequestType.video:
+        return AssetType.video;
+      case RequestType.audio:
+        return AssetType.audio;
+      default:
+        return AssetType.other;
+    }
+  }
 }

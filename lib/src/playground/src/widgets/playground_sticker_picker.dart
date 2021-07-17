@@ -2,6 +2,8 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
+import '../../playground.dart';
+
 ///
 class StickerPicker extends StatelessWidget {
   ///
@@ -11,6 +13,7 @@ class StickerPicker extends StatelessWidget {
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.bucket,
+    this.background,
   }) : super(key: key);
 
   ///
@@ -25,55 +28,31 @@ class StickerPicker extends StatelessWidget {
   ///
   final PageStorageBucket bucket;
 
+  ///
+  final GradientBackground? background;
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     return PageStorage(
       bucket: bucket,
-      child: Container(
-        height: screenHeight * 0.90,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-        ),
-        child: Stack(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
           children: [
-            Column(
-              children: [
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 24.0),
-                    child: Text(
-                      'Add sticker',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline3
-                          ?.copyWith(fontSize: 24),
-                    ),
-                  ),
+            GestureDetector(
+              onTap: Navigator.of(context).pop,
+              child: Container(
+                height: 70.0,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                 ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: StickersTabs(
-                    initialIndex: initialIndex,
-                    onTabChanged: onTabChanged,
-                    onStickerSelected: onStickerSelected,
-                  ),
-                ),
-              ],
+              ),
             ),
-            Positioned(
-              right: 16,
-              top: 8,
-              child: IconButton(
-                key: const Key('stickersDrawer_close_iconButton'),
-                icon: const Icon(
-                  Icons.clear,
-                  color: Colors.black54,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
+            Expanded(
+              child: StickersTabs(
+                initialIndex: initialIndex,
+                onTabChanged: onTabChanged,
+                onStickerSelected: onStickerSelected,
               ),
             ),
           ],
@@ -134,46 +113,51 @@ class _StickersTabsState extends State<StickersTabs>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TabBar(
-          onTap: widget.onTabChanged,
-          controller: _tabController,
-          tabs: const [
-            StickersTab(
-              key: Key('stickersTabs_googleTab'),
-              assetPath: 'assets/icons/google_icon.png',
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.white54,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                StickersTabBarView(
+                  key: const Key('stickersTabs_googleTabBarView'),
+                  stickers: arts,
+                  onStickerSelected: widget.onStickerSelected,
+                ),
+                StickersTabBarView(
+                  key: const Key('stickersTabs_hatsTabBarView'),
+                  stickers: gifs,
+                  onStickerSelected: widget.onStickerSelected,
+                ),
+              ],
             ),
-            StickersTab(
-              key: Key('stickersTabs_hatsTab'),
-              assetPath: 'assets/icons/hats_icon.png',
-            ),
-          ],
-        ),
-        Expanded(
-          child: TabBarView(
+          ),
+          TabBar(
+            onTap: widget.onTabChanged,
             controller: _tabController,
-            children: [
-              StickersTabBarView(
-                key: const Key('stickersTabs_googleTabBarView'),
-                stickers: arts,
-                onStickerSelected: widget.onStickerSelected,
+            tabs: const [
+              StickersTab(
+                key: Key('stickersTabs_googleTab'),
+                assetPath: 'assets/icons/google_icon.png',
               ),
-              StickersTabBarView(
-                key: const Key('stickersTabs_hatsTabBarView'),
-                stickers: gifs,
-                onStickerSelected: widget.onStickerSelected,
+              StickersTab(
+                key: Key('stickersTabs_hatsTab'),
+                assetPath: 'assets/icons/hats_icon.png',
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 ///
-@visibleForTesting
 class StickersTab extends StatefulWidget {
   ///
   const StickersTab({
@@ -228,14 +212,6 @@ class StickersTabBarView extends StatelessWidget {
     mainAxisSpacing: 48,
     crossAxisSpacing: 24,
   );
-
-  // static const _defaultGridDelegate =
-  // SliverGridDelegateWithMaxCrossAxisExtent(
-  //   maxCrossAxisExtent: 150,
-  //   childAspectRatio: 1,
-  //   mainAxisSpacing: 64,
-  //   crossAxisSpacing: 42,
-  // );
 
   @override
   Widget build(BuildContext context) {
