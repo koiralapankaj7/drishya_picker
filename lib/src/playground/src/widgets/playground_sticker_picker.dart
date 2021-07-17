@@ -93,7 +93,7 @@ class _StickersTabsState extends State<StickersTabs>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 2,
+      length: 3,
       vsync: this,
       initialIndex: widget.initialIndex,
     );
@@ -125,12 +125,17 @@ class _StickersTabsState extends State<StickersTabs>
               controller: _tabController,
               children: [
                 StickersTabBarView(
-                  key: const Key('stickersTabs_googleTabBarView'),
+                  key: const Key('stickersTabs_artsTabBarView'),
                   stickers: arts,
                   onStickerSelected: widget.onStickerSelected,
                 ),
                 StickersTabBarView(
-                  key: const Key('stickersTabs_hatsTabBarView'),
+                  key: const Key('stickersTabs_emojisTabBarView'),
+                  stickers: gifs,
+                  onStickerSelected: widget.onStickerSelected,
+                ),
+                StickersTabBarView(
+                  key: const Key('stickersTabs_shapesTabBarView'),
                   stickers: gifs,
                   onStickerSelected: widget.onStickerSelected,
                 ),
@@ -140,14 +145,27 @@ class _StickersTabsState extends State<StickersTabs>
           TabBar(
             onTap: widget.onTabChanged,
             controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.label,
+            indicatorPadding: const EdgeInsets.symmetric(vertical: 10.0),
+            indicator: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(16.0),
+            ),
             tabs: const [
               StickersTab(
-                key: Key('stickersTabs_googleTab'),
+                key: Key('stickersTabs_artsTab'),
                 assetPath: 'assets/icons/google_icon.png',
+                label: 'ARTS',
               ),
               StickersTab(
-                key: Key('stickersTabs_hatsTab'),
+                key: Key('stickersTabs_emojisTab'),
                 assetPath: 'assets/icons/hats_icon.png',
+                label: 'EMOJIS',
+              ),
+              StickersTab(
+                key: Key('stickersTabs_shapesTab'),
+                assetPath: 'assets/icons/hats_icon.png',
+                label: 'SHAPES',
               ),
             ],
           ),
@@ -163,10 +181,18 @@ class StickersTab extends StatefulWidget {
   const StickersTab({
     Key? key,
     required this.assetPath,
+    required this.label,
+    this.active = true,
   }) : super(key: key);
 
   ///
   final String assetPath;
+
+  ///
+  final String label;
+
+  ///
+  final bool active;
 
   @override
   _StickersTabState createState() => _StickersTabState();
@@ -177,11 +203,15 @@ class _StickersTabState extends State<StickersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return const Tab(
-      iconMargin: EdgeInsets.only(bottom: 24),
-      icon: Icon(
-        Icons.emoji_emotions,
-        color: Colors.black,
+    return Tab(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16.0),
+        child: Text(
+          widget.label,
+          style: Theme.of(context).textTheme.button?.copyWith(
+                color: Colors.white,
+              ),
+        ),
       ),
     );
   }
