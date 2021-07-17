@@ -1,6 +1,8 @@
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
+import '../../playground.dart';
 import '../controller/playground_controller.dart';
 import 'playground_builder.dart';
 import 'playground_sticker_picker.dart';
@@ -19,22 +21,33 @@ class PlaygroundButtonCollection extends StatelessWidget {
   final PageStorageBucket _bucket = PageStorageBucket();
 
   void _onStickerIconPressed(BuildContext context) {
-    showModalBottomSheet<Sticker>(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.75),
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => StickerPicker(
-        initialIndex: 0,
-        bucket: _bucket,
-        onTabChanged: (index) {},
-        onStickerSelected: (sticker) {
-          controller.stickerController.addSticker(sticker);
-          controller.updateValue(hasStickers: true);
-          Navigator.of(context).pop();
+    controller.updateValue(isEditing: true, stickerPickerView: true);
+    Navigator.of(context)
+        .push<Sticker>(
+      SwipeablePageRoute(
+        notificationPredicate: (notification) {
+          return notification.depth == 1;
+        },
+        builder: (context) {
+          return StickerPicker(
+            initialIndex: 0,
+            bucket: _bucket,
+            onTabChanged: (index) {},
+            onStickerSelected: (sticker) {
+              controller.stickerController.addSticker(sticker);
+              controller.updateValue(hasStickers: true);
+              Navigator.of(context).pop();
+            },
+            background: controller.value.background is GradientBackground
+                ? (controller.value.background as GradientBackground)
+                : null,
+          );
         },
       ),
-    );
+    )
+        .then((value) {
+      controller.updateValue(isEditing: false, stickerPickerView: false);
+    });
   }
 
   void _textAlignButtonPressed() {
@@ -63,7 +76,19 @@ class PlaygroundButtonCollection extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
+        if (value.stickerPickerView) {
+          return Container(
+            height: 70.0,
+            alignment: Alignment.centerRight,
+            child: const _DoneButton(
+              isVisible: true,
+              padding: EdgeInsets.all(0.0),
+            ),
+          );
+        }
+
         if (value.isEditing) return const SizedBox();
+
         return child!;
         //
       },
@@ -115,10 +140,12 @@ class _DoneButton extends StatelessWidget {
     Key? key,
     this.isVisible = false,
     this.onPressed,
+    this.padding,
   }) : super(key: key);
 
   final bool isVisible;
   final void Function()? onPressed;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -126,9 +153,9 @@ class _DoneButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: onPressed,
-      child: const Padding(
-        padding: EdgeInsets.only(bottom: 12.0),
-        child: Text(
+      child: Padding(
+        padding: padding ?? const EdgeInsets.only(bottom: 12.0),
+        child: const Text(
           'DONE',
           style: TextStyle(
             color: Colors.white,

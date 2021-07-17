@@ -14,6 +14,7 @@ class PlaygroundValue {
     this.isEditing = false,
     PlaygroundBackground? background,
     GradientBackground? textBackground,
+    this.stickerPickerView = false,
   })  : background = background ?? gradients[0],
         textBackground = textBackground ?? gradients[0];
 
@@ -41,6 +42,9 @@ class PlaygroundValue {
   ///
   final GradientBackground textBackground;
 
+  ///
+  final bool stickerPickerView;
+
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
@@ -55,6 +59,7 @@ class PlaygroundValue {
     bool? isEditing,
     PlaygroundBackground? background,
     GradientBackground? textBackground,
+    bool? stickerPickerView,
   }) {
     return PlaygroundValue(
       textAlign: textAlign ?? this.textAlign,
@@ -65,6 +70,7 @@ class PlaygroundValue {
       isEditing: isEditing ?? this.isEditing,
       background: background ?? this.background,
       textBackground: textBackground ?? this.textBackground,
+      stickerPickerView: stickerPickerView ?? this.stickerPickerView,
     );
   }
 }
