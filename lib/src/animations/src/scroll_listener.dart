@@ -21,7 +21,7 @@ class ScrollListener extends StatefulWidget {
     required this.child,
     required this.onScrollUpdate,
     this.onScrollStart,
-    this.notificationPredicate,
+    this.notificationDepth,
     this.triggerMode = TriggerMode.onEdge,
   }) : super(key: key);
 
@@ -36,7 +36,7 @@ class ScrollListener extends StatefulWidget {
   final void Function()? onScrollStart;
 
   ///
-  final ScrollNotificationPredicate? notificationPredicate;
+  final int? notificationDepth;
 
   ///
   final TriggerMode triggerMode;
@@ -127,9 +127,8 @@ class ScrollListenerState extends State<ScrollListener> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    final handelScroll = widget.notificationPredicate?.call(notification) ??
-        defaultScrollNotificationPredicate(notification);
-    if (!handelScroll) return false;
+    if ((widget.notificationDepth ?? 0) != notification.depth) return false;
+
     if (notification is ScrollStartNotification) {
       _scrollStart(notification);
     } else if (notification is ScrollUpdateNotification) {

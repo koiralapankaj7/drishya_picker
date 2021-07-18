@@ -53,14 +53,14 @@ class SwipeablePageRoute<T> extends PageRoute<T>
   /// be null.
   SwipeablePageRoute({
     required this.builder,
-    ScrollNotificationPredicate? notificationPredicate,
+    int? notificationDepth,
     this.title,
     RouteSettings? settings,
     this.maintainState = true,
     // bool fullscreenDialog = false,
   }) : super(settings: settings, fullscreenDialog: false) {
     // assert(opaque);
-    SwipeableRouteTransitionMixin.notificationPredicate = notificationPredicate;
+    SwipeableRouteTransitionMixin.notificationDepth = notificationDepth;
   }
 
   /// Builds the primary contents of the route.
@@ -101,7 +101,7 @@ class SwipeablePageRoute<T> extends PageRoute<T>
 ///  * [SwipeablePageRoute], which is a [PageRoute] that leverages this mixin.
 mixin SwipeableRouteTransitionMixin<T> on PageRoute<T> {
   ///
-  static ScrollNotificationPredicate? notificationPredicate;
+  static int? notificationDepth;
 
   /// Builds the primary contents of the route.
   @protected
@@ -277,7 +277,7 @@ mixin SwipeableRouteTransitionMixin<T> on PageRoute<T> {
     final linearTransition = isPopGestureInProgress(route);
 
     return _SwipeableBackGestureDetector<T>(
-      notificationPredicate: notificationPredicate,
+      notificationDepth: notificationDepth,
       enabledCallback: () => _isPopGestureEnabled<T>(route),
       onStartPopGesture: () => _startPopGesture<T>(route),
       builder: (slidingState) {
@@ -434,7 +434,7 @@ class _SwipeableBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.builder,
-    this.notificationPredicate,
+    this.notificationDepth,
   }) : super(key: key);
 
   final Widget Function(_SlidingState slidingState) builder;
@@ -443,7 +443,7 @@ class _SwipeableBackGestureDetector<T> extends StatefulWidget {
 
   final ValueGetter<_SwipeableBackGestureController<T>> onStartPopGesture;
 
-  final ScrollNotificationPredicate? notificationPredicate;
+  final int? notificationDepth;
 
   @override
   _SwipeableBackGestureDetectorState<T> createState() =>
@@ -542,7 +542,7 @@ class _SwipeableBackGestureDetectorState<T>
       onPointerMove: _onPointerMove,
       onPointerUp: _onPointerUp,
       child: ScrollListener(
-        notificationPredicate: widget.notificationPredicate,
+        notificationDepth: widget.notificationDepth,
         onScrollUpdate: (controller, overScroll) {
           _scrollController = controller;
           _overScroll = overScroll;
