@@ -377,3 +377,22 @@ final shapes = ShapeIcons.values
           child: FittedBox(child: Icon(iconData)),
         ))
     .toSet();
+
+class _StickerWidget extends StatefulWidget {
+  const _StickerWidget({
+    Key? key,
+    required this.builder,
+  }) : super(key: key);
+
+  final Widget Function(VoidCallback onPressed) builder;
+
+  @override
+  __StickerWidgetState createState() => __StickerWidgetState();
+}
+
+class __StickerWidgetState extends State<_StickerWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}

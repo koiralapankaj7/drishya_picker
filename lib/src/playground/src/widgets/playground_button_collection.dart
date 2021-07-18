@@ -30,9 +30,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
     Navigator.of(context)
         .push<Sticker>(
       SwipeablePageRoute(
-        notificationPredicate: (notification) {
-          return notification.depth == 1;
-        },
+        notificationDepth: 1,
         builder: (context) {
           return StickerPicker(
             initialIndex: _initialIndex,
