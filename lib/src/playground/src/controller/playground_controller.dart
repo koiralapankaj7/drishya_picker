@@ -5,6 +5,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/playground_background.dart';
@@ -13,11 +14,11 @@ import '../entities/playground_value.dart';
 ///
 class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   ///
-  PlaygroundController()
+  PlaygroundController({PlaygroundBackground? background})
       : _playgroundKey = GlobalKey(),
         stickerController = StickerboothController(),
         textController = TextEditingController(),
-        super(PlaygroundValue());
+        super(PlaygroundValue(background: background));
 
   final GlobalKey _playgroundKey;
 
@@ -50,6 +51,10 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
     bool? isEditing,
     bool? stickerPickerView,
   }) {
+    if (!(hasFocus ?? false)) {
+      // Hide status bar
+      SystemChrome.setEnabledSystemUIOverlays([]);
+    }
     value = value.copyWith(
       fillColor: fillColor,
       maxLines: maxLines,
@@ -96,6 +101,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
         final entity = await PhotoManager.editor.saveImage(data);
+        await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
         return DrishyaEntity(entity: entity!, bytes: data);
       }
     } catch (e) {

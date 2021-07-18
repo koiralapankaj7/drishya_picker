@@ -18,6 +18,10 @@ class PhotoBackground implements PlaygroundBackground {
 
   ///
   final String? url;
+
+  ///
+  bool get hasData =>
+      (url?.isNotEmpty ?? false) || (bytes?.isNotEmpty ?? false);
 }
 
 ///

@@ -16,10 +16,14 @@ class PlaygroundButtonCollection extends StatelessWidget {
   const PlaygroundButtonCollection({
     Key? key,
     required this.controller,
+    this.stickerViewBackground,
   }) : super(key: key);
 
   ///
   final PlaygroundController controller;
+
+  ///
+  final Color? stickerViewBackground;
 
   void _onStickerIconPressed(BuildContext context) {
     controller.updateValue(isEditing: true, stickerPickerView: true);
@@ -41,9 +45,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
               controller.updateValue(hasStickers: true);
               Navigator.of(context).pop();
             },
-            background: controller.value.background is GradientBackground
-                ? (controller.value.background as GradientBackground)
-                : null,
+            imageBackground: controller.value.background is PhotoBackground,
           );
         },
       ),
