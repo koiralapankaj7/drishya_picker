@@ -1,4 +1,5 @@
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -42,8 +43,15 @@ class PlaygroundCloseButton extends StatelessWidget {
       child: PlaygroundBuilder(
         controller: controller,
         builder: (context, value, child) {
-          if (value.isEditing || value.hasFocus) return const SizedBox();
-          return child!;
+          final crossFadeState = value.isEditing || value.hasFocus
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond;
+          return AppAnimatedCrossFade(
+            firstChild: const SizedBox(),
+            secondChild: child!,
+            crossFadeState: crossFadeState,
+            duration: const Duration(milliseconds: 300),
+          );
         },
         child: InkWell(
           onTap: () {

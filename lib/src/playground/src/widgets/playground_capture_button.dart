@@ -1,4 +1,5 @@
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -21,11 +22,16 @@ class PlaygroundCaptureButton extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        if (!value.hasStickers || value.isEditing || value.hasFocus) {
-          return const SizedBox();
-        }
-
-        return child!;
+        final crossFadeState =
+            !value.hasStickers || value.isEditing || value.hasFocus
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond;
+        return AppAnimatedCrossFade(
+          firstChild: const SizedBox(),
+          secondChild: child!,
+          crossFadeState: crossFadeState,
+          duration: const Duration(milliseconds: 300),
+        );
       },
       child: GestureDetector(
         onTap: () async {

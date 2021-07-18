@@ -59,10 +59,15 @@ class _PlaygroundState extends State<Playground> {
                   background,
 
                   // Stickers
-                  PlaygroundStickers(controller: _controller),
+                  Opacity(
+                    opacity: value.stickerPickerView ? 0.0 : 1.0,
+                    child: PlaygroundStickers(controller: _controller),
+                  ),
 
                   // Textfield
                   PlaygroundTextfield(controller: _controller),
+
+                  // Sticker picker background
 
                   //
                 ],
