@@ -1,3 +1,4 @@
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
@@ -74,8 +75,17 @@ class PlaygroundGradientBackgroundChanger extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        if (value.isEditing) return const SizedBox();
-
+        final crossFadeState = value.isEditing
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond;
+        return AppAnimatedCrossFade(
+          firstChild: const SizedBox(),
+          secondChild: child!,
+          crossFadeState: crossFadeState,
+          duration: const Duration(milliseconds: 300),
+        );
+      },
+      child: Builder(builder: (_) {
         final background = controller.value.background;
         final isGradient = background is GradientBackground;
 
@@ -101,7 +111,7 @@ class PlaygroundGradientBackgroundChanger extends StatelessWidget {
             ),
           ),
         );
-      },
+      }),
     );
   }
 }

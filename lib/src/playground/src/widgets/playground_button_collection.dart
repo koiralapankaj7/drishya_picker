@@ -7,18 +7,19 @@ import '../controller/playground_controller.dart';
 import 'playground_builder.dart';
 import 'playground_sticker_picker.dart';
 
+final PageStorageBucket _bucket = PageStorageBucket();
+var _initialIndex = 0;
+
 ///
 class PlaygroundButtonCollection extends StatelessWidget {
   ///
-  PlaygroundButtonCollection({
+  const PlaygroundButtonCollection({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
   final PlaygroundController controller;
-
-  final PageStorageBucket _bucket = PageStorageBucket();
 
   void _onStickerIconPressed(BuildContext context) {
     controller.updateValue(isEditing: true, stickerPickerView: true);
@@ -30,9 +31,11 @@ class PlaygroundButtonCollection extends StatelessWidget {
         },
         builder: (context) {
           return StickerPicker(
-            initialIndex: 0,
+            initialIndex: _initialIndex,
             bucket: _bucket,
-            onTabChanged: (index) {},
+            onTabChanged: (index) {
+              _initialIndex = index;
+            },
             onStickerSelected: (sticker) {
               controller.stickerController.addSticker(sticker);
               controller.updateValue(hasStickers: true);
@@ -46,7 +49,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
       ),
     )
         .then((value) {
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 400), () {
         controller.updateValue(isEditing: false, stickerPickerView: false);
       });
     });
@@ -78,20 +81,29 @@ class PlaygroundButtonCollection extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        if (value.stickerPickerView) {
-          return Container(
-            height: 70.0,
-            alignment: Alignment.centerRight,
-            child: const _DoneButton(
-              isVisible: true,
-              padding: EdgeInsets.all(0.0),
-            ),
-          );
-        }
+        final firstChild = value.stickerPickerView
+            ? Container(
+                height: 70.0,
+                alignment: Alignment.centerRight,
+                child: const _DoneButton(
+                  isVisible: true,
+                  padding: EdgeInsets.all(0.0),
+                ),
+              )
+            : const SizedBox();
 
-        if (value.isEditing) return const SizedBox();
+        final crossFadeState = value.stickerPickerView || value.isEditing
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond;
 
-        return child!;
+        return AppAnimatedCrossFade(
+          firstChild: firstChild,
+          secondChild: child!,
+          crossFadeState: crossFadeState,
+          alignment: Alignment.topCenter,
+          duration: const Duration(milliseconds: 200),
+        );
+
         //
       },
       child: Column(
@@ -156,7 +168,7 @@ class _DoneButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Padding(
-        padding: padding ?? const EdgeInsets.only(bottom: 12.0),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 16.0),
         child: const Text(
           'DONE',
           style: TextStyle(
@@ -177,7 +189,7 @@ class _Button extends StatelessWidget {
     this.iconData,
     this.child,
     this.background,
-    this.margin = 8.0,
+    this.margin = 10.0,
     this.label,
     this.labelColor,
     this.onPressed,

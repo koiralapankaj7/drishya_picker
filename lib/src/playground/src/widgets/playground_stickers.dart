@@ -58,14 +58,14 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
     if (sticker is ImageSticker && sticker.pathType == PathType.networkImg) {
       return Image.network(
         sticker.path,
-        fit: BoxFit.fill,
+        fit: BoxFit.contain,
         gaplessPlayback: true,
       );
     } else if (sticker is ImageSticker &&
         sticker.pathType == PathType.assetsImage) {
       return Image.asset(
         sticker.path,
-        fit: BoxFit.fill,
+        fit: BoxFit.contain,
         gaplessPlayback: true,
       );
     } else if (sticker is TextSticker) {
@@ -101,7 +101,9 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
     return ValueListenableBuilder<StickerboothValue>(
       valueListenable: stickerController,
       builder: (context, stickerValue, child) {
-        if (stickerValue.assets.isEmpty) return const SizedBox();
+        if (stickerValue.assets.isEmpty) {
+          return const SizedBox();
+        }
 
         return Center(
           child: Stack(

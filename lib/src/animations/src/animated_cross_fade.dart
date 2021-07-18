@@ -13,6 +13,7 @@ class AppAnimatedCrossFade extends StatelessWidget {
     required this.secondChild,
     required this.crossFadeState,
     this.duration,
+    this.alignment,
   }) : super(key: key);
 
   /// First [Widget] to display
@@ -26,6 +27,9 @@ class AppAnimatedCrossFade extends StatelessWidget {
 
   ///
   final Duration? duration;
+
+  ///
+  final Alignment? alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,7 @@ class AppAnimatedCrossFade extends StatelessWidget {
       ) {
         return Stack(
           clipBehavior: Clip.none,
-          alignment: Alignment.center,
+          alignment: alignment ?? Alignment.center,
           children: [
             Align(
               alignment: Alignment.center,
@@ -50,7 +54,7 @@ class AppAnimatedCrossFade extends StatelessWidget {
               child: bottomChild,
             ),
             Align(
-              alignment: Alignment.center,
+              alignment: alignment ?? Alignment.center,
               key: topChildKey,
               child: topChild,
             ),

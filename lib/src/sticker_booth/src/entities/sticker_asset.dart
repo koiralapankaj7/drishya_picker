@@ -1,3 +1,4 @@
+import 'package:drishya_picker/assets/icons/shape_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -170,7 +171,7 @@ class WidgetSticker extends Sticker {
   ///
   const WidgetSticker({
     required this.child,
-    Size size = const Size(200.0, 200.0),
+    Size size = const Size(100.0, 100.0),
     ValueSetter<Sticker>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
@@ -272,20 +273,16 @@ const gifs = {
     path: 'https://media.giphy.com/media/kyzzHEoaLAAr9nX4fy/giphy.gif',
     pathType: PathType.networkImg,
   ),
-  ImageSticker(
-    name: 'Celebrate Happy Birthday',
-    path: 'https://media.giphy.com/media/7zSBoGW2VoCEzWVjyA/giphy.gif',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Effects ',
-    path: 'https://media.giphy.com/media/xT0GqKaASLordVtYCk/giphy.gif',
-    pathType: PathType.networkImg,
-  ),
 };
 
 ///
 const arts = {
+  ImageSticker(
+    name: 'Smoke',
+    path:
+        'https://pngimage.net/wp-content/uploads/2018/06/%D1%87%D0%B5%D1%80%D0%BD%D1%8B%D0%B9-%D0%B4%D1%8B%D0%BC-png-2.png',
+    pathType: PathType.networkImg,
+  ),
   ImageSticker(
     name: 'Multiple circles',
     path:
@@ -293,54 +290,8 @@ const arts = {
     pathType: PathType.networkImg,
   ),
   ImageSticker(
-    name: 'Red color',
-    path:
-        'https://www.pngarts.com/files/2/Blood-Red-Smoke-PNG-Background-Image.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Flowers',
-    path: 'https://freepngimg.com/thumb/vector/5-2-vector-high-quality-png.png',
-    pathType: PathType.networkImg,
-  ),
-  // ImageSticker(
-  //   name: 'Multiple colors splash',
-  //   path:
-  //       ' https://img.pngio.com/millions-of-png-images-backgrounds-and-vectors-for-free-download-holi-background-png-640_640.png',
-  //   pathType: ImageStickerPathType.networkImg,
-  // ),
-  ImageSticker(
-    name: 'Circle drops',
-    path:
-        'https://www.freepnglogos.com/uploads/bubbles-png/bubbles-png-transparent-image-pngpix-4.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
     name: 'Eagle Wings',
     path: 'https://www.freeiconspng.com/uploads/angel-png-1.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Cloud',
-    path:
-        'https://i.pinimg.com/originals/19/8d/ae/198daeda14097d45e417e62ff283f10e.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Wings',
-    path:
-        'https://cdn.pixabay.com/photo/2017/07/04/23/41/white-wings-2473023__480.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Abstract art',
-    path:
-        'https://freepngimg.com/download/graphic/53280-2-abstract-art-hd-free-png-hq.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Love hearts',
-    path: 'https://www.pngarts.com/files/4/Love-Heart-PNG-Free-Download.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
@@ -350,20 +301,32 @@ const arts = {
     pathType: PathType.networkImg,
   ),
   ImageSticker(
+    name: 'Cloud',
+    path:
+        'https://i.pinimg.com/originals/19/8d/ae/198daeda14097d45e417e62ff283f10e.png',
+    pathType: PathType.networkImg,
+  ),
+  ImageSticker(
+    name: 'Abstract art',
+    path:
+        'https://freepngimg.com/download/graphic/53280-2-abstract-art-hd-free-png-hq.png',
+    pathType: PathType.networkImg,
+  ),
+  ImageSticker(
     name: 'Hair',
     path:
         'https://i.pinimg.com/originals/df/8b/f1/df8bf1a18047ff20d3f82e0f47dbe683.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
-    name: 'Hair',
-    path:
-        'https://i.dlpng.com/static/png/1357097-cb-hair-png-hair-png-521_500_preview.png',
+    name: '',
+    path: 'https://freepngimg.com/thumb/hair/21-women-hair-png-image-thumb.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
-    name: '',
-    path: 'https://freepngimg.com/thumb/hair/21-women-hair-png-image-thumb.png',
+    name: 'Paint splatter',
+    path:
+        'https://pngimage.net/wp-content/uploads/2018/06/paint-splatter-png-6.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
@@ -377,54 +340,20 @@ const arts = {
     pathType: PathType.networkImg,
   ),
   ImageSticker(
-    name: 'Color splash',
-    path: 'https://pngimage.net/wp-content/uploads/2018/06/png-arts-6.png',
+    name: 'Eagle',
+    path:
+        'https://www.pngkey.com/png/full/0-9646_american-eagle-logo-png-eagle-holding-lombardi-trophy.png',
     pathType: PathType.networkImg,
   ),
-  // ImageSticker(
-  //   name: 'Smoke',
-  //   path:
-  //       ' https://i.dlpng.com/static/png/6242591-pink-smoke-png-background-image-png-arts-pink-smoke-png-738_733_preview.png',
-  //   pathType: ImageStickerPathType.networkImg,
-  // ),
   ImageSticker(
-    name: 'Colors',
-    path: 'https://pngimage.net/wp-content/uploads/2018/05/colors-png-1.png',
+    name: 'Hair',
+    path:
+        'https://i.dlpng.com/static/png/1357097-cb-hair-png-hair-png-521_500_preview.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
     name: 'Art',
     path: 'https://i.dlpng.com/static/png/6719469_preview.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Paint splatter',
-    path:
-        'https://pngimage.net/wp-content/uploads/2018/06/paint-splatter-png-6.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Quincea',
-    path:
-        'https://pngimage.net/wp-content/uploads/2018/06/vector-quincea%C3%B1era-png-1.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Red lines',
-    path:
-        'https://www.downloadclipart.net/large/red-abstract-lines-png-image.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Smoke',
-    path:
-        'https://pngimage.net/wp-content/uploads/2018/06/%D1%87%D0%B5%D1%80%D0%BD%D1%8B%D0%B9-%D0%B4%D1%8B%D0%BC-png-2.png',
-    pathType: PathType.networkImg,
-  ),
-  ImageSticker(
-    name: 'Eagle',
-    path:
-        'https://www.pngkey.com/png/full/0-9646_american-eagle-logo-png-eagle-holding-lombardi-trophy.png',
     pathType: PathType.networkImg,
   ),
   ImageSticker(
@@ -440,3 +369,11 @@ const arts = {
     pathType: PathType.networkImg,
   ),
 };
+
+///
+final shapes = ShapeIcons.values
+    .map((iconData) => WidgetSticker(
+          onPressed: (s) {},
+          child: FittedBox(child: Icon(iconData)),
+        ))
+    .toSet();

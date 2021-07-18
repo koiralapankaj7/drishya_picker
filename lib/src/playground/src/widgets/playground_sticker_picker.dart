@@ -128,15 +128,17 @@ class _StickersTabsState extends State<StickersTabs>
                   key: const Key('stickersTabs_artsTabBarView'),
                   stickers: arts,
                   onStickerSelected: widget.onStickerSelected,
+                  maxCrossAxisExtent: 100.0,
                 ),
                 StickersTabBarView(
                   key: const Key('stickersTabs_emojisTabBarView'),
                   stickers: gifs,
                   onStickerSelected: widget.onStickerSelected,
+                  maxCrossAxisExtent: 70.0,
                 ),
                 StickersTabBarView(
                   key: const Key('stickersTabs_shapesTabBarView'),
-                  stickers: gifs,
+                  stickers: shapes,
                   onStickerSelected: widget.onStickerSelected,
                 ),
               ],
@@ -154,17 +156,14 @@ class _StickersTabsState extends State<StickersTabs>
             tabs: const [
               StickersTab(
                 key: Key('stickersTabs_artsTab'),
-                assetPath: 'assets/icons/google_icon.png',
                 label: 'ARTS',
               ),
               StickersTab(
                 key: Key('stickersTabs_emojisTab'),
-                assetPath: 'assets/icons/hats_icon.png',
                 label: 'EMOJIS',
               ),
               StickersTab(
                 key: Key('stickersTabs_shapesTab'),
-                assetPath: 'assets/icons/hats_icon.png',
                 label: 'SHAPES',
               ),
             ],
@@ -180,13 +179,9 @@ class StickersTab extends StatefulWidget {
   ///
   const StickersTab({
     Key? key,
-    required this.assetPath,
     required this.label,
     this.active = true,
   }) : super(key: key);
-
-  ///
-  final String assetPath;
 
   ///
   final String label;
@@ -228,6 +223,7 @@ class StickersTabBarView extends StatelessWidget {
     Key? key,
     required this.stickers,
     required this.onStickerSelected,
+    this.maxCrossAxisExtent = 50.0,
   }) : super(key: key);
 
   ///
@@ -236,20 +232,21 @@ class StickersTabBarView extends StatelessWidget {
   ///
   final ValueSetter<Sticker> onStickerSelected;
 
-  static const _smallGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: 100,
-    childAspectRatio: 1,
-    mainAxisSpacing: 48,
-    crossAxisSpacing: 24,
-  );
+  ///
+  final double maxCrossAxisExtent;
 
   @override
   Widget build(BuildContext context) {
-    const gridDelegate = _smallGridDelegate;
+    final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: maxCrossAxisExtent,
+      childAspectRatio: 1,
+      mainAxisSpacing: 24,
+      crossAxisSpacing: 24,
+    );
     return GridView.builder(
       key: PageStorageKey<String>('$key'),
       gridDelegate: gridDelegate,
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       itemCount: stickers.length,
       itemBuilder: (context, index) {
         final sticker = stickers.elementAt(index);
@@ -291,6 +288,11 @@ class StickerChoice extends StatelessWidget {
         default:
           return const SizedBox();
       }
+    } else if (sticker is WidgetSticker) {
+      return InkWell(
+        onTap: onPressed,
+        child: (sticker as WidgetSticker).child,
+      );
     } else {
       return const SizedBox();
     }
