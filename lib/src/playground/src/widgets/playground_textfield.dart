@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controller/playground_controller.dart';
 
@@ -78,50 +81,57 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
 
     if (!value.hasFocus) return const SizedBox();
 
-    return GestureDetector(
-      onTap: () {
-        widget.controller.updateValue(hasFocus: false);
-        if (_textController.text.isNotEmpty) {
-          _addSticker();
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        alignment: Alignment.center,
-        color: value.hasFocus ? Colors.black54 : Colors.transparent,
-        child: IntrinsicWidth(
-          key: _widthKey,
-          stepWidth: 20.0,
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 20.0),
-            margin: const EdgeInsets.symmetric(
-              horizontal: 60.0,
-              vertical: 30.0,
-            ),
-            child: TextFormField(
-              key: _tfSizeKey,
-              controller: _textController,
-              autofocus: true,
-              textAlign: value.textAlign,
-              autocorrect: false,
-              minLines: 1,
-              maxLines: null,
-              // maxLines: value.convertedMaxLines,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
-              smartDashesType: SmartDashesType.disabled,
-              style: _textStickerStyle,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(8.0),
-                filled: value.fillColor,
-                fillColor: value.textBackground.colors.first,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide.none,
-                ),
+    return Scaffold(
+      backgroundColor: value.hasFocus ? Colors.black54 : Colors.transparent,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          widget.controller.updateValue(hasFocus: false);
+          if (_textController.text.isNotEmpty) {
+            _addSticker();
+          }
+        },
+        child: Center(
+          child: IntrinsicWidth(
+            key: _widthKey,
+            stepWidth: 20.0,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 20.0),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 60.0,
+                vertical: 30.0,
               ),
-              // onChanged: _onTextChanged,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: value.fillColor
+                    ? value.textBackground.colors.first
+                    : Colors.transparent,
+              ),
+              child: TextFormField(
+                key: _tfSizeKey,
+                controller: _textController,
+                autofocus: true,
+                textAlign: value.textAlign,
+                autocorrect: false,
+                minLines: 1,
+                maxLines: null,
+                // maxLines: value.convertedMaxLines,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                smartDashesType: SmartDashesType.disabled,
+                style: _textStickerStyle,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(8.0),
+                  // filled: value.fillColor,
+                  // fillColor: value.textBackground.colors.first,
+                  // focusedBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(10.0),
+                  //   borderSide: BorderSide.none,
+                  // ),
+                ),
+                // onChanged: _onTextChanged,
+              ),
             ),
           ),
         ),

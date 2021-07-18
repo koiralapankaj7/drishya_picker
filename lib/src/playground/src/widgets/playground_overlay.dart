@@ -11,6 +11,8 @@ import 'playground_capture_button.dart';
 import 'playground_close_button.dart';
 import 'playground_textfield.dart';
 
+const _top = 16.0;
+
 ///
 class PlaygroundOverlay extends StatelessWidget {
   ///
@@ -24,8 +26,6 @@ class PlaygroundOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.of(context).padding.top + 4.0;
-
     return ValueListenableBuilder<PlaygroundValue>(
       valueListenable: controller,
       builder: (context, value, child) {
@@ -45,7 +45,7 @@ class PlaygroundOverlay extends StatelessWidget {
             // Close button
             Positioned(
               left: 8.0,
-              top: top,
+              top: _top,
               child: PlaygroundCloseButton(controller: controller),
             ),
 
@@ -67,7 +67,7 @@ class PlaygroundOverlay extends StatelessWidget {
             // Sticker buttons
             Positioned(
               right: 16.0,
-              top: top,
+              top: _top,
               child: PlaygroundButtonCollection(controller: controller),
             ),
 

@@ -43,19 +43,24 @@ class PhotoBackgroundView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (background.bytes != null) {
-      return Image.memory(
-        background.bytes!,
-        fit: BoxFit.cover,
-      );
-    } else if (background.url != null) {
-      return Image.network(
-        background.url!,
-        fit: BoxFit.cover,
-      );
-    }
+    return ColoredBox(
+      color: Colors.black,
+      child: Builder(builder: (_) {
+        if (background.bytes != null) {
+          return Image.memory(
+            background.bytes!,
+            fit: BoxFit.contain,
+          );
+        } else if (background.url != null) {
+          return Image.network(
+            background.url!,
+            fit: BoxFit.cover,
+          );
+        }
 
-    return const SizedBox();
+        return const SizedBox();
+      }),
+    );
   }
 }
 
@@ -72,6 +77,10 @@ class PlaygroundGradientBackgroundChanger extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (controller.value.background is PhotoBackground) {
+      return const SizedBox();
+    }
+
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {

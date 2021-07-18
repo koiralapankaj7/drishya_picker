@@ -2,8 +2,6 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
-import '../../playground.dart';
-
 ///
 class StickerPicker extends StatelessWidget {
   ///
@@ -13,7 +11,7 @@ class StickerPicker extends StatelessWidget {
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.bucket,
-    this.background,
+    required this.imageBackground,
   }) : super(key: key);
 
   ///
@@ -29,7 +27,7 @@ class StickerPicker extends StatelessWidget {
   final PageStorageBucket bucket;
 
   ///
-  final GradientBackground? background;
+  final bool imageBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +51,7 @@ class StickerPicker extends StatelessWidget {
                 initialIndex: initialIndex,
                 onTabChanged: onTabChanged,
                 onStickerSelected: onStickerSelected,
+                imageBackground: imageBackground,
               ),
             ),
           ],
@@ -69,6 +68,7 @@ class StickersTabs extends StatefulWidget {
     Key? key,
     required this.onStickerSelected,
     required this.onTabChanged,
+    required this.imageBackground,
     this.initialIndex = 0,
   }) : super(key: key);
 
@@ -80,6 +80,9 @@ class StickersTabs extends StatefulWidget {
 
   ///
   final int initialIndex;
+
+  ///
+  final bool imageBackground;
 
   @override
   State<StickersTabs> createState() => _StickersTabsState();
@@ -114,9 +117,9 @@ class _StickersTabsState extends State<StickersTabs>
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.white54,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      decoration: BoxDecoration(
+        color: widget.imageBackground ? Colors.black54 : Colors.white54,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
         children: [

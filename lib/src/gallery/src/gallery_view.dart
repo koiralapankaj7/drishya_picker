@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_view.dart';
+import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -377,7 +378,9 @@ class _GalleryViewState extends State<GalleryView>
               // Send and edit button
               GalleryAssetSelector(
                 controller: _controller,
-                onEdit: (e) {},
+                onEdit: (e) {
+                  _controller._openPlayground(context, e);
+                },
                 onSubmit: _controller._completeTask,
               ),
 
@@ -718,6 +721,42 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     var entities = [...value.selectedEntities];
     if (entity != null) {
+      entities.add(entity);
+      _onChanged?.call(entity, false);
+      _onSubmitted?.call(entities);
+    }
+    _accessCamera = false;
+    _completer.complete(entities);
+  }
+
+  /// Open camera from [GalleryView]
+  Future<void> _openPlayground(
+    BuildContext context,
+    DrishyaEntity entity,
+  ) async {
+    _select(entity, context);
+    _accessCamera = true;
+    DrishyaEntity? pickedEntity;
+
+    final route = SlideTransitionPageRoute<DrishyaEntity>(
+      builder: Playground(
+        background: PhotoBackground(bytes: entity.bytes),
+        enableOverlay: true,
+      ),
+      begainHorizontal: true,
+      endHorizontal: false,
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+
+    if (fullScreenMode) {
+      pickedEntity = await Navigator.of(context).pushReplacement(route);
+    } else {
+      pickedEntity = await Navigator.of(context).push(route);
+      _closeOnCameraSelect();
+    }
+
+    var entities = [...value.selectedEntities];
+    if (pickedEntity != null) {
       entities.add(entity);
       _onChanged?.call(entity, false);
       _onSubmitted?.call(entities);

@@ -1,4 +1,3 @@
-import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
@@ -20,16 +19,10 @@ class PlaygroundAddTextButton extends StatelessWidget {
     return PlaygroundBuilder(
       controller: controller,
       builder: (context, value, child) {
-        final crossFadeState =
-            value.hasStickers || value.hasFocus || value.isEditing
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond;
-        return AppAnimatedCrossFade(
-          firstChild: const SizedBox(),
-          secondChild: child!,
-          crossFadeState: crossFadeState,
-          duration: const Duration(milliseconds: 300),
-        );
+        if (value.hasStickers || value.hasFocus || value.isEditing) {
+          return const SizedBox();
+        }
+        return child!;
       },
       child: GestureDetector(
         onTap: () {
