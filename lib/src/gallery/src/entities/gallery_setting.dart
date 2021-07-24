@@ -20,12 +20,12 @@ class GallerySetting {
   final RequestType requestType;
 
   ///
-  /// Total medai allowed to select. Default is 20
+  /// Total media allowed to select. Default is 20
   ///
   final int maximum;
 
   ///
-  /// String displayed below alnum name. Default : 'Select media'
+  /// String displayed below album name. Default : 'Select media'
   ///
   final String albumSubtitle;
 
