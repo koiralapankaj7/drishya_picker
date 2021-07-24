@@ -15,6 +15,7 @@ class PlaygroundValue {
     PlaygroundBackground? background,
     GradientBackground? textBackground,
     this.stickerPickerView = false,
+    this.colorPickerVisibility = false,
   })  : background = background ?? gradients[0],
         textBackground = textBackground ?? gradients[0];
 
@@ -45,22 +46,25 @@ class PlaygroundValue {
   ///
   final bool stickerPickerView;
 
+  ///
+  final bool colorPickerVisibility;
+
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   ///
-  PlaygroundValue copyWith({
-    TextAlign? textAlign,
-    bool? fillColor,
-    bool? hasFocus,
-    bool? editingMode,
-    int? maxLines,
-    bool? hasStickers,
-    bool? isEditing,
-    PlaygroundBackground? background,
-    GradientBackground? textBackground,
-    bool? stickerPickerView,
-  }) {
+  PlaygroundValue copyWith(
+      {TextAlign? textAlign,
+      bool? fillColor,
+      bool? hasFocus,
+      bool? editingMode,
+      int? maxLines,
+      bool? hasStickers,
+      bool? isEditing,
+      PlaygroundBackground? background,
+      GradientBackground? textBackground,
+      bool? stickerPickerView,
+      bool? colorPickerVisibility}) {
     return PlaygroundValue(
       textAlign: textAlign ?? this.textAlign,
       fillColor: fillColor ?? this.fillColor,
@@ -71,6 +75,8 @@ class PlaygroundValue {
       background: background ?? this.background,
       textBackground: textBackground ?? this.textBackground,
       stickerPickerView: stickerPickerView ?? this.stickerPickerView,
+      colorPickerVisibility:
+          colorPickerVisibility ?? this.colorPickerVisibility,
     );
   }
 }

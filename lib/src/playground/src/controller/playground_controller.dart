@@ -41,16 +41,16 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   }
 
   /// Update playground value
-  void updateValue({
-    bool? fillColor,
-    int? maxLines,
-    TextAlign? textAlign,
-    bool? hasFocus,
-    bool? editingMode,
-    bool? hasStickers,
-    bool? isEditing,
-    bool? stickerPickerView,
-  }) {
+  void updateValue(
+      {bool? fillColor,
+      int? maxLines,
+      TextAlign? textAlign,
+      bool? hasFocus,
+      bool? editingMode,
+      bool? hasStickers,
+      bool? isEditing,
+      bool? stickerPickerView,
+      bool? colorPickerVisibility}) {
     if (!(hasFocus ?? false)) {
       // Hide status bar
       SystemChrome.setEnabledSystemUIOverlays([]);
@@ -64,6 +64,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
       hasStickers: hasStickers,
       isEditing: isEditing,
       stickerPickerView: stickerPickerView,
+      colorPickerVisibility: colorPickerVisibility,
     );
   }
 

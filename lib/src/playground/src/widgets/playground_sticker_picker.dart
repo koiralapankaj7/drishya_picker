@@ -117,10 +117,9 @@ class _StickersTabsState extends State<StickersTabs>
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        // color: widget.imageBackground ? Colors.black54 : Colors.white54,
-        color: Colors.white30,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      decoration: BoxDecoration(
+        color: widget.imageBackground ? Colors.black54 : Colors.white54,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
         children: [
@@ -292,10 +291,15 @@ class StickerChoice extends StatelessWidget {
         default:
           return const SizedBox();
       }
-    } else if (sticker is WidgetSticker) {
+    } else if (sticker is IconSticker) {
       return InkWell(
         onTap: onPressed,
-        child: (sticker as WidgetSticker).child,
+        child: FittedBox(
+          child: Icon(
+            (sticker as IconSticker).iconData,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
       );
     } else {
       return const SizedBox();
