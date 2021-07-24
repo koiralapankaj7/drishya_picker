@@ -351,68 +351,46 @@ class SwipeablePageTransition extends StatelessWidget {
     final slidingUp = slidingState == _SlidingState.slidingUp;
     final slidingDown = slidingState == _SlidingState.slidingDown;
 
-    final slidingDownChild = Stack(
-      fit: StackFit.expand,
-      clipBehavior: Clip.none,
-      children: [
-        Positioned.fill(
-          top: (1 - primaryRouteAnimation.value) *
-              MediaQuery.of(context).size.height,
-          left: 0.0,
-          right: 0.0,
-          child: child,
-        ),
-      ],
-    );
-
-    // final defaultChild = SlideTransition(
-    //   position: CurvedAnimation(
-    //     parent: primaryRouteAnimation,
-    //     curve: Curves.linearToEaseOut,
-    //     reverseCurve: Curves.easeInToLinear,
-    //   ).drive(
-    //     Tween(
-    //       begin: Offset(0.0, slidingUp ? primaryRouteAnimation.value
-    // - 1 : 1.0),
-    //       end: Offset(0.0, slidingUp ? primaryRouteAnimation.value - 1
-    //  : 0.0),
-    //     ),
-    //   ),
-    //   child: child,
-    // );
-
     return SlideTransition(
       position: _secondaryPositionAnimation,
       transformHitTests: false,
-      child: slidingDown && primaryRouteAnimation.value > 0.2
-          ? slidingDownChild
-          : SlideTransition(
-              position: CurvedAnimation(
-                parent: primaryRouteAnimation,
-                curve: Curves.linearToEaseOut,
-                reverseCurve: Curves.easeInToLinear,
-              ).drive(
-                Tween(
-                  begin: Offset(
-                    0.0,
-                    slidingUp
-                        ? primaryRouteAnimation.value - 1
-                        : slidingDown
-                            ? 1 - primaryRouteAnimation.value
-                            : 1.0,
-                  ),
-                  end: Offset(
-                    0.0,
-                    slidingUp
-                        ? primaryRouteAnimation.value - 1
-                        : slidingDown
-                            ? 1 - primaryRouteAnimation.value
-                            : 0.0,
-                  ),
-                ),
-              ),
-              child: child,
+      child: SlideTransition(
+        position: CurvedAnimation(
+          parent: primaryRouteAnimation,
+          curve: Curves.linearToEaseOut,
+          reverseCurve: Curves.easeInToLinear,
+        ).drive(
+          Tween(
+            begin: Offset(
+              0.0,
+              slidingUp
+                  ? primaryRouteAnimation.value - 1
+                  : slidingDown
+                      ? 1 - primaryRouteAnimation.value
+                      : 1.0,
             ),
+            end: Offset(
+              0.0,
+              slidingUp
+                  ? primaryRouteAnimation.value - 1
+                  : slidingDown
+                      ? 1 - primaryRouteAnimation.value
+                      : 0.0,
+            ),
+          ),
+        ),
+        child: Column(
+          children: [
+            Expanded(child: child),
+            SizedBox(
+              height: slidingDown && primaryRouteAnimation.value > 0.4
+                  ? (1 - primaryRouteAnimation.value) *
+                      MediaQuery.of(context).size.height
+                  : 0.0,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

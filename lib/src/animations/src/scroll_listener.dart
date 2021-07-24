@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 ///
@@ -55,7 +54,8 @@ class ScrollListenerState extends State<ScrollListener> {
   }
 
   var _isReadyOnStart = false;
-  var _disableGlow = false;
+  var _disableGlow = true;
+  var _continuousScroll = false;
 
   bool _isAtEdge(ScrollNotification notification) {
     return notification.metrics.extentBefore == 0.0 ||
@@ -72,9 +72,10 @@ class ScrollListenerState extends State<ScrollListener> {
     widget.onScrollStart?.call();
   }
 
+  // for BouncingScrollPhysics
   void _scrollUpdate(ScrollUpdateNotification notification) {
-    // for BouncingScrollPhysics
     final atEdge = _isAtEdge(notification);
+    _continuousScroll = true;
     final overScroll = atEdge &&
         (_triggerAnyWhere ||
             (_isReadyOnStart &&
@@ -84,14 +85,15 @@ class ScrollListenerState extends State<ScrollListener> {
   }
 
   void _overScroll(OverscrollNotification notification) {
-    final overScroll = _triggerAnyWhere ||
-        (_isReadyOnStart && _triggerOnEdge && notification.dragDetails != null);
+    final overScroll =
+        (_triggerAnyWhere || (_triggerOnEdge && !_continuousScroll));
     _finish(notification, overScroll);
   }
 
   void _scrolEnd(ScrollEndNotification notification) {
     _isReadyOnStart = false;
     _disableGlow = true;
+    _continuousScroll = false;
   }
 
   void _finish(ScrollNotification notification, bool overScroll) {
@@ -99,16 +101,19 @@ class ScrollListenerState extends State<ScrollListener> {
         ? Scrollable.of(notification.context!)?.widget.controller
         : null;
 
-    final scrollDirection =
-        controller?.position.userScrollDirection ?? ScrollDirection.idle;
-    final atBottom = notification.metrics.extentAfter == 0.0;
-    final atTop = notification.metrics.extentBefore == 0.0;
+    // final scrollDirection =
+    //     controller?.position.userScrollDirection ?? ScrollDirection.idle;
+    // final atBottom = notification.metrics.extentAfter == 0.0;
+    // final atTop = notification.metrics.extentBefore == 0.0;
 
-    final continueScroll =
-        (atBottom && scrollDirection == ScrollDirection.forward) ||
-            (atTop && scrollDirection == ScrollDirection.reverse);
+    // final scrolling =
+    //     (atBottom && scrollDirection == ScrollDirection.forward) ||
+    //         (atTop && scrollDirection == ScrollDirection.reverse);
 
-    widget.onScrollUpdate(controller, !continueScroll && overScroll);
+    // log('$atBottom  $scrollDirection : $scrolling');
+
+    // widget.onScrollUpdate(controller, !continueScroll && overScroll);
+    widget.onScrollUpdate(controller, overScroll);
 
     //     final scrolledPixel =
     //     (_pointerInitialPosition?.dy ?? 0.0) - currentPosition.dy;
