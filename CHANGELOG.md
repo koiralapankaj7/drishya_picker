@@ -22,3 +22,10 @@
 * Picker will return DrishyaEntity
 * [Before] : AssetEntity
 * [Now]    : DrishyaEntity
+
+## [1.0.2] - Features and UI update
+
+* Image edit
+* Stickers view updated
+* Camera view will accept resolution and image format
+

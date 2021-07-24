@@ -59,8 +59,8 @@ Now in your `Dart` code, you can use:
 ```dart
 import 'package:drishya_picker/drishya_picker.dart';
 ```
----
 
+---
 
 # Platform Setup
 
@@ -167,7 +167,6 @@ Add following content to `info.plist`.
     </table>
 </div>
 
----
 
  1. Use `GalleryViewWrapper` to make gallery view collapsible otherwise ignore it.
 
@@ -245,8 +244,6 @@ GalleryViewField(
 
 ---
 
-
-
 # Camera
 
 <div style="text-align: center">
@@ -279,8 +276,6 @@ GalleryViewField(
         </tr> 
     </table>
 </div>
-
----
 
  1. Using `pick()` function on `CameraView` to pick media.
 
