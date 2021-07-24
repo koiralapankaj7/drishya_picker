@@ -2,7 +2,7 @@ PODS:
   - camera (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - photo_manager (0.0.1):
+  - photo_manager (1.0.0):
     - Flutter
     - FlutterMacOS
 
@@ -22,7 +22,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   camera: 3164201dc344383e62282964016528c4f5a9ad50
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  photo_manager: 61cdd6835af271b9ad1bb533fccf71d5db02fff3
+  photo_manager: 84fa94fbeb82e607333ea9a13c43b58e0903a463
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 

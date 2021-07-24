@@ -783,7 +783,15 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   Future<List<DrishyaEntity>> pick(
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
-  }) {
+  }) async {
+    // If dont have permission dont do anything
+    final permission = await PhotoManager.requestPermissionExtend();
+    if (permission != PermissionState.authorized &&
+        permission != PermissionState.limited) {
+      PhotoManager.openSetting();
+      return [];
+    }
+
     _completer = Completer<List<DrishyaEntity>>();
 
     if (_wrapperKey.currentState == null) {
@@ -791,7 +799,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
         builder: GalleryView(controller: this),
       );
-      Navigator.of(context).push(route).then((result) {
+      await Navigator.of(context).push(route).then((result) {
         // Closed by user
         if (result == null && !_accessCamera) {
           _completer.complete(value.selectedEntities);

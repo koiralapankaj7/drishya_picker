@@ -19,11 +19,16 @@ class CamController extends ValueNotifier<ActionValue> {
   CamController({
     required ControllerNotifier controllerNotifier,
     required BuildContext context,
+    ResolutionPreset? resolutionPreset,
+    ImageFormatGroup? imageFormatGroup,
   })  : _controllerNotifier = controllerNotifier,
         _uiHandler = UIHandler(context),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
-        super(ActionValue());
+        super(ActionValue(
+          resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
+          imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
+        ));
 
   ///
   final ControllerNotifier _controllerNotifier;
@@ -361,13 +366,13 @@ class CamController extends ValueNotifier<ActionValue> {
 class ActionValue {
   ///
   ActionValue({
+    required this.resolutionPreset,
+    required this.imageFormatGroup,
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
     this.cameraType = CameraType.normal,
     this.flashMode = FlashMode.off,
-    this.resolutionPreset = ResolutionPreset.medium,
-    this.imageFormatGroup = ImageFormatGroup.jpeg,
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
@@ -420,6 +425,8 @@ class ActionValue {
     bool? isPlaygroundActive,
   }) {
     return ActionValue(
+      resolutionPreset: resolutionPreset,
+      imageFormatGroup: imageFormatGroup,
       cameraDescription: cameraDescription ?? this.cameraDescription,
       cameras: cameras ?? this.cameras,
       cameraType: cameraType ?? this.cameraType,
