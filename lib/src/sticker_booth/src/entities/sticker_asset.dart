@@ -167,10 +167,10 @@ class ImageSticker extends Sticker {
 }
 
 ///
-class WidgetSticker extends Sticker {
+class IconSticker extends Sticker {
   ///
-  const WidgetSticker({
-    required this.child,
+  const IconSticker({
+    required this.iconData,
     Size size = const Size(100.0, 100.0),
     ValueSetter<Sticker>? onPressed,
     Map<String, Object> extra = const {},
@@ -181,7 +181,7 @@ class WidgetSticker extends Sticker {
         );
 
   ///
-  final Widget child;
+  final IconData iconData;
 }
 
 ///
@@ -372,30 +372,5 @@ const arts = {
 
 ///
 final shapes = ShapeIcons.values
-    .map((iconData) => WidgetSticker(
-          onPressed: (s) {},
-          child: FittedBox(child: Icon(iconData)),
-        ))
+    .map((iconData) => IconSticker(iconData: iconData))
     .toSet();
-
-class _IconWidget extends StatefulWidget {
-  const _IconWidget({
-    Key? key,
-    required this.builder,
-    required this.iconData,
-  }) : super(key: key);
-
-  final Widget Function(VoidCallback onPressed) builder;
-
-  final IconData iconData;
-
-  @override
-  _IconWidgetState createState() => _IconWidgetState();
-}
-
-class _IconWidgetState extends State<_IconWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return FittedBox(child: Icon(widget.iconData));
-  }
-}

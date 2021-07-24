@@ -24,12 +24,27 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
   late final GlobalKey _deleteKey;
   late final PlaygroundController _controller;
   var _collied = false;
+  late final ValueNotifier<Color> _colorNotifier;
 
   @override
   void initState() {
     super.initState();
     _deleteKey = GlobalKey();
     _controller = widget.controller;
+    _colorNotifier = ValueNotifier(_colors.first);
+  }
+
+  @override
+  void dispose() {
+    _colorNotifier.dispose();
+    super.dispose();
+  }
+
+  void _onTapOutside() {
+    _controller.stickerController.unselectSticker();
+    if (_controller.value.colorPickerVisibility) {
+      _controller.updateValue(colorPickerVisibility: false);
+    }
   }
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
@@ -87,8 +102,8 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
           ),
         ),
       );
-    } else if (sticker is WidgetSticker) {
-      return sticker.child;
+    } else if (sticker is IconSticker) {
+      return _IconSticker(colorNotifier: _colorNotifier, sticker: sticker);
     } else {
       return const SizedBox();
     }
@@ -109,12 +124,8 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              //
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: stickerController.unselectSticker,
-                ),
-              ),
+              // For outside tap
+              Positioned.fill(child: GestureDetector(onTap: _onTapOutside)),
 
               // Stickers
               Stack(
@@ -130,6 +141,8 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                       if (asset.sticker is TextSticker) {
                         stickerController.deleteSticker(asset);
                         _controller.updateValue(hasFocus: true);
+                      } else if (asset.sticker is IconSticker) {
+                        _controller.updateValue(colorPickerVisibility: true);
                       }
                     },
                     onStart: () {
@@ -186,8 +199,120 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                   ),
                 ),
 
+              // Color picker
+              if (_controller.value.colorPickerVisibility &&
+                  !_controller.value.isEditing)
+                Positioned(
+                  left: 0.0,
+                  right: 0.0,
+                  bottom: 80.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: _colors
+                          .map((color) => _ColorCircle(
+                                color: color,
+                                colorNotifier: _colorNotifier,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ),
+
               //
             ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+final _colors = [
+  Colors.white,
+  Colors.black,
+  Colors.red,
+  Colors.yellow,
+  Colors.blue,
+  Colors.teal,
+  Colors.green,
+  Colors.orange,
+];
+
+class _ColorCircle extends StatelessWidget {
+  const _ColorCircle({
+    Key? key,
+    required this.color,
+    required this.colorNotifier,
+  }) : super(key: key);
+
+  final Color color;
+  final ValueNotifier<Color> colorNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Color>(
+      valueListenable: colorNotifier,
+      builder: (context, c, child) {
+        final isSelected = color == c;
+        final size = isSelected ? 36.0 : 30.0;
+        return InkWell(
+          onTap: () {
+            colorNotifier.value = color;
+          },
+          child: SizedBox(
+            height: 40.0,
+            width: 40.0,
+            child: Align(
+              alignment: Alignment.center,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: size,
+                width: size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 4.0,
+                  ),
+                  borderRadius: BorderRadius.circular(size),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: CircleAvatar(backgroundColor: color),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _IconSticker extends StatelessWidget {
+  const _IconSticker({
+    Key? key,
+    required this.sticker,
+    required this.colorNotifier,
+  }) : super(key: key);
+
+  final IconSticker sticker;
+  final ValueNotifier<Color> colorNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Color>(
+      valueListenable: colorNotifier,
+      builder: (context, color, child) {
+        return FittedBox(
+          child: Icon(
+            sticker.iconData,
+            color: color,
           ),
         );
       },

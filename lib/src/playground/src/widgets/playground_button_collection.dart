@@ -49,7 +49,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
       ),
     )
         .then((value) {
-      Future.delayed(const Duration(milliseconds: 400), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         controller.updateValue(isEditing: false, stickerPickerView: false);
       });
     });
