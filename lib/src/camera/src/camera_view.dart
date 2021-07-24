@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
@@ -25,22 +26,42 @@ class CameraView extends StatefulWidget {
   const CameraView({
     Key? key,
     this.videoDuration,
+    this.resolutionPreset,
+    this.imageFormatGroup,
   }) : super(key: key);
 
+  ///
+  /// Vide duration. Default is 10 seconds.
   ///
   final Duration? videoDuration;
 
   ///
-  static const String name = 'CameraView';
+  /// Camera resolution. Default to [ResolutionPreset.medium]
+  ///
+  final ResolutionPreset? resolutionPreset;
 
   ///
+  /// Camera image format. Default to [ImageFormatGroup.jpeg]
+  ///
+  final ImageFormatGroup? imageFormatGroup;
+
+  /// Camera view route name
+  static const String name = 'CameraView';
+
+  /// Open camera view for picking.
   static Future<DrishyaEntity?> pick(
     BuildContext context, {
     Duration? videoDuration,
+    ResolutionPreset? resolutionPreset,
+    ImageFormatGroup? imageFormatGroup,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
-        builder: CameraView(videoDuration: videoDuration),
+        builder: CameraView(
+          videoDuration: videoDuration,
+          resolutionPreset: resolutionPreset,
+          imageFormatGroup: imageFormatGroup,
+        ),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
         reverseTransitionDuration: _kRouteDuration,
@@ -69,6 +90,8 @@ class _CameraViewState extends State<CameraView>
     _camController = CamController(
       controllerNotifier: _controllerNotifier,
       context: context,
+      imageFormatGroup: widget.imageFormatGroup,
+      resolutionPreset: widget.resolutionPreset,
     );
     _playgroundController = PlaygroundController()
       ..addListener(_playgroundListener);
