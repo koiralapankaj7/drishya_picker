@@ -11,7 +11,6 @@
     <img src="https://badges.bar/drishya_picker/likes" alt="likes"/>
   </a>
   <a><img src="https://img.shields.io/github/forks/koiralapankaj7/drishya_picker" alt="Forks"/></a>
-  </p>
 </p>
 
 ---
@@ -311,7 +310,7 @@ If you encounter any problems feel free to open an [issue](https://github.com/ko
 
 # Maintainers
 
-- [Pankaj Koirala](https://github.com/koiralapankajgit)
+- [Pankaj Koirala](https://github.com/koiralapankaj7)
 
   <a href="https://twitter.com/koiralapankaj7">
     <img src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fkoiralapankaj7"

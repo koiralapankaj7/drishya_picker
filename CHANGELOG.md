@@ -29,3 +29,5 @@
 * Stickers view updated
 * Camera view will accept resolution and image format
 
+## [1.0.2+1] - 
+
