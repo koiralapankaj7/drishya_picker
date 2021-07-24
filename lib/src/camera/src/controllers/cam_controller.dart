@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 // import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -171,8 +172,7 @@ class CamController extends ValueNotifier<ActionValue> {
       );
 
       if (file.existsSync()) {
-        // ignore: unawaited_futures
-        file.delete();
+        file.deleteSync();
       }
 
       // Update state
@@ -180,6 +180,7 @@ class CamController extends ValueNotifier<ActionValue> {
 
       if (entity != null) {
         final drishyaEntity = DrishyaEntity(entity: entity, bytes: data);
+        await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
         _uiHandler.pop<DrishyaEntity>(drishyaEntity);
         return drishyaEntity;
       } else {
@@ -264,20 +265,20 @@ class CamController extends ValueNotifier<ActionValue> {
       try {
         final xfile = await controller.stopVideoRecording();
         final file = File(xfile.path);
-        final data = await file.readAsBytes();
         final entity = await PhotoManager.editor.saveVideo(
           file,
-          title: path.basename(xfile.path),
+          title: path.basename(file.path),
         );
         if (file.existsSync()) {
-          // ignore: unawaited_futures
-          file.delete();
+          file.deleteSync();
         }
         // Update state
         value = value.copyWith(isRecordingVideo: false);
 
         if (entity != null) {
-          final drishyaEntity = DrishyaEntity(entity: entity, bytes: data);
+          final d = await entity.thumbData;
+          final drishyaEntity = DrishyaEntity(entity: entity, bytes: d!);
+          await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
           _uiHandler.pop<DrishyaEntity>(drishyaEntity);
           return;
         } else {
