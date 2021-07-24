@@ -1,6 +1,6 @@
 name: drishya_picker
 description: Clone of messanger camera and gallery which is combined as single component. 
-version: 1.0.2
+version: 1.0.2+1
 homepage: https://github.com/koiralapankaj7/drishya_picker
 
 environment:
