@@ -35,50 +35,52 @@ class CameraOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // preview, input type page view and camera
-        Positioned(
-          bottom: 0.0,
-          left: 0.0,
-          right: 0.0,
-          child: CameraFooter(controller: controller),
-        ),
-
-        // Close button
-        Positioned(
-          left: 8.0,
-          top: _top,
-          child: CameraCloseButton(controller: controller),
-        ),
-
-        // Flash Light
-        Positioned(
-          right: 8.0,
-          top: _top,
-          child: CameraFlashButton(controller: controller),
-        ),
-
-        // Shutter view
-        Positioned(
-          left: 0.0,
-          right: 0.0,
-          bottom: 64.0,
-          child: CameraShutterButton(
-            videoDuration: videoDuration,
-            controller: controller,
+    return SafeArea(
+      child:  Stack(
+        fit: StackFit.expand,
+        children: [
+          // preview, input type page view and camera
+          Positioned(
+            bottom: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: CameraFooter(controller: controller),
           ),
-        ),
 
-        // Playground controls
-        _PlaygroundOverlay(
-          controller: controller,
-          playgroundCntroller: playgroundCntroller,
-        ),
+          // Close button
+          Positioned(
+            left: 8.0,
+            top: _top,
+            child: CameraCloseButton(controller: controller),
+          ),
 
-        //
-      ],
+          // Flash Light
+          Positioned(
+            right: 8.0,
+            top: _top,
+            child: CameraFlashButton(controller: controller),
+          ),
+
+          // Shutter view
+          Positioned(
+            left: 0.0,
+            right: 0.0,
+            bottom: 64.0,
+            child: CameraShutterButton(
+              videoDuration: videoDuration,
+              controller: controller,
+            ),
+          ),
+
+          // Playground controls
+          _PlaygroundOverlay(
+            controller: controller,
+            playgroundCntroller: playgroundCntroller,
+          ),
+
+          //
+        ],
+      ),
     );
   }
 }
