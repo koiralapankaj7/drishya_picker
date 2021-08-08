@@ -11,6 +11,8 @@ import 'camera_flash_button.dart';
 import 'camera_footer.dart';
 import 'camera_shutter_button.dart';
 
+// TODO : Disable button click on 0.0 opacity
+
 ///
 const _top = 16.0;
 
