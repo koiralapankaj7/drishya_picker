@@ -1,15 +1,20 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../controllers/gallery_repository.dart';
 import '../entities/gallery_value.dart';
 import '../gallery_view.dart';
+import 'album_builder.dart';
 import 'gallery_permission_view.dart';
 
 ///
@@ -20,7 +25,7 @@ class GalleryGridView extends StatelessWidget {
     required this.controller,
     required this.onCameraRequest,
     required this.onSelect,
-    required this.entitiesNotifier,
+    required this.albums,
     required this.panelController,
   }) : super(key: key);
 
@@ -34,7 +39,7 @@ class GalleryGridView extends StatelessWidget {
   final void Function(DrishyaEntity, BuildContext) onSelect;
 
   ///
-  final ValueNotifier<EntitiesType> entitiesNotifier;
+  final Albums albums;
 
   ///
   final PanelController panelController;
@@ -43,68 +48,81 @@ class GalleryGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: controller.panelSetting.foregroundColor,
-      child: ValueListenableBuilder<EntitiesType>(
-        valueListenable: entitiesNotifier,
-        builder: (context, state, child) {
-          // Error
-          if (state.hasError) {
-            if (!state.hasPermission) {
-              return const GalleryPermissionView();
-            }
-          }
+      child: CurrentAlbumBuilder(
+        albums: albums,
+        builder: (context, album, child) {
+          return ValueListenableBuilder<AlbumValue>(
+            valueListenable: album,
+            builder: (context, value, child) {
+              // Error
+              if (value.state == BaseState.unauthorised &&
+                  value.entities.isEmpty) {
+                return const GalleryPermissionView();
+              }
 
-          // No data
-          if (!state.isLoading && (state.data?.isEmpty ?? true)) {
-            return const Center(
-              child: Text(
-                'No media available',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            );
-          }
-
-          final entities = state.isLoading ? <AssetEntity>[] : state.data!;
-
-          final itemCount = state.isLoading
-              ? 20
-              : controller.setting.enableCamera
-                  ? entities.length + 1
-                  : entities.length;
-
-          return GridView.builder(
-            controller: panelController.scrollController,
-            padding: const EdgeInsets.all(0.0),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: controller.setting.crossAxisCount ?? 3,
-              crossAxisSpacing: 1.5,
-              mainAxisSpacing: 1.5,
-            ),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (controller.setting.enableCamera && index == 0) {
-                return InkWell(
-                  onTap: () => onCameraRequest(context),
-                  child: Icon(
-                    CupertinoIcons.camera,
-                    color: Colors.lightBlue.shade300,
-                    size: 26.0,
+              // No data
+              if (value.state == BaseState.completed &&
+                  value.entities.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No media available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 );
               }
 
-              final ind = controller.setting.enableCamera ? index - 1 : index;
+              final entities = value.entities;
 
-              final entity = state.isLoading ? null : entities[ind];
+              final itemCount = albums.value.state == BaseState.fetching
+                  ? 20
+                  : controller.setting.enableCamera
+                      ? entities.length + 1
+                      : entities.length;
 
-              return _MediaTile(
-                controller: controller,
-                entity: entity,
-                onPressed: (entity) {
-                  onSelect(entity, context);
-                },
+              return LazyLoadScrollView(
+                onEndOfPage: () => album.fetchAssets(),
+                child: GridView.builder(
+                  controller: panelController.scrollController,
+                  padding: const EdgeInsets.all(0.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: controller.setting.crossAxisCount ?? 3,
+                    crossAxisSpacing: 1.5,
+                    mainAxisSpacing: 1.5,
+                  ),
+                  itemCount: itemCount,
+                  itemBuilder: (context, index) {
+                    if (controller.setting.enableCamera && index == 0) {
+                      return InkWell(
+                        onTap: () => onCameraRequest(context),
+                        child: Icon(
+                          CupertinoIcons.camera,
+                          color: Colors.lightBlue.shade300,
+                          size: 26.0,
+                        ),
+                      );
+                    }
+
+                    final ind =
+                        controller.setting.enableCamera ? index - 1 : index;
+
+                    final entity = albums.value.state == BaseState.fetching
+                        ? null
+                        : entities[ind];
+
+                    if (entity == null) return const SizedBox();
+
+                    return _MediaTile(
+                      controller: controller,
+                      entity: entity,
+                      onPressed: (entity) {
+                        onSelect(entity, context);
+                      },
+                    );
+                  },
+                ),
               );
             },
           );
@@ -130,58 +148,57 @@ class _MediaTile extends StatelessWidget {
   final GalleryController controller;
 
   ///
-  final AssetEntity? entity;
+  final DrishyaEntity entity;
 
   ///
   final ValueSetter<DrishyaEntity> onPressed;
 
   @override
   Widget build(BuildContext context) {
+    Widget? child;
+    Uint8List? bytes;
+    File? file;
+
+    if (entity.type == AssetType.video || entity.type == AssetType.image) {
+      child = AspectRatio(
+        aspectRatio: 1,
+        child: Image(
+          image: MediaThumbnailProvider(media: entity),
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    if (entity.type == AssetType.audio) {
+      child = const Icon(Icons.audiotrack, color: Colors.white);
+    }
+
+    if (entity.type == AssetType.other) {
+      child = const Center(child: Icon(Icons.folder, color: Colors.white));
+    }
+
+    child = Stack(
+      fit: StackFit.expand,
+      children: [
+        child ?? const SizedBox(),
+        if (entity.type == AssetType.video || entity.type == AssetType.audio)
+          Positioned(
+            right: 4.0,
+            bottom: 4.0,
+            child: _VideoDuration(duration: entity.videoDuration.inSeconds),
+          ),
+        if (!controller.singleSelection)
+          _SelectionCount(controller: controller, entity: entity),
+      ],
+    );
+
     return ColoredBox(
       color: Colors.grey.shade800,
-      child: FutureBuilder<Uint8List?>(
-        future: entity?.thumbDataWithSize(400, 400),
-        builder: (context, snapshot) {
-          final hasData = snapshot.connectionState == ConnectionState.done &&
-              snapshot.data != null;
-
-          if (hasData) {
-            final dEntity =
-                DrishyaEntity(entity: entity!, bytes: snapshot.data!);
-            return GestureDetector(
-              onTap: () {
-                onPressed(dEntity);
-              },
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Image
-                  Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                  ),
-
-                  // Duration
-                  if (entity!.type == AssetType.video)
-                    Positioned(
-                      right: 4.0,
-                      bottom: 4.0,
-                      child: _VideoDuration(duration: entity!.duration),
-                    ),
-
-                  // Image selection overlay
-                  if (!controller.singleSelection)
-                    _SelectionCount(controller: controller, entity: dEntity),
-
-                  //
-                ],
-              ),
-            );
-          }
-
-          return const SizedBox();
+      child: InkWell(
+        onTap: () {
+          onPressed(entity.copyWith(thumbBytes: bytes, file: file));
         },
+        child: child,
       ),
     );
   }
@@ -273,4 +290,62 @@ extension on int {
     final sec = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$min:$sec';
   }
+}
+
+/// ImageProvider implementation
+class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
+  /// Constructor for creating a [MediaThumbnailProvider]
+  const MediaThumbnailProvider({
+    this.media,
+    this.entity,
+  }) : assert(
+          media != null || entity != null,
+          'Provide at least one media',
+        );
+
+  /// Media to load
+  final DrishyaEntity? media;
+
+  ///
+  final AssetEntity? entity;
+
+  @override
+  ImageStreamCompleter load(
+          MediaThumbnailProvider key, DecoderCallback decode) =>
+      MultiFrameImageStreamCompleter(
+        codec: _loadAsync(key, decode),
+        scale: 1,
+        informationCollector: () sync* {
+          yield ErrorDescription('Id: ${media?.id ?? entity?.id}');
+        },
+      );
+
+  Future<ui.Codec> _loadAsync(
+      MediaThumbnailProvider key, DecoderCallback decode) async {
+    assert(key == this, 'Checks MediaThumbnailProvider');
+    if (entity != null) {
+      final bytes = await entity!.thumbData;
+      return decode(bytes!);
+    }
+    return decode(media!.thumbBytes);
+  }
+
+  @override
+  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<MediaThumbnailProvider>(this);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) return false;
+    // ignore: test_types_in_equals
+    final typedOther = other as MediaThumbnailProvider;
+    return media?.id == typedOther.media?.id ||
+        entity?.id == typedOther.entity?.id;
+  }
+
+  @override
+  int get hashCode => media?.id.hashCode ?? entity!.id.hashCode;
+
+  @override
+  String toString() => '$runtimeType("${media?.id ?? entity?.id}")';
 }

@@ -31,3 +31,9 @@
 
 ## [1.0.2+1] - 
 
+## [1.0.3] - Breaking changes
+
+* Edit bug fixed 
+* DrishyaEndity properties updated
+* Paginated gallery
+

@@ -119,10 +119,10 @@ class _CameraViewState extends State<CameraView>
     }
 
     if (state == AppLifecycleState.inactive) {
-      // _showSB();
+      _showSB();
       _controllerNotifier.controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      // _hideSB();
+      _hideSB();
       _camController.createCamera();
     }
   }

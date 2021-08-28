@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/recent_entities.dart';
 import 'package:flutter/material.dart';
 
 import 'grid_view_widget.dart';
@@ -48,6 +49,12 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
         children: [
           // Grid view
           Expanded(child: GridViewWidget(notifier: notifier)),
+
+          const SizedBox(height: 8.0),
+
+          RecentEntities(controller: controller),
+
+          const SizedBox(height: 8.0),
 
           TextButton(
             onPressed: () async {
