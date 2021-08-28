@@ -43,9 +43,7 @@ class _PlaygroundState extends State<Playground> {
   void initState() {
     super.initState();
     _controller = widget.controller ??
-        PlaygroundController(
-          background: widget.background,
-        );
+        PlaygroundController(background: widget.background);
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
@@ -96,7 +94,8 @@ class _PlaygroundState extends State<Playground> {
                 ),
 
                 // Textfield
-                PlaygroundTextfield(controller: _controller),
+                if (!widget.enableOverlay)
+                  PlaygroundTextfield(controller: _controller),
 
                 // Overlay
                 if (widget.enableOverlay)

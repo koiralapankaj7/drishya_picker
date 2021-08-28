@@ -32,13 +32,20 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
     super.initState();
     _tfSizeKey = GlobalKey();
     _widthKey = GlobalKey();
-    _controller = widget.controller;
+    _controller = widget.controller..addListener(_listener);
     _textController = _controller.textController;
+  }
+
+  void _listener() {
+    if (!_controller.value.hasFocus && _textController.text.isNotEmpty) {
+      _addSticker();
+    }
   }
 
   void _addSticker() {
     final box = _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
+      _controller.removeListener(_listener);
       final sticker = TextSticker(
         size: box.size,
         extra: {'text': _textController.text},
@@ -56,6 +63,7 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
 
       Future.delayed(const Duration(milliseconds: 20), () {
         _controller.stickerController.addSticker(sticker);
+        _controller.addListener(_listener);
       });
     }
   }
@@ -76,6 +84,12 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
   // }
 
   @override
+  void dispose() {
+    _controller.removeListener(_listener);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final value = widget.controller.value;
 
@@ -87,9 +101,6 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
         behavior: HitTestBehavior.opaque,
         onTap: () {
           widget.controller.updateValue(hasFocus: false);
-          if (_textController.text.isNotEmpty) {
-            _addSticker();
-          }
         },
         child: Center(
           child: IntrinsicWidth(

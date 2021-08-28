@@ -101,7 +101,6 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final image = await boundary.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
-
         final entity = await PhotoManager.editor.saveImage(data);
         final file = await entity!.file;
         await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);

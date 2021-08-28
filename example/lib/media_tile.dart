@@ -37,6 +37,7 @@ class MediaTile extends StatelessWidget {
 
     if (entity.type == AssetType.video || entity.type == AssetType.audio) {
       child = Stack(
+        fit: StackFit.expand,
         children: [
           child ?? const SizedBox(),
           Positioned(

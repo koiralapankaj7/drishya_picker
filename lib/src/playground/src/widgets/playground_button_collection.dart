@@ -108,7 +108,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DoneButton(
             onPressed: () {

@@ -745,8 +745,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     var entities = [...value.selectedEntities];
     if (pickedEntity != null) {
-      entities.add(entity);
-      _onChanged?.call(entity, false);
+      entities.add(pickedEntity);
+      _onChanged?.call(pickedEntity, false);
       _onSubmitted?.call(entities);
     }
     _accessCamera = false;

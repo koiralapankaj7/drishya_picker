@@ -11,8 +11,6 @@ import 'camera_flash_button.dart';
 import 'camera_footer.dart';
 import 'camera_shutter_button.dart';
 
-// TODO : Disable button click on 0.0 opacity
-
 ///
 const _top = 16.0;
 
@@ -38,7 +36,7 @@ class CameraOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child:  Stack(
+      child: Stack(
         fit: StackFit.expand,
         children: [
           // preview, input type page view and camera
