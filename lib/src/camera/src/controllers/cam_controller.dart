@@ -179,7 +179,11 @@ class CamController extends ValueNotifier<ActionValue> {
       value = value.copyWith(isTakingPicture: false);
 
       if (entity != null) {
-        final drishyaEntity = DrishyaEntity(entity: entity, bytes: data);
+        final drishyaEntity = DrishyaEntity(
+          entity: entity,
+          bytes: data,
+          file: file,
+        );
         await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
         _uiHandler.pop<DrishyaEntity>(drishyaEntity);
         return drishyaEntity;
@@ -277,7 +281,11 @@ class CamController extends ValueNotifier<ActionValue> {
 
         if (entity != null) {
           final d = await entity.thumbData;
-          final drishyaEntity = DrishyaEntity(entity: entity, bytes: d!);
+          final drishyaEntity = DrishyaEntity(
+            entity: entity,
+            bytes: d!,
+            file: file,
+          );
           await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
           _uiHandler.pop<DrishyaEntity>(drishyaEntity);
           return;

@@ -287,9 +287,9 @@ class _GalleryViewState extends State<GalleryView>
     Navigator.of(context).pop();
   }
 
-  void _onALbumChange(AssetPathEntity album) {
+  void _onALbumChange(Album album) {
     if (_animationController.isAnimating) return;
-    _controller._repository.fetchAssetsFor(album);
+    _controller._albums.changeAlbum(album);
     _toogleAlbumList(true);
   }
 
@@ -319,7 +319,7 @@ class _GalleryViewState extends State<GalleryView>
                 alignment: Alignment.topCenter,
                 child: GalleryHeader(
                   controller: _controller,
-                  albumNotifier: _controller._albumNotifier,
+                  albums: _controller._albums,
                   onClose: _onClosePressed,
                   onAlbumToggle: _toogleAlbumList,
                   albumVisibility: _controller._albumVisibility,
@@ -366,7 +366,7 @@ class _GalleryViewState extends State<GalleryView>
                   Expanded(
                     child: GalleryGridView(
                       controller: _controller,
-                      entitiesNotifier: _controller._entitiesNotifier,
+                      albums: _controller._albums,
                       panelController: _controller._panelController,
                       onCameraRequest: _controller._openCamera,
                       onSelect: _controller._select,
@@ -400,7 +400,7 @@ class _GalleryViewState extends State<GalleryView>
                   );
                 },
                 child: GalleryAlbumView(
-                  albumsNotifier: _controller._albumsNotifier,
+                  albums: _controller._albums,
                   controller: _controller,
                   onAlbumChange: _onALbumChange,
                 ),
@@ -526,14 +526,23 @@ class _GalleryViewFieldState extends State<GalleryViewField> {
           context,
         );
       },
-      child: widget.previewBuilder != null &&
-              (_controller.recentEntities?.isNotEmpty ?? false)
-          ? GalleryRecentPreview(
-              entity: _controller.recentEntities!.first,
-              builder: widget.previewBuilder,
-              height: widget.previewSize?.height,
-              width: widget.previewSize?.width,
-              child: widget.child,
+      child: widget.previewBuilder != null
+          ? FutureBuilder<List<DrishyaEntity?>>(
+              future: _controller.recentEntities(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData &&
+                    snapshot.data!.isNotEmpty) {
+                  return GalleryRecentPreview(
+                    entity: snapshot.data!.first!.entity,
+                    builder: widget.previewBuilder,
+                    height: widget.previewSize?.height,
+                    width: widget.previewSize?.width,
+                    child: widget.child,
+                  );
+                }
+                return widget.child ?? const SizedBox();
+              },
             )
           : widget.child,
     );
@@ -555,18 +564,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   })  : panelSetting = panelSetting ?? const PanelSetting(),
         setting = gallerySetting ?? const GallerySetting(),
         _panelController = PanelController(),
-        _albumsNotifier = ValueNotifier(const BaseState()),
-        _albumNotifier = ValueNotifier(const BaseState()),
-        _entitiesNotifier = ValueNotifier(const BaseState()),
-        _recentEntities = ValueNotifier(const BaseState()),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue()) {
-    _repository = GalleryRepository(
-      albumsNotifier: _albumsNotifier,
-      albumNotifier: _albumNotifier,
-      entitiesNotifier: _entitiesNotifier,
-      recentEntitiesNotifier: _recentEntities,
-    )..fetchAlbums(setting.requestType);
+    _albums = Albums()..fetchAlbums(setting.requestType);
   }
 
   /// Panel setting
@@ -579,19 +579,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   final PanelController _panelController;
 
   /// Drishya repository
-  late final GalleryRepository _repository;
-
-  /// Albums notifier
-  final ValueNotifier<AlbumsType> _albumsNotifier;
-
-  /// Current album notifier
-  final ValueNotifier<AlbumType> _albumNotifier;
-
-  /// Current album entities notifier
-  final ValueNotifier<EntitiesType> _entitiesNotifier;
-
-  /// Recent entities notifier
-  final ValueNotifier<EntitiesType> _recentEntities;
+  late final Albums _albums;
 
   /// Recent entities notifier
   final ValueNotifier<bool> _albumVisibility;
@@ -826,7 +814,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Recent entities list
   ///
-  List<AssetEntity>? get recentEntities => _recentEntities.value.data;
+  Future<List<DrishyaEntity?>> recentEntities(
+          {RequestType? type, int count = 20}) =>
+      _albums.recentEntities(type: type, count: count);
 
   ///
   /// return true if gallery is in full screen mode,
@@ -855,10 +845,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   @override
   void dispose() {
     _panelController.dispose();
-    _albumsNotifier.dispose();
-    _albumNotifier.dispose();
-    _entitiesNotifier.dispose();
-    _recentEntities.dispose();
+    _albums.dispose();
     _albumVisibility.dispose();
     super.dispose();
   }

@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   camera: ^0.8.1+7
-  photo_manager: ^1.2.9
+  photo_manager: ^1.3.1
   uuid: ^3.0.4
   path: ^1.8.0
 

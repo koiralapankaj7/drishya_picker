@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -14,38 +15,39 @@ class GalleryAlbumView extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.onAlbumChange,
-    required this.albumsNotifier,
+    required this.albums,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
 
   ///
-  final ValueSetter<AssetPathEntity> onAlbumChange;
+  final ValueSetter<Album> onAlbumChange;
 
   ///
-  final ValueNotifier<AlbumsType> albumsNotifier;
+  final Albums albums;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AlbumsType>(
-      valueListenable: albumsNotifier,
-      builder: (context, state, child) {
+    return AlbumBuilder(
+      albums: albums,
+      builder: (context, value, child) {
         // Loading
-        if (state.isLoading) {
+        if (value.state == BaseState.fetching) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        if (value.state == BaseState.unauthorised) {
+          return const GalleryPermissionView();
+        }
+
         // Error
-        if (state.hasError) {
-          if (!state.hasPermission) {
-            return const GalleryPermissionView();
-          }
+        if (value.state == BaseState.error) {
           return Container(
             alignment: Alignment.center,
             color: Colors.black,
             child: Text(
-              state.error ?? 'Something went wrong',
+              value.error ?? 'Something went wrong',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -54,7 +56,7 @@ class GalleryAlbumView extends StatelessWidget {
           );
         }
 
-        if (state.data?.isEmpty ?? true) {
+        if (value.albums.isEmpty) {
           return Container(
             alignment: Alignment.center,
             color: Colors.black,
@@ -73,13 +75,10 @@ class GalleryAlbumView extends StatelessWidget {
           color: Colors.black,
           child: ListView.builder(
             padding: const EdgeInsets.only(top: 16.0),
-            itemCount: state.data!.length,
+            itemCount: value.albums.length,
             itemBuilder: (context, index) {
-              final entity = state.data![index];
-              return _Album(
-                entity: entity,
-                onPressed: onAlbumChange,
-              );
+              final album = value.albums[index];
+              return _Album(album: album, onPressed: onAlbumChange);
             },
           ),
         );
@@ -91,19 +90,19 @@ class GalleryAlbumView extends StatelessWidget {
 class _Album extends StatelessWidget {
   const _Album({
     Key? key,
-    required this.entity,
+    required this.album,
     this.onPressed,
   }) : super(key: key);
 
-  final AssetPathEntity entity;
+  final Album album;
   final imageSize = 48;
-  final Function(AssetPathEntity album)? onPressed;
+  final Function(Album album)? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onPressed?.call(entity);
+        onPressed?.call(album);
       },
       child: Container(
         padding: const EdgeInsets.only(left: 16.0, bottom: 20.0, right: 16.0),
@@ -116,7 +115,7 @@ class _Album extends StatelessWidget {
               width: imageSize.toDouble(),
               color: Colors.grey,
               child: FutureBuilder<List<AssetEntity>>(
-                future: entity.getAssetListPaged(0, 1),
+                future: album.value.assetPathEntity?.getAssetListPaged(0, 1),
                 builder: (context, listSnapshot) {
                   if (listSnapshot.connectionState == ConnectionState.done &&
                       (listSnapshot.data?.isNotEmpty ?? false)) {
@@ -150,7 +149,7 @@ class _Album extends StatelessWidget {
                 children: [
                   // Album name
                   Text(
-                    entity.name,
+                    album.value.assetPathEntity?.name ?? '',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -159,7 +158,7 @@ class _Album extends StatelessWidget {
                   const SizedBox(height: 4.0),
                   // Total photos
                   Text(
-                    entity.assetCount.toString(),
+                    album.value.assetPathEntity?.assetCount.toString() ?? '',
                     style: TextStyle(
                       color: Colors.grey.shade500,
                       fontSize: 13.0,

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:flutter/material.dart';
 
 import '../controllers/gallery_repository.dart';
@@ -15,7 +16,7 @@ class GalleryHeader extends StatefulWidget {
     required this.onClose,
     required this.onAlbumToggle,
     required this.albumVisibility,
-    required this.albumNotifier,
+    required this.albums,
     this.headerSubtitle,
   }) : super(key: key);
 
@@ -35,7 +36,7 @@ class GalleryHeader extends StatefulWidget {
   final ValueNotifier<bool> albumVisibility;
 
   ///
-  final ValueNotifier<AlbumType> albumNotifier;
+  final Albums albums;
 
   @override
   _GalleryHeaderState createState() => _GalleryHeaderState();
@@ -84,7 +85,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 _AlbumDetail(
                   subtitle: widget.headerSubtitle,
                   controller: _controller,
-                  albumNotifier: widget.albumNotifier,
+                  albums: widget.albums,
                 ),
 
                 // Dropdown
@@ -209,7 +210,7 @@ class _AlbumDetail extends StatelessWidget {
     Key? key,
     this.subtitle,
     required this.controller,
-    required this.albumNotifier,
+    required this.albums,
   }) : super(key: key);
 
   ///
@@ -219,7 +220,7 @@ class _AlbumDetail extends StatelessWidget {
   final GalleryController controller;
 
   ///
-  final ValueNotifier<AlbumType> albumNotifier;
+  final Albums albums;
 
   @override
   Widget build(BuildContext context) {
@@ -227,11 +228,11 @@ class _AlbumDetail extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Album name
-        ValueListenableBuilder<AlbumType>(
-          valueListenable: albumNotifier,
+        CurrentAlbumBuilder(
+          albums: albums,
           builder: (context, album, child) {
             return Text(
-              album.data?.name ?? 'Unknown',
+              album.value.assetPathEntity?.name ?? 'Unknown',
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
