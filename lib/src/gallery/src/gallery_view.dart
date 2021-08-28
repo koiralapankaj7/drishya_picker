@@ -11,9 +11,9 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../drishya_entity.dart';
-import 'controllers/gallery_repository.dart';
 import 'entities/gallery_setting.dart';
 import 'entities/gallery_value.dart';
+import 'repo/gallery_repository.dart';
 import 'widgets/gallery_album_view.dart';
 import 'widgets/gallery_asset_selector.dart';
 import 'widgets/gallery_controller_provider.dart';
@@ -728,7 +728,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: Playground(
-        background: PhotoBackground(bytes: entity.bytes),
+        background: PhotoBackground(bytes: entity.thumbBytes),
         enableOverlay: true,
       ),
       begainHorizontal: true,
@@ -814,7 +814,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Recent entities list
   ///
-  Future<List<DrishyaEntity?>> recentEntities(
+  Future<List<DrishyaEntity>> recentEntities(
           {RequestType? type, int count = 20}) =>
       _albums.recentEntities(type: type, count: count);
 

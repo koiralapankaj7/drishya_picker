@@ -9,15 +9,15 @@ class DrishyaEntity {
   ///
   DrishyaEntity({
     required this.entity,
-    required this.bytes,
+    required this.thumbBytes,
     required this.file,
   });
 
   /// Core sssets object which hold complete details of the asset
   final AssetEntity entity;
 
-  /// Bytes of the asset
-  final Uint8List bytes;
+  /// Thumb bytes of image and video. Dont use this for other asset types.
+  final Uint8List thumbBytes;
 
   /// Field where asset is stored
   final File file;
@@ -42,6 +42,17 @@ class DrishyaEntity {
 
   /// The [Size] for the asset.
   Size get size => entity.size;
+
+  ///
+  DrishyaEntity copyWith({
+    Uint8List? thumbBytes,
+    File? file,
+  }) =>
+      DrishyaEntity(
+        entity: entity,
+        thumbBytes: thumbBytes ?? this.thumbBytes,
+        file: file ?? this.file,
+      );
 
   @override
   int get hashCode => id.hashCode;

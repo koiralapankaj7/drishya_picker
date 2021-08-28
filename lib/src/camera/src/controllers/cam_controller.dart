@@ -181,7 +181,7 @@ class CamController extends ValueNotifier<ActionValue> {
       if (entity != null) {
         final drishyaEntity = DrishyaEntity(
           entity: entity,
-          bytes: data,
+          thumbBytes: data,
           file: file,
         );
         await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -283,7 +283,7 @@ class CamController extends ValueNotifier<ActionValue> {
           final d = await entity.thumbData;
           final drishyaEntity = DrishyaEntity(
             entity: entity,
-            bytes: d!,
+            thumbBytes: d!,
             file: file,
           );
           await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);

@@ -105,7 +105,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final entity = await PhotoManager.editor.saveImage(data);
         final file = await entity!.file;
         await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-        return DrishyaEntity(entity: entity, bytes: data, file: file!);
+        return DrishyaEntity(entity: entity, thumbBytes: data, file: file!);
       }
     } catch (e) {
       log('Exception occured while capturing picture : $e');

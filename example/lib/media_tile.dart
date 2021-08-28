@@ -18,21 +18,24 @@ class MediaTile extends StatelessWidget {
 
     if (entity.type == AssetType.image || entity.type == AssetType.video) {
       child = Image.memory(
-        entity.bytes,
+        entity.thumbBytes,
         fit: BoxFit.cover,
       );
     }
 
     if (entity.type == AssetType.audio) {
-      child = const Center(
-        child: Icon(
-          Icons.audiotrack,
-          color: Colors.white,
+      child = const ColoredBox(
+        color: Colors.black,
+        child: Center(
+          child: Icon(
+            Icons.audiotrack,
+            color: Colors.white,
+          ),
         ),
       );
     }
 
-    if (entity.type == AssetType.video) {
+    if (entity.type == AssetType.video || entity.type == AssetType.audio) {
       child = Stack(
         children: [
           child ?? const SizedBox(),

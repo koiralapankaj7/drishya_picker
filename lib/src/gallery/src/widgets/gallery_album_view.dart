@@ -1,10 +1,10 @@
-import 'dart:typed_data';
-
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../controllers/gallery_repository.dart';
 import '../gallery_view.dart';
 import 'gallery_permission_view.dart';
 
@@ -98,6 +98,13 @@ class _Album extends StatelessWidget {
   final imageSize = 48;
   final Function(Album album)? onPressed;
 
+  Future<AssetEntity?> _entity() async {
+    final assets =
+        (await album.value.assetPathEntity?.getAssetListPaged(0, 1)) ?? [];
+    if (assets.isEmpty) return null;
+    return assets.first;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -114,28 +121,15 @@ class _Album extends StatelessWidget {
               height: imageSize.toDouble(),
               width: imageSize.toDouble(),
               color: Colors.grey,
-              child: FutureBuilder<List<AssetEntity>>(
-                future: album.value.assetPathEntity?.getAssetListPaged(0, 1),
-                builder: (context, listSnapshot) {
-                  if (listSnapshot.connectionState == ConnectionState.done &&
-                      (listSnapshot.data?.isNotEmpty ?? false)) {
-                    return FutureBuilder<Uint8List?>(
-                      future: listSnapshot.data!.first
-                          .thumbDataWithSize(imageSize * 5, imageSize * 5),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            snapshot.data != null) {
-                          return Image.memory(
-                            snapshot.data!,
-                            fit: BoxFit.cover,
-                          );
-                        }
-
-                        return const SizedBox();
-                      },
-                    );
+              child: FutureBuilder<AssetEntity?>(
+                future: _entity(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done ||
+                      snapshot.data == null) {
+                    return const SizedBox();
                   }
-                  return const SizedBox();
+
+                  return _MediaTile(entity: snapshot.data!);
                 },
               ),
             ),
@@ -172,6 +166,45 @@ class _Album extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MediaTile extends StatelessWidget {
+  ///
+  const _MediaTile({
+    Key? key,
+    required this.entity,
+  }) : super(key: key);
+
+  ///
+  final AssetEntity entity;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget? child;
+
+    if (entity.type == AssetType.video || entity.type == AssetType.image) {
+      child = AspectRatio(
+        aspectRatio: 1,
+        child: Image(
+          image: MediaThumbnailProvider(entity: entity),
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    if (entity.type == AssetType.audio) {
+      child = const Icon(Icons.audiotrack, color: Colors.white);
+    }
+
+    if (entity.type == AssetType.other) {
+      child = const Center(child: Icon(Icons.folder, color: Colors.white));
+    }
+
+    return ColoredBox(
+      color: Colors.grey.shade800,
+      child: child,
     );
   }
 }
