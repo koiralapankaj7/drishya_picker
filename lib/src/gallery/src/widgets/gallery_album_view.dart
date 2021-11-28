@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
@@ -7,6 +9,8 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../gallery_view.dart';
 import 'gallery_permission_view.dart';
+
+const _imageSize = 48;
 
 ///
 class GalleryAlbumView extends StatelessWidget {
@@ -74,7 +78,7 @@ class GalleryAlbumView extends StatelessWidget {
         return ColoredBox(
           color: Colors.black,
           child: ListView.builder(
-            padding: const EdgeInsets.only(top: 16.0),
+            padding: const EdgeInsets.only(top: 16),
             itemCount: value.albums.length,
             itemBuilder: (context, index) {
               final album = value.albums[index];
@@ -95,7 +99,6 @@ class _Album extends StatelessWidget {
   }) : super(key: key);
 
   final Album album;
-  final imageSize = 48;
   final Function(Album album)? onPressed;
 
   Future<AssetEntity?> _entity() async {
@@ -112,14 +115,14 @@ class _Album extends StatelessWidget {
         onPressed?.call(album);
       },
       child: Container(
-        padding: const EdgeInsets.only(left: 16.0, bottom: 20.0, right: 16.0),
+        padding: const EdgeInsets.only(left: 16, bottom: 20, right: 16),
         color: Colors.black,
         child: Row(
           children: [
             // Image
             Container(
-              height: imageSize.toDouble(),
-              width: imageSize.toDouble(),
+              height: _imageSize.toDouble(),
+              width: _imageSize.toDouble(),
               color: Colors.grey,
               child: FutureBuilder<AssetEntity?>(
                 future: _entity(),
@@ -134,7 +137,7 @@ class _Album extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 16.0),
+            const SizedBox(width: 16),
 
             // Column
             Expanded(
@@ -149,13 +152,13 @@ class _Album extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4.0),
+                  const SizedBox(height: 4),
                   // Total photos
                   Text(
                     album.value.assetPathEntity?.assetCount.toString() ?? '',
                     style: TextStyle(
                       color: Colors.grey.shade500,
-                      fontSize: 13.0,
+                      fontSize: 13,
                     ),
                   ),
                 ],

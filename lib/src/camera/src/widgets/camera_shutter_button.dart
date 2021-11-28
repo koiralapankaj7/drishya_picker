@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -68,8 +70,8 @@ class _ShutterButtonState extends State<_ShutterButton>
   late final AnimationController _pulseController;
   late final Animation<double> _animation;
 
-  var margin = 0.0;
-  var strokeWidth = 6.0;
+  var _margin = 0.0;
+  var _strokeWidth = 6.0;
   var _videoIconRadius = 10.0;
 
   @override
@@ -101,6 +103,7 @@ class _ShutterButtonState extends State<_ShutterButton>
         }
       });
 
+    // ignore: prefer_int_literals
     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
   }
 
@@ -108,8 +111,8 @@ class _ShutterButtonState extends State<_ShutterButton>
     _camController.startVideoRecording();
     _pulseController.forward(from: 0.2);
     setState(() {
-      strokeWidth = 3;
-      margin = 1.0;
+      _strokeWidth = 3;
+      _margin = 1.0;
       _videoIconRadius = 4.0;
     });
   }
@@ -119,8 +122,8 @@ class _ShutterButtonState extends State<_ShutterButton>
     _pulseController.reverse();
     _controller.reset();
     setState(() {
-      strokeWidth = 5;
-      margin = 0.0;
+      _strokeWidth = 5;
+      _margin = 0.0;
       _videoIconRadius = 10.0;
     });
   }
@@ -161,14 +164,14 @@ class _ShutterButtonState extends State<_ShutterButton>
         width: widget.size,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          margin: EdgeInsets.all(margin),
+          margin: EdgeInsets.all(_margin),
           child: AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
               return CustomPaint(
                 painter: _CustomPainter(
                   progress: _animation.value,
-                  strokeWidth: strokeWidth,
+                  strokeWidth: _strokeWidth,
                 ),
                 child: child,
               );
@@ -184,7 +187,7 @@ class _ShutterButtonState extends State<_ShutterButton>
                 children: [
                   // Background
                   Container(
-                    margin: const EdgeInsets.all(7.0),
+                    margin: const EdgeInsets.all(7),
                     decoration: const BoxDecoration(
                       color: Colors.white70,
                       shape: BoxShape.circle,
@@ -194,7 +197,7 @@ class _ShutterButtonState extends State<_ShutterButton>
                   // Pulse animation
                   _Pulse(
                     controller: _pulseController,
-                    size: widget.size - strokeWidth - margin - 4,
+                    size: widget.size - _strokeWidth - _margin - 4,
                   ),
 
                   // Icon
@@ -209,6 +212,7 @@ class _ShutterButtonState extends State<_ShutterButton>
                           );
                         case CameraType.video:
                           return _VideoIcon(radius: _videoIconRadius);
+                        // ignore: no_default_cases
                         default:
                           return const SizedBox();
                       }
@@ -317,6 +321,7 @@ class _PulseState extends State<_Pulse> {
   @override
   void initState() {
     super.initState();
+    // ignore: prefer_int_literals
     _animation = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: widget.controller, curve: Curves.easeIn),
     );

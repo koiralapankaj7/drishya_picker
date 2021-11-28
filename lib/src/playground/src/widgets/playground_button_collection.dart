@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports, no_default_cases
+
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
@@ -83,11 +85,11 @@ class PlaygroundButtonCollection extends StatelessWidget {
       builder: (context, value, child) {
         final firstChild = value.stickerPickerView
             ? Container(
-                height: 70.0,
+                height: 70,
                 alignment: Alignment.centerRight,
                 child: const _DoneButton(
                   isVisible: true,
-                  padding: EdgeInsets.all(0.0),
+                  padding: EdgeInsets.zero,
                 ),
               )
             : const SizedBox();
@@ -108,7 +110,6 @@ class PlaygroundButtonCollection extends StatelessWidget {
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _DoneButton(
             onPressed: () {
@@ -168,12 +169,12 @@ class _DoneButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Padding(
-        padding: padding ?? const EdgeInsets.symmetric(vertical: 16.0),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 16),
         child: const Text(
           'DONE',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 17.0,
+            fontSize: 17,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -227,7 +228,7 @@ class _Button extends StatelessWidget {
     final icon = Icon(
       iconData ?? Icons.emoji_emotions,
       color: Colors.white,
-      size: 24.0,
+      size: 24,
     );
 
     return InkWell(
@@ -268,7 +269,7 @@ class _TextAlignmentIcon extends StatelessWidget {
     final right = center ? sideMargin : (start ? sideMargin * 2 : 3.0);
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(count, (index) {
@@ -278,11 +279,11 @@ class _TextAlignmentIcon extends StatelessWidget {
             height: 2.5,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(2.0),
+              borderRadius: BorderRadius.circular(2),
             ),
             margin: isLast
-                ? EdgeInsets.only(bottom: 0.0, left: left, right: right)
-                : const EdgeInsets.only(bottom: 5.0),
+                ? EdgeInsets.only(left: left, right: right)
+                : const EdgeInsets.only(bottom: 5),
           );
         }),
       ),
@@ -302,19 +303,19 @@ class _TextBackgroundIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints.expand(),
-      margin: const EdgeInsets.all(10.0),
+      margin: const EdgeInsets.all(10),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isSelected ? Colors.white : Colors.transparent,
-        border: isSelected ? null : Border.all(color: Colors.white, width: 2.0),
-        borderRadius: BorderRadius.circular(4.0),
+        border: isSelected ? null : Border.all(color: Colors.white, width: 2),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         'A',
         style: TextStyle(
           color: isSelected ? Colors.black : Colors.white,
           fontWeight: FontWeight.w600,
-          fontSize: 20.0,
+          fontSize: 20,
         ),
       ),
     );

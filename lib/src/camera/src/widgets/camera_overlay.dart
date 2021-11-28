@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,31 +43,31 @@ class CameraOverlay extends StatelessWidget {
         children: [
           // preview, input type page view and camera
           Positioned(
-            bottom: 0.0,
-            left: 0.0,
-            right: 0.0,
+            bottom: 0,
+            left: 0,
+            right: 0,
             child: CameraFooter(controller: controller),
           ),
 
           // Close button
           Positioned(
-            left: 8.0,
+            left: 8,
             top: _top,
             child: CameraCloseButton(controller: controller),
           ),
 
           // Flash Light
           Positioned(
-            right: 8.0,
+            right: 8,
             top: _top,
             child: CameraFlashButton(controller: controller),
           ),
 
           // Shutter view
           Positioned(
-            left: 0.0,
-            right: 0.0,
-            bottom: 64.0,
+            left: 0,
+            right: 0,
+            bottom: 64,
             child: CameraShutterButton(
               videoDuration: videoDuration,
               controller: controller,
@@ -109,21 +111,20 @@ class _PlaygroundOverlay extends StatelessWidget {
           children: [
             // Add text button
             Align(
-              alignment: Alignment.center,
               child: PlaygroundAddTextButton(controller: playgroundCntroller),
             ),
 
             // Close button
             Positioned(
-              left: 8.0,
+              left: 8,
               top: _top,
               child: PlaygroundCloseButton(controller: playgroundCntroller),
             ),
 
             // Background changer
             Positioned(
-              left: 16.0,
-              bottom: 16.0,
+              left: 16,
+              bottom: 16,
               child: PlaygroundGradientBackgroundChanger(
                 controller: playgroundCntroller,
               ),
@@ -131,14 +132,14 @@ class _PlaygroundOverlay extends StatelessWidget {
 
             // Screenshot capture button
             Positioned(
-              right: 16.0,
-              bottom: 16.0,
+              right: 16,
+              bottom: 16,
               child: PlaygroundCaptureButton(controller: playgroundCntroller),
             ),
 
             // Sticker buttons
             Positioned(
-              right: 16.0,
+              right: 16,
               top: playgroundCntroller.value.stickerPickerView ? 0.0 : _top,
               child:
                   PlaygroundButtonCollection(controller: playgroundCntroller),

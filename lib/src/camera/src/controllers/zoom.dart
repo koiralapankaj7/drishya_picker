@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +46,7 @@ class Zoom extends ValueNotifier<ZoomValue> {
   }
 
   ///
-  void startZooming(ScaleUpdateDetails details) async {
+  Future<void> startZooming(ScaleUpdateDetails details) async {
     // When there are not exactly two fingers on screen don't scale
     if (!_initialized || value.pointers != 2) {
       return;

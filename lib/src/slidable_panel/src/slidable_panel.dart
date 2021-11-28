@@ -139,7 +139,7 @@ class SlidablePanel extends StatefulWidget {
   final PanelController? controller;
 
   @override
-  _SlidablePanelState createState() => _SlidablePanelState();
+  State<SlidablePanel> createState() => _SlidablePanelState();
 }
 
 class _SlidablePanelState extends State<SlidablePanel>
@@ -197,10 +197,12 @@ class _SlidablePanelState extends State<SlidablePanel>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     )..addListener(() {
-        _panelController.attach(SliderValue(
-          factor: _animationController.value,
-          state: _aboveHalfWay ? SlidingState.max : SlidingState.min,
-        ));
+        _panelController.attach(
+          SliderValue(
+            factor: _animationController.value,
+            state: _aboveHalfWay ? SlidingState.max : SlidingState.min,
+          ),
+        );
       });
   }
 
@@ -235,9 +237,12 @@ class _SlidablePanelState extends State<SlidablePanel>
     if (!_scrollToBottom &&
         panelState == SlidingState.max &&
         state == SlidingState.slidingDown) {
-      final isControllerOffsetZero = _scrollController.hasClients
-          ? _scrollController.offset == 0.0
-          : false;
+      final isControllerOffsetZero =
+          _scrollController.hasClients && _scrollController.offset == 0.0;
+
+      // final isControllerOffsetZero = _scrollController.hasClients
+      //     ? _scrollController.offset == 0.0
+      //     : false;
       // final headerMinPosition = mediaQuery.padding.top;
       // final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
       // final isHandler = event.position.dy >= headerMinPosition &&
@@ -300,17 +305,19 @@ class _SlidablePanelState extends State<SlidablePanel>
   }
 
   void _slidePanelWithPosition(double factor, SlidingState state) {
-    _panelController.attach(SliderValue(
-      factor: factor,
-      state: state,
-    ));
+    _panelController.attach(
+      SliderValue(
+        factor: factor,
+        state: state,
+      ),
+    );
   }
 
   void _snapToPosition(double endValue, {double? startValue}) {
     final Simulation simulation = SpringSimulation(
       SpringDescription.withDampingRatio(
-        mass: 1.0,
-        stiffness: 600.0,
+        mass: 1,
+        stiffness: 600,
         ratio: 1.1,
       ),
       startValue ?? _panelController.value.factor,
@@ -387,6 +394,7 @@ class PanelController extends ValueNotifier<SliderValue> {
 
   late _SlidablePanelState _state;
 
+  // ignore: use_setters_to_change_properties
   void _init(_SlidablePanelState state) {
     _state = state;
   }
@@ -420,8 +428,8 @@ class PanelController extends ValueNotifier<SliderValue> {
     if (value.state == SlidingState.min) return;
     value = value.copyWith(
       state: SlidingState.min,
-      factor: 0.0,
-      offset: 0.0,
+      factor: 0,
+      offset: 0,
       position: Offset.zero,
     );
     _panelVisibility.value = true;
@@ -432,13 +440,13 @@ class PanelController extends ValueNotifier<SliderValue> {
   /// Maximize panel
   void maximizePanel() {
     if (value.state == SlidingState.max) return;
-    _state._snapToPosition(1.0);
+    _state._snapToPosition(1);
   }
 
   ///
   void minimizePanel() {
     if (value.state == SlidingState.min) return;
-    _state._snapToPosition(0.0);
+    _state._snapToPosition(0);
   }
 
   /// Close Panel
@@ -447,8 +455,8 @@ class PanelController extends ValueNotifier<SliderValue> {
     if (value.state == SlidingState.close) return;
     value = value.copyWith(
       state: SlidingState.close,
-      factor: 0.0,
-      offset: 0.0,
+      factor: 0,
+      offset: 0,
       position: Offset.zero,
     );
     _panelVisibility.value = false;

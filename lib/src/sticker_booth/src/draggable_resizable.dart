@@ -79,7 +79,7 @@ class DraggableResizable extends StatefulWidget {
   final BoxConstraints constraints;
 
   @override
-  _DraggableResizableState createState() => _DraggableResizableState();
+  State<DraggableResizable> createState() => _DraggableResizableState();
 }
 
 class _DraggableResizableState extends State<DraggableResizable> {
@@ -250,14 +250,14 @@ class _DraggablePoint extends StatefulWidget {
 
 class _DraggablePointState extends State<_DraggablePoint> {
   late Offset initPoint;
-  var baseScaleFactor = 1.0;
-  var scaleFactor = 1.0;
-  var baseAngle = 0.0;
-  var angle = 0.0;
+  var _baseScaleFactor = 1.0;
+  var _scaleFactor = 1.0;
+  var _baseAngle = 0.0;
+  var _angle = 0.0;
 
-  var isStartTriggered = false;
-  var isEndTriggered = false;
-  var isUpdating = false;
+  // var _isStartTriggered = false;
+  // var _isEndTriggered = false;
+  // var _isUpdating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -275,16 +275,16 @@ class _DraggablePointState extends State<_DraggablePoint> {
             break;
         }
         if (details.pointerCount > 1) {
-          baseAngle = angle;
-          baseScaleFactor = scaleFactor;
-          widget.onRotate?.call(baseAngle);
-          widget.onScale?.call(baseScaleFactor);
+          _baseAngle = _angle;
+          _baseScaleFactor = _scaleFactor;
+          widget.onRotate?.call(_baseAngle);
+          widget.onScale?.call(_baseScaleFactor);
         }
       },
       onScaleUpdate: (details) {
         widget.onScaleUpdate?.call(details);
-        isEndTriggered = false;
-        isStartTriggered = false;
+        // _isEndTriggered = false;
+        // _isStartTriggered = false;
         switch (widget.mode) {
           case _PositionMode.global:
             final dx = details.focalPoint.dx - initPoint.dx;
@@ -300,10 +300,10 @@ class _DraggablePointState extends State<_DraggablePoint> {
             break;
         }
         if (details.pointerCount > 1) {
-          scaleFactor = baseScaleFactor * details.scale;
-          widget.onScale?.call(scaleFactor);
-          angle = baseAngle + details.rotation;
-          widget.onRotate?.call(angle);
+          _scaleFactor = _baseScaleFactor * details.scale;
+          widget.onScale?.call(_scaleFactor);
+          _angle = _baseAngle + details.rotation;
+          widget.onRotate?.call(_angle);
         }
       },
       onScaleEnd: (detail) {

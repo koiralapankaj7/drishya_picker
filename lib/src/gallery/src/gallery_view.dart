@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -43,7 +45,7 @@ class GalleryViewWrapper extends StatefulWidget {
   final GalleryController? controller;
 
   @override
-  _GalleryViewWrapperState createState() => _GalleryViewWrapperState();
+  State<GalleryViewWrapper> createState() => _GalleryViewWrapperState();
 }
 
 class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
@@ -59,7 +61,7 @@ class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    var ps = _controller.panelSetting;
+    final ps = _controller.panelSetting;
     final _panelMaxHeight = ps.maxHeight ??
         MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
     final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
@@ -157,7 +159,7 @@ class GalleryView extends StatefulWidget {
   }
 
   @override
-  _GalleryViewState createState() => _GalleryViewState();
+  State<GalleryView> createState() => _GalleryViewState();
 }
 
 class _GalleryViewState extends State<GalleryView>
@@ -168,12 +170,12 @@ class _GalleryViewState extends State<GalleryView>
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
-  double albumHeight = 0.0;
+  double albumHeight = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = (widget.controller ?? GalleryController());
+    _controller = widget.controller ?? GalleryController();
 
     _panelController = _controller._panelController;
 
@@ -181,9 +183,10 @@ class _GalleryViewState extends State<GalleryView>
       vsync: this,
       duration: const Duration(milliseconds: 800),
       reverseDuration: const Duration(milliseconds: 300),
-      value: 0.0,
+      value: 0,
     );
 
+    // ignore: prefer_int_literals
     _animation = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -240,11 +243,10 @@ class _GalleryViewState extends State<GalleryView>
       ),
       actions: [cancel, unselectItems],
       backgroundColor: Colors.grey.shade900,
-      actionsPadding: const EdgeInsets.all(0.0),
-      titlePadding: const EdgeInsets.all(16.0),
+      titlePadding: const EdgeInsets.all(16),
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 2.0,
+        horizontal: 16,
+        vertical: 2,
       ),
     );
 
@@ -295,7 +297,7 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    var ps = _controller.panelSetting;
+    final ps = _controller.panelSetting;
     final _panelMaxHeight = ps.maxHeight ??
         MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
     final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
@@ -359,7 +361,7 @@ class _GalleryViewState extends State<GalleryView>
                   Divider(
                     color: Colors.lightBlue.shade300,
                     thickness: 0.3,
-                    height: 2.0,
+                    height: 2,
                   ),
 
                   // Gallery grid
@@ -394,7 +396,7 @@ class _GalleryViewState extends State<GalleryView>
                   return Visibility(
                     visible: _animation.value > 0.0,
                     child: Transform.translate(
-                      offset: Offset(0.0, offsetY),
+                      offset: Offset(0, offsetY),
                       child: child,
                     ),
                   );
@@ -482,7 +484,7 @@ class GalleryViewField extends StatefulWidget {
   final Size? previewSize;
 
   @override
-  _GalleryViewFieldState createState() => _GalleryViewFieldState();
+  State<GalleryViewField> createState() => _GalleryViewFieldState();
 }
 
 class _GalleryViewFieldState extends State<GalleryViewField> {
@@ -635,11 +637,14 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         if (reachedMaximumLimit) {
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
-            ..showSnackBar(SnackBar(
+            ..showSnackBar(
+              SnackBar(
                 content: Text(
-              'Maximum selection limit of '
-              '${setting.maximum} has been reached!',
-            )));
+                  'Maximum selection limit of '
+                  '${setting.maximum} has been reached!',
+                ),
+              ),
+            );
           return;
         }
         selectedList.add(entity);
@@ -696,7 +701,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: const CameraView(),
       begainHorizontal: true,
-      endHorizontal: false,
       transitionDuration: const Duration(milliseconds: 300),
     );
 
@@ -707,7 +711,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       _closeOnCameraSelect();
     }
 
-    var entities = [...value.selectedEntities];
+    final entities = [...value.selectedEntities];
     if (entity != null) {
       entities.add(entity);
       _onChanged?.call(entity, false);
@@ -732,7 +736,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         enableOverlay: true,
       ),
       begainHorizontal: true,
-      endHorizontal: false,
       transitionDuration: const Duration(milliseconds: 300),
     );
 
@@ -743,7 +746,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       _closeOnCameraSelect();
     }
 
-    var entities = [...value.selectedEntities];
+    final entities = [...value.selectedEntities];
     if (pickedEntity != null) {
       entities.add(pickedEntity);
       _onChanged?.call(pickedEntity, false);
@@ -787,6 +790,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
         builder: GalleryView(controller: this),
       );
+
+      // ignore: use_build_context_synchronously
       await Navigator.of(context).push(route).then((result) {
         // Closed by user
         if (result == null && !_accessCamera) {
@@ -796,6 +801,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     } else {
       _fullScreenMode = false;
       _panelController.openPanel();
+      // ignore: use_build_context_synchronously
       FocusScope.of(context).unfocus();
     }
     if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {
@@ -814,8 +820,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Recent entities list
   ///
-  Future<List<DrishyaEntity>> recentEntities(
-          {RequestType? type, int count = 20}) =>
+  Future<List<DrishyaEntity>> recentEntities({
+    RequestType? type,
+    int count = 20,
+  }) =>
       _albums.recentEntities(type: type, count: count);
 
   ///

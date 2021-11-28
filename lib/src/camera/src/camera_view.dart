@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -71,7 +73,7 @@ class CameraView extends StatefulWidget {
   }
 
   @override
-  _CameraViewState createState() {
+  State<CameraView> createState() {
     return _CameraViewState();
   }
 }
@@ -147,12 +149,15 @@ class _CameraViewState extends State<CameraView>
 
   ///
   void _hideSB() {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   }
 
   ///
   void _showSB() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
   }
 
   Future<bool> _onWillPop() async {

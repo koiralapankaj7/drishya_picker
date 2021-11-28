@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -47,22 +49,29 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
     _selectSizeController =
         AnimationController(vsync: this, duration: duration);
 
+    // ignore: prefer_int_literals
     final tween = Tween(begin: 0.0, end: 1.0);
 
-    _editOpa = tween.animate(CurvedAnimation(
-      parent: _editOpaController,
-      curve: Curves.easeIn,
-    ));
+    _editOpa = tween.animate(
+      CurvedAnimation(
+        parent: _editOpaController,
+        curve: Curves.easeIn,
+      ),
+    );
 
-    _selectOpa = tween.animate(CurvedAnimation(
-      parent: _selectOpaController,
-      curve: Curves.easeIn,
-    ));
+    _selectOpa = tween.animate(
+      CurvedAnimation(
+        parent: _selectOpaController,
+        curve: Curves.easeIn,
+      ),
+    );
 
-    _selectSize = tween.animate(CurvedAnimation(
-      parent: _selectSizeController,
-      curve: Curves.easeIn,
-    ));
+    _selectSize = tween.animate(
+      CurvedAnimation(
+        parent: _selectSizeController,
+        curve: Curves.easeIn,
+      ),
+    );
 
     widget.controller.addListener(() {
       if (mounted) {
@@ -113,7 +122,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
           children: [
             const Expanded(child: SizedBox()),
             Container(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20),
               width: size.width,
               // color: Colors.cyan,
               child: Stack(
@@ -148,7 +157,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                   ),
 
                   // Margin
-                  const SizedBox(width: 16.0),
+                  const SizedBox(width: 16),
 
                   // Select
                   Align(
@@ -217,9 +226,9 @@ class _TextButton extends StatelessWidget {
       style: TextButton.styleFrom(
         backgroundColor: background ?? Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14.0),
+        padding: const EdgeInsets.symmetric(vertical: 14),
       ),
       child: Text(
         label ?? '',

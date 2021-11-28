@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
@@ -18,7 +20,10 @@ class PlaygroundBuilder extends StatelessWidget {
 
   ///
   final Widget Function(
-      BuildContext context, PlaygroundValue value, Widget? child) builder;
+    BuildContext context,
+    PlaygroundValue value,
+    Widget? child,
+  ) builder;
 
   ///
   final Widget? child;

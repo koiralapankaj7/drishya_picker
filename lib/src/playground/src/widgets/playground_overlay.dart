@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -35,7 +37,6 @@ class PlaygroundOverlay extends StatelessWidget {
             //
             // Add text button
             Align(
-              alignment: Alignment.center,
               child: PlaygroundAddTextButton(controller: controller),
             ),
 
@@ -44,29 +45,29 @@ class PlaygroundOverlay extends StatelessWidget {
 
             // Close button
             Positioned(
-              left: 8.0,
+              left: 8,
               top: _top,
               child: PlaygroundCloseButton(controller: controller),
             ),
 
             // Background changer
             Positioned(
-              left: 16.0,
-              bottom: 16.0,
+              left: 16,
+              bottom: 16,
               child:
                   PlaygroundGradientBackgroundChanger(controller: controller),
             ),
 
             // Screenshot capture button
             Positioned(
-              right: 16.0,
-              bottom: 16.0,
+              right: 16,
+              bottom: 16,
               child: PlaygroundCaptureButton(controller: controller),
             ),
 
             // Sticker buttons
             Positioned(
-              right: 16.0,
+              right: 16,
               top: controller.value.stickerPickerView ? 0.0 : _top,
               child: PlaygroundButtonCollection(controller: controller),
             ),

@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,12 +30,15 @@ class CameraCloseButton extends StatelessWidget {
       },
       child: InkWell(
         onTap: () {
-          SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+          SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.manual,
+            overlays: SystemUiOverlay.values,
+          );
           Navigator.of(context).pop();
         },
         child: Container(
-          height: 36.0,
-          width: 36.0,
+          height: 36,
+          width: 36,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.black26,
@@ -41,7 +46,7 @@ class CameraCloseButton extends StatelessWidget {
           child: const Icon(
             CustomIcons.close,
             color: Colors.white,
-            size: 16.0,
+            size: 16,
           ),
         ),
       ),

@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import '../controller/playground_controller.dart';
@@ -32,7 +34,7 @@ class PlaygroundAddTextButton extends StatelessWidget {
           'Tap to type...',
           style: TextStyle(
             color: Colors.white60,
-            fontSize: 30.0,
+            fontSize: 30,
             fontWeight: FontWeight.w800,
           ),
         ),

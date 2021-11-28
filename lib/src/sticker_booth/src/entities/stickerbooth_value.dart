@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import '../entities/sticker_asset.dart';
 
 ///

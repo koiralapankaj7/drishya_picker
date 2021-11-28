@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:developer';
 import 'dart:ui' as ui;
 
@@ -41,19 +43,20 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   }
 
   /// Update playground value
-  void updateValue(
-      {bool? fillColor,
-      int? maxLines,
-      TextAlign? textAlign,
-      bool? hasFocus,
-      bool? editingMode,
-      bool? hasStickers,
-      bool? isEditing,
-      bool? stickerPickerView,
-      bool? colorPickerVisibility}) {
+  void updateValue({
+    bool? fillColor,
+    int? maxLines,
+    TextAlign? textAlign,
+    bool? hasFocus,
+    bool? editingMode,
+    bool? hasStickers,
+    bool? isEditing,
+    bool? stickerPickerView,
+    bool? colorPickerVisibility,
+  }) {
     if (!(hasFocus ?? false)) {
       // Hide status bar
-      SystemChrome.setEnabledSystemUIOverlays([]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     }
     value = value.copyWith(
       fillColor: fillColor,
@@ -103,7 +106,10 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final data = byteData!.buffer.asUint8List();
         final entity = await PhotoManager.editor.saveImage(data);
         final file = await entity!.file;
-        await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
         return DrishyaEntity(entity: entity, thumbBytes: data, file: file!);
       }
     } catch (e) {

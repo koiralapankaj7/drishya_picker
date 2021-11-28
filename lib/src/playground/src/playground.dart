@@ -1,4 +1,6 @@
 //
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,7 +35,7 @@ class Playground extends StatefulWidget {
   final bool enableOverlay;
 
   @override
-  _PlaygroundState createState() => _PlaygroundState();
+  State<Playground> createState() => _PlaygroundState();
 }
 
 class _PlaygroundState extends State<Playground> {
@@ -44,12 +46,15 @@ class _PlaygroundState extends State<Playground> {
     super.initState();
     _controller = widget.controller ??
         PlaygroundController(background: widget.background);
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   }
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 

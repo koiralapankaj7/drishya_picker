@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -41,12 +43,14 @@ class PlaygroundControllerProvider extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PlaygroundController>(
-      'controller',
-      controller,
-      ifNull: 'no controller',
-      showName: false,
-    ));
+    properties.add(
+      DiagnosticsProperty<PlaygroundController>(
+        'controller',
+        controller,
+        ifNull: 'no controller',
+        showName: false,
+      ),
+    );
   }
 }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -16,36 +18,38 @@ class RawCameraView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final size = constraints.biggest;
-      final scale =
-          1 / (action.controller.value.aspectRatio * size.aspectRatio);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        final scale =
+            1 / (action.controller.value.aspectRatio * size.aspectRatio);
 
-      return ClipRect(
-        clipper: _Clipper(size),
-        child: Transform.scale(
-          scale: scale,
-          alignment: Alignment.topCenter,
-          child: Listener(
-            onPointerDown: action.zoom.addPointer,
-            onPointerUp: action.zoom.removePointer,
-            child: CameraPreview(
-              action.controller,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onScaleStart: action.zoom.initZoom,
-                  onScaleUpdate: action.zoom.startZooming,
-                  onTapDown: (details) =>
-                      action.exposure.setExposureAndFocus(details, constraints),
+        return ClipRect(
+          clipper: _Clipper(size),
+          child: Transform.scale(
+            scale: scale,
+            alignment: Alignment.topCenter,
+            child: Listener(
+              onPointerDown: action.zoom.addPointer,
+              onPointerUp: action.zoom.removePointer,
+              child: CameraPreview(
+                action.controller,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints.expand(),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onScaleStart: action.zoom.initZoom,
+                    onScaleUpdate: action.zoom.startZooming,
+                    onTapDown: (details) => action.exposure
+                        .setExposureAndFocus(details, constraints),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }
 

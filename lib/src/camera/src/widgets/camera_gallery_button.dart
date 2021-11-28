@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import '../controllers/cam_controller.dart';
@@ -20,9 +22,9 @@ class CameraGalleryButton extends StatelessWidget {
       controller: controller,
       builder: (value, child) {
         return Container(
-          padding: const EdgeInsets.all(4.0),
-          width: 54.0,
-          height: 54.0,
+          padding: const EdgeInsets.all(4),
+          width: 54,
+          height: 54,
           child: const SizedBox(),
           // child: value.hideCameraGalleryButton
           //     ? const SizedBox()

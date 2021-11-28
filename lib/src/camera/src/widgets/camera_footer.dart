@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import '../controllers/cam_controller.dart';
@@ -28,13 +30,13 @@ class CameraFooter extends StatelessWidget {
         return child!;
       },
       child: Container(
-        height: 60.0,
+        height: 60,
         decoration: const BoxDecoration(
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
-              blurRadius: 12.0,
-              spreadRadius: 1.0,
+              blurRadius: 12,
+              spreadRadius: 1,
             ),
           ],
         ),
@@ -44,7 +46,7 @@ class CameraFooter extends StatelessWidget {
             CameraGalleryButton(controller: controller),
 
             // Margin
-            const SizedBox(width: 8.0),
+            const SizedBox(width: 8),
 
             // Camera type scroller
             Expanded(child: CameraTypeChanger(controller: controller)),

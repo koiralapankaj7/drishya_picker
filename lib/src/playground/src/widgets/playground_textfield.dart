@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:ui';
 
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
@@ -18,7 +20,7 @@ class PlaygroundTextfield extends StatefulWidget {
   final PlaygroundController controller;
 
   @override
-  _PlaygroundTextfieldState createState() => _PlaygroundTextfieldState();
+  State<PlaygroundTextfield> createState() => _PlaygroundTextfieldState();
 }
 
 class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
@@ -105,15 +107,15 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
         child: Center(
           child: IntrinsicWidth(
             key: _widthKey,
-            stepWidth: 20.0,
+            stepWidth: 20,
             child: Container(
-              constraints: const BoxConstraints(minWidth: 20.0),
+              constraints: const BoxConstraints(minWidth: 20),
               margin: const EdgeInsets.symmetric(
-                horizontal: 60.0,
-                vertical: 30.0,
+                horizontal: 60,
+                vertical: 30,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(10),
                 color: value.fillColor
                     ? value.textBackground.colors.first
                     : Colors.transparent,
@@ -133,7 +135,7 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
                 style: _textStickerStyle,
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(8.0),
+                  contentPadding: EdgeInsets.all(8),
                   // filled: value.fillColor,
                   // fillColor: value.textBackground.colors.first,
                   // focusedBorder: OutlineInputBorder(
@@ -155,9 +157,9 @@ class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
 const _textStickerStyle = TextStyle(
   textBaseline: TextBaseline.ideographic,
   color: Colors.white,
-  fontSize: 32.0,
+  fontSize: 32,
   fontWeight: FontWeight.w700,
   decoration: TextDecoration.none,
   decorationColor: Colors.transparent,
-  decorationThickness: 0.0,
+  decorationThickness: 0,
 );

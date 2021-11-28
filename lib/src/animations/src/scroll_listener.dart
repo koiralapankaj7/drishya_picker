@@ -86,7 +86,7 @@ class ScrollListenerState extends State<ScrollListener> {
 
   void _overScroll(OverscrollNotification notification) {
     final overScroll =
-        (_triggerAnyWhere || (_triggerOnEdge && !_continuousScroll));
+        _triggerAnyWhere || (_triggerOnEdge && !_continuousScroll);
     _finish(notification, overScroll);
   }
 
@@ -158,7 +158,7 @@ class ScrollListenerState extends State<ScrollListener> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMaterialLocalizations(context), '');
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(

@@ -1,14 +1,13 @@
 import 'dart:ui';
 
+import 'package:drishya_picker/src/animations/src/scroll_listener.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'scroll_listener.dart';
-
 ///
-enum _SlidingState {
+enum SlideState {
   ///
   slidingUp,
 
@@ -19,12 +18,12 @@ enum _SlidingState {
   idle,
 }
 
-const double _kMinFlingVelocity = 2.0; // Screen widths per second.
+const double _kMinFlingVelocity = 2; // Screen widths per second.
 
 // Offset from fully on screen to 1/3 offscreen to the top.
 final Animatable<Offset> _kMiddleBottomTween = Tween<Offset>(
   begin: Offset.zero,
-  end: const Offset(-1.0 / 3.0, 0.0),
+  end: const Offset(-1 / 3, 0),
 );
 
 /// A modal route that replaces the entire screen with an facebook
@@ -233,8 +232,11 @@ mixin SwipeableRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     final child = buildContent(context);
     final result = Semantics(
       scopesRoute: true,
@@ -249,8 +251,9 @@ mixin SwipeableRouteTransitionMixin<T> on PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _SwipeableBackGestureController<T> _startPopGesture<T>(
-      PageRoute<T> route) {
-    assert(_isPopGestureEnabled(route));
+    PageRoute<T> route,
+  ) {
+    assert(_isPopGestureEnabled(route), '');
     return _SwipeableBackGestureController<T>(
       navigator: route.navigator!,
       controller: route.controller!, // protected access
@@ -293,10 +296,19 @@ mixin SwipeableRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return buildPageTransitions<T>(
-        this, context, animation, secondaryAnimation, child);
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
   }
 }
 
@@ -342,14 +354,14 @@ class SwipeablePageTransition extends StatelessWidget {
   final Animation<double> primaryRouteAnimation;
 
   /// Sliding state UP/DOWN
-  final _SlidingState slidingState;
+  final SlideState slidingState;
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasDirectionality(context), '');
 
-    final slidingUp = slidingState == _SlidingState.slidingUp;
-    final slidingDown = slidingState == _SlidingState.slidingDown;
+    final slidingUp = slidingState == SlideState.slidingUp;
+    final slidingDown = slidingState == SlideState.slidingDown;
 
     return SlideTransition(
       position: _secondaryPositionAnimation,
@@ -362,7 +374,7 @@ class SwipeablePageTransition extends StatelessWidget {
         ).drive(
           Tween(
             begin: Offset(
-              0.0,
+              0,
               slidingUp
                   ? primaryRouteAnimation.value - 1
                   : slidingDown
@@ -370,7 +382,7 @@ class SwipeablePageTransition extends StatelessWidget {
                       : 1.0,
             ),
             end: Offset(
-              0.0,
+              0,
               slidingUp
                   ? primaryRouteAnimation.value - 1
                   : slidingDown
@@ -415,7 +427,7 @@ class _SwipeableBackGestureDetector<T> extends StatefulWidget {
     this.notificationDepth,
   }) : super(key: key);
 
-  final Widget Function(_SlidingState slidingState) builder;
+  final Widget Function(SlideState slidingState) builder;
 
   final ValueGetter<bool> enabledCallback;
 
@@ -433,7 +445,7 @@ class _SwipeableBackGestureDetectorState<T>
   // Animation status listener
   void _listener(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      slidingState = _SlidingState.idle;
+      slidingState = SlideState.idle;
       _scrollController = null;
       _backGestureController?.controller.removeStatusListener(_listener);
     }
@@ -452,19 +464,19 @@ class _SwipeableBackGestureDetectorState<T>
   VelocityTracker? _velocityTracker;
 
   // Current sliding state
-  var slidingState = _SlidingState.idle;
+  SlideState slidingState = SlideState.idle;
 
   //
   var _overScroll = true;
 
   //
   double _convertToLogical(double value) {
-    return slidingState == _SlidingState.slidingDown ? value : -value;
+    return slidingState == SlideState.slidingDown ? value : -value;
   }
 
   // Pointer down event
   void _onPointerDown(PointerDownEvent event) {
-    assert(mounted);
+    assert(mounted, '');
     if (_backGestureController != null) return;
 
     _backGestureController = widget.onStartPopGesture()
@@ -475,7 +487,7 @@ class _SwipeableBackGestureDetectorState<T>
 
   // Pointer move event
   void _onPointerMove(PointerMoveEvent event) {
-    assert(mounted);
+    assert(mounted, '');
     if (_backGestureController == null) return;
     if (!_shouldScroll(event.position.dy)) return;
     if (!_overScroll) return;
@@ -485,21 +497,24 @@ class _SwipeableBackGestureDetectorState<T>
     _velocityTracker!.addPosition(event.timeStamp, event.position);
 
     slidingState = _pointerInitialPosition.dy - event.position.dy < 0.0
-        ? _SlidingState.slidingDown
-        : _SlidingState.slidingUp;
+        ? SlideState.slidingDown
+        : SlideState.slidingUp;
 
     _backGestureController!
         .dragUpdate(_convertToLogical(event.delta.dy / context.size!.height));
   }
 
   void _onPointerUp(PointerUpEvent event) {
-    assert(mounted);
+    assert(mounted, '');
     if (_velocityTracker == null) return;
     if (_backGestureController == null) return;
 
-    _backGestureController!.dragEnd(_convertToLogical(
+    _backGestureController!.dragEnd(
+      _convertToLogical(
         _velocityTracker!.getVelocity().pixelsPerSecond.dy /
-            context.size!.height));
+            context.size!.height,
+      ),
+    );
 
     _backGestureController = null;
     _scrollController = null;
@@ -514,7 +529,7 @@ class _SwipeableBackGestureDetectorState<T>
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasDirectionality(context), '');
     return Listener(
       onPointerDown: _onPointerDown,
       onPointerMove: _onPointerMove,
@@ -587,7 +602,7 @@ class _SwipeableBackGestureController<T> {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
       controller.animateTo(
-        1.0,
+        1,
         duration: const Duration(milliseconds: 500),
         curve: Curves.fastOutSlowIn,
       );
@@ -600,7 +615,7 @@ class _SwipeableBackGestureController<T> {
       if (controller.isAnimating) {
         // Otherwise, use a custom popping animation duration and curve.
         controller.animateBack(
-          0.0,
+          0,
           duration: const Duration(milliseconds: 800),
           curve: Curves.fastLinearToSlowEaseIn,
         );

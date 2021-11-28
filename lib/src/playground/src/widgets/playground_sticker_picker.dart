@@ -40,7 +40,7 @@ class StickerPicker extends StatelessWidget {
             GestureDetector(
               onTap: Navigator.of(context).pop,
               child: Container(
-                height: 70.0,
+                height: 70,
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                 ),
@@ -131,13 +131,13 @@ class _StickersTabsState extends State<StickersTabs>
                   key: const Key('stickersTabs_artsTabBarView'),
                   stickers: arts,
                   onStickerSelected: widget.onStickerSelected,
-                  maxCrossAxisExtent: 100.0,
+                  maxCrossAxisExtent: 100,
                 ),
                 StickersTabBarView(
                   key: const Key('stickersTabs_emojisTabBarView'),
                   stickers: gifs,
                   onStickerSelected: widget.onStickerSelected,
-                  maxCrossAxisExtent: 70.0,
+                  maxCrossAxisExtent: 70,
                 ),
                 StickersTabBarView(
                   key: const Key('stickersTabs_shapesTabBarView'),
@@ -151,10 +151,10 @@ class _StickersTabsState extends State<StickersTabs>
             onTap: widget.onTabChanged,
             controller: _tabController,
             indicatorSize: TabBarIndicatorSize.label,
-            indicatorPadding: const EdgeInsets.symmetric(vertical: 10.0),
+            indicatorPadding: const EdgeInsets.symmetric(vertical: 10),
             indicator: BoxDecoration(
               color: Colors.white24,
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(16),
             ),
             tabs: const [
               StickersTab(
@@ -193,7 +193,7 @@ class StickersTab extends StatefulWidget {
   final bool active;
 
   @override
-  _StickersTabState createState() => _StickersTabState();
+  State<StickersTab> createState() => _StickersTabState();
 }
 
 class _StickersTabState extends State<StickersTab>
@@ -203,7 +203,7 @@ class _StickersTabState extends State<StickersTab>
     super.build(context);
     return Tab(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         child: Text(
           widget.label,
           style: Theme.of(context).textTheme.button?.copyWith(
@@ -242,7 +242,6 @@ class StickersTabBarView extends StatelessWidget {
   Widget build(BuildContext context) {
     final gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
       maxCrossAxisExtent: maxCrossAxisExtent,
-      childAspectRatio: 1,
       mainAxisSpacing: 24,
       crossAxisSpacing: 24,
     );
@@ -288,6 +287,7 @@ class StickerChoice extends StatelessWidget {
             url: s.path,
             onPressed: onPressed,
           );
+        // ignore: no_default_cases
         default:
           return const SizedBox();
       }

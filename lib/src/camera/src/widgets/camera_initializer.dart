@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 

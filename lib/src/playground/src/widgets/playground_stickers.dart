@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +19,7 @@ class PlaygroundStickers extends StatefulWidget {
   final PlaygroundController controller;
 
   @override
-  _PlaygroundStickersState createState() => _PlaygroundStickersState();
+  State<PlaygroundStickers> createState() => _PlaygroundStickersState();
 }
 
 class _PlaygroundStickersState extends State<PlaygroundStickers> {
@@ -58,10 +60,10 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
 
       final stickerPos = details.focalPoint;
 
-      final collide = (deletePos.dx < stickerPos.dx &&
+      final collide = deletePos.dx < stickerPos.dx &&
           deletePos.dx + deleteSize.width > stickerPos.dx &&
           deletePos.dy < stickerPos.dy &&
-          deletePos.dy + deleteSize.height > stickerPos.dy);
+          deletePos.dy + deleteSize.height > stickerPos.dy;
 
       setState(() {
         _collied = collide;
@@ -90,11 +92,10 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
           color: sticker.withBackground
               ? _controller.value.textBackground.colors.first
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: FittedBox(
-          alignment: Alignment.center,
           child: Text(
             sticker.text,
             textAlign: sticker.textAlign,
@@ -186,7 +187,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
                     duration: const Duration(milliseconds: 100),
                     height: _collied ? 60.0 : 48.0,
                     width: _collied ? 60.0 : 48.0,
-                    margin: const EdgeInsets.only(bottom: 24.0),
+                    margin: const EdgeInsets.only(bottom: 24),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.black45,
@@ -203,21 +204,23 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
               if (_controller.value.colorPickerVisibility &&
                   !_controller.value.isEditing)
                 Positioned(
-                  left: 0.0,
-                  right: 0.0,
-                  bottom: 80.0,
+                  left: 0,
+                  right: 0,
+                  bottom: 80,
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8.0,
-                      runSpacing: 8.0,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: _colors
-                          .map((color) => _ColorCircle(
-                                color: color,
-                                colorNotifier: _colorNotifier,
-                              ))
+                          .map(
+                            (color) => _ColorCircle(
+                              color: color,
+                              colorNotifier: _colorNotifier,
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -265,10 +268,9 @@ class _ColorCircle extends StatelessWidget {
             colorNotifier.value = color;
           },
           child: SizedBox(
-            height: 40.0,
-            width: 40.0,
+            height: 40,
+            width: 40,
             child: Align(
-              alignment: Alignment.center,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 height: size,
@@ -277,12 +279,12 @@ class _ColorCircle extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: Colors.white,
-                    width: 4.0,
+                    width: 4,
                   ),
                   borderRadius: BorderRadius.circular(size),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(1.0),
+                  padding: const EdgeInsets.all(1),
                   child: CircleAvatar(backgroundColor: color),
                 ),
               ),
@@ -325,8 +327,6 @@ extension on StickerAsset {
     return BoxConstraints(
       minWidth: sticker.size.width * _minStickerScale,
       minHeight: sticker.size.height * _minStickerScale,
-      maxWidth: double.infinity,
-      maxHeight: double.infinity,
     );
   }
 }

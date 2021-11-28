@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import 'playground_background.dart';
@@ -53,18 +55,19 @@ class PlaygroundValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   ///
-  PlaygroundValue copyWith(
-      {TextAlign? textAlign,
-      bool? fillColor,
-      bool? hasFocus,
-      bool? editingMode,
-      int? maxLines,
-      bool? hasStickers,
-      bool? isEditing,
-      PlaygroundBackground? background,
-      GradientBackground? textBackground,
-      bool? stickerPickerView,
-      bool? colorPickerVisibility}) {
+  PlaygroundValue copyWith({
+    TextAlign? textAlign,
+    bool? fillColor,
+    bool? hasFocus,
+    bool? editingMode,
+    int? maxLines,
+    bool? hasStickers,
+    bool? isEditing,
+    PlaygroundBackground? background,
+    GradientBackground? textBackground,
+    bool? stickerPickerView,
+    bool? colorPickerVisibility,
+  }) {
     return PlaygroundValue(
       textAlign: textAlign ?? this.textAlign,
       fillColor: fillColor ?? this.fillColor,

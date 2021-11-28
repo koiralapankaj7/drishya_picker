@@ -12,7 +12,7 @@ class GalleryPermissionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
@@ -21,11 +21,11 @@ class GalleryPermissionView extends StatelessWidget {
             'Access Your Album',
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 16.0,
+              fontSize: 16,
             ),
           ),
 
-          SizedBox(height: 8.0),
+          SizedBox(height: 8),
 
           // Description
           Text(
@@ -33,7 +33,7 @@ class GalleryPermissionView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 8.0),
+          SizedBox(height: 8),
 
           // Allow access button
           TextButton(

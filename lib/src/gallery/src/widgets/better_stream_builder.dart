@@ -37,7 +37,7 @@ class BetterStreamBuilder<T> extends StatefulWidget {
   final Widget Function(BuildContext context, Object error)? errorBuilder;
 
   @override
-  _BetterStreamBuilderState createState() => _BetterStreamBuilderState<T>();
+  State<BetterStreamBuilder<T>> createState() => _BetterStreamBuilderState<T>();
 }
 
 class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {

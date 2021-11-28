@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
@@ -40,17 +42,19 @@ class PlaygroundCaptureButton extends StatelessWidget {
                 }
                 final entity = await controller.takeScreenshot();
                 if (entity != null) {
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pop(entity);
                 } else {
+                  // ignore: use_build_context_synchronously
                   UIHandler(context).showSnackBar(
                     'Something went wront! Please try again.',
                   );
                 }
               },
               child: Container(
-                width: 56.0,
-                height: 56.0,
-                padding: const EdgeInsets.only(left: 4.0),
+                width: 56,
+                height: 56,
+                padding: const EdgeInsets.only(left: 4),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,

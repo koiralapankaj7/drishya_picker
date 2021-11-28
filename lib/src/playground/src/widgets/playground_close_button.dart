@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +21,10 @@ class PlaygroundCloseButton extends StatelessWidget {
 
   void _onPressed(BuildContext context) {
     if (controller.isPlaygroundEmpty) {
-      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
       Navigator.of(context).pop();
     } else {
       showDialog<bool>(
@@ -58,8 +63,8 @@ class PlaygroundCloseButton extends StatelessWidget {
             _onPressed(context);
           },
           child: Container(
-            height: 36.0,
-            width: 36.0,
+            height: 36,
+            width: 36,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black26,
@@ -67,7 +72,7 @@ class PlaygroundCloseButton extends StatelessWidget {
             child: const Icon(
               CustomIcons.close,
               color: Colors.white,
-              size: 16.0,
+              size: 16,
             ),
           ),
         ),
@@ -117,11 +122,10 @@ class _AppDialog extends StatelessWidget {
       ),
       actions: [cancel, unselectItems],
       backgroundColor: Colors.grey.shade900,
-      actionsPadding: const EdgeInsets.all(0.0),
-      titlePadding: const EdgeInsets.all(16.0),
+      titlePadding: const EdgeInsets.all(16),
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 2.0,
+        horizontal: 16,
+        vertical: 2,
       ),
     );
   }

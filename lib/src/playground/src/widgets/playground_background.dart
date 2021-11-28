@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
@@ -45,21 +47,23 @@ class PhotoBackgroundView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.black,
-      child: Builder(builder: (_) {
-        if (background.bytes != null) {
-          return Image.memory(
-            background.bytes!,
-            fit: BoxFit.contain,
-          );
-        } else if (background.url != null) {
-          return Image.network(
-            background.url!,
-            fit: BoxFit.cover,
-          );
-        }
+      child: Builder(
+        builder: (_) {
+          if (background.bytes != null) {
+            return Image.memory(
+              background.bytes!,
+              fit: BoxFit.contain,
+            );
+          } else if (background.url != null) {
+            return Image.network(
+              background.url!,
+              fit: BoxFit.cover,
+            );
+          }
 
-        return const SizedBox();
-      }),
+          return const SizedBox();
+        },
+      ),
     );
   }
 }
@@ -94,33 +98,35 @@ class PlaygroundGradientBackgroundChanger extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
         );
       },
-      child: Builder(builder: (_) {
-        final background = controller.value.background;
-        final isGradient = background is GradientBackground;
+      child: Builder(
+        builder: (_) {
+          final background = controller.value.background;
+          final isGradient = background is GradientBackground;
 
-        return GestureDetector(
-          onTap: controller.changeBackground,
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 2.0,
+          return GestureDetector(
+            onTap: controller.changeBackground,
+            child: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(
+                side: BorderSide(
+                  color: Colors.white,
+                  width: 2,
+                ),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: SizedBox(
+                width: 54,
+                height: 54,
+                child: GradientBackgroundView(
+                  background: isGradient
+                      ? background as GradientBackground
+                      : gradients[0],
+                ),
               ),
             ),
-            clipBehavior: Clip.hardEdge,
-            child: SizedBox(
-              width: 54.0,
-              height: 54.0,
-              child: GradientBackgroundView(
-                background: isGradient
-                    ? background as GradientBackground
-                    : gradients[0],
-              ),
-            ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }

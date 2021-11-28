@@ -5,9 +5,10 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 ///
+@immutable
 class DrishyaEntity {
   ///
-  DrishyaEntity({
+  const DrishyaEntity({
     required this.entity,
     required this.thumbBytes,
     required this.file,
@@ -58,9 +59,9 @@ class DrishyaEntity {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! DrishyaEntity) return false;
-    return id == other.id;
+    return other == this || id == other.id;
   }
 
   @override

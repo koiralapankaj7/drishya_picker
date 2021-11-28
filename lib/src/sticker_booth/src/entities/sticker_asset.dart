@@ -94,7 +94,7 @@ class Sticker {
   /// {@macro asset}
   const Sticker({
     this.name = '',
-    this.size = const Size(200.0, 200.0),
+    this.size = const Size(200, 200),
     this.onPressed,
     this.extra = const {},
   });
@@ -120,7 +120,7 @@ class TextSticker extends Sticker {
     this.style,
     this.withBackground = false,
     this.textAlign,
-    Size size = const Size(200.0, 200.0),
+    Size size = const Size(200, 200),
     ValueSetter<Sticker>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
@@ -149,7 +149,7 @@ class ImageSticker extends Sticker {
     this.path = '',
     this.pathType = PathType.none,
     String name = '',
-    Size size = const Size(200.0, 200.0),
+    Size size = const Size(200, 200),
     ValueSetter<Sticker>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
@@ -171,7 +171,7 @@ class IconSticker extends Sticker {
   ///
   const IconSticker({
     required this.iconData,
-    Size size = const Size(100.0, 100.0),
+    Size size = const Size(100, 100),
     ValueSetter<Sticker>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
@@ -319,7 +319,6 @@ const arts = {
     pathType: PathType.networkImg,
   ),
   ImageSticker(
-    name: '',
     path: 'https://freepngimg.com/thumb/hair/21-women-hair-png-image-thumb.png',
     pathType: PathType.networkImg,
   ),

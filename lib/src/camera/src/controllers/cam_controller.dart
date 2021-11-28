@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -26,10 +28,12 @@ class CamController extends ValueNotifier<ActionValue> {
         _uiHandler = UIHandler(context),
         zoom = Zoom(controllerNotifier),
         exposure = Exposure(controllerNotifier, UIHandler(context)),
-        super(ActionValue(
-          resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
-          imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
-        ));
+        super(
+          ActionValue(
+            resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
+            imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
+          ),
+        );
 
   ///
   final ControllerNotifier _controllerNotifier;
@@ -150,7 +154,7 @@ class CamController extends ValueNotifier<ActionValue> {
   /// Take picture
   Future<DrishyaEntity?> takePicture() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return null;
     }
 
@@ -184,7 +188,10 @@ class CamController extends ValueNotifier<ActionValue> {
           thumbBytes: data,
           file: file,
         );
-        await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
         _uiHandler.pop<DrishyaEntity>(drishyaEntity);
         return drishyaEntity;
       } else {
@@ -215,9 +222,9 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   /// Set flash mode
-  void changeFlashMode() async {
+  Future<void> changeFlashMode() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 
@@ -236,7 +243,7 @@ class CamController extends ValueNotifier<ActionValue> {
   /// Start video recording
   Future<void> startVideoRecording() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 
@@ -259,9 +266,9 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   /// Stop/Complete video recording
-  void stopVideoRecording() async {
+  Future<void> stopVideoRecording() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 
@@ -286,7 +293,10 @@ class CamController extends ValueNotifier<ActionValue> {
             thumbBytes: d!,
             file: file,
           );
-          await SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+          await SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.manual,
+            overlays: SystemUiOverlay.values,
+          );
           _uiHandler.pop<DrishyaEntity>(drishyaEntity);
           return;
         } else {
@@ -306,9 +316,9 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   /// Pause video recording
-  void pauseVideoRecording() async {
+  Future<void> pauseVideoRecording() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 
@@ -329,9 +339,9 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   /// Resume video recording
-  void resumeVideoRecording() async {
+  Future<void> resumeVideoRecording() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 
@@ -345,15 +355,15 @@ class CamController extends ValueNotifier<ActionValue> {
         rethrow;
       }
     } else {
-      _uiHandler.showSnackBar('Couldn\'t resume the video!');
+      _uiHandler.showSnackBar("Couldn't resume the video!");
       return;
     }
   }
 
   /// Lock unlock capture orientation i,e. Portrait and Landscape
-  void lockUnlockCaptureOrientation() async {
+  Future<void> lockUnlockCaptureOrientation() async {
     if (!initialized) {
-      _uiHandler.showSnackBar('Couldn\'t find the camera!');
+      _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
 

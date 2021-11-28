@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -21,8 +23,8 @@ class CameraRotateButton extends StatelessWidget {
       controller: controller,
       builder: (value, child) {
         return Container(
-          padding: const EdgeInsets.only(top: 10.0),
-          width: 54.0,
+          padding: const EdgeInsets.only(top: 10),
+          width: 54,
           alignment: Alignment.center,
           child: value.hideCameraRotationButton
               ? const SizedBox()

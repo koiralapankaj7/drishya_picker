@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +35,7 @@ class Exposure extends ValueNotifier<ExposureValue> {
   }
 
   /// Set exposure and focus point on the screen
-  void setExposureAndFocus(
+  Future<void> setExposureAndFocus(
     TapDownDetails details,
     BoxConstraints constraints,
   ) async {

@@ -33,7 +33,7 @@ class GalleryRecentPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8.0),
+      borderRadius: BorderRadius.circular(8),
       child: SizedBox(
         height: height ?? 54.0,
         width: width ?? 54.0,

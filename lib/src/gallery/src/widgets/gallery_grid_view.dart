@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -86,7 +88,6 @@ class GalleryGridView extends StatelessWidget {
                 onEndOfPage: () => album.fetchAssets(),
                 child: GridView.builder(
                   controller: panelController.scrollController,
-                  padding: const EdgeInsets.all(0.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: controller.setting.crossAxisCount ?? 3,
                     crossAxisSpacing: 1.5,
@@ -100,7 +101,7 @@ class GalleryGridView extends StatelessWidget {
                         child: Icon(
                           CupertinoIcons.camera,
                           color: Colors.lightBlue.shade300,
-                          size: 26.0,
+                          size: 26,
                         ),
                       );
                     }
@@ -183,8 +184,8 @@ class _MediaTile extends StatelessWidget {
         child ?? const SizedBox(),
         if (entity.type == AssetType.video || entity.type == AssetType.audio)
           Positioned(
-            right: 4.0,
-            bottom: 4.0,
+            right: 4,
+            bottom: 4,
             child: _VideoDuration(duration: entity.videoDuration.inSeconds),
           ),
         if (!controller.singleSelection)
@@ -215,16 +216,16 @@ class _VideoDuration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20.0),
+      borderRadius: BorderRadius.circular(20),
       child: ColoredBox(
         color: Colors.black.withOpacity(0.7),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           child: Text(
             duration.formatedDuration,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 13.0,
+              fontSize: 13,
               color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
@@ -261,7 +262,7 @@ class _SelectionCount extends StatelessWidget {
           child: Center(
             child: CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
-              radius: 14.0,
+              radius: 14,
               child: Text(
                 '${index + 1}',
                 style: Theme.of(context).textTheme.button?.copyWith(
@@ -293,6 +294,7 @@ extension on int {
 }
 
 /// ImageProvider implementation
+@immutable
 class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   /// Constructor for creating a [MediaThumbnailProvider]
   const MediaThumbnailProvider({
@@ -311,7 +313,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
   @override
   ImageStreamCompleter load(
-          MediaThumbnailProvider key, DecoderCallback decode) =>
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) =>
       MultiFrameImageStreamCompleter(
         codec: _loadAsync(key, decode),
         scale: 1,
@@ -321,7 +325,9 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       );
 
   Future<ui.Codec> _loadAsync(
-      MediaThumbnailProvider key, DecoderCallback decode) async {
+    MediaThumbnailProvider key,
+    DecoderCallback decode,
+  ) async {
     assert(key == this, 'Checks MediaThumbnailProvider');
     if (entity != null) {
       final bytes = await entity!.thumbData;
@@ -347,5 +353,5 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   int get hashCode => media?.id.hashCode ?? entity!.id.hashCode;
 
   @override
-  String toString() => '$runtimeType("${media?.id ?? entity?.id}")';
+  String toString() => '$MediaThumbnailProvider("${media?.id ?? entity?.id}")';
 }

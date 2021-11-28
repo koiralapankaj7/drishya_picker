@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:math';
 
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
@@ -34,12 +36,12 @@ class CameraTypeChanger extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 8),
 
             // Arrow indicator
             SizedBox(
-              height: 12.0,
-              width: 20.0,
+              height: 12,
+              width: 20,
               child: FittedBox(
                 fit: BoxFit.fill,
                 child: Transform.rotate(
@@ -77,7 +79,7 @@ class _TypesPageView extends StatefulWidget {
 
 class _TypesPageViewState extends State<_TypesPageView> {
   late final PageController pageController;
-  double pageValue = 0.0;
+  double pageValue = 0;
 
   @override
   void initState() {
