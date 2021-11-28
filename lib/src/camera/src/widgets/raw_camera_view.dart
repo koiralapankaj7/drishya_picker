@@ -2,6 +2,7 @@
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controllers/cam_controller.dart';
 
@@ -18,6 +19,7 @@ class RawCameraView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;

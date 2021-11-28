@@ -149,7 +149,7 @@ class _CameraViewState extends State<CameraView>
 
   ///
   void _hideSB() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   ///

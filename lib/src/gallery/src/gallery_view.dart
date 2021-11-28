@@ -15,7 +15,7 @@ import '../../drishya_entity.dart';
 import 'entities/gallery_setting.dart';
 import 'entities/gallery_value.dart';
 import 'repo/gallery_repository.dart';
-import 'widgets/gallery_album_view.dart';
+import 'widgets/albums_page.dart';
 import 'widgets/gallery_asset_selector.dart';
 import 'widgets/gallery_controller_provider.dart';
 import 'widgets/gallery_grid_view.dart';
@@ -399,7 +399,7 @@ class _GalleryViewState extends State<GalleryView>
                     ),
                   );
                 },
-                child: GalleryAlbumView(
+                child: AlbumsPage(
                   albums: _controller._albums,
                   controller: _controller,
                   onAlbumChange: _onALbumChange,
@@ -702,9 +702,11 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _accessCamera = true;
     DrishyaEntity? pickedEntity;
 
+    final bytes = await entity.originBytes;
+
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: Playground(
-        background: PhotoBackground(bytes: entity.pickedThumbData),
+        background: PhotoBackground(bytes: bytes),
         enableOverlay: true,
       ),
       begainHorizontal: true,

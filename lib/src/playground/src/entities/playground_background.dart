@@ -1,9 +1,15 @@
 import 'dart:typed_data';
 
+import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 ///
-abstract class PlaygroundBackground {}
+// ignore: one_member_abstracts
+abstract class PlaygroundBackground {
+  /// Playgroung builder
+  Widget build(BuildContext context);
+}
 
 ///
 class PhotoBackground implements PlaygroundBackground {
@@ -22,6 +28,9 @@ class PhotoBackground implements PlaygroundBackground {
   ///
   bool get hasData =>
       (url?.isNotEmpty ?? false) || (bytes?.isNotEmpty ?? false);
+
+  @override
+  Widget build(BuildContext context) => PhotoBackgroundView(background: this);
 }
 
 ///
@@ -31,6 +40,10 @@ class GradientBackground implements PlaygroundBackground {
 
   ///
   final List<Color> colors;
+
+  @override
+  Widget build(BuildContext context) =>
+      GradientBackgroundView(background: this);
 }
 
 ///

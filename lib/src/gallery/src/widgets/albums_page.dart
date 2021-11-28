@@ -12,9 +12,9 @@ import 'gallery_permission_view.dart';
 const _imageSize = 48;
 
 ///
-class GalleryAlbumView extends StatelessWidget {
+class AlbumsPage extends StatelessWidget {
   ///
-  const GalleryAlbumView({
+  const AlbumsPage({
     Key? key,
     required this.controller,
     required this.onAlbumChange,
@@ -81,7 +81,7 @@ class GalleryAlbumView extends StatelessWidget {
             itemCount: value.albums.length,
             itemBuilder: (context, index) {
               final album = value.albums[index];
-              return _Album(album: album, onPressed: onAlbumChange);
+              return _AlbumTile(album: album, onPressed: onAlbumChange);
             },
           ),
         );
@@ -90,8 +90,8 @@ class GalleryAlbumView extends StatelessWidget {
   }
 }
 
-class _Album extends StatelessWidget {
-  const _Album({
+class _AlbumTile extends StatelessWidget {
+  const _AlbumTile({
     Key? key,
     required this.album,
     this.onPressed,

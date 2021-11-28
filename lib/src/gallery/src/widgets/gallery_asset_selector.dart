@@ -118,6 +118,12 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
     return ValueListenableBuilder<GalleryValue>(
       valueListenable: widget.controller,
       builder: (context, value, child) {
+        final emptyList = value.selectedEntities.isEmpty;
+        var canEdit = !emptyList;
+        if (!emptyList) {
+          canEdit = value.selectedEntities.first.type == AssetType.image;
+        }
+
         return Column(
           children: [
             const Expanded(child: SizedBox()),
@@ -128,36 +134,34 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
               child: Stack(
                 children: [
                   // Edit button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: AnimatedBuilder(
-                      animation: _editOpa,
-                      builder: (context, child) {
-                        final hide = (value.selectedEntities.isEmpty &&
-                                !_editOpaController.isAnimating) ||
-                            _editOpa.value == 0.0;
-                        return hide
-                            ? const SizedBox()
-                            : Opacity(
-                                opacity: _editOpa.value,
-                                child: child,
-                              );
-                      },
-                      child: SizedBox(
-                        width: buttonWidth,
-                        child: _TextButton(
-                          onPressed: () =>
-                              widget.onEdit(value.selectedEntities.first),
-                          label: 'EDIT',
-                          background: Colors.white,
-                          labelColor: Colors.black,
+                  if (canEdit)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedBuilder(
+                        animation: _editOpa,
+                        builder: (context, child) {
+                          final hide = (value.selectedEntities.isEmpty &&
+                                  !_editOpaController.isAnimating) ||
+                              _editOpa.value == 0.0;
+                          return hide
+                              ? const SizedBox()
+                              : Opacity(opacity: _editOpa.value, child: child);
+                        },
+                        child: SizedBox(
+                          width: buttonWidth,
+                          child: _TextButton(
+                            onPressed: () =>
+                                widget.onEdit(value.selectedEntities.first),
+                            label: 'EDIT',
+                            background: Colors.white,
+                            labelColor: Colors.black,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
                   // Margin
-                  const SizedBox(width: 16),
+                  if (canEdit) const SizedBox(width: 16),
 
                   // Select
                   Align(
@@ -180,8 +184,10 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         animation: _selectSize,
                         builder: (context, child) {
                           return SizedBox(
-                            width: buttonWidth +
-                                _selectSize.value * (buttonWidth + 20.0),
+                            width: !canEdit
+                                ? size.width
+                                : buttonWidth +
+                                    _selectSize.value * (buttonWidth + 20.0),
                             child: child,
                           );
                         },

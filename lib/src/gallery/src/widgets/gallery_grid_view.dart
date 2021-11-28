@@ -1,6 +1,5 @@
 // ignore_for_file: always_use_package_imports
 
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -157,23 +156,26 @@ class _MediaTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Uint8List? bytes;
-    File? file;
+
+    final drishya = entity.toDrishya;
 
     return ColoredBox(
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
           onPressed(
-            entity.toDrishya.copyWith(
-              pickedThumbData: bytes,
-              pickedFile: file,
-            ),
+            drishya.copyWith(pickedThumbData: bytes),
           );
         },
         child: Stack(
           fit: StackFit.expand,
           children: [
-            EntityThumbnail(entity: entity.toDrishya),
+            EntityThumbnail(
+              entity: drishya,
+              onBytesGenerated: (b) {
+                bytes = b;
+              },
+            ),
             if (!controller.singleSelection)
               _SelectionCount(controller: controller, entity: entity),
           ],

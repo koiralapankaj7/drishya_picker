@@ -11,10 +11,12 @@ class EntityThumbnail extends StatelessWidget {
   const EntityThumbnail({
     Key? key,
     required this.entity,
+    this.onBytesGenerated,
   }) : super(key: key);
 
   ///
   final DrishyaEntity entity;
+  final ValueSetter<Uint8List?>? onBytesGenerated;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class EntityThumbnail extends StatelessWidget {
         child = Image(
           image: _MediaThumbnailProvider(
             entity: entity,
-            onBytesLoaded: (bytes) {},
+            onBytesLoaded: onBytesGenerated,
           ),
           fit: BoxFit.cover,
         );
