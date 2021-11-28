@@ -84,8 +84,8 @@ class GalleryGridView extends StatelessWidget {
                       : entities.length;
 
               return LazyLoadScrollView(
-                onEndOfPage: () => album.fetchAssets(),
-                scrollOffset: MediaQuery.of(context).size.height * 0.5,
+                onEndOfPage: album.fetchAssets,
+                scrollOffset: MediaQuery.of(context).size.height * 0.4,
                 child: GridView.builder(
                   controller: panelController.scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

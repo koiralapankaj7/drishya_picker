@@ -13,11 +13,31 @@ class DrishyaEntity extends AssetEntity {
     required int typeInt,
     this.pickedThumbData,
     this.pickedFile,
+    int duration = 0,
+    int orientation = 0,
+    bool isFavorite = false,
+    String? title,
+    int? createDtSecond,
+    int? modifiedDateSecond,
+    String? relativePath,
+    double? latitude,
+    double? longitude,
+    String? mimeType,
   }) : super(
           id: id,
           height: height,
           width: width,
           typeInt: typeInt,
+          duration: duration,
+          orientation: orientation,
+          isFavorite: isFavorite,
+          title: title,
+          createDtSecond: createDtSecond,
+          modifiedDateSecond: modifiedDateSecond,
+          relativePath: relativePath,
+          latitude: latitude,
+          longitude: longitude,
+          mimeType: mimeType,
         );
 
   /// Thumb bytes of image and video. Dont use this for other asset types.
@@ -26,27 +46,6 @@ class DrishyaEntity extends AssetEntity {
 
   /// Field where asset is stored
   final File? pickedFile;
-
-  // /// in android is database _id column
-  // ///
-  // /// in ios is local id
-  // String get id => entity.id;
-
-  // /// the asset type
-  // ///
-  // /// see [AssetType]
-  // AssetType get type => entity.type;
-
-  // /// Asset type int value.
-  // ///
-  // /// see [type]
-  // int get typeInt => entity.typeInt;
-
-  // /// if not video, duration is 0
-  // Duration get videoDuration => entity.videoDuration;
-
-  // /// The [Size] for the asset.
-  // Size get size => entity.size;
 
   ///
   DrishyaEntity copyWith({
@@ -58,23 +57,19 @@ class DrishyaEntity extends AssetEntity {
         width: width,
         height: height,
         typeInt: typeInt,
+        duration: duration,
+        orientation: orientation,
+        isFavorite: isFavorite,
+        title: title,
+        createDtSecond: createDtSecond,
+        modifiedDateSecond: modifiedDateSecond,
+        relativePath: relativePath,
+        latitude: latitude,
+        longitude: longitude,
+        mimeType: mimeType,
         pickedThumbData: pickedThumbData ?? this.pickedThumbData,
         pickedFile: pickedFile ?? this.pickedFile,
       );
-
-  // @override
-  // int get hashCode => id.hashCode;
-
-  // @override
-  // bool operator ==(Object other) {
-  //   if (other is! DrishyaEntity) return false;
-  //   return id == other.id;
-  // }
-
-  // @override
-  // String toString() {
-  //   return 'DrishyaEntity{ id : $id , type: $type}';
-  // }
 }
 
 /// AssetEntity extension
@@ -85,5 +80,15 @@ extension AssetEntityX on AssetEntity {
         width: width,
         height: height,
         typeInt: typeInt,
+        duration: duration,
+        orientation: orientation,
+        isFavorite: isFavorite,
+        title: title,
+        createDtSecond: createDtSecond,
+        modifiedDateSecond: modifiedDateSecond,
+        relativePath: relativePath,
+        latitude: latitude,
+        longitude: longitude,
+        mimeType: mimeType,
       );
 }

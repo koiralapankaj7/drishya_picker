@@ -115,7 +115,8 @@ class Albums extends ValueNotifier<AlbumsValue> {
       final entities = await albums
           .singleWhere((element) => element.isAll)
           .getAssetListPaged(0, count);
-      return entities.map((e) => e.toDrishya).toList();
+      final drishyaEntities = entities.map((e) => e.toDrishya).toList();
+      return drishyaEntities;
     } catch (e) {
       log('Exception fetching recent entities => $e');
       return [];
@@ -185,7 +186,7 @@ class Album extends ValueNotifier<AlbumValue> {
     // if (state == PermissionState.authorized) {
     try {
       final entities =
-          (await value.assetPathEntity?.getAssetListPaged(_currentPage, 25)) ??
+          (await value.assetPathEntity?.getAssetListPaged(_currentPage, 30)) ??
               [];
 
       final updatedEntities = [...value.entities, ...entities];

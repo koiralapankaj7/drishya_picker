@@ -51,10 +51,9 @@ class EntityThumbnail extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           child,
-          Positioned(
-            right: 4,
-            bottom: 4,
-            child: _DurationView(duration: entity.videoDuration.inSeconds),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: _DurationView(duration: entity.duration),
           ),
         ],
       );
@@ -132,20 +131,22 @@ class _DurationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: ColoredBox(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
         color: Colors.black.withOpacity(0.7),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          child: Text(
-            duration.formatedDuration,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          duration.formatedDuration,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -156,7 +157,7 @@ class _DurationView extends StatelessWidget {
 extension on int {
   String get formatedDuration {
     final duration = Duration(seconds: this);
-    final min = duration.inMinutes.remainder(60).toString();
+    final min = duration.inMinutes.remainder(60).toString().padRight(2, '0');
     final sec = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$min:$sec';
   }
