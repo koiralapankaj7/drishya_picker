@@ -1,5 +1,4 @@
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:example/media_tile.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -34,7 +33,7 @@ class GridViewWidget extends StatelessWidget {
           itemCount: list.length,
           itemBuilder: (context, index) {
             final entity = list[index];
-            return MediaTile(entity: entity);
+            return EntityThumbnail(entity: entity);
           },
         );
       },

@@ -2,7 +2,6 @@
 
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
@@ -86,6 +85,7 @@ class GalleryGridView extends StatelessWidget {
 
               return LazyLoadScrollView(
                 onEndOfPage: () => album.fetchAssets(),
+                scrollOffset: MediaQuery.of(context).size.height * 0.5,
                 child: GridView.builder(
                   controller: panelController.scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -149,87 +149,34 @@ class _MediaTile extends StatelessWidget {
   final GalleryController controller;
 
   ///
-  final DrishyaEntity entity;
+  final AssetEntity entity;
 
   ///
   final ValueSetter<DrishyaEntity> onPressed;
 
   @override
   Widget build(BuildContext context) {
-    Widget? child;
     Uint8List? bytes;
     File? file;
-
-    if (entity.type == AssetType.video || entity.type == AssetType.image) {
-      child = AspectRatio(
-        aspectRatio: 1,
-        child: Image(
-          image: MediaThumbnailProvider(media: entity),
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    if (entity.type == AssetType.audio) {
-      child = const Icon(Icons.audiotrack, color: Colors.white);
-    }
-
-    if (entity.type == AssetType.other) {
-      child = const Center(child: Icon(Icons.folder, color: Colors.white));
-    }
-
-    child = Stack(
-      fit: StackFit.expand,
-      children: [
-        child ?? const SizedBox(),
-        if (entity.type == AssetType.video || entity.type == AssetType.audio)
-          Positioned(
-            right: 4,
-            bottom: 4,
-            child: _VideoDuration(duration: entity.videoDuration.inSeconds),
-          ),
-        if (!controller.singleSelection)
-          _SelectionCount(controller: controller, entity: entity),
-      ],
-    );
 
     return ColoredBox(
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
-          onPressed(entity.copyWith(thumbBytes: bytes, file: file));
-        },
-        child: child,
-      ),
-    );
-  }
-}
-
-class _VideoDuration extends StatelessWidget {
-  const _VideoDuration({
-    Key? key,
-    required this.duration,
-  }) : super(key: key);
-
-  final int duration;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: ColoredBox(
-        color: Colors.black.withOpacity(0.7),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          child: Text(
-            duration.formatedDuration,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+          onPressed(
+            entity.toDrishya.copyWith(
+              pickedThumbData: bytes,
+              pickedFile: file,
             ),
-          ),
+          );
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            EntityThumbnail(entity: entity.toDrishya),
+            if (!controller.singleSelection)
+              _SelectionCount(controller: controller, entity: entity),
+          ],
         ),
       ),
     );
@@ -244,7 +191,7 @@ class _SelectionCount extends StatelessWidget {
   }) : super(key: key);
 
   final GalleryController controller;
-  final DrishyaEntity entity;
+  final AssetEntity entity;
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +200,7 @@ class _SelectionCount extends StatelessWidget {
       builder: (context, value, child) {
         final isSelected = value.selectedEntities.contains(entity);
         // if (!isSelected) return const SizedBox();
-        final index = value.selectedEntities.indexOf(entity);
+        final index = value.selectedEntities.indexOf(entity.toDrishya);
 
         final crossFadeState =
             isSelected ? CrossFadeState.showFirst : CrossFadeState.showSecond;
@@ -281,77 +228,4 @@ class _SelectionCount extends StatelessWidget {
       },
     );
   }
-}
-
-///
-extension on int {
-  String get formatedDuration {
-    final duration = Duration(seconds: this);
-    final min = duration.inMinutes.remainder(60).toString();
-    final sec = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$min:$sec';
-  }
-}
-
-/// ImageProvider implementation
-@immutable
-class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
-  /// Constructor for creating a [MediaThumbnailProvider]
-  const MediaThumbnailProvider({
-    this.media,
-    this.entity,
-  }) : assert(
-          media != null || entity != null,
-          'Provide at least one media',
-        );
-
-  /// Media to load
-  final DrishyaEntity? media;
-
-  ///
-  final AssetEntity? entity;
-
-  @override
-  ImageStreamCompleter load(
-    MediaThumbnailProvider key,
-    DecoderCallback decode,
-  ) =>
-      MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Id: ${media?.id ?? entity?.id}');
-        },
-      );
-
-  Future<ui.Codec> _loadAsync(
-    MediaThumbnailProvider key,
-    DecoderCallback decode,
-  ) async {
-    assert(key == this, 'Checks MediaThumbnailProvider');
-    if (entity != null) {
-      final bytes = await entity!.thumbData;
-      return decode(bytes!);
-    }
-    return decode(media!.thumbBytes);
-  }
-
-  @override
-  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<MediaThumbnailProvider>(this);
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    // ignore: test_types_in_equals
-    final typedOther = other as MediaThumbnailProvider;
-    return media?.id == typedOther.media?.id ||
-        entity?.id == typedOther.entity?.id;
-  }
-
-  @override
-  int get hashCode => media?.id.hashCode ?? entity!.id.hashCode;
-
-  @override
-  String toString() => '$MediaThumbnailProvider("${media?.id ?? entity?.id}")';
 }

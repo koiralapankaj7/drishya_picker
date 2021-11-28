@@ -184,9 +184,12 @@ class CamController extends ValueNotifier<ActionValue> {
 
       if (entity != null) {
         final drishyaEntity = DrishyaEntity(
-          entity: entity,
-          thumbBytes: data,
-          file: file,
+          id: entity.id,
+          width: entity.width,
+          height: entity.height,
+          typeInt: entity.typeInt,
+          pickedThumbData: data,
+          pickedFile: file,
         );
         await SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.manual,
@@ -287,11 +290,13 @@ class CamController extends ValueNotifier<ActionValue> {
         value = value.copyWith(isRecordingVideo: false);
 
         if (entity != null) {
-          final d = await entity.thumbData;
           final drishyaEntity = DrishyaEntity(
-            entity: entity,
-            thumbBytes: d!,
-            file: file,
+            id: entity.id,
+            width: entity.width,
+            height: entity.height,
+            typeInt: entity.typeInt,
+            pickedThumbData: file.readAsBytesSync(),
+            pickedFile: file,
           );
           await SystemChrome.setEnabledSystemUIMode(
             SystemUiMode.manual,

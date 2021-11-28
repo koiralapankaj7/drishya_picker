@@ -110,7 +110,10 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
           SystemUiMode.manual,
           overlays: SystemUiOverlay.values,
         );
-        return DrishyaEntity(entity: entity, thumbBytes: data, file: file!);
+        return entity.toDrishya.copyWith(
+          pickedThumbData: data,
+          pickedFile: file,
+        );
       }
     } catch (e) {
       log('Exception occured while capturing picture : $e');

@@ -1,5 +1,4 @@
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:example/media_tile.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -36,7 +35,7 @@ class RecentEntities extends StatelessWidget {
                 child: SizedBox(
                   height: 100.0,
                   width: 100.0,
-                  child: MediaTile(entity: entity),
+                  child: EntityThumbnail(entity: entity),
                 ),
               );
             },

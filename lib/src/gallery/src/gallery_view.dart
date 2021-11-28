@@ -1,7 +1,6 @@
 // ignore_for_file: always_use_package_imports
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_view.dart';
@@ -21,7 +20,6 @@ import 'widgets/gallery_asset_selector.dart';
 import 'widgets/gallery_controller_provider.dart';
 import 'widgets/gallery_grid_view.dart';
 import 'widgets/gallery_header.dart';
-import 'widgets/gallery_recent_preview.dart';
 
 const _defaultMin = 0.37;
 
@@ -438,8 +436,6 @@ class GalleryViewField extends StatefulWidget {
     this.panelSetting,
     this.gallerySetting,
     this.child,
-    this.previewBuilder,
-    this.previewSize,
   }) : super(key: key);
 
   ///
@@ -476,12 +472,6 @@ class GalleryViewField extends StatefulWidget {
 
   ///
   final Widget? child;
-
-  ///
-  final Widget Function(Uint8List bytes)? previewBuilder;
-
-  ///
-  final Size? previewSize;
 
   @override
   State<GalleryViewField> createState() => _GalleryViewFieldState();
@@ -528,25 +518,7 @@ class _GalleryViewFieldState extends State<GalleryViewField> {
           context,
         );
       },
-      child: widget.previewBuilder != null
-          ? FutureBuilder<List<DrishyaEntity?>>(
-              future: _controller.recentEntities(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData &&
-                    snapshot.data!.isNotEmpty) {
-                  return GalleryRecentPreview(
-                    entity: snapshot.data!.first!.entity,
-                    builder: widget.previewBuilder,
-                    height: widget.previewSize?.height,
-                    width: widget.previewSize?.width,
-                    child: widget.child,
-                  );
-                }
-                return widget.child ?? const SizedBox();
-              },
-            )
-          : widget.child,
+      child: widget.child,
     );
   }
 }
@@ -732,7 +704,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: Playground(
-        background: PhotoBackground(bytes: entity.thumbBytes),
+        background: PhotoBackground(bytes: entity.pickedThumbData),
         enableOverlay: true,
       ),
       begainHorizontal: true,
