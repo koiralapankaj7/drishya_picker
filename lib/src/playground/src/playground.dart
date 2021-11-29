@@ -1,13 +1,14 @@
 //
 // ignore_for_file: always_use_package_imports
 
+import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/drishya_entity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'controller/playground_controller.dart';
-import 'entities/playground_background.dart';
 import 'entities/playground_value.dart';
 import 'widgets/playground_controller_provider.dart';
 import 'widgets/playground_overlay.dart';
@@ -20,18 +21,24 @@ class Playground extends StatefulWidget {
   const Playground({
     Key? key,
     this.controller,
-    this.background,
-    this.enableOverlay = false,
   }) : super(key: key);
 
   ///
   final PlaygroundController? controller;
 
-  ///
-  final PlaygroundBackground? background;
-
-  ///
-  final bool enableOverlay;
+  /// Open playground
+  static Future<DrishyaEntity?> open(
+    BuildContext context, {
+    PlaygroundController? controller,
+  }) async {
+    return Navigator.of(context).push<DrishyaEntity>(
+      SlideTransitionPageRoute(
+        builder: Playground(
+          controller: controller,
+        ),
+      ),
+    );
+  }
 
   @override
   State<Playground> createState() => _PlaygroundState();
@@ -43,67 +50,64 @@ class _PlaygroundState extends State<Playground> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ??
-        PlaygroundController(background: widget.background);
-    if (widget.background != null) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    }
-  }
-
-  @override
-  void dispose() {
-    if (widget.background != null) {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
-    }
-    super.dispose();
+    _controller = widget.controller ?? PlaygroundController();
+    // if (widget.controller?.value.background != null) {
+    //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      resizeToAvoidBottomInset: false,
-      body: PlaygroundControllerProvider(
-        controller: _controller,
-        child: ValueListenableBuilder<PlaygroundValue>(
-          valueListenable: _controller,
-          builder: (context, value, child) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                // Captureable view that shows the background and stickers
-                RepaintBoundary(
-                  key: _controller.playgroundKey,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Playground background
-                      value.background.build(context),
+    return WillPopScope(
+      onWillPop: () async {
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
+        return true;
+      },
+      child: Scaffold(
+        extendBody: true,
+        resizeToAvoidBottomInset: false,
+        body: PlaygroundControllerProvider(
+          controller: _controller,
+          child: ValueListenableBuilder<PlaygroundValue>(
+            valueListenable: _controller,
+            builder: (context, value, child) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Captureable view that shows the background and stickers
+                  RepaintBoundary(
+                    key: _controller.playgroundKey,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Playground background
+                        value.background.build(context),
 
-                      // Stickers
-                      Opacity(
-                        opacity: value.stickerPickerView ? 0.0 : 1.0,
-                        child: PlaygroundStickers(controller: _controller),
-                      ),
+                        // Stickers
+                        Opacity(
+                          opacity: value.stickerPickerView ? 0.0 : 1.0,
+                          child: PlaygroundStickers(controller: _controller),
+                        ),
 
-                      //
-                    ],
+                        //
+                      ],
+                    ),
                   ),
-                ),
 
-                // Textfield
-                if (!widget.enableOverlay)
-                  PlaygroundTextfield(controller: _controller),
+                  // Textfield
+                  if (!value.enableOverlay)
+                    PlaygroundTextfield(controller: _controller),
 
-                // Overlay
-                if (widget.enableOverlay)
-                  PlaygroundOverlay(controller: _controller),
-              ],
-            );
-          },
+                  // Overlay
+                  if (value.enableOverlay)
+                    PlaygroundOverlay(controller: _controller),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

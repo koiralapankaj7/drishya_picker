@@ -42,7 +42,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return GalleryViewWrapper(
+    return SlidableGalleryView(
       controller: controller,
       child: Scaffold(
         backgroundColor: Colors.amber,

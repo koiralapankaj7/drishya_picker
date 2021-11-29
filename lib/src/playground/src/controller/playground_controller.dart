@@ -16,19 +16,26 @@ import '../entities/playground_value.dart';
 ///
 class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   ///
-  PlaygroundController({PlaygroundBackground? background})
-      : _playgroundKey = GlobalKey(),
-        stickerController = StickerboothController(),
-        textController = TextEditingController(),
-        super(PlaygroundValue(background: background));
+  PlaygroundController({
+    PlaygroundBackground? background,
+    bool enableOverlay = true,
+  })  : _playgroundKey = GlobalKey(),
+        _stickerController = StickerBoothController(),
+        _textController = TextEditingController(),
+        super(
+          PlaygroundValue(
+            background: background,
+            enableOverlay: enableOverlay,
+          ),
+        );
 
   final GlobalKey _playgroundKey;
 
   ///
-  final StickerboothController stickerController;
+  final StickerBoothController _stickerController;
 
   ///
-  final TextEditingController textController;
+  final TextEditingController _textController;
 
   ///
   GlobalKey get playgroundKey => _playgroundKey;
@@ -36,9 +43,15 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   ///
   bool get isPlaygroundEmpty => !value.hasStickers;
 
+  /// Playground sticker booth controller
+  StickerBoothController get stickerController => _stickerController;
+
+  /// Playground text editing controller
+  TextEditingController get textController => _textController;
+
   @override
   void dispose() {
-    stickerController.dispose();
+    _stickerController.dispose();
     super.dispose();
   }
 
@@ -73,7 +86,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
 
   /// Clear playground
   void clearPlayground() {
-    stickerController.clearStickers();
+    _stickerController.clearStickers();
     value = value.copyWith(hasStickers: false);
   }
 

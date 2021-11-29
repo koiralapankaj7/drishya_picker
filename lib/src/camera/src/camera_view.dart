@@ -24,26 +24,8 @@ class CameraView extends StatefulWidget {
   ///
   const CameraView({
     Key? key,
-    // this.videoDuration,
-    // this.resolutionPreset,
-    // this.imageFormatGroup,
     this.controller,
   }) : super(key: key);
-
-  // ///
-  // /// Vide duration. Default is 10 seconds.
-  // ///
-  // final Duration? videoDuration;
-
-  // ///
-  // /// Camera resolution. Default to [ResolutionPreset.medium]
-  // ///
-  // final ResolutionPreset? resolutionPreset;
-
-  // ///
-  // /// Camera image format. Default to [ImageFormatGroup.jpeg]
-  // ///
-  // final ImageFormatGroup? imageFormatGroup;
 
   /// Camera controller
   final CamController? controller;
@@ -54,18 +36,12 @@ class CameraView extends StatefulWidget {
   /// Open camera view for picking.
   static Future<DrishyaEntity?> pick(
     BuildContext context, {
-    // Duration? videoDuration,
-    // ResolutionPreset? resolutionPreset,
-    // ImageFormatGroup? imageFormatGroup,
     CamController? controller,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: CameraView(
           controller: controller,
-          // videoDuration: videoDuration,
-          // resolutionPreset: resolutionPreset,
-          // imageFormatGroup: imageFormatGroup,
         ),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
@@ -76,27 +52,23 @@ class CameraView extends StatefulWidget {
   }
 
   @override
-  State<CameraView> createState() {
-    return _CameraViewState();
-  }
+  State<CameraView> createState() => _CameraViewState();
 }
 
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late final PlaygroundController _playgroundController;
-  late final CamController _camController;
+  late PlaygroundController _playgroundController;
+  late CamController _camController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _camController = widget.controller ?? CamController(context: context);
-    _playgroundController = PlaygroundController()
+    _playgroundController = _camController.playgroundController
       ..addListener(_playgroundListener);
-    Future<void>.delayed(_kRouteDuration, () {
-      _hideSB();
-      _camController.createCamera();
-    });
+    _hideSB();
+    _camController.createCamera();
   }
 
   void _playgroundListener() {
@@ -111,19 +83,17 @@ class _CameraViewState extends State<CameraView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       _camController = widget.controller ?? CamController(context: context);
-      _playgroundController = PlaygroundController()
+      _playgroundController = _camController.playgroundController
         ..addListener(_playgroundListener);
-      Future<void>.delayed(_kRouteDuration, () {
-        _hideSB();
-        _camController.createCamera();
-      });
+      _hideSB();
+      _camController.createCamera();
     }
   }
 
   // Handle app life cycle
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cameraController = _camController.controller;
+    final cameraController = _camController.cameraController;
 
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
@@ -133,7 +103,6 @@ class _CameraViewState extends State<CameraView>
     if (state == AppLifecycleState.inactive) {
       _showSB();
       cameraController.dispose();
-      // _controllerNotifier.controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _hideSB();
       _camController.createCamera();
@@ -150,13 +119,10 @@ class _CameraViewState extends State<CameraView>
   void dispose() {
     _showSB();
     WidgetsBinding.instance?.removeObserver(this);
+    _playgroundController.removeListener(_playgroundListener);
     if (widget.controller == null) {
       _camController.dispose();
     }
-    // _controllerNotifier.dispose();
-    _playgroundController
-      ..removeListener(_playgroundListener)
-      ..dispose();
     super.dispose();
   }
 
@@ -184,7 +150,7 @@ class _CameraViewState extends State<CameraView>
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: ValueListenableBuilder<ActionValue>(
+        body: ValueListenableBuilder<CamValue>(
           valueListenable: _camController,
           builder: (context, value, child) {
             if (_camController.initialized) {
@@ -208,10 +174,7 @@ class _CameraViewState extends State<CameraView>
                 ),
 
                 // Camera control overlay
-                CameraOverlay(
-                  controller: _camController,
-                  playgroundCntroller: _playgroundController,
-                ),
+                CameraOverlay(controller: _camController),
 
                 //
               ],

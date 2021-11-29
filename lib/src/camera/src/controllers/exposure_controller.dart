@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import '../widgets/ui_handler.dart';
 
 ///
-class Exposure extends ValueNotifier<ExposureValue> {
+class ExposureController extends ValueNotifier<ExposureValue> {
   ///
-  Exposure(
+  ExposureController(
     CamController controllerNotifier,
     UIHandler uiHandler,
   )   : _controllerNotifier = controllerNotifier,
@@ -22,7 +22,7 @@ class Exposure extends ValueNotifier<ExposureValue> {
   bool get _initialized => _controllerNotifier.initialized;
 
   /// Call this only when [_initialized] is true
-  CameraController? get _controller => _controllerNotifier.controller;
+  CameraController? get _controller => _controllerNotifier.cameraController;
 
   ///
   void setMaxExposure(double offset) {

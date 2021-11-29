@@ -11,9 +11,9 @@ import '../entities/stickerbooth_value.dart';
 typedef UuidGetter = String Function();
 
 ///
-class StickerboothController extends ValueNotifier<StickerboothValue> {
+class StickerBoothController extends ValueNotifier<StickerboothValue> {
   ///
-  StickerboothController([UuidGetter? uuid])
+  StickerBoothController([UuidGetter? uuid])
       : uuid = uuid ?? const Uuid().v4,
         super(const StickerboothValue());
 

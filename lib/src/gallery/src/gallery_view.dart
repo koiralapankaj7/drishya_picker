@@ -1,4 +1,4 @@
-// ignore_for_file: always_use_package_imports
+// ignore_for_file: always_use_package_imports, use_build_context_synchronously
 
 import 'dart:async';
 
@@ -28,9 +28,9 @@ const _defaultMin = 0.37;
 ///
 ///
 ///
-class GalleryViewWrapper extends StatefulWidget {
+class SlidableGalleryView extends StatefulWidget {
   ///
-  const GalleryViewWrapper({
+  const SlidableGalleryView({
     Key? key,
     required this.child,
     this.controller,
@@ -43,10 +43,10 @@ class GalleryViewWrapper extends StatefulWidget {
   final GalleryController? controller;
 
   @override
-  State<GalleryViewWrapper> createState() => _GalleryViewWrapperState();
+  State<SlidableGalleryView> createState() => _SlidableGalleryViewState();
 }
 
-class _GalleryViewWrapperState extends State<GalleryViewWrapper> {
+class _SlidableGalleryViewState extends State<SlidableGalleryView> {
   late GalleryController _controller;
   late final PanelController _panelController;
 
@@ -425,8 +425,8 @@ class GalleryViewField extends StatefulWidget {
   ///
   /// Widget which pick media from gallery
   ///
-  /// If used [GalleryViewField] with [GalleryViewWrapper], [PanelSetting]
-  /// and [GallerySetting] will be override by the [GalleryViewWrapper]
+  /// If used [GalleryViewField] with [SlidableGalleryView], [PanelSetting]
+  /// and [GallerySetting] will be override by the [SlidableGalleryView]
   ///
   const GalleryViewField({
     Key? key,
@@ -455,18 +455,18 @@ class GalleryViewField extends StatefulWidget {
   final List<DrishyaEntity>? selectedEntities;
 
   ///
-  /// If used [GalleryViewField] with [GalleryViewWrapper]
+  /// If used [GalleryViewField] with [SlidableGalleryView]
   /// this setting will be ignored.
   ///
-  /// [PanelSetting] passed to the [GalleryViewWrapper] will be applicable..
+  /// [PanelSetting] passed to the [SlidableGalleryView] will be applicable..
   ///
   final PanelSetting? panelSetting;
 
   ///
-  /// If used [GalleryViewField] with [GalleryViewWrapper]
+  /// If used [GalleryViewField] with [SlidableGalleryView]
   /// this setting will be ignored.
   ///
-  /// [GallerySetting] passed to the [GalleryViewWrapper] will be applicable..
+  /// [GallerySetting] passed to the [SlidableGalleryView] will be applicable..
   ///
   final GallerySetting? gallerySetting;
 
@@ -702,25 +702,24 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _accessCamera = true;
     DrishyaEntity? pickedEntity;
 
-    final bytes = await entity.originBytes;
+    final pc = PlaygroundController(
+      background: PhotoBackground(entity: entity),
+    );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: Playground(
-        background: PhotoBackground(bytes: bytes),
-        enableOverlay: true,
-      ),
+      builder: Playground(controller: pc),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
 
     if (fullScreenMode) {
-      // ignore: use_build_context_synchronously
       pickedEntity = await Navigator.of(context).pushReplacement(route);
     } else {
-      // ignore: use_build_context_synchronously
       pickedEntity = await Navigator.of(context).push(route);
       _closeOnCameraSelect();
     }
+
+    pc.dispose();
 
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {
@@ -767,7 +766,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         builder: GalleryView(controller: this),
       );
 
-      // ignore: use_build_context_synchronously
       await Navigator.of(context).push(route).then((result) {
         // Closed by user
         if (result == null && !_accessCamera) {
@@ -777,7 +775,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     } else {
       _fullScreenMode = false;
       _panelController.openPanel();
-      // ignore: use_build_context_synchronously
       FocusScope.of(context).unfocus();
     }
     if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {
@@ -817,6 +814,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// return true is gallery is in single selection mode
   ///
   bool get singleSelection => setting.maximum == 1;
+
+  /// Gallery view pannel controller
+  PanelController get panelController => _panelController;
 
   @override
   set value(GalleryValue newValue) {

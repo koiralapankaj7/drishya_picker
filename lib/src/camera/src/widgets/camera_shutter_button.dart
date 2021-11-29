@@ -9,8 +9,6 @@ import '../controllers/cam_controller.dart';
 import '../entities/camera_type.dart';
 import 'camera_builder.dart';
 
-const Duration _defaultVideoDuration = Duration(seconds: 10);
-
 ///
 class CameraShutterButton extends StatelessWidget {
   ///
@@ -72,7 +70,7 @@ class _ShutterButtonState extends State<_ShutterButton>
     // Progress bar animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: widget.controller.videoDuration ?? _defaultVideoDuration,
+      duration: widget.controller.value.videoDuration,
     )..addStatusListener((status) {
         if (_controller.status == AnimationStatus.completed) {
           _stopRecording();

@@ -18,6 +18,7 @@ class PlaygroundValue {
     GradientBackground? textBackground,
     this.stickerPickerView = false,
     this.colorPickerVisibility = false,
+    this.enableOverlay = false,
   })  : background = background ?? gradients[0],
         textBackground = textBackground ?? gradients[0];
 
@@ -27,7 +28,7 @@ class PlaygroundValue {
   ///
   final bool fillColor;
 
-  /// treate -ve as null
+  /// Consider -ve as null
   final int maxLines;
 
   ///
@@ -51,6 +52,9 @@ class PlaygroundValue {
   ///
   final bool colorPickerVisibility;
 
+  ///
+  final bool enableOverlay;
+
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
@@ -67,6 +71,7 @@ class PlaygroundValue {
     GradientBackground? textBackground,
     bool? stickerPickerView,
     bool? colorPickerVisibility,
+    bool? enableOverlay,
   }) {
     return PlaygroundValue(
       textAlign: textAlign ?? this.textAlign,
@@ -80,6 +85,7 @@ class PlaygroundValue {
       stickerPickerView: stickerPickerView ?? this.stickerPickerView,
       colorPickerVisibility:
           colorPickerVisibility ?? this.colorPickerVisibility,
+      enableOverlay: enableOverlay ?? this.enableOverlay,
     );
   }
 }

@@ -4,57 +4,68 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-// import 'package:pedantic/pedantic.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/camera_type.dart';
 import '../widgets/ui_handler.dart';
-import 'exposure.dart';
-import 'zoom.dart';
+import 'exposure_controller.dart';
+import 'zoom_controller.dart';
 
 ///
-class CamController extends ValueNotifier<ActionValue> {
+class CamController extends ValueNotifier<CamValue> {
   ///
   CamController({
-    // required ControllerNotifier controllerNotifier,
     required BuildContext context,
+    PlaygroundController? playgroundController,
     ResolutionPreset? resolutionPreset,
     ImageFormatGroup? imageFormatGroup,
-    this.videoDuration,
+    Duration? videoDuration,
+    bool? editAfterCapture,
   })  : _uiHandler = UIHandler(context),
+        _context = context,
+        _playgroundController =
+            playgroundController ?? PlaygroundController(enableOverlay: false),
         super(
-          ActionValue(
+          CamValue(
             resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
             imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
+            videoDuration: videoDuration ?? const Duration(seconds: 10),
+            editAfterCapture: editAfterCapture ?? true,
           ),
         ) {
-    zoom = Zoom(this);
-    exposure = Exposure(this, _uiHandler);
+    _zoomController = ZoomController(this);
+    _exposureController = ExposureController(this, _uiHandler);
   }
 
-  CameraController? _cameraController;
+  //
+  final BuildContext _context;
 
-  ///
-  /// Vide duration. Default is 10 seconds.
-  ///
-  final Duration? videoDuration;
-
-  ///
+  //
   final UIHandler _uiHandler;
 
-  ///
-  late final Zoom zoom;
+  // Text view editing controller
+  final PlaygroundController _playgroundController;
 
-  ///
-  late final Exposure exposure;
+  // Value will be set after creating camera
+  CameraController? _cameraController;
+
+  // Zoom controller
+  late final ZoomController _zoomController;
+
+  // Exposure controller
+  late final ExposureController _exposureController;
 
   @override
   void dispose() {
-    zoom.dispose();
-    exposure.dispose();
+    _zoomController.dispose();
+    _exposureController.dispose();
+    _playgroundController.dispose();
+    _cameraController?.dispose();
     super.dispose();
   }
 
@@ -62,7 +73,16 @@ class CamController extends ValueNotifier<ActionValue> {
   bool get initialized => _cameraController?.value.isInitialized ?? false;
 
   /// Call this only when [initialized] is true
-  CameraController? get controller => _cameraController;
+  CameraController? get cameraController => _cameraController;
+
+  /// Camera playground controller i,e. text view
+  PlaygroundController get playgroundController => _playgroundController;
+
+  /// Camera zoom controller
+  ZoomController get zoomController => _zoomController;
+
+  /// Camera exposure controller
+  ExposureController get exposureController => _exposureController;
 
   ///
   void update({bool? isPlaygroundActive}) {
@@ -141,10 +161,14 @@ class CamController extends ValueNotifier<ActionValue> {
       }
       // ignore: unawaited_futures
       Future.wait([
-        controller.getMinExposureOffset().then(exposure.setMinExposure),
-        controller.getMaxExposureOffset().then(exposure.setMaxExposure),
-        controller.getMaxZoomLevel().then(zoom.setMaxZoom),
-        controller.getMinZoomLevel().then(zoom.setMinZoom),
+        controller
+            .getMinExposureOffset()
+            .then(_exposureController.setMinExposure),
+        controller
+            .getMaxExposureOffset()
+            .then(_exposureController.setMaxExposure),
+        controller.getMaxZoomLevel().then(_zoomController.setMaxZoom),
+        controller.getMinZoomLevel().then(_zoomController.setMinZoom),
       ]);
     } on CameraException catch (e) {
       _uiHandler.showExceptionSnackbar(e);
@@ -155,6 +179,17 @@ class CamController extends ValueNotifier<ActionValue> {
     return controller;
 
     //
+  }
+
+  //
+  void _finishTakingPicture(DrishyaEntity? drishyaEntity) {
+    if (!value.editAfterCapture) {
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+    }
+    _uiHandler.pop<DrishyaEntity>(drishyaEntity);
   }
 
   /// Take picture
@@ -178,6 +213,7 @@ class CamController extends ValueNotifier<ActionValue> {
       final xFile = await controller.takePicture();
       final file = File(xFile.path);
       final data = await file.readAsBytes();
+
       final entity = await PhotoManager.editor.saveImage(
         data,
         title: path.basename(file.path),
@@ -187,19 +223,27 @@ class CamController extends ValueNotifier<ActionValue> {
         file.deleteSync();
       }
 
-      // Update state
       value = value.copyWith(isTakingPicture: false);
 
       if (entity != null) {
-        final drishyaEntity = entity.toDrishya.copyWith(
+        DrishyaEntity? drishyaEntity = entity.toDrishya.copyWith(
           pickedThumbData: data,
           pickedFile: file,
         );
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
-        _uiHandler.pop<DrishyaEntity>(drishyaEntity);
+
+        if (value.editAfterCapture) {
+          final pc = PlaygroundController(
+            background: PhotoBackground(entity: drishyaEntity),
+          );
+          final route = SlideTransitionPageRoute<DrishyaEntity?>(
+            builder: Playground(controller: pc),
+            begainHorizontal: true,
+          );
+          // ignore: use_build_context_synchronously
+          drishyaEntity = await Navigator.of(_context).pushReplacement(route);
+          pc.dispose();
+        }
+        _finishTakingPicture(drishyaEntity);
         return drishyaEntity;
       } else {
         _uiHandler.showSnackBar('Something went wrong! Please try again');
@@ -397,11 +441,13 @@ class CamController extends ValueNotifier<ActionValue> {
 }
 
 ///
-class ActionValue {
+class CamValue {
   ///
-  ActionValue({
+  CamValue({
     required this.resolutionPreset,
     required this.imageFormatGroup,
+    required this.videoDuration,
+    this.editAfterCapture = true,
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
@@ -413,41 +459,47 @@ class ActionValue {
     this.isPlaygroundActive = false,
   });
 
-  ///
-  final CameraDescription? cameraDescription;
-
-  ///
-  final List<CameraDescription> cameras;
-
-  ///
-  final CameraType cameraType;
-
-  ///
-  final bool enableAudio;
-
-  ///
-  final FlashMode flashMode;
-
-  ///
+  /// Image resolution. Default value is [ResolutionPreset.medium]
   final ResolutionPreset resolutionPreset;
 
-  ///
+  /// Image format group. Default value is [ImageFormatGroup.jpeg]
   final ImageFormatGroup imageFormatGroup;
 
+  /// Video duration. Default value is 10 seconds
+  final Duration videoDuration;
+
   ///
+  final bool editAfterCapture;
+
+  /// Current active camera description e,g. Front camera or back camera
+  final CameraDescription? cameraDescription;
+
+  /// Available camera description list
+  final List<CameraDescription> cameras;
+
+  /// Type of the active camera
+  final CameraType cameraType;
+
+  /// Audio will be enabled if value is true
+  final bool enableAudio;
+
+  /// Camera flash mode
+  final FlashMode flashMode;
+
+  /// Return true if camera is taking picture
   final bool isTakingPicture;
 
-  ///
+  /// Return true if camera is recording video
   final bool isRecordingVideo;
 
-  ///
+  /// Return true if video recording is in pause state
   final bool isRecordingPaused;
 
-  ///
+  /// Return true if playground is active
   final bool isPlaygroundActive;
 
   ///
-  ActionValue copyWith({
+  CamValue copyWith({
     CameraDescription? cameraDescription,
     List<CameraDescription>? cameras,
     CameraType? cameraType,
@@ -457,10 +509,12 @@ class ActionValue {
     bool? isRecordingVideo,
     bool? isRecordingPaused,
     bool? isPlaygroundActive,
+    bool? editAfterCapture,
   }) {
-    return ActionValue(
+    return CamValue(
       resolutionPreset: resolutionPreset,
       imageFormatGroup: imageFormatGroup,
+      videoDuration: videoDuration,
       cameraDescription: cameraDescription ?? this.cameraDescription,
       cameras: cameras ?? this.cameras,
       cameraType: cameraType ?? this.cameraType,
@@ -470,6 +524,7 @@ class ActionValue {
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
+      editAfterCapture: editAfterCapture ?? this.editAfterCapture,
     );
   }
 

@@ -22,14 +22,10 @@ class CameraOverlay extends StatelessWidget {
   const CameraOverlay({
     Key? key,
     required this.controller,
-    required this.playgroundCntroller,
   }) : super(key: key);
 
   ///
   final CamController controller;
-
-  ///
-  final PlaygroundController playgroundCntroller;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +64,7 @@ class CameraOverlay extends StatelessWidget {
           ),
 
           // Playground controls
-          _PlaygroundOverlay(
-            controller: controller,
-            playgroundCntroller: playgroundCntroller,
-          ),
+          _PlaygroundOverlay(controller: controller),
 
           //
         ],
@@ -84,12 +77,9 @@ class _PlaygroundOverlay extends StatelessWidget {
   const _PlaygroundOverlay({
     Key? key,
     required this.controller,
-    required this.playgroundCntroller,
   }) : super(key: key);
 
   final CamController controller;
-
-  final PlaygroundController playgroundCntroller;
 
   @override
   Widget build(BuildContext context) {
@@ -104,14 +94,18 @@ class _PlaygroundOverlay extends StatelessWidget {
           children: [
             // Add text button
             Align(
-              child: PlaygroundAddTextButton(controller: playgroundCntroller),
+              child: PlaygroundAddTextButton(
+                controller: controller.playgroundController,
+              ),
             ),
 
             // Close button
             Positioned(
               left: 8,
               top: _top,
-              child: PlaygroundCloseButton(controller: playgroundCntroller),
+              child: PlaygroundCloseButton(
+                controller: controller.playgroundController,
+              ),
             ),
 
             // Background changer
@@ -119,7 +113,7 @@ class _PlaygroundOverlay extends StatelessWidget {
               left: 16,
               bottom: 16,
               child: PlaygroundGradientBackgroundChanger(
-                controller: playgroundCntroller,
+                controller: controller.playgroundController,
               ),
             ),
 
@@ -127,15 +121,20 @@ class _PlaygroundOverlay extends StatelessWidget {
             Positioned(
               right: 16,
               bottom: 16,
-              child: PlaygroundCaptureButton(controller: playgroundCntroller),
+              child: PlaygroundCaptureButton(
+                controller: controller.playgroundController,
+              ),
             ),
 
             // Sticker buttons
             Positioned(
               right: 16,
-              top: playgroundCntroller.value.stickerPickerView ? 0.0 : _top,
-              child:
-                  PlaygroundButtonCollection(controller: playgroundCntroller),
+              top: controller.playgroundController.value.stickerPickerView
+                  ? 0.0
+                  : _top,
+              child: PlaygroundButtonCollection(
+                controller: controller.playgroundController,
+              ),
             ),
           ],
         );
