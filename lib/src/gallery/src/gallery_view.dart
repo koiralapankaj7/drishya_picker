@@ -714,8 +714,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     );
 
     if (fullScreenMode) {
+      // ignore: use_build_context_synchronously
       pickedEntity = await Navigator.of(context).pushReplacement(route);
     } else {
+      // ignore: use_build_context_synchronously
       pickedEntity = await Navigator.of(context).push(route);
       _closeOnCameraSelect();
     }

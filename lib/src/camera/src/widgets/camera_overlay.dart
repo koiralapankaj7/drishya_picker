@@ -21,13 +21,9 @@ class CameraOverlay extends StatelessWidget {
   ///
   const CameraOverlay({
     Key? key,
-    required this.videoDuration,
     required this.controller,
     required this.playgroundCntroller,
   }) : super(key: key);
-
-  ///
-  final Duration videoDuration;
 
   ///
   final CamController controller;
@@ -68,10 +64,7 @@ class CameraOverlay extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 64,
-            child: CameraShutterButton(
-              videoDuration: videoDuration,
-              controller: controller,
-            ),
+            child: CameraShutterButton(controller: controller),
           ),
 
           // Playground controls

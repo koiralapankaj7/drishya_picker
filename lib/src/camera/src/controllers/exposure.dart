@@ -1,28 +1,28 @@
 // ignore_for_file: always_use_package_imports
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/ui_handler.dart';
-import 'controller_notifier.dart';
 
 ///
 class Exposure extends ValueNotifier<ExposureValue> {
   ///
   Exposure(
-    ControllerNotifier controllerNotifier,
+    CamController controllerNotifier,
     UIHandler uiHandler,
   )   : _controllerNotifier = controllerNotifier,
         _uiHandler = uiHandler,
         super(ExposureValue());
 
-  final ControllerNotifier _controllerNotifier;
+  final CamController _controllerNotifier;
   final UIHandler _uiHandler;
 
   bool get _initialized => _controllerNotifier.initialized;
 
   /// Call this only when [_initialized] is true
-  CameraController get _controller => _controllerNotifier.value.controller!;
+  CameraController? get _controller => _controllerNotifier.controller;
 
   ///
   void setMaxExposure(double offset) {
@@ -48,8 +48,8 @@ class Exposure extends ValueNotifier<ExposureValue> {
 
     try {
       await Future.wait([
-        _controller.setExposurePoint(offset),
-        _controller.setFocusPoint(offset),
+        _controller!.setExposurePoint(offset),
+        _controller!.setFocusPoint(offset),
       ]);
     } on CameraException catch (e) {
       _uiHandler.showExceptionSnackbar(e);
@@ -62,7 +62,7 @@ class Exposure extends ValueNotifier<ExposureValue> {
     if (!_initialized) return;
 
     try {
-      await _controller.setExposureMode(mode);
+      await _controller!.setExposureMode(mode);
     } on CameraException catch (e) {
       _uiHandler.showExceptionSnackbar(e);
       rethrow;
@@ -74,7 +74,7 @@ class Exposure extends ValueNotifier<ExposureValue> {
     if (!_initialized) return;
 
     try {
-      await _controller.setFocusMode(mode);
+      await _controller!.setFocusMode(mode);
     } on CameraException catch (e) {
       _uiHandler.showExceptionSnackbar(e);
       rethrow;

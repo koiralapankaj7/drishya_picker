@@ -16,6 +16,8 @@ class EntityThumbnail extends StatelessWidget {
 
   ///
   final DrishyaEntity entity;
+
+  /// Callback function triggered when image bytes is generated
   final ValueSetter<Uint8List?>? onBytesGenerated;
 
   @override

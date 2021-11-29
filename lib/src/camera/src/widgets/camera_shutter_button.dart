@@ -9,17 +9,15 @@ import '../controllers/cam_controller.dart';
 import '../entities/camera_type.dart';
 import 'camera_builder.dart';
 
+const Duration _defaultVideoDuration = Duration(seconds: 10);
+
 ///
 class CameraShutterButton extends StatelessWidget {
   ///
   const CameraShutterButton({
     Key? key,
-    required this.videoDuration,
     required this.controller,
   }) : super(key: key);
-
-  ///
-  final Duration videoDuration;
 
   ///
   final CamController controller;
@@ -36,12 +34,7 @@ class CameraShutterButton extends StatelessWidget {
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _ShutterButton(
-            videoDuration: videoDuration,
-            controller: controller,
-          ),
-        ],
+        children: [_ShutterButton(controller: controller)],
       ),
     );
   }
@@ -50,12 +43,10 @@ class CameraShutterButton extends StatelessWidget {
 class _ShutterButton extends StatefulWidget {
   const _ShutterButton({
     Key? key,
-    required this.videoDuration,
     required this.controller,
     this.size = 70.0,
   }) : super(key: key);
 
-  final Duration videoDuration;
   final double size;
   final CamController controller;
 
@@ -81,7 +72,7 @@ class _ShutterButtonState extends State<_ShutterButton>
     // Progress bar animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: widget.videoDuration,
+      duration: widget.controller.videoDuration ?? _defaultVideoDuration,
     )..addStatusListener((status) {
         if (_controller.status == AnimationStatus.completed) {
           _stopRecording();

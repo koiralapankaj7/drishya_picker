@@ -1,24 +1,23 @@
 // ignore_for_file: always_use_package_imports
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
-
-import 'controller_notifier.dart';
 
 ///
 class Zoom extends ValueNotifier<ZoomValue> {
   ///
   Zoom(
-    ControllerNotifier controllerNotifier,
+    CamController controllerNotifier,
   )   : _controllerNotifier = controllerNotifier,
         super(ZoomValue());
 
-  final ControllerNotifier _controllerNotifier;
+  final CamController _controllerNotifier;
 
   bool get _initialized => _controllerNotifier.initialized;
 
   /// Call this only when [_initialized] is true
-  CameraController get _controller => _controllerNotifier.value.controller!;
+  CameraController? get _controller => _controllerNotifier.controller;
 
   ///
   void addPointer(PointerDownEvent event) {
@@ -56,7 +55,7 @@ class Zoom extends ValueNotifier<ZoomValue> {
       currentScale: (value.baseScale * details.scale)
           .clamp(value.minAvailableZoom, value.maxAvailableZoom),
     );
-    await _controller.setZoomLevel(value.currentScale);
+    await _controller!.setZoomLevel(value.currentScale);
   }
 }
 

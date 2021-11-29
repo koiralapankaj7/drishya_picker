@@ -12,7 +12,6 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/camera_type.dart';
 import '../widgets/ui_handler.dart';
-import 'controller_notifier.dart';
 import 'exposure.dart';
 import 'zoom.dart';
 
@@ -20,32 +19,37 @@ import 'zoom.dart';
 class CamController extends ValueNotifier<ActionValue> {
   ///
   CamController({
-    required ControllerNotifier controllerNotifier,
+    // required ControllerNotifier controllerNotifier,
     required BuildContext context,
     ResolutionPreset? resolutionPreset,
     ImageFormatGroup? imageFormatGroup,
-  })  : _controllerNotifier = controllerNotifier,
-        _uiHandler = UIHandler(context),
-        zoom = Zoom(controllerNotifier),
-        exposure = Exposure(controllerNotifier, UIHandler(context)),
+    this.videoDuration,
+  })  : _uiHandler = UIHandler(context),
         super(
           ActionValue(
             resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
             imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
           ),
-        );
+        ) {
+    zoom = Zoom(this);
+    exposure = Exposure(this, _uiHandler);
+  }
+
+  CameraController? _cameraController;
 
   ///
-  final ControllerNotifier _controllerNotifier;
+  /// Vide duration. Default is 10 seconds.
+  ///
+  final Duration? videoDuration;
 
   ///
   final UIHandler _uiHandler;
 
   ///
-  final Zoom zoom;
+  late final Zoom zoom;
 
   ///
-  final Exposure exposure;
+  late final Exposure exposure;
 
   @override
   void dispose() {
@@ -55,10 +59,10 @@ class CamController extends ValueNotifier<ActionValue> {
   }
 
   ///
-  bool get initialized => _controllerNotifier.initialized;
+  bool get initialized => _cameraController?.value.isInitialized ?? false;
 
   /// Call this only when [initialized] is true
-  CameraController get controller => _controllerNotifier.value.controller!;
+  CameraController? get controller => _cameraController;
 
   ///
   void update({bool? isPlaygroundActive}) {
@@ -101,29 +105,31 @@ class CamController extends ValueNotifier<ActionValue> {
     }
 
     // create camera controller
-    final controller = CameraController(
+    _cameraController = CameraController(
       description,
       value.resolutionPreset,
       enableAudio: value.enableAudio,
       imageFormatGroup: value.imageFormatGroup,
     );
 
+    final controller = _cameraController!;
+
     // listen controller
     controller.addListener(() {
       if (controller.value.hasError) {
         final error = 'Camera error ${controller.value.errorDescription}';
         _uiHandler.showSnackBar(error);
-        _controllerNotifier.value =
-            _controllerNotifier.value.copyWith(error: error);
+        // _controllerNotifier.value =
+        //     _controllerNotifier.value.copyWith(error: error);
       }
     });
 
     try {
       await controller.initialize();
-      _controllerNotifier.value = ControllerValue(
-        controller: controller,
-        isReady: true,
-      );
+      // _controllerNotifier.value = ControllerValue(
+      //   controller: controller,
+      //   isReady: true,
+      // );
       value = value.copyWith(
         cameraDescription: description,
         cameras: cameras,
@@ -164,6 +170,8 @@ class CamController extends ValueNotifier<ActionValue> {
     }
 
     try {
+      final controller = _cameraController!;
+
       // Update state
       value = value.copyWith(isTakingPicture: true);
 
@@ -228,6 +236,8 @@ class CamController extends ValueNotifier<ActionValue> {
     }
 
     try {
+      final controller = _cameraController!;
+
       final mode = controller.value.flashMode == FlashMode.off
           ? FlashMode.always
           : FlashMode.off;
@@ -252,6 +262,7 @@ class CamController extends ValueNotifier<ActionValue> {
     }
 
     try {
+      final controller = _cameraController!;
       await controller.startVideoRecording();
       value = value.copyWith(
         isRecordingVideo: true,
@@ -273,6 +284,8 @@ class CamController extends ValueNotifier<ActionValue> {
 
     if (value.isRecordingVideo) {
       try {
+        final controller = _cameraController!;
+
         final xfile = await controller.stopVideoRecording();
         final file = File(xfile.path);
         final entity = await PhotoManager.editor.saveVideo(
@@ -320,6 +333,8 @@ class CamController extends ValueNotifier<ActionValue> {
 
     if (value.isRecordingVideo) {
       try {
+        final controller = _cameraController!;
+
         await controller.pauseVideoRecording();
         // Update state
         value = value.copyWith(isRecordingPaused: true);
@@ -343,6 +358,8 @@ class CamController extends ValueNotifier<ActionValue> {
 
     if (value.isRecordingPaused) {
       try {
+        final controller = _cameraController!;
+
         await controller.resumeVideoRecording();
         // Update state
         value = value.copyWith(isRecordingPaused: false);
@@ -362,6 +379,8 @@ class CamController extends ValueNotifier<ActionValue> {
       _uiHandler.showSnackBar("Couldn't find the camera!");
       return;
     }
+
+    final controller = _cameraController!;
 
     if (controller.value.isCaptureOrientationLocked) {
       await controller.unlockCaptureOrientation();

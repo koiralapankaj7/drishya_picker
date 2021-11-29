@@ -1,6 +1,5 @@
 // ignore_for_file: always_use_package_imports
 
-import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -13,10 +12,8 @@ class CameraViewField extends StatelessWidget {
   const CameraViewField({
     Key? key,
     this.onCapture,
+    this.controller,
     this.child,
-    this.videoDuration,
-    this.imageFormatGroup,
-    this.resolutionPreset,
   }) : super(key: key);
 
   ///
@@ -24,32 +21,17 @@ class CameraViewField extends StatelessWidget {
   ///
   final void Function(DrishyaEntity entity)? onCapture;
 
-  /// Video duration. Default is 10 seconds
-  final Duration? videoDuration;
+  /// Camera controller
+  final CamController? controller;
 
-  ///
-  /// Camera resolution. Default to [ResolutionPreset.medium]
-  ///
-  final ResolutionPreset? resolutionPreset;
-
-  ///
-  /// Camera image format. Default to [ImageFormatGroup.jpeg]
-  ///
-  final ImageFormatGroup? imageFormatGroup;
-
-  ///
+  /// Child widget
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        CameraView.pick(
-          context,
-          videoDuration: videoDuration,
-          resolutionPreset: resolutionPreset,
-          imageFormatGroup: imageFormatGroup,
-        ).then((value) {
+        CameraView.pick(context, controller: controller).then((value) {
           if (value != null) {
             onCapture?.call(value);
           }

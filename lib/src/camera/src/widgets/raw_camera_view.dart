@@ -24,7 +24,7 @@ class RawCameraView extends StatelessWidget {
       builder: (context, constraints) {
         final size = constraints.biggest;
         final scale =
-            1 / (action.controller.value.aspectRatio * size.aspectRatio);
+            1 / (action.controller!.value.aspectRatio * size.aspectRatio);
 
         return ClipRect(
           clipper: _Clipper(size),
@@ -35,7 +35,7 @@ class RawCameraView extends StatelessWidget {
               onPointerDown: action.zoom.addPointer,
               onPointerUp: action.zoom.removePointer,
               child: CameraPreview(
-                action.controller,
+                action.controller!,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints.expand(),
                   child: GestureDetector(
