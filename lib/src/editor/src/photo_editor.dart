@@ -14,10 +14,14 @@ class PhotoEditor extends StatefulWidget {
   const PhotoEditor({
     Key? key,
     this.controller,
+    this.setting,
   }) : super(key: key);
 
   ///
   final PhotoEditingController? controller;
+
+  ///
+  final EditorSetting? setting;
 
   /// Open playground
   static Future<DrishyaEntity?> open(
@@ -38,15 +42,32 @@ class PhotoEditor extends StatefulWidget {
 }
 
 class _PhotoEditorState extends State<PhotoEditor> {
-  late final PhotoEditingController _controller;
+  late PhotoEditingController _controller;
+  late EditorSetting _setting;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? PhotoEditingController();
-    // if (widget.controller?.value.background != null) {
-    //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    // }
+    _setting = widget.setting ?? EditorSetting();
+  }
+
+  @override
+  void didUpdateWidget(covariant PhotoEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller ||
+        oldWidget.setting != widget.setting) {
+      _controller = widget.controller ?? PhotoEditingController();
+      _setting = widget.setting ?? EditorSetting();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -81,8 +102,11 @@ class _PhotoEditorState extends State<PhotoEditor> {
 
                         // Stickers
                         Opacity(
-                          opacity: value.stickerPickerView ? 0.0 : 1.0,
-                          child: StickersView(controller: _controller),
+                          opacity: value.isStickerPickerOpen ? 0.0 : 1.0,
+                          child: StickersView(
+                            controller: _controller,
+                            setting: _setting,
+                          ),
                         ),
 
                         //
@@ -91,12 +115,12 @@ class _PhotoEditorState extends State<PhotoEditor> {
                   ),
 
                   // Textfield
-                  if (!value.enableOverlay)
+                  if (!value.disableEditing)
                     EditorTextfield(controller: _controller),
 
                   // Overlay
-                  if (value.enableOverlay)
-                    EditorOverlay(controller: _controller),
+                  if (value.disableEditing)
+                    EditorOverlay(controller: _controller, setting: _setting),
                 ],
               );
             },

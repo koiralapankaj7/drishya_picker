@@ -7,12 +7,16 @@ class StickerPicker extends StatelessWidget {
   ///
   const StickerPicker({
     Key? key,
+    required this.setting,
     required this.initialIndex,
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.bucket,
     required this.imageBackground,
   }) : super(key: key);
+
+  ///
+  final EditorSetting setting;
 
   ///
   final int initialIndex;
@@ -48,6 +52,7 @@ class StickerPicker extends StatelessWidget {
             ),
             Expanded(
               child: StickersTabs(
+                setting: setting,
                 initialIndex: initialIndex,
                 onTabChanged: onTabChanged,
                 onStickerSelected: onStickerSelected,
@@ -66,11 +71,15 @@ class StickersTabs extends StatefulWidget {
   ///
   const StickersTabs({
     Key? key,
+    required this.setting,
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.imageBackground,
     this.initialIndex = 0,
   }) : super(key: key);
+
+  ///
+  final EditorSetting setting;
 
   ///
   final ValueSetter<Sticker> onStickerSelected;
@@ -91,14 +100,16 @@ class StickersTabs extends StatefulWidget {
 class _StickersTabsState extends State<StickersTabs>
     with TickerProviderStateMixin {
   late final TabController _tabController;
+  late final Map<String, Set<Sticker>> _stickers;
 
   @override
   void initState() {
     super.initState();
+    _stickers = widget.setting.stickers ?? stickers;
     _tabController = TabController(
-      length: 3,
-      vsync: this,
+      length: _stickers.length,
       initialIndex: widget.initialIndex,
+      vsync: this,
     );
     _tabController.addListener(() {
       // False when swipe
@@ -126,25 +137,34 @@ class _StickersTabsState extends State<StickersTabs>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                StickersTabBarView(
-                  key: const Key('stickersTabs_artsTabBarView'),
-                  stickers: arts,
+              children: _stickers.keys.map((key) {
+                final stickers = _stickers[key] ?? {};
+                return StickersTabBarView(
+                  key: Key('stickersTabs_${key}TabBarView'),
+                  stickers: stickers,
                   onStickerSelected: widget.onStickerSelected,
                   maxCrossAxisExtent: 100,
-                ),
-                StickersTabBarView(
-                  key: const Key('stickersTabs_emojisTabBarView'),
-                  stickers: gifs,
-                  onStickerSelected: widget.onStickerSelected,
-                  maxCrossAxisExtent: 70,
-                ),
-                StickersTabBarView(
-                  key: const Key('stickersTabs_shapesTabBarView'),
-                  stickers: shapes,
-                  onStickerSelected: widget.onStickerSelected,
-                ),
-              ],
+                );
+              }).toList(),
+              // [
+              //   StickersTabBarView(
+              //     key: const Key('stickersTabs_artsTabBarView'),
+              //     stickers: arts,
+              //     onStickerSelected: widget.onStickerSelected,
+              //     maxCrossAxisExtent: 100,
+              //   ),
+              //   StickersTabBarView(
+              //     key: const Key('stickersTabs_emojisTabBarView'),
+              //     stickers: gifs,
+              //     onStickerSelected: widget.onStickerSelected,
+              //     maxCrossAxisExtent: 70,
+              //   ),
+              //   StickersTabBarView(
+              //     key: const Key('stickersTabs_shapesTabBarView'),
+              //     stickers: shapes,
+              //     onStickerSelected: widget.onStickerSelected,
+              //   ),
+              // ],
             ),
           ),
           TabBar(
@@ -156,20 +176,28 @@ class _StickersTabsState extends State<StickersTabs>
               color: Colors.white24,
               borderRadius: BorderRadius.circular(16),
             ),
-            tabs: const [
-              StickersTab(
-                key: Key('stickersTabs_artsTab'),
-                label: 'ARTS',
-              ),
-              StickersTab(
-                key: Key('stickersTabs_emojisTab'),
-                label: 'EMOJIS',
-              ),
-              StickersTab(
-                key: Key('stickersTabs_shapesTab'),
-                label: 'SHAPES',
-              ),
-            ],
+            isScrollable: _stickers.length > widget.setting.fixedTabSize,
+            tabs: _stickers.keys.map((key) {
+              return StickersTab(
+                key: Key('stickersTabs_${key}Tab'),
+                label: key,
+              );
+            }).toList(),
+
+            // const [
+            //   StickersTab(
+            //     key: Key('stickersTabs_artsTab'),
+            //     label: 'ARTS',
+            //   ),
+            //   StickersTab(
+            //     key: Key('stickersTabs_emojisTab'),
+            //     label: 'EMOJIS',
+            //   ),
+            //   StickersTab(
+            //     key: Key('stickersTabs_shapesTab'),
+            //     label: 'SHAPES',
+            //   ),
+            // ],
           ),
         ],
       ),

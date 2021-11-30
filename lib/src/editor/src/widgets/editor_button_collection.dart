@@ -11,6 +11,7 @@ class EditorButtonCollection extends StatelessWidget {
   const EditorButtonCollection({
     Key? key,
     required this.controller,
+    required this.setting,
     this.stickerViewBackground,
   }) : super(key: key);
 
@@ -18,16 +19,20 @@ class EditorButtonCollection extends StatelessWidget {
   final PhotoEditingController controller;
 
   ///
+  final EditorSetting setting;
+
+  ///
   final Color? stickerViewBackground;
 
   void _onStickerIconPressed(BuildContext context) {
-    controller.updateValue(isEditing: true, stickerPickerView: true);
+    controller.updateValue(isEditing: true, isStickerPickerOpen: true);
     Navigator.of(context)
         .push<Sticker>(
       SwipeablePageRoute(
         notificationDepth: 1,
         builder: (context) {
           return StickerPicker(
+            setting: setting,
             initialIndex: _initialIndex,
             bucket: _bucket,
             onTabChanged: (index) {
@@ -45,7 +50,7 @@ class EditorButtonCollection extends StatelessWidget {
     )
         .then((value) {
       Future.delayed(const Duration(milliseconds: 300), () {
-        controller.updateValue(isEditing: false, stickerPickerView: false);
+        controller.updateValue(isEditing: false, isStickerPickerOpen: false);
       });
     });
   }
@@ -77,7 +82,7 @@ class EditorButtonCollection extends StatelessWidget {
     return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
-        final firstChild = value.stickerPickerView
+        final firstChild = value.isStickerPickerOpen
             ? Container(
                 height: 70,
                 alignment: Alignment.centerRight,
@@ -88,7 +93,7 @@ class EditorButtonCollection extends StatelessWidget {
               )
             : const SizedBox();
 
-        final crossFadeState = value.stickerPickerView || value.isEditing
+        final crossFadeState = value.isStickerPickerOpen || value.isEditing
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond;
 

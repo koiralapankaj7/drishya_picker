@@ -11,10 +11,14 @@ class EditorOverlay extends StatelessWidget {
   const EditorOverlay({
     Key? key,
     required this.controller,
+    required this.setting,
   }) : super(key: key);
 
   ///
   final PhotoEditingController controller;
+
+  ///
+  final EditorSetting setting;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +61,11 @@ class EditorOverlay extends StatelessWidget {
             // Sticker buttons
             Positioned(
               right: 16,
-              top: controller.value.stickerPickerView ? 0.0 : _top,
-              child: EditorButtonCollection(controller: controller),
+              top: controller.value.isStickerPickerOpen ? 0.0 : _top,
+              child: EditorButtonCollection(
+                controller: controller,
+                setting: setting,
+              ),
             ),
 
             //

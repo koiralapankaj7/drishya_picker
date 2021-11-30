@@ -13,14 +13,14 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
   ///
   PhotoEditingController({
     EditorBackground? background,
-    bool enableOverlay = true,
+    bool disableEditing = false,
   })  : _editorKey = GlobalKey(),
         _stickerController = StickerController(),
         _textController = TextEditingController(),
         super(
           PhotoValue(
             background: background,
-            enableOverlay: enableOverlay,
+            disableEditing: disableEditing,
           ),
         );
 
@@ -38,19 +38,20 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
   ///
   bool get hasStickers => !value.hasStickers;
 
-  /// Playground sticker booth controller
+  /// Editor sticker controller
   StickerController get stickerController => _stickerController;
 
-  /// Playground text editing controller
+  /// Editor text editing controller
   TextEditingController get textController => _textController;
 
   @override
   void dispose() {
     _stickerController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
-  /// Update playground value
+  /// Update editor value
   void updateValue({
     bool? fillColor,
     int? maxLines,
@@ -59,8 +60,8 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     bool? editingMode,
     bool? hasStickers,
     bool? isEditing,
-    bool? stickerPickerView,
-    bool? colorPickerVisibility,
+    bool? isStickerPickerOpen,
+    bool? isColorPickerVisible,
   }) {
     if (!(hasFocus ?? false)) {
       // Hide status bar
@@ -74,18 +75,18 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
       editingMode: editingMode,
       hasStickers: hasStickers,
       isEditing: isEditing,
-      stickerPickerView: stickerPickerView,
-      colorPickerVisibility: colorPickerVisibility,
+      isStickerPickerOpen: isStickerPickerOpen,
+      isColorPickerVisible: isColorPickerVisible,
     );
   }
 
-  /// Clear playground
-  void clearPlayground() {
+  /// Clear editor
+  void clear() {
     _stickerController.clearStickers();
     value = value.copyWith(hasStickers: false);
   }
 
-  /// Change playground background
+  /// Change editor background
   void changeBackground({EditorBackground? background}) {
     // Photo background
     if (background != null && background is PhotoBackground) {
@@ -103,8 +104,8 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     }
   }
 
-  /// Take screen shot of the playground
-  Future<DrishyaEntity?> takeScreenshot() async {
+  /// Take screen shot of the editor
+  Future<DrishyaEntity?> completeEditing() async {
     try {
       final bg = value.background;
       if (bg is PhotoBackground && bg.bytes != null && !value.hasStickers) {

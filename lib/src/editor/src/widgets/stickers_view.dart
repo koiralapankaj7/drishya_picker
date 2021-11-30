@@ -9,10 +9,14 @@ class StickersView extends StatefulWidget {
   const StickersView({
     Key? key,
     required this.controller,
+    required this.setting,
   }) : super(key: key);
 
   ///
   final PhotoEditingController controller;
+
+  ///
+  final EditorSetting setting;
 
   @override
   State<StickersView> createState() => _StickersViewState();
@@ -29,7 +33,7 @@ class _StickersViewState extends State<StickersView> {
     super.initState();
     _deleteKey = GlobalKey();
     _controller = widget.controller;
-    _colorNotifier = ValueNotifier(_colors.first);
+    _colorNotifier = ValueNotifier(widget.setting.colors.first);
   }
 
   @override
@@ -40,8 +44,8 @@ class _StickersViewState extends State<StickersView> {
 
   void _onTapOutside() {
     _controller.stickerController.unselectSticker();
-    if (_controller.value.colorPickerVisibility) {
-      _controller.updateValue(colorPickerVisibility: false);
+    if (_controller.value.isColorPickerVisible) {
+      _controller.updateValue(isColorPickerVisible: false);
     }
   }
 
@@ -139,7 +143,7 @@ class _StickersViewState extends State<StickersView> {
                         stickerController.deleteSticker(asset);
                         _controller.updateValue(hasFocus: true);
                       } else if (asset.sticker is IconSticker) {
-                        _controller.updateValue(colorPickerVisibility: true);
+                        _controller.updateValue(isColorPickerVisible: true);
                       }
                     },
                     onStart: () {
@@ -197,7 +201,7 @@ class _StickersViewState extends State<StickersView> {
                 ),
 
               // Color picker
-              if (_controller.value.colorPickerVisibility &&
+              if (_controller.value.isColorPickerVisible &&
                   !_controller.value.isEditing)
                 Positioned(
                   left: 0,
@@ -210,7 +214,7 @@ class _StickersViewState extends State<StickersView> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
                       runSpacing: 8,
-                      children: _colors
+                      children: widget.setting.colors
                           .map(
                             (color) => _ColorCircle(
                               color: color,
@@ -230,17 +234,6 @@ class _StickersViewState extends State<StickersView> {
     );
   }
 }
-
-final _colors = [
-  Colors.white,
-  Colors.black,
-  Colors.red,
-  Colors.yellow,
-  Colors.blue,
-  Colors.teal,
-  Colors.green,
-  Colors.orange,
-];
 
 class _ColorCircle extends StatelessWidget {
   const _ColorCircle({

@@ -28,7 +28,7 @@ class EditorCloseButton extends StatelessWidget {
         builder: (context) => const _AppDialog(),
       ).then((value) {
         if (value ?? false) {
-          controller.clearPlayground();
+          controller.clear();
         }
       });
     }

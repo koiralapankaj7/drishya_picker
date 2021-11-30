@@ -129,7 +129,7 @@ class _PlaygroundOverlay extends StatelessWidget {
             // Sticker buttons
             Positioned(
               right: 16,
-              top: controller.photoEditingController.value.stickerPickerView
+              top: controller.photoEditingController.value.isStickerPickerOpen
                   ? 0.0
                   : _top,
               child: EditorButtonCollection(

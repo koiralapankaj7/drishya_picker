@@ -29,7 +29,7 @@ class CamController extends ValueNotifier<CamValue> {
   })  : _uiHandler = UIHandler(context),
         _context = context,
         _photoEditingController = playgroundController ??
-            PhotoEditingController(enableOverlay: false),
+            PhotoEditingController(disableEditing: true),
         super(
           CamValue(
             resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,

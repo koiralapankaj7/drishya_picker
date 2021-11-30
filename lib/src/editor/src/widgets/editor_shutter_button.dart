@@ -34,11 +34,11 @@ class EditorShutterButton extends StatelessWidget {
             ignoring: crossFadeState == CrossFadeState.showFirst,
             child: InkWell(
               onTap: () async {
-                if (controller.value.colorPickerVisibility) {
-                  controller.updateValue(colorPickerVisibility: false);
+                if (controller.value.isColorPickerVisible) {
+                  controller.updateValue(isColorPickerVisible: false);
                   return;
                 }
-                final entity = await controller.takeScreenshot();
+                final entity = await controller.completeEditing();
                 if (entity != null) {
                   // ignore: use_build_context_synchronously
                   Navigator.of(context).pop(entity);
