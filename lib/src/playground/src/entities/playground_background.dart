@@ -1,4 +1,5 @@
-import 'package:drishya_picker/drishya_picker.dart';
+import 'dart:typed_data';
+
 import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -14,21 +15,18 @@ abstract class PlaygroundBackground {
 class PhotoBackground implements PlaygroundBackground {
   ///
   PhotoBackground({
-    this.entity,
+    this.bytes,
     this.url,
-  }) : assert(
-          entity?.type == AssetType.image,
-          'Photo background can be only image',
-        );
+  });
 
   ///
-  final DrishyaEntity? entity;
+  final Uint8List? bytes;
 
   ///
   final String? url;
 
   ///
-  bool get hasData => (url?.isNotEmpty ?? false) || (entity != null);
+  bool get hasData => (url?.isNotEmpty ?? false) || (bytes != null);
 
   @override
   Widget build(BuildContext context) => PhotoBackgroundView(background: this);

@@ -111,22 +111,18 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   /// Take screen shot of the playground
   Future<DrishyaEntity?> takeScreenshot() async {
     try {
-      final boundary = _playgroundKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
-      if (boundary != null) {
-        final image = await boundary.toImage();
+      final bg = value.background;
+      if (bg is PhotoBackground && bg.bytes != null && !value.hasStickers) {
+        final entity = await PhotoManager.editor.saveImage(bg.bytes!);
+        return entity?.toDrishya;
+      } else {
+        final boundary = _playgroundKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+        final image = await boundary!.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
         final entity = await PhotoManager.editor.saveImage(data);
-        final file = await entity!.file;
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
-        return entity.toDrishya.copyWith(
-          pickedThumbData: data,
-          pickedFile: file,
-        );
+        return entity?.toDrishya;
       }
     } catch (e) {
       log('Exception occured while capturing picture : $e');

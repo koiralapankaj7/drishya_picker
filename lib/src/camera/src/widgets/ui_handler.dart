@@ -27,5 +27,5 @@ class UIHandler {
 
   ///
   void pop<T extends Object?>([T? result]) =>
-      Navigator.of(context).pop<T>(result);
+      Navigator.of(context).pop<T?>(result);
 }

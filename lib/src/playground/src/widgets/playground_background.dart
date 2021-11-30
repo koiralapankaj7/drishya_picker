@@ -1,7 +1,5 @@
 // ignore_for_file: always_use_package_imports
 
-import 'dart:typed_data';
-
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
@@ -51,19 +49,10 @@ class PhotoBackgroundView extends StatelessWidget {
       color: Colors.black,
       child: Builder(
         builder: (_) {
-          if (background.entity != null) {
-            return FutureBuilder<Uint8List?>(
-              future: background.entity!.originBytes,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.data != null) {
-                  return Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.contain,
-                  );
-                }
-                return const SizedBox();
-              },
+          if (background.bytes != null) {
+            return Image.memory(
+              background.bytes!,
+              fit: BoxFit.contain,
             );
           } else if (background.url != null) {
             return Image.network(

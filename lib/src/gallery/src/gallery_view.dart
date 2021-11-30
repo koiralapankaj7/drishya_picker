@@ -702,8 +702,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _accessCamera = true;
     DrishyaEntity? pickedEntity;
 
+    final bytes = await entity.originBytes;
+
     final pc = PlaygroundController(
-      background: PhotoBackground(entity: entity),
+      background: PhotoBackground(bytes: bytes),
     );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(

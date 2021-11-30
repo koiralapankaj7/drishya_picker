@@ -1,4 +1,4 @@
-// ignore_for_file: always_use_package_imports
+// ignore_for_file: always_use_package_imports, use_build_context_synchronously
 
 import 'dart:io';
 
@@ -181,16 +181,17 @@ class CamController extends ValueNotifier<CamValue> {
     //
   }
 
-  //
-  void _finishTakingPicture(DrishyaEntity? drishyaEntity) {
-    if (!value.editAfterCapture) {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
-    }
-    _uiHandler.pop<DrishyaEntity>(drishyaEntity);
-  }
+  // //
+  // void _finishTakingPicture(DrishyaEntity? drishyaEntity) {
+  //   // if (!value.editAfterCapture) {
+  //   //   SystemChrome.setEnabledSystemUIMode(
+  //   //     SystemUiMode.manual,
+  //   //     overlays: SystemUiOverlay.values,
+  //   //   );
+  //   // }
+  //   Navigator.of(_context).pop(drishyaEntity);
+  //   // _uiHandler.pop<DrishyaEntity?>(drishyaEntity);
+  // }
 
   /// Take picture
   Future<DrishyaEntity?> takePicture() async {
@@ -212,43 +213,46 @@ class CamController extends ValueNotifier<CamValue> {
 
       final xFile = await controller.takePicture();
       final file = File(xFile.path);
-      final data = await file.readAsBytes();
+      final bytes = await file.readAsBytes();
 
-      final entity = await PhotoManager.editor.saveImage(
-        data,
-        title: path.basename(file.path),
-      );
-
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-
-      value = value.copyWith(isTakingPicture: false);
-
-      if (entity != null) {
-        DrishyaEntity? drishyaEntity = entity.toDrishya.copyWith(
-          pickedThumbData: data,
-          pickedFile: file,
+      if (value.editAfterCapture) {
+        final pc = PlaygroundController(
+          background: PhotoBackground(bytes: bytes),
+        );
+        final route = SlideTransitionPageRoute<DrishyaEntity?>(
+          builder: Playground(controller: pc),
+          begainHorizontal: true,
+          endHorizontal: true,
+        );
+        final de = await Navigator.of(_context).push(route);
+        if (de != null) {
+          _uiHandler.pop(de);
+        }
+        // pc.dispose();
+        value = value.copyWith(isTakingPicture: false);
+        return de;
+      } else {
+        final entity = await PhotoManager.editor.saveImage(
+          bytes,
+          title: path.basename(file.path),
         );
 
-        if (value.editAfterCapture) {
-          final pc = PlaygroundController(
-            background: PhotoBackground(entity: drishyaEntity),
-          );
-          final route = SlideTransitionPageRoute<DrishyaEntity?>(
-            builder: Playground(controller: pc),
-            begainHorizontal: true,
-          );
-          // ignore: use_build_context_synchronously
-          drishyaEntity = await Navigator.of(_context).pushReplacement(route);
-          pc.dispose();
+        if (file.existsSync()) {
+          file.deleteSync();
         }
-        _finishTakingPicture(drishyaEntity);
-        return drishyaEntity;
-      } else {
-        _uiHandler.showSnackBar('Something went wrong! Please try again');
-        value = value.copyWith(isTakingPicture: false);
-        return null;
+
+        if (entity != null) {
+          final drishyaEntity = entity.toDrishya.copyWith(
+            pickedThumbData: bytes,
+            pickedFile: file,
+          );
+          _uiHandler.pop(drishyaEntity);
+          return drishyaEntity;
+        } else {
+          _uiHandler.showSnackBar('Something went wrong! Please try again');
+          value = value.copyWith(isTakingPicture: false);
+          return null;
+        }
       }
     } on CameraException catch (e) {
       _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
