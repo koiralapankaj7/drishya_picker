@@ -1,39 +1,32 @@
 //
-// ignore_for_file: always_use_package_imports
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/drishya_entity.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'controller/playground_controller.dart';
-import 'entities/playground_value.dart';
-import 'widgets/playground_controller_provider.dart';
-import 'widgets/playground_overlay.dart';
-import 'widgets/playground_stickers.dart';
-import 'widgets/playground_textfield.dart';
-
 ///
-class Playground extends StatefulWidget {
+class PhotoEditor extends StatefulWidget {
   ///
-  const Playground({
+  const PhotoEditor({
     Key? key,
     this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController? controller;
+  final PhotoEditingController? controller;
 
   /// Open playground
   static Future<DrishyaEntity?> open(
     BuildContext context, {
-    PlaygroundController? controller,
+    PhotoEditingController? controller,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
-        builder: Playground(
+        builder: PhotoEditor(
           controller: controller,
         ),
       ),
@@ -41,16 +34,16 @@ class Playground extends StatefulWidget {
   }
 
   @override
-  State<Playground> createState() => _PlaygroundState();
+  State<PhotoEditor> createState() => _PhotoEditorState();
 }
 
-class _PlaygroundState extends State<Playground> {
-  late final PlaygroundController _controller;
+class _PhotoEditorState extends State<PhotoEditor> {
+  late final PhotoEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? PlaygroundController();
+    _controller = widget.controller ?? PhotoEditingController();
     // if (widget.controller?.value.background != null) {
     //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     // }
@@ -69,9 +62,9 @@ class _PlaygroundState extends State<Playground> {
       child: Scaffold(
         extendBody: true,
         resizeToAvoidBottomInset: false,
-        body: PlaygroundControllerProvider(
+        body: PhotoEditingControllerProvider(
           controller: _controller,
-          child: ValueListenableBuilder<PlaygroundValue>(
+          child: ValueListenableBuilder<PhotoValue>(
             valueListenable: _controller,
             builder: (context, value, child) {
               return Stack(
@@ -79,7 +72,7 @@ class _PlaygroundState extends State<Playground> {
                 children: [
                   // Captureable view that shows the background and stickers
                   RepaintBoundary(
-                    key: _controller.playgroundKey,
+                    key: _controller.editorKey,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -89,7 +82,7 @@ class _PlaygroundState extends State<Playground> {
                         // Stickers
                         Opacity(
                           opacity: value.stickerPickerView ? 0.0 : 1.0,
-                          child: PlaygroundStickers(controller: _controller),
+                          child: StickersView(controller: _controller),
                         ),
 
                         //
@@ -99,11 +92,11 @@ class _PlaygroundState extends State<Playground> {
 
                   // Textfield
                   if (!value.enableOverlay)
-                    PlaygroundTextfield(controller: _controller),
+                    EditorTextfield(controller: _controller),
 
                   // Overlay
                   if (value.enableOverlay)
-                    PlaygroundOverlay(controller: _controller),
+                    EditorOverlay(controller: _controller),
                 ],
               );
             },

@@ -1,18 +1,18 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 ///
 // ignore: one_member_abstracts
-abstract class PlaygroundBackground {
+abstract class EditorBackground {
   /// Playgroung builder
   Widget build(BuildContext context);
 }
 
 ///
-class PhotoBackground implements PlaygroundBackground {
+class PhotoBackground implements EditorBackground {
   ///
   PhotoBackground({
     this.bytes,
@@ -33,7 +33,7 @@ class PhotoBackground implements PlaygroundBackground {
 }
 
 ///
-class GradientBackground implements PlaygroundBackground {
+class GradientBackground implements EditorBackground {
   ///
   const GradientBackground(this.colors);
 

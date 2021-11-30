@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_view.dart';
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -704,12 +704,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final bytes = await entity.originBytes;
 
-    final pc = PlaygroundController(
+    final pc = PhotoEditingController(
       background: PhotoBackground(bytes: bytes),
     );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: Playground(controller: pc),
+      builder: PhotoEditor(controller: pc),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );

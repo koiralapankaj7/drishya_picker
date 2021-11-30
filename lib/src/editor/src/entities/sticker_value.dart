@@ -1,14 +1,12 @@
-// ignore_for_file: always_use_package_imports
-
-import '../entities/sticker_asset.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 
 ///
 const emptyAssetId = '';
 
 ///
-class StickerboothValue {
+class StickerValue {
   ///
-  const StickerboothValue({
+  const StickerValue({
     this.aspectRatio = 3 / 4,
     this.assets = const <StickerAsset>[],
     this.selectedAssetId = emptyAssetId,
@@ -24,12 +22,12 @@ class StickerboothValue {
   final String selectedAssetId;
 
   ///
-  StickerboothValue copyWith({
+  StickerValue copyWith({
     double? aspectRatio,
     List<StickerAsset>? assets,
     String? selectedAssetId,
   }) {
-    return StickerboothValue(
+    return StickerValue(
       aspectRatio: aspectRatio ?? this.aspectRatio,
       assets: assets ?? this.assets,
       selectedAssetId: selectedAssetId ?? this.selectedAssetId,

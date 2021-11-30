@@ -1,28 +1,21 @@
-// ignore_for_file: always_use_package_imports, no_default_cases
-
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-
-import '../../playground.dart';
-import '../controller/playground_controller.dart';
-import 'playground_builder.dart';
-import 'playground_sticker_picker.dart';
 
 final PageStorageBucket _bucket = PageStorageBucket();
 var _initialIndex = 0;
 
 ///
-class PlaygroundButtonCollection extends StatelessWidget {
+class EditorButtonCollection extends StatelessWidget {
   ///
-  const PlaygroundButtonCollection({
+  const EditorButtonCollection({
     Key? key,
     required this.controller,
     this.stickerViewBackground,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   ///
   final Color? stickerViewBackground;
@@ -66,6 +59,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
       case TextAlign.end:
         textAlign = TextAlign.start;
         break;
+      // ignore: no_default_cases
       default:
         textAlign = TextAlign.center;
     }
@@ -80,7 +74,7 @@ class PlaygroundButtonCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasFocus = controller.value.hasFocus;
-    return PlaygroundBuilder(
+    return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
         final firstChild = value.stickerPickerView

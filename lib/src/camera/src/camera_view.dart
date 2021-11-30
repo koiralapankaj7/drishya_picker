@@ -6,7 +6,7 @@ import 'dart:ui';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -57,7 +57,7 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late PlaygroundController _playgroundController;
+  late PhotoEditingController _playgroundController;
   late CamController _camController;
 
   @override
@@ -65,7 +65,7 @@ class _CameraViewState extends State<CameraView>
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _camController = widget.controller ?? CamController(context: context);
-    _playgroundController = _camController.playgroundController
+    _playgroundController = _camController.photoEditingController
       ..addListener(_playgroundListener);
     _hideSB();
     _camController.createCamera();
@@ -83,7 +83,7 @@ class _CameraViewState extends State<CameraView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       _camController = widget.controller ?? CamController(context: context);
-      _playgroundController = _camController.playgroundController
+      _playgroundController = _camController.photoEditingController
         ..addListener(_playgroundListener);
       _hideSB();
       _camController.createCamera();
@@ -167,7 +167,7 @@ class _CameraViewState extends State<CameraView>
                   controller: _camController,
                   builder: (value, child) {
                     if (value.cameraType == CameraType.text) {
-                      return Playground(controller: _playgroundController);
+                      return PhotoEditor(controller: _playgroundController);
                     }
                     return RawCameraView(action: _camController);
                   },

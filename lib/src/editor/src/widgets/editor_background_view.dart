@@ -1,11 +1,6 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-
-import '../controller/playground_controller.dart';
-import '../entities/playground_background.dart';
-import 'playground_builder.dart';
 
 ///
 class GradientBackgroundView extends StatelessWidget {
@@ -69,15 +64,15 @@ class PhotoBackgroundView extends StatelessWidget {
 }
 
 ///
-class PlaygroundGradientBackgroundChanger extends StatelessWidget {
+class GradientBackgroundChanger extends StatelessWidget {
   ///
-  const PlaygroundGradientBackgroundChanger({
+  const GradientBackgroundChanger({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +80,7 @@ class PlaygroundGradientBackgroundChanger extends StatelessWidget {
       return const SizedBox();
     }
 
-    return PlaygroundBuilder(
+    return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
         final crossFadeState = value.isEditing

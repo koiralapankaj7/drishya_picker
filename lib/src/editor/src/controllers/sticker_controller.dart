@@ -1,21 +1,16 @@
-// ignore_for_file: always_use_package_imports
-
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-
-import '../draggable_resizable.dart';
-import '../entities/sticker_asset.dart';
-import '../entities/stickerbooth_value.dart';
 
 ///
 typedef UuidGetter = String Function();
 
 ///
-class StickerBoothController extends ValueNotifier<StickerboothValue> {
+class StickerController extends ValueNotifier<StickerValue> {
   ///
-  StickerBoothController([UuidGetter? uuid])
+  StickerController([UuidGetter? uuid])
       : uuid = uuid ?? const Uuid().v4,
-        super(const StickerboothValue());
+        super(const StickerValue());
 
   ///
   final UuidGetter uuid;

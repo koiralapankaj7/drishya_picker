@@ -1,14 +1,10 @@
-// ignore_for_file: always_use_package_imports
-
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
-import '../controller/playground_controller.dart';
-import '../entities/playground_value.dart';
-
 ///
-class PlaygroundBuilder extends StatelessWidget {
+class EditorBuilder extends StatelessWidget {
   ///
-  const PlaygroundBuilder({
+  const EditorBuilder({
     Key? key,
     required this.controller,
     required this.builder,
@@ -16,12 +12,12 @@ class PlaygroundBuilder extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   ///
   final Widget Function(
     BuildContext context,
-    PlaygroundValue value,
+    PhotoValue value,
     Widget? child,
   ) builder;
 
@@ -30,7 +26,7 @@ class PlaygroundBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<PlaygroundValue>(
+    return ValueListenableBuilder<PhotoValue>(
       valueListenable: controller,
       builder: builder,
       child: child,

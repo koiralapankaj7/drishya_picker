@@ -1,20 +1,17 @@
-// ignore_for_file: always_use_package_imports
-
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
-import 'playground_background.dart';
-
 ///
-class PlaygroundValue {
+class PhotoValue {
   ///
-  PlaygroundValue({
+  PhotoValue({
     this.textAlign = TextAlign.center,
     this.fillColor = false,
     this.maxLines = 1,
     this.hasFocus = false,
     this.hasStickers = false,
     this.isEditing = false,
-    PlaygroundBackground? background,
+    EditorBackground? background,
     GradientBackground? textBackground,
     this.stickerPickerView = false,
     this.colorPickerVisibility = false,
@@ -41,7 +38,7 @@ class PlaygroundValue {
   final bool isEditing;
 
   ///
-  final PlaygroundBackground background;
+  final EditorBackground background;
 
   ///
   final GradientBackground textBackground;
@@ -59,7 +56,7 @@ class PlaygroundValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   ///
-  PlaygroundValue copyWith({
+  PhotoValue copyWith({
     TextAlign? textAlign,
     bool? fillColor,
     bool? hasFocus,
@@ -67,13 +64,13 @@ class PlaygroundValue {
     int? maxLines,
     bool? hasStickers,
     bool? isEditing,
-    PlaygroundBackground? background,
+    EditorBackground? background,
     GradientBackground? textBackground,
     bool? stickerPickerView,
     bool? colorPickerVisibility,
     bool? enableOverlay,
   }) {
-    return PlaygroundValue(
+    return PhotoValue(
       textAlign: textAlign ?? this.textAlign,
       fillColor: fillColor ?? this.fillColor,
       hasFocus: hasFocus ?? this.hasFocus,

@@ -1,5 +1,5 @@
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///

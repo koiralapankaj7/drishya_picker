@@ -1,28 +1,23 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
-import '../controller/playground_controller.dart';
-import 'playground_builder.dart';
-
 ///
-class PlaygroundCaptureButton extends StatelessWidget {
+class EditorShutterButton extends StatelessWidget {
   ///
-  const PlaygroundCaptureButton({
+  const EditorShutterButton({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   @override
   Widget build(BuildContext context) {
-    return PlaygroundBuilder(
+    return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
         final crossFadeState =

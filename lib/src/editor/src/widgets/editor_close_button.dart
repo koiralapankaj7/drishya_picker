@@ -1,26 +1,22 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../controller/playground_controller.dart';
-import 'playground_builder.dart';
-
 ///
-class PlaygroundCloseButton extends StatelessWidget {
+class EditorCloseButton extends StatelessWidget {
   ///
-  const PlaygroundCloseButton({
+  const EditorCloseButton({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   void _onPressed(BuildContext context) {
-    if (controller.isPlaygroundEmpty) {
+    if (controller.hasStickers) {
       SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.manual,
         overlays: SystemUiOverlay.values,
@@ -45,7 +41,7 @@ class PlaygroundCloseButton extends StatelessWidget {
         _onPressed(context);
         return false;
       },
-      child: PlaygroundBuilder(
+      child: EditorBuilder(
         controller: controller,
         builder: (context, value, child) {
           final crossFadeState = value.isEditing || value.hasFocus

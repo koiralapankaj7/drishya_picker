@@ -1,50 +1,45 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../entities/playground_background.dart';
-import '../entities/playground_value.dart';
-
 ///
-class PlaygroundController extends ValueNotifier<PlaygroundValue> {
+class PhotoEditingController extends ValueNotifier<PhotoValue> {
   ///
-  PlaygroundController({
-    PlaygroundBackground? background,
+  PhotoEditingController({
+    EditorBackground? background,
     bool enableOverlay = true,
-  })  : _playgroundKey = GlobalKey(),
-        _stickerController = StickerBoothController(),
+  })  : _editorKey = GlobalKey(),
+        _stickerController = StickerController(),
         _textController = TextEditingController(),
         super(
-          PlaygroundValue(
+          PhotoValue(
             background: background,
             enableOverlay: enableOverlay,
           ),
         );
 
-  final GlobalKey _playgroundKey;
+  final GlobalKey _editorKey;
 
   ///
-  final StickerBoothController _stickerController;
+  final StickerController _stickerController;
 
   ///
   final TextEditingController _textController;
 
   ///
-  GlobalKey get playgroundKey => _playgroundKey;
+  GlobalKey get editorKey => _editorKey;
 
   ///
-  bool get isPlaygroundEmpty => !value.hasStickers;
+  bool get hasStickers => !value.hasStickers;
 
   /// Playground sticker booth controller
-  StickerBoothController get stickerController => _stickerController;
+  StickerController get stickerController => _stickerController;
 
   /// Playground text editing controller
   TextEditingController get textController => _textController;
@@ -91,7 +86,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
   }
 
   /// Change playground background
-  void changeBackground({PlaygroundBackground? background}) {
+  void changeBackground({EditorBackground? background}) {
     // Photo background
     if (background != null && background is PhotoBackground) {
       value = value.copyWith(background: background);
@@ -116,7 +111,7 @@ class PlaygroundController extends ValueNotifier<PlaygroundValue> {
         final entity = await PhotoManager.editor.saveImage(bg.bytes!);
         return entity?.toDrishya;
       } else {
-        final boundary = _playgroundKey.currentContext?.findRenderObject()
+        final boundary = _editorKey.currentContext?.findRenderObject()
             as RenderRepaintBoundary?;
         final image = await boundary!.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);

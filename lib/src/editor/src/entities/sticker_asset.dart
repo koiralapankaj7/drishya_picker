@@ -90,7 +90,7 @@ class StickerPosition {
 /// {@template asset}
 /// A Dart object which holds metadata for a given sticker.
 /// {@endtemplate}
-class Sticker {
+abstract class Sticker {
   /// {@macro asset}
   const Sticker({
     this.name = '',

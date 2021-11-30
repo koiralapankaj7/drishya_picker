@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
@@ -21,15 +21,15 @@ class CamController extends ValueNotifier<CamValue> {
   ///
   CamController({
     required BuildContext context,
-    PlaygroundController? playgroundController,
+    PhotoEditingController? playgroundController,
     ResolutionPreset? resolutionPreset,
     ImageFormatGroup? imageFormatGroup,
     Duration? videoDuration,
     bool? editAfterCapture,
   })  : _uiHandler = UIHandler(context),
         _context = context,
-        _playgroundController =
-            playgroundController ?? PlaygroundController(enableOverlay: false),
+        _photoEditingController = playgroundController ??
+            PhotoEditingController(enableOverlay: false),
         super(
           CamValue(
             resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
@@ -49,7 +49,7 @@ class CamController extends ValueNotifier<CamValue> {
   final UIHandler _uiHandler;
 
   // Text view editing controller
-  final PlaygroundController _playgroundController;
+  final PhotoEditingController _photoEditingController;
 
   // Value will be set after creating camera
   CameraController? _cameraController;
@@ -64,7 +64,7 @@ class CamController extends ValueNotifier<CamValue> {
   void dispose() {
     _zoomController.dispose();
     _exposureController.dispose();
-    _playgroundController.dispose();
+    _photoEditingController.dispose();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -76,7 +76,7 @@ class CamController extends ValueNotifier<CamValue> {
   CameraController? get cameraController => _cameraController;
 
   /// Camera playground controller i,e. text view
-  PlaygroundController get playgroundController => _playgroundController;
+  PhotoEditingController get photoEditingController => _photoEditingController;
 
   /// Camera zoom controller
   ZoomController get zoomController => _zoomController;
@@ -216,11 +216,11 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (value.editAfterCapture) {
-        final pc = PlaygroundController(
+        final pc = PhotoEditingController(
           background: PhotoBackground(bytes: bytes),
         );
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
-          builder: Playground(controller: pc),
+          builder: PhotoEditor(controller: pc),
           begainHorizontal: true,
           endHorizontal: true,
         );

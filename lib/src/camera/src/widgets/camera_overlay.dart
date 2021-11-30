@@ -1,6 +1,6 @@
 // ignore_for_file: always_use_package_imports
 
-import 'package:drishya_picker/src/playground/playground.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -94,8 +94,8 @@ class _PlaygroundOverlay extends StatelessWidget {
           children: [
             // Add text button
             Align(
-              child: PlaygroundAddTextButton(
-                controller: controller.playgroundController,
+              child: EditorTextfieldButton(
+                controller: controller.photoEditingController,
               ),
             ),
 
@@ -103,8 +103,8 @@ class _PlaygroundOverlay extends StatelessWidget {
             Positioned(
               left: 8,
               top: _top,
-              child: PlaygroundCloseButton(
-                controller: controller.playgroundController,
+              child: EditorCloseButton(
+                controller: controller.photoEditingController,
               ),
             ),
 
@@ -112,8 +112,8 @@ class _PlaygroundOverlay extends StatelessWidget {
             Positioned(
               left: 16,
               bottom: 16,
-              child: PlaygroundGradientBackgroundChanger(
-                controller: controller.playgroundController,
+              child: GradientBackgroundChanger(
+                controller: controller.photoEditingController,
               ),
             ),
 
@@ -121,19 +121,19 @@ class _PlaygroundOverlay extends StatelessWidget {
             Positioned(
               right: 16,
               bottom: 16,
-              child: PlaygroundCaptureButton(
-                controller: controller.playgroundController,
+              child: EditorShutterButton(
+                controller: controller.photoEditingController,
               ),
             ),
 
             // Sticker buttons
             Positioned(
               right: 16,
-              top: controller.playgroundController.value.stickerPickerView
+              top: controller.photoEditingController.value.stickerPickerView
                   ? 0.0
                   : _top,
-              child: PlaygroundButtonCollection(
-                controller: controller.playgroundController,
+              child: EditorButtonCollection(
+                controller: controller.photoEditingController,
               ),
             ),
           ],

@@ -1,30 +1,26 @@
-// ignore_for_file: always_use_package_imports
-
-import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-
-import '../controller/playground_controller.dart';
 
 const _minStickerScale = 1.0;
 
 ///
-class PlaygroundStickers extends StatefulWidget {
+class StickersView extends StatefulWidget {
   ///
-  const PlaygroundStickers({
+  const StickersView({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   @override
-  State<PlaygroundStickers> createState() => _PlaygroundStickersState();
+  State<StickersView> createState() => _StickersViewState();
 }
 
-class _PlaygroundStickersState extends State<PlaygroundStickers> {
+class _StickersViewState extends State<StickersView> {
   late final GlobalKey _deleteKey;
-  late final PlaygroundController _controller;
+  late final PhotoEditingController _controller;
   var _collied = false;
   late final ValueNotifier<Color> _colorNotifier;
 
@@ -114,7 +110,7 @@ class _PlaygroundStickersState extends State<PlaygroundStickers> {
   Widget build(BuildContext context) {
     final stickerController = _controller.stickerController;
 
-    return ValueListenableBuilder<StickerboothValue>(
+    return ValueListenableBuilder<StickerValue>(
       valueListenable: stickerController,
       builder: (context, stickerValue, child) {
         if (stickerValue.assets.isEmpty) {

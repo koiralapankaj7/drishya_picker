@@ -1,32 +1,28 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:ui';
 
-import 'package:drishya_picker/src/sticker_booth/sticker_booth.dart';
+import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../controller/playground_controller.dart';
-
 ///
-class PlaygroundTextfield extends StatefulWidget {
+class EditorTextfield extends StatefulWidget {
   ///
-  const PlaygroundTextfield({
+  const EditorTextfield({
     Key? key,
     required this.controller,
   }) : super(key: key);
 
   ///
-  final PlaygroundController controller;
+  final PhotoEditingController controller;
 
   @override
-  State<PlaygroundTextfield> createState() => _PlaygroundTextfieldState();
+  State<EditorTextfield> createState() => _EditorTextfieldState();
 }
 
-class _PlaygroundTextfieldState extends State<PlaygroundTextfield> {
+class _EditorTextfieldState extends State<EditorTextfield> {
   late final GlobalKey _tfSizeKey;
   late final GlobalKey _widthKey;
-  late final PlaygroundController _controller;
+  late final PhotoEditingController _controller;
   late final TextEditingController _textController;
 
   @override
