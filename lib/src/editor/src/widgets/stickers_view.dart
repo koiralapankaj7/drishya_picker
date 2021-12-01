@@ -119,7 +119,7 @@ class _StickersViewState extends State<StickersView> {
                     key: Key(asset.id),
                     canTransform: isSelected,
                     onTap: () {
-                      asset.sticker.onPressed?.call(asset.sticker);
+                      asset.sticker.onPressed?.call(asset);
                       if (asset.sticker is TextSticker) {
                         stickerController.deleteSticker(asset);
                         _controller.updateValue(hasFocus: true);
@@ -151,6 +151,8 @@ class _StickersViewState extends State<StickersView> {
                     onScaleUpdate: _onScaleUpdate,
                     size: asset.sticker.size,
                     constraints: asset.getImageConstraints(),
+                    initialPosition: asset.position.offset,
+                    initialAngle: asset.angle,
                     child: Opacity(
                       opacity: isSelected && _collied ? 0.3 : 1.0,
                       // child: _stickerChild(asset.sticker),

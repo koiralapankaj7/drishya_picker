@@ -37,7 +37,8 @@ class DraggableResizable extends StatefulWidget {
     required this.size,
     this.onTap,
     BoxConstraints? constraints,
-    this.initialPosition = Offset.zero,
+    this.initialPosition,
+    this.initialAngle,
     this.onUpdate,
     this.onScaleUpdate,
     this.onStart,
@@ -69,7 +70,10 @@ class DraggableResizable extends StatefulWidget {
   final bool canTransform;
 
   /// Initial position of widget
-  final Offset initialPosition;
+  final Offset? initialPosition;
+
+  /// Initial angle of the widget
+  final double? initialAngle;
 
   /// The child's original size.
   final Size size;
@@ -98,10 +102,11 @@ class _DraggableResizableState extends State<DraggableResizable> {
   @override
   void initState() {
     super.initState();
-    position = widget.initialPosition;
+    position = widget.initialPosition ?? Offset.zero;
     size = widget.size;
-    constraints = const BoxConstraints.expand(width: 1, height: 1);
-    angle = 0;
+    constraints = widget.constraints;
+    // const BoxConstraints.expand(width: 1, height: 1);
+    angle = widget.initialAngle ?? 0;
     baseAngle = 0;
     angleDelta = 0;
   }

@@ -4,6 +4,8 @@ import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+StickerAsset? _editingTextAsset;
+
 ///
 class EditorTextfield extends StatefulWidget {
   ///
@@ -43,12 +45,14 @@ class _EditorTextfieldState extends State<EditorTextfield> {
   void _addSticker() {
     final box = _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
-      _controller.removeListener(_listener);
+      // _controller.removeListener(_listener);
       final sticker = TextSticker(
-        size: box.size,
+        // size: _editingTextAsset?.size.size ?? box.size,
+        size: box.size, // TODO : play with size
         extra: {'text': _textController.text},
-        onPressed: (s) {
-          _textController.text = (s as TextSticker).text;
+        onPressed: (asset) {
+          _editingTextAsset = asset;
+          _textController.text = (asset.sticker as TextSticker).text;
         },
         text: _textController.text,
         style: TextStyle(
@@ -68,7 +72,14 @@ class _EditorTextfieldState extends State<EditorTextfield> {
       );
 
       _textController.clear();
-      _controller.stickerController.addSticker(sticker);
+      _controller.stickerController.addSticker(
+        sticker,
+        size: _editingTextAsset?.size,
+        angle: _editingTextAsset?.angle,
+        constraint: _editingTextAsset?.constraint,
+        position: _editingTextAsset?.position,
+      );
+      _editingTextAsset = null;
       _controller.updateValue(hasStickers: true);
 
       // Future.delayed(const Duration(milliseconds: 20), () {

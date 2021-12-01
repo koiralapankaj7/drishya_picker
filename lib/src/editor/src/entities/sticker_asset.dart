@@ -63,6 +63,9 @@ class StickerConstraint {
 
   ///
   final double height;
+
+  ///
+  Size get size => Size(width, height);
 }
 
 ///
@@ -75,6 +78,9 @@ class StickerSize {
 
   ///
   final double height;
+
+  ///
+  Size get size => Size(width, height);
 }
 
 ///
@@ -87,6 +93,9 @@ class StickerPosition {
 
   ///
   final double dy;
+
+  ///
+  Offset get offset => Offset(dx, dy);
 }
 
 /// {@template sticker}
@@ -108,7 +117,7 @@ abstract class Sticker {
   final Size size;
 
   /// Sticker onPressed callback
-  final ValueSetter<Sticker>? onPressed;
+  final ValueSetter<StickerAsset>? onPressed;
 
   /// Extra information about sticker
   final Map<String, Object> extra;
@@ -127,7 +136,7 @@ class TextSticker extends Sticker {
     this.withBackground = false,
     this.textAlign,
     Size size = const Size(200, 200),
-    ValueSetter<Sticker>? onPressed,
+    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
           size: size,
@@ -171,7 +180,7 @@ class ImageSticker extends Sticker {
     this.isNetworkImage = true,
     String name = '',
     Size size = const Size(200, 200),
-    ValueSetter<Sticker>? onPressed,
+    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
           name: name,
@@ -204,7 +213,7 @@ class ImageSticker extends Sticker {
             ),
             secondChild: InkWell(
               onTap: () {
-                onPressed?.call(this);
+                // onPressed?.call(this);
               },
               child: child,
             ),
@@ -230,7 +239,7 @@ class IconSticker extends Sticker {
   const IconSticker({
     required this.iconData,
     Size size = const Size(100, 100),
-    ValueSetter<Sticker>? onPressed,
+    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
           size: size,

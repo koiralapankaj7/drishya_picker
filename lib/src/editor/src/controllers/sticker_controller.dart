@@ -26,8 +26,21 @@ class StickerController extends ValueNotifier<StickerValue> {
   }
 
   /// sticker tapped
-  void addSticker(Sticker sticker) {
-    final assets = StickerAsset(id: uuid(), sticker: sticker);
+  void addSticker(
+    Sticker sticker, {
+    double? angle,
+    StickerConstraint? constraint,
+    StickerPosition? position,
+    StickerSize? size,
+  }) {
+    final assets = StickerAsset(
+      id: uuid(),
+      sticker: sticker,
+      angle: angle ?? 0.0,
+      constraint: constraint ?? const StickerConstraint(),
+      position: position ?? const StickerPosition(),
+      size: size ?? const StickerSize(),
+    );
     value = value.copyWith(
       assets: List.of(value.assets)..add(assets),
       selectedAssetId: assets.id,
