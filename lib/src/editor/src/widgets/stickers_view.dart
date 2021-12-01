@@ -182,32 +182,6 @@ class _StickersViewState extends State<StickersView> {
                   ),
                 ),
 
-              // Color picker
-              if (_controller.value.isColorPickerVisible &&
-                  !_controller.value.isEditing)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _controller.setting.colors
-                          .map(
-                            (color) => _ColorCircle(
-                              color: color,
-                              colorNotifier: _controller.colorNotifier,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ),
-
               //
             ],
           ),
@@ -216,82 +190,6 @@ class _StickersViewState extends State<StickersView> {
     );
   }
 }
-
-class _ColorCircle extends StatelessWidget {
-  const _ColorCircle({
-    Key? key,
-    required this.color,
-    required this.colorNotifier,
-  }) : super(key: key);
-
-  final Color color;
-  final ValueNotifier<Color> colorNotifier;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<Color>(
-      valueListenable: colorNotifier,
-      builder: (context, c, child) {
-        final isSelected = color == c;
-        final size = isSelected ? 36.0 : 30.0;
-        return InkWell(
-          onTap: () {
-            colorNotifier.value = color;
-          },
-          child: SizedBox(
-            height: 40,
-            width: 40,
-            child: Align(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: size,
-                width: size,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(size),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(1),
-                  child: CircleAvatar(backgroundColor: color),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// class _IconSticker extends StatelessWidget {
-//   const _IconSticker({
-//     Key? key,
-//     required this.sticker,
-//     required this.colorNotifier,
-//   }) : super(key: key);
-
-//   final IconSticker sticker;
-//   final ValueNotifier<Color> colorNotifier;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ValueListenableBuilder<Color>(
-//       valueListenable: colorNotifier,
-//       builder: (context, color, child) {
-//         return FittedBox(
-//           child: Icon(
-//             sticker.iconData,
-//             color: color,
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
 
 extension on StickerAsset {
   BoxConstraints getImageConstraints() {

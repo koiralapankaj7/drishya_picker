@@ -77,7 +77,8 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
 
   /// Update editor value
   void updateValue({
-    bool? fillColor,
+    bool? fillTextfield,
+    Color? textColor,
     int? maxLines,
     TextAlign? textAlign,
     bool? hasFocus,
@@ -95,7 +96,8 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     }
 
     value = value.copyWith(
-      fillColor: fillColor,
+      fillTextfield: fillTextfield,
+      textColor: textColor,
       maxLines: maxLines,
       textAlign: textAlign,
       hasFocus: hasFocus,

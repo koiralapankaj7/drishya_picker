@@ -127,6 +127,13 @@ class _PhotoEditorState extends State<PhotoEditor> {
                   if (!widget.hideOverlay)
                     EditorOverlay(controller: _controller),
 
+                  // Color picker
+                  if (((value.hasFocus &&
+                              value.background is! GradientBackground) ||
+                          value.isColorPickerVisible) &&
+                      !value.isEditing)
+                    ColorPicker(controller: _controller),
+
                   //
                 ],
               );

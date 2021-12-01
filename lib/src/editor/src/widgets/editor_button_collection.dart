@@ -67,10 +67,10 @@ class EditorButtonCollection extends StatelessWidget {
     controller.updateValue(textAlign: textAlign);
   }
 
-  void _textBackgroundButtonPressed() {
-    final value = controller.value;
-    controller.value = value.copyWith(fillColor: !value.fillColor);
-  }
+  // void _textBackgroundButtonPressed() {
+  //   final value = controller.value;
+  //   controller.value = value.copyWith(fillColor: !value.fillColor);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -129,8 +129,15 @@ class EditorButtonCollection extends StatelessWidget {
           ),
           _Button(
             isVisible: hasFocus,
-            onPressed: _textBackgroundButtonPressed,
-            child: _TextBackgroundIcon(isSelected: controller.value.fillColor),
+            onPressed: () {
+              controller.updateValue(
+                fillTextfield: !controller.value.fillTextfield,
+                isColorPickerVisible: !controller.value.fillTextfield &&
+                    controller.value.background is! GradientBackground,
+              );
+            },
+            child:
+                _TextBackgroundIcon(isSelected: controller.value.fillTextfield),
           ),
           _Button(
             isVisible: !hasFocus,
@@ -206,38 +213,42 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isVisible) return const SizedBox();
+    if (!isVisible) {
+      return const SizedBox();
+    }
+    var widget = child ?? const SizedBox();
 
-    final isText = label?.isNotEmpty ?? false;
-    final isIcon = iconData != null;
+    if (label?.isNotEmpty ?? false) {
+      widget = Text(
+        label ?? 'Aa',
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: fontSize ?? 20.0,
+          color: labelColor ?? Colors.white,
+        ),
+      );
+    }
 
-    final text = Text(
-      label ?? 'Aa',
-      style: TextStyle(
-        fontWeight: FontWeight.w800,
-        fontSize: fontSize ?? 20.0,
-        color: labelColor ?? Colors.white,
-      ),
-    );
-
-    final icon = Icon(
-      iconData ?? Icons.emoji_emotions,
-      color: Colors.white,
-      size: 24,
-    );
+    if (iconData != null) {
+      widget = Icon(
+        iconData ?? Icons.emoji_emotions,
+        color: Colors.white,
+        size: 24,
+      );
+    }
 
     return InkWell(
       onTap: onPressed,
       child: Container(
-        height: size ?? 48.0,
-        width: size ?? 48.0,
+        height: size ?? 44.0,
+        width: size ?? 44.0,
         alignment: Alignment.center,
         margin: EdgeInsets.only(bottom: margin),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: background ?? Colors.black38,
         ),
-        child: isText ? text : (isIcon ? icon : child),
+        child: widget,
       ),
     );
   }

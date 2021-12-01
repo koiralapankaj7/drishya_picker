@@ -6,7 +6,7 @@ class PhotoValue {
   ///
   PhotoValue({
     this.textAlign = TextAlign.center,
-    this.fillColor = false,
+    this.fillTextfield = false,
     this.maxLines = 1,
     this.hasFocus = false,
     this.hasStickers = false,
@@ -21,7 +21,7 @@ class PhotoValue {
   final TextAlign textAlign;
 
   ///
-  final bool fillColor;
+  final bool fillTextfield;
 
   /// Consider -ve as null
   final int maxLines;
@@ -53,7 +53,7 @@ class PhotoValue {
   ///
   PhotoValue copyWith({
     TextAlign? textAlign,
-    bool? fillColor,
+    bool? fillTextfield,
     bool? hasFocus,
     bool? editingMode,
     int? maxLines,
@@ -66,7 +66,7 @@ class PhotoValue {
   }) {
     return PhotoValue(
       textAlign: textAlign ?? this.textAlign,
-      fillColor: fillColor ?? this.fillColor,
+      fillTextfield: fillTextfield ?? this.fillTextfield,
       hasFocus: hasFocus ?? this.hasFocus,
       maxLines: maxLines ?? this.maxLines,
       hasStickers: hasStickers ?? this.hasStickers,

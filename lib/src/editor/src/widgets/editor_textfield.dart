@@ -51,9 +51,20 @@ class _EditorTextfieldState extends State<EditorTextfield> {
           _textController.text = (s as TextSticker).text;
         },
         text: _textController.text,
-        style: _textStickerStyle,
+        style: TextStyle(
+          textBaseline: TextBaseline.ideographic,
+          color: widget.controller.value.background is! GradientBackground &&
+                  !widget.controller.value.fillTextfield
+              ? widget.controller.value.textColor
+              : Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          decoration: TextDecoration.none,
+          decorationColor: Colors.transparent,
+          decorationThickness: 0,
+        ),
         textAlign: _controller.value.textAlign,
-        withBackground: _controller.value.fillColor,
+        withBackground: _controller.value.fillTextfield,
       );
 
       _controller.updateValue(hasStickers: true);
@@ -112,7 +123,8 @@ class _EditorTextfieldState extends State<EditorTextfield> {
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: value.fillColor ? value.textColor : Colors.transparent,
+                color:
+                    value.fillTextfield ? value.textColor : Colors.transparent,
               ),
               child: TextFormField(
                 key: _tfSizeKey,
@@ -126,7 +138,19 @@ class _EditorTextfieldState extends State<EditorTextfield> {
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
                 smartDashesType: SmartDashesType.disabled,
-                style: _textStickerStyle,
+                style: TextStyle(
+                  textBaseline: TextBaseline.ideographic,
+                  color: widget.controller.value.background
+                              is! GradientBackground &&
+                          !widget.controller.value.fillTextfield
+                      ? widget.controller.value.textColor
+                      : Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.none,
+                  decorationColor: Colors.transparent,
+                  decorationThickness: 0,
+                ),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(8),
@@ -146,14 +170,3 @@ class _EditorTextfieldState extends State<EditorTextfield> {
     );
   }
 }
-
-///
-const _textStickerStyle = TextStyle(
-  textBaseline: TextBaseline.ideographic,
-  color: Colors.white,
-  fontSize: 32,
-  fontWeight: FontWeight.w700,
-  decoration: TextDecoration.none,
-  decorationColor: Colors.transparent,
-  decorationThickness: 0,
-);

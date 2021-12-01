@@ -1,4 +1,5 @@
 export 'background_switcher.dart';
+export 'color_picker.dart';
 export 'draggable_resizable.dart';
 export 'editor_builder.dart';
 export 'editor_button_collection.dart';
