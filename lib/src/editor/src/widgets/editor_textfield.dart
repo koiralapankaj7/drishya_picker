@@ -67,30 +67,16 @@ class _EditorTextfieldState extends State<EditorTextfield> {
         withBackground: _controller.value.fillTextfield,
       );
 
-      _controller.updateValue(hasStickers: true);
       _textController.clear();
+      _controller.stickerController.addSticker(sticker);
+      _controller.updateValue(hasStickers: true);
 
-      Future.delayed(const Duration(milliseconds: 20), () {
-        _controller.stickerController.addSticker(sticker);
-        _controller.addListener(_listener);
-      });
+      // Future.delayed(const Duration(milliseconds: 20), () {
+      //   _controller.stickerController.addSticker(sticker);
+      //   _controller.addListener(_listener);
+      // });
     }
   }
-
-  // void _onTextChanged(String text) {
-  //   final box = _widthKey.currentContext?.findRenderObject() as RenderBox?;
-  //   if (box != null) {
-  //     final actualWidth = MediaQuery.of(context).size.width;
-  //     final currentWidth = box.size.width;
-  //     if (currentWidth == actualWidth) {
-  //       log('Add new line...');
-  //     }
-
-  //     // widget.controller.value = widget.controller.value.copyWith(
-  //     //   maxLines: currentWidth >= actualWidth ? -1 : 1,
-  //     // );
-  //   }
-  // }
 
   @override
   void dispose() {
