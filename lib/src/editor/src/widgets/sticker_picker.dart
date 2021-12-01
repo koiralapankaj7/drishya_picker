@@ -309,16 +309,13 @@ class StickerChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     if (sticker is ImageSticker) {
       final s = sticker as ImageSticker;
-      switch (s.pathType) {
-        case PathType.networkImg:
-          return _Network(
-            url: s.path,
-            onPressed: onPressed,
-          );
-        // ignore: no_default_cases
-        default:
-          return const SizedBox();
+      if (s.isNetworkImage) {
+        return _Network(
+          url: s.path,
+          onPressed: onPressed,
+        );
       }
+      return const SizedBox();
     } else if (sticker is IconSticker) {
       return InkWell(
         onTap: onPressed,

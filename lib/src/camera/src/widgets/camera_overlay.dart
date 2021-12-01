@@ -112,7 +112,7 @@ class _PlaygroundOverlay extends StatelessWidget {
             Positioned(
               left: 16,
               bottom: 16,
-              child: GradientBackgroundChanger(
+              child: BackgroundSwitcher(
                 controller: controller.photoEditingController,
               ),
             ),

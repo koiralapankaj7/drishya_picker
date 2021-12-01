@@ -1,5 +1,6 @@
 //
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/drishya_entity.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
@@ -15,6 +16,7 @@ class PhotoEditor extends StatefulWidget {
     Key? key,
     this.controller,
     this.setting,
+    this.hideOverlay = false,
   }) : super(key: key);
 
   ///
@@ -23,15 +25,22 @@ class PhotoEditor extends StatefulWidget {
   ///
   final EditorSetting? setting;
 
+  ///
+  final bool hideOverlay;
+
   /// Open playground
   static Future<DrishyaEntity?> open(
     BuildContext context, {
     PhotoEditingController? controller,
+    EditorSetting? setting,
+    bool hideOverlay = false,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: PhotoEditor(
           controller: controller,
+          setting: setting,
+          hideOverlay: hideOverlay,
         ),
       ),
     );
@@ -43,13 +52,12 @@ class PhotoEditor extends StatefulWidget {
 
 class _PhotoEditorState extends State<PhotoEditor> {
   late PhotoEditingController _controller;
-  late EditorSetting _setting;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? PhotoEditingController();
-    _setting = widget.setting ?? EditorSetting();
+    _controller = (widget.controller ?? PhotoEditingController())
+      ..init(context, setting: widget.setting);
   }
 
   @override
@@ -57,8 +65,9 @@ class _PhotoEditorState extends State<PhotoEditor> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller ||
         oldWidget.setting != widget.setting) {
-      _controller = widget.controller ?? PhotoEditingController();
-      _setting = widget.setting ?? EditorSetting();
+      _controller.dispose();
+      _controller = (widget.controller ?? PhotoEditingController())
+        ..init(context, setting: widget.setting);
     }
   }
 
@@ -98,15 +107,12 @@ class _PhotoEditorState extends State<PhotoEditor> {
                       fit: StackFit.expand,
                       children: [
                         // Playground background
-                        value.background.build(context),
+                        value.background?.build(context) ?? const SizedBox(),
 
                         // Stickers
                         Opacity(
                           opacity: value.isStickerPickerOpen ? 0.0 : 1.0,
-                          child: StickersView(
-                            controller: _controller,
-                            setting: _setting,
-                          ),
+                          child: StickersView(controller: _controller),
                         ),
 
                         //
@@ -115,12 +121,13 @@ class _PhotoEditorState extends State<PhotoEditor> {
                   ),
 
                   // Textfield
-                  if (!value.disableEditing)
-                    EditorTextfield(controller: _controller),
+                  if (value.hasFocus) EditorTextfield(controller: _controller),
 
                   // Overlay
-                  if (value.disableEditing)
-                    EditorOverlay(controller: _controller, setting: _setting),
+                  if (!widget.hideOverlay)
+                    EditorOverlay(controller: _controller),
+
+                  //
                 ],
               );
             },

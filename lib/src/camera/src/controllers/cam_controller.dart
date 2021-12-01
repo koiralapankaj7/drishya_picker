@@ -28,8 +28,8 @@ class CamController extends ValueNotifier<CamValue> {
     bool? editAfterCapture,
   })  : _uiHandler = UIHandler(context),
         _context = context,
-        _photoEditingController = playgroundController ??
-            PhotoEditingController(disableEditing: true),
+        _photoEditingController =
+            playgroundController ?? PhotoEditingController(),
         super(
           CamValue(
             resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
@@ -216,11 +216,12 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (value.editAfterCapture) {
-        final pc = PhotoEditingController(
-          background: PhotoBackground(bytes: bytes),
-        );
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
-          builder: PhotoEditor(controller: pc),
+          builder: PhotoEditor(
+            setting: EditorSetting(
+              backgrounds: [PhotoBackground(bytes: bytes)],
+            ),
+          ),
           begainHorizontal: true,
           endHorizontal: true,
         );

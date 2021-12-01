@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
@@ -29,33 +28,57 @@ class PhotoBackground implements EditorBackground {
   bool get hasData => (url?.isNotEmpty ?? false) || (bytes != null);
 
   @override
-  Widget build(BuildContext context) => PhotoBackgroundView(background: this);
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black,
+      child: Builder(
+        builder: (_) {
+          if (bytes != null) {
+            return Image.memory(bytes!, fit: BoxFit.contain);
+          } else if (url != null) {
+            return Image.network(url!, fit: BoxFit.cover);
+          }
+          return const SizedBox();
+        },
+      ),
+    );
+  }
 }
 
 ///
 class GradientBackground implements EditorBackground {
   ///
-  const GradientBackground(this.colors);
+  const GradientBackground({
+    this.colors,
+    this.gradient,
+  }) : assert(
+          colors != null || gradient != null,
+          "Both colors and gradient canno't be null",
+        );
 
   ///
-  final List<Color> colors;
+  final List<Color>? colors;
+
+  ///
+  final Gradient? gradient;
+
+  /// First color from the gradient
+  Color get firstColor => colors?.first ?? gradient!.colors.first;
+
+  /// Last color from the gradient
+  Color get lastColor => colors?.last ?? gradient!.colors.last;
 
   @override
-  Widget build(BuildContext context) =>
-      GradientBackgroundView(background: this);
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: gradient ??
+            LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: colors!,
+            ),
+      ),
+    );
+  }
 }
-
-///
-const gradients = [
-  GradientBackground([Color(0xFF00C6FF), Color(0xFF0078FF)]),
-  GradientBackground([Color(0xFFeb3349), Color(0xFFf45c43)]),
-  GradientBackground([Color(0xFF26a0da), Color(0xFF314755)]),
-  GradientBackground([Color(0xFFe65c00), Color(0xFFF9D423)]),
-  GradientBackground([Color(0xFFfc6767), Color(0xFFec008c)]),
-  GradientBackground([Color(0xFF5433FF), Color(0xFF20BDFF), Color(0xFFA5FECB)]),
-  GradientBackground([Color(0xFF334d50), Color(0xFFcbcaa5)]),
-  GradientBackground([Color(0xFF1565C0), Color(0xFFb92b27)]),
-  GradientBackground([Color(0xFF0052D4), Color(0xFF4364F7), Color(0xFFA5FECB)]),
-  GradientBackground([Color(0xFF2193b0), Color(0xFF6dd5ed)]),
-  GradientBackground([Color(0xFF753a88), Color(0xFFcc2b5e)]),
-];

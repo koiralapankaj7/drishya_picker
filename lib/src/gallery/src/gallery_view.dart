@@ -704,12 +704,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final bytes = await entity.originBytes;
 
-    final pc = PhotoEditingController(
-      background: PhotoBackground(bytes: bytes),
-    );
-
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: PhotoEditor(controller: pc),
+      builder: PhotoEditor(
+        setting: EditorSetting(backgrounds: [PhotoBackground(bytes: bytes)]),
+      ),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -720,8 +718,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       pickedEntity = await Navigator.of(context).push(route);
       _closeOnCameraSelect();
     }
-
-    pc.dispose();
 
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {

@@ -11,13 +11,11 @@ class PhotoValue {
     this.hasFocus = false,
     this.hasStickers = false,
     this.isEditing = false,
-    EditorBackground? background,
-    GradientBackground? textBackground,
+    this.background,
+    this.textColor,
     this.isStickerPickerOpen = false,
     this.isColorPickerVisible = false,
-    this.disableEditing = false,
-  })  : background = background ?? gradients[0],
-        textBackground = textBackground ?? gradients[0];
+  });
 
   ///
   final TextAlign textAlign;
@@ -38,19 +36,16 @@ class PhotoValue {
   final bool isEditing;
 
   ///
-  final EditorBackground background;
+  final EditorBackground? background;
 
   ///
-  final GradientBackground textBackground;
+  final Color? textColor;
 
   ///
   final bool isStickerPickerOpen;
 
   ///
   final bool isColorPickerVisible;
-
-  ///
-  final bool disableEditing;
 
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
@@ -65,10 +60,9 @@ class PhotoValue {
     bool? hasStickers,
     bool? isEditing,
     EditorBackground? background,
-    GradientBackground? textBackground,
+    Color? textColor,
     bool? isStickerPickerOpen,
     bool? isColorPickerVisible,
-    bool? disableEditing,
   }) {
     return PhotoValue(
       textAlign: textAlign ?? this.textAlign,
@@ -78,10 +72,9 @@ class PhotoValue {
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,
       background: background ?? this.background,
-      textBackground: textBackground ?? this.textBackground,
+      textColor: textColor ?? this.textColor,
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
       isColorPickerVisible: isColorPickerVisible ?? this.isColorPickerVisible,
-      disableEditing: disableEditing ?? this.disableEditing,
     );
   }
 }

@@ -9,14 +9,10 @@ class StickersView extends StatefulWidget {
   const StickersView({
     Key? key,
     required this.controller,
-    required this.setting,
   }) : super(key: key);
 
   ///
   final PhotoEditingController controller;
-
-  ///
-  final EditorSetting setting;
 
   @override
   State<StickersView> createState() => _StickersViewState();
@@ -26,20 +22,12 @@ class _StickersViewState extends State<StickersView> {
   late final GlobalKey _deleteKey;
   late final PhotoEditingController _controller;
   var _collied = false;
-  late final ValueNotifier<Color> _colorNotifier;
 
   @override
   void initState() {
     super.initState();
     _deleteKey = GlobalKey();
     _controller = widget.controller;
-    _colorNotifier = ValueNotifier(widget.setting.colors.first);
-  }
-
-  @override
-  void dispose() {
-    _colorNotifier.dispose();
-    super.dispose();
   }
 
   void _onTapOutside() {
@@ -71,44 +59,37 @@ class _StickersViewState extends State<StickersView> {
     }
   }
 
-  Widget? _stickerChild(Sticker sticker) {
-    if (sticker is ImageSticker && sticker.pathType == PathType.networkImg) {
-      return Image.network(
-        sticker.path,
-        fit: BoxFit.contain,
-        gaplessPlayback: true,
-      );
-    } else if (sticker is ImageSticker &&
-        sticker.pathType == PathType.assetsImage) {
-      return Image.asset(
-        sticker.path,
-        fit: BoxFit.contain,
-        gaplessPlayback: true,
-      );
-    } else if (sticker is TextSticker) {
-      return Container(
-        constraints: BoxConstraints.loose(sticker.size),
-        decoration: BoxDecoration(
-          color: sticker.withBackground
-              ? _controller.value.textBackground.colors.first
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: FittedBox(
-          child: Text(
-            sticker.text,
-            textAlign: sticker.textAlign,
-            style: sticker.style,
-          ),
-        ),
-      );
-    } else if (sticker is IconSticker) {
-      return _IconSticker(colorNotifier: _colorNotifier, sticker: sticker);
-    } else {
-      return const SizedBox();
-    }
-  }
+  // Widget? _stickerChild(Sticker sticker) {
+  //   if (sticker is ImageSticker) {
+  //     return sticker.build(context, _controller);
+  //   } else if (sticker is TextSticker) {
+  //     return sticker.build(context, _controller);
+  //     // return Container(
+  //     //   constraints: BoxConstraints.loose(sticker.size),
+  //     //   decoration: BoxDecoration(
+  //     //     color: sticker.withBackground
+  //     //         ? _controller.value.textBackground.colors.first
+  //     //         : Colors.transparent,
+  //     //     borderRadius: BorderRadius.circular(10),
+  //     //   ),
+  //     //   padding: const EdgeInsets.symmetric(horizontal: 16),
+  //     //   child: FittedBox(
+  //     //     child: Text(
+  //     //       sticker.text,
+  //     //       textAlign: sticker.textAlign,
+  //     //       style: sticker.style,
+  //     //     ),
+  //     //   ),
+  //     // );
+  //   } else if (sticker is IconSticker) {
+  //     return _IconSticker(
+  //       colorNotifier: _controller.colorNotifier,
+  //       sticker: sticker,
+  //     );
+  //   } else {
+  //     return const SizedBox();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +153,8 @@ class _StickersViewState extends State<StickersView> {
                     constraints: asset.getImageConstraints(),
                     child: Opacity(
                       opacity: isSelected && _collied ? 0.3 : 1.0,
-                      child: _stickerChild(asset.sticker),
+                      // child: _stickerChild(asset.sticker),
+                      child: asset.sticker.build(context, _controller),
                     ),
                   );
                 }).toList(),
@@ -214,11 +196,11 @@ class _StickersViewState extends State<StickersView> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
                       runSpacing: 8,
-                      children: widget.setting.colors
+                      children: _controller.setting.colors
                           .map(
                             (color) => _ColorCircle(
                               color: color,
-                              colorNotifier: _colorNotifier,
+                              colorNotifier: _controller.colorNotifier,
                             ),
                           )
                           .toList(),
@@ -285,31 +267,31 @@ class _ColorCircle extends StatelessWidget {
   }
 }
 
-class _IconSticker extends StatelessWidget {
-  const _IconSticker({
-    Key? key,
-    required this.sticker,
-    required this.colorNotifier,
-  }) : super(key: key);
+// class _IconSticker extends StatelessWidget {
+//   const _IconSticker({
+//     Key? key,
+//     required this.sticker,
+//     required this.colorNotifier,
+//   }) : super(key: key);
 
-  final IconSticker sticker;
-  final ValueNotifier<Color> colorNotifier;
+//   final IconSticker sticker;
+//   final ValueNotifier<Color> colorNotifier;
 
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<Color>(
-      valueListenable: colorNotifier,
-      builder: (context, color, child) {
-        return FittedBox(
-          child: Icon(
-            sticker.iconData,
-            color: color,
-          ),
-        );
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ValueListenableBuilder<Color>(
+//       valueListenable: colorNotifier,
+//       builder: (context, color, child) {
+//         return FittedBox(
+//           child: Icon(
+//             sticker.iconData,
+//             color: color,
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
 
 extension on StickerAsset {
   BoxConstraints getImageConstraints() {

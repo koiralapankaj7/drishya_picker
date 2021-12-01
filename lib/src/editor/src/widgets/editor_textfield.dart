@@ -112,9 +112,7 @@ class _EditorTextfieldState extends State<EditorTextfield> {
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: value.fillColor
-                    ? value.textBackground.colors.first
-                    : Colors.transparent,
+                color: value.fillColor ? value.textColor : Colors.transparent,
               ),
               child: TextFormField(
                 key: _tfSizeKey,

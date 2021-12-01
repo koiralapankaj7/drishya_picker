@@ -51,7 +51,7 @@ class EditorCloseButton extends StatelessWidget {
             firstChild: const SizedBox(),
             secondChild: child!,
             crossFadeState: crossFadeState,
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 200),
           );
         },
         child: InkWell(

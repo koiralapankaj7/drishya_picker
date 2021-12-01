@@ -1,5 +1,5 @@
+export 'background_switcher.dart';
 export 'draggable_resizable.dart';
-export 'editor_background_view.dart';
 export 'editor_builder.dart';
 export 'editor_button_collection.dart';
 export 'editor_close_button.dart';

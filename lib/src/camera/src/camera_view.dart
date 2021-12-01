@@ -167,7 +167,10 @@ class _CameraViewState extends State<CameraView>
                   controller: _camController,
                   builder: (value, child) {
                     if (value.cameraType == CameraType.text) {
-                      return PhotoEditor(controller: _playgroundController);
+                      return PhotoEditor(
+                        controller: _playgroundController,
+                        hideOverlay: true,
+                      );
                     }
                     return RawCameraView(action: _camController);
                   },

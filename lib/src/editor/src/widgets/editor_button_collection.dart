@@ -11,15 +11,11 @@ class EditorButtonCollection extends StatelessWidget {
   const EditorButtonCollection({
     Key? key,
     required this.controller,
-    required this.setting,
     this.stickerViewBackground,
   }) : super(key: key);
 
   ///
   final PhotoEditingController controller;
-
-  ///
-  final EditorSetting setting;
 
   ///
   final Color? stickerViewBackground;
@@ -32,7 +28,7 @@ class EditorButtonCollection extends StatelessWidget {
         notificationDepth: 1,
         builder: (context) {
           return StickerPicker(
-            setting: setting,
+            setting: controller.setting,
             initialIndex: _initialIndex,
             bucket: _bucket,
             onTabChanged: (index) {
@@ -79,6 +75,7 @@ class EditorButtonCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasFocus = controller.value.hasFocus;
+
     return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
@@ -108,7 +105,6 @@ class EditorButtonCollection extends StatelessWidget {
         //
       },
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           _DoneButton(
             onPressed: () {

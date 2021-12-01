@@ -21,6 +21,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   void initState() {
     super.initState();
+
     notifier = ValueNotifier(<DrishyaEntity>[]);
     controller = GalleryController(
       gallerySetting: const GallerySetting(
