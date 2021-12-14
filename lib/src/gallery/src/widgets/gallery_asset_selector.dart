@@ -4,7 +4,6 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../entities/gallery_value.dart';
-import '../gallery_view.dart';
 
 ///
 class GalleryAssetSelector extends StatefulWidget {

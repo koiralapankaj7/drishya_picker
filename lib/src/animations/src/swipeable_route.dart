@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:drishya_picker/src/animations/src/scroll_listener.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

@@ -6,7 +6,6 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/camera_view.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -34,6 +33,7 @@ class SlidableGalleryView extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
+    this.editorSetting,
   }) : super(key: key);
 
   ///
@@ -41,6 +41,9 @@ class SlidableGalleryView extends StatefulWidget {
 
   ///
   final GalleryController? controller;
+
+  ///
+  final EditorSetting? editorSetting;
 
   @override
   State<SlidableGalleryView> createState() => _SlidableGalleryViewState();
@@ -114,7 +117,10 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
               setting: _setting,
               controller: _panelController,
               child: Builder(
-                builder: (_) => GalleryView(controller: _controller),
+                builder: (_) => GalleryView(
+                  controller: _controller,
+                  editorSetting: widget.editorSetting,
+                ),
               ),
             ),
 
@@ -137,10 +143,14 @@ class GalleryView extends StatefulWidget {
   const GalleryView({
     Key? key,
     this.controller,
+    this.editorSetting,
   }) : super(key: key);
 
   ///
   final GalleryController? controller;
+
+  ///
+  final EditorSetting? editorSetting;
 
   ///
   static const String name = 'GalleryView';
@@ -287,7 +297,7 @@ class _GalleryViewState extends State<GalleryView>
     Navigator.of(context).pop();
   }
 
-  void _onALbumChange(Album album) {
+  void _onAlbumChange(Album album) {
     if (_animationController.isAnimating) return;
     _controller._albums.changeAlbum(album);
     _toogleAlbumList(true);
@@ -402,7 +412,7 @@ class _GalleryViewState extends State<GalleryView>
                 child: AlbumsPage(
                   albums: _controller._albums,
                   controller: _controller,
-                  onAlbumChange: _onALbumChange,
+                  onAlbumChange: _onAlbumChange,
                 ),
               ),
 
@@ -535,8 +545,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   GalleryController({
     PanelSetting? panelSetting,
     GallerySetting? gallerySetting,
+    EditorSetting? editorSetting,
   })  : panelSetting = panelSetting ?? const PanelSetting(),
         setting = gallerySetting ?? const GallerySetting(),
+        editorSetting = editorSetting ?? const EditorSetting(),
         _panelController = PanelController(),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue()) {
@@ -545,6 +557,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   /// Panel setting
   final PanelSetting panelSetting;
+
+  ///
+  final EditorSetting editorSetting;
 
   /// Media setting
   late final GallerySetting setting;
@@ -706,7 +721,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: PhotoEditor(
-        setting: EditorSetting(backgrounds: [PhotoBackground(bytes: bytes)]),
+        setting: editorSetting.copyWith(
+          backgrounds: [PhotoBackground(bytes: bytes)],
+        ),
       ),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),

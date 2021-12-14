@@ -1,8 +1,6 @@
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 ///
 class StickerAsset {
@@ -66,6 +64,12 @@ class StickerConstraint {
 
   ///
   Size get size => Size(width, height);
+
+  ///
+  BoxConstraints get boxConstraints => BoxConstraints(
+        minWidth: width,
+        minHeight: height,
+      );
 }
 
 ///
@@ -135,6 +139,7 @@ class TextSticker extends Sticker {
     this.style,
     this.withBackground = false,
     this.textAlign,
+    this.background,
     Size size = const Size(200, 200),
     ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
@@ -156,12 +161,16 @@ class TextSticker extends Sticker {
   ///
   final bool withBackground;
 
+  ///
+  final Color? background;
+
   @override
   Widget? build(BuildContext context, PhotoEditingController controller) {
     return Container(
       constraints: BoxConstraints.loose(size),
       decoration: BoxDecoration(
-        color: withBackground ? controller.value.textColor : Colors.transparent,
+        color: background ??
+            (withBackground ? controller.value.textColor : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),

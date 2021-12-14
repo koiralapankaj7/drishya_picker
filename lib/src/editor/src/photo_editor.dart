@@ -1,12 +1,9 @@
-//
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/drishya_entity.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:drishya_picker/src/widgets/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 ///
@@ -89,55 +86,68 @@ class _PhotoEditorState extends State<PhotoEditor> {
         );
         return true;
       },
-      child: Scaffold(
-        extendBody: true,
-        resizeToAvoidBottomInset: false,
-        body: PhotoEditingControllerProvider(
-          controller: _controller,
-          child: ValueListenableBuilder<PhotoValue>(
-            valueListenable: _controller,
-            builder: (context, value, child) {
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Captureable view that shows the background and stickers
-                  RepaintBoundary(
-                    key: _controller.editorKey,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Playground background
-                        value.background?.build(context) ?? const SizedBox(),
+      child: KeyboardVisibility(
+        listener: (visible) {
+          if (!visible) {
+            FocusScope.of(context).unfocus();
+            _controller.updateValue(
+              hasFocus: false,
+              isColorPickerVisible: false,
+            );
+          }
+        },
+        builder: (context, visible, child) => child!,
+        child: Scaffold(
+          extendBody: true,
+          resizeToAvoidBottomInset: false,
+          body: PhotoEditingControllerProvider(
+            controller: _controller,
+            child: ValueListenableBuilder<PhotoValue>(
+              valueListenable: _controller,
+              builder: (context, value, child) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Captureable view that shows the background and stickers
+                    RepaintBoundary(
+                      key: _controller.editorKey,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Playground background
+                          value.background?.build(context) ?? const SizedBox(),
 
-                        // Stickers
-                        Opacity(
-                          opacity: value.isStickerPickerOpen ? 0.0 : 1.0,
-                          child: StickersView(controller: _controller),
-                        ),
+                          // Stickers
+                          Opacity(
+                            opacity: value.isStickerPickerOpen ? 0.0 : 1.0,
+                            child: StickersView(controller: _controller),
+                          ),
 
-                        //
-                      ],
+                          //
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // Textfield
-                  if (value.hasFocus) EditorTextfield(controller: _controller),
+                    // Textfield
+                    if (value.hasFocus)
+                      EditorTextfield(controller: _controller),
 
-                  // Overlay
-                  if (!widget.hideOverlay)
-                    EditorOverlay(controller: _controller),
+                    // Overlay
+                    if (!widget.hideOverlay)
+                      EditorOverlay(controller: _controller),
 
-                  // Color picker
-                  if (((value.hasFocus &&
-                              value.background is! GradientBackground) ||
-                          value.isColorPickerVisible) &&
-                      !value.isEditing)
-                    ColorPicker(controller: _controller),
+                    // Color picker
+                    if (((value.hasFocus &&
+                                value.background is! GradientBackground) ||
+                            value.isColorPickerVisible) &&
+                        !value.isEditing)
+                      ColorPicker(controller: _controller),
 
-                  //
-                ],
-              );
-            },
+                    //
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

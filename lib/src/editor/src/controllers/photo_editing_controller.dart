@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 ///
 class PhotoEditingController extends ValueNotifier<PhotoValue> {
@@ -54,7 +53,7 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
   @internal
   void init(BuildContext context, {EditorSetting? setting}) {
     _init = true;
-    _setting = setting ?? EditorSetting();
+    _setting = setting ?? const EditorSetting();
     _editorKey = GlobalKey();
     _colorNotifier = ValueNotifier(_setting.colors.first);
     _stickerController = StickerController();
@@ -68,6 +67,7 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
 
   @override
   void dispose() {
+    if (!_init) return;
     _colorNotifier.dispose();
     _stickerController.dispose();
     _textController.dispose();
@@ -76,6 +76,7 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
   }
 
   /// Update editor value
+  @internal
   void updateValue({
     bool? fillTextfield,
     Color? textColor,

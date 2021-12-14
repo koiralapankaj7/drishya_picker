@@ -1,8 +1,5 @@
-import 'dart:ui';
-
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 StickerAsset? _editingTextAsset;
 
@@ -47,8 +44,9 @@ class _EditorTextfieldState extends State<EditorTextfield> {
     if (box != null) {
       // _controller.removeListener(_listener);
       final sticker = TextSticker(
-        // size: _editingTextAsset?.size.size ?? box.size,
-        size: box.size, // TODO : play with size
+        // size: box.size, // This size will be the smallest one
+
+        size: _editingTextAsset?.size.size ?? box.size,
         extra: {'text': _textController.text},
         onPressed: (asset) {
           _editingTextAsset = asset;
@@ -67,6 +65,10 @@ class _EditorTextfieldState extends State<EditorTextfield> {
           decorationColor: Colors.transparent,
           decorationThickness: 0,
         ),
+        background: widget.controller.value.background is! GradientBackground &&
+                widget.controller.value.fillTextfield
+            ? widget.controller.value.textColor
+            : Colors.white,
         textAlign: _controller.value.textAlign,
         withBackground: _controller.value.fillTextfield,
       );

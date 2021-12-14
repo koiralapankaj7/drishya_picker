@@ -3,8 +3,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../camera_view.dart';
-
 ///
 /// Widget to pick media using camera
 class CameraViewField extends StatelessWidget {

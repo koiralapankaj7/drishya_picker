@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 /// State for the fetching process
 enum BaseState {

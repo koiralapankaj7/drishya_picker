@@ -70,7 +70,7 @@ class _ShutterButtonState extends State<_ShutterButton>
     // Progress bar animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: widget.controller.value.videoDuration,
+      duration: widget.controller.cameraSetting.videoDuration,
     )..addStatusListener((status) {
         if (_controller.status == AnimationStatus.completed) {
           _stopRecording();

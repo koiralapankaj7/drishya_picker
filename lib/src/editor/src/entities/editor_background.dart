@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 
 ///
 // ignore: one_member_abstracts

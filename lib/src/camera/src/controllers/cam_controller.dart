@@ -8,60 +8,69 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:photo_manager/photo_manager.dart';
 
-import '../entities/camera_type.dart';
 import '../widgets/ui_handler.dart';
-import 'exposure_controller.dart';
-import 'zoom_controller.dart';
 
 ///
 class CamController extends ValueNotifier<CamValue> {
   ///
-  CamController({
-    required BuildContext context,
-    PhotoEditingController? playgroundController,
-    ResolutionPreset? resolutionPreset,
-    ImageFormatGroup? imageFormatGroup,
-    Duration? videoDuration,
-    bool? editAfterCapture,
-  })  : _uiHandler = UIHandler(context),
-        _context = context,
-        _photoEditingController =
-            playgroundController ?? PhotoEditingController(),
-        super(
-          CamValue(
-            resolutionPreset: resolutionPreset ?? ResolutionPreset.medium,
-            imageFormatGroup: imageFormatGroup ?? ImageFormatGroup.jpeg,
-            videoDuration: videoDuration ?? const Duration(seconds: 10),
-            editAfterCapture: editAfterCapture ?? true,
-          ),
-        ) {
-    _zoomController = ZoomController(this);
-    _exposureController = ExposureController(this, _uiHandler);
-  }
+  CamController() : super(CamValue());
 
   //
-  final BuildContext _context;
+  late BuildContext _context;
 
   //
-  final UIHandler _uiHandler;
+  late UIHandler _uiHandler;
 
   // Text view editing controller
-  final PhotoEditingController _photoEditingController;
+  late PhotoEditingController _photoEditingController;
+
+  //
+  late CameraSetting _cameraSetting;
+
+  // Zoom controller
+  late ZoomController _zoomController;
+
+  // Exposure controller
+  late ExposureController _exposureController;
 
   // Value will be set after creating camera
   CameraController? _cameraController;
 
-  // Zoom controller
-  late final ZoomController _zoomController;
+  //
+  var _init = false;
 
-  // Exposure controller
-  late final ExposureController _exposureController;
+  ///
+  @internal
+  void init(BuildContext context, {CameraSetting? setting}) {
+    _init = true;
+    _context = context;
+    _uiHandler = UIHandler(context);
+    _photoEditingController = PhotoEditingController();
+    _cameraSetting = setting ?? const CameraSetting();
+    _zoomController = ZoomController(this);
+    _exposureController = ExposureController(this, _uiHandler);
+  }
+
+  @internal
+  @override
+  set value(CamValue newValue) {
+    if (!_init) return;
+    super.value = newValue;
+  }
+
+  ///
+  @internal
+  void update({bool? isPlaygroundActive}) {
+    if (!_init) return;
+    value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
+  }
 
   @override
   void dispose() {
+    if (!_init) return;
     _zoomController.dispose();
     _exposureController.dispose();
     _photoEditingController.dispose();
@@ -72,7 +81,10 @@ class CamController extends ValueNotifier<CamValue> {
   ///
   bool get initialized => _cameraController?.value.isInitialized ?? false;
 
-  /// Call this only when [initialized] is true
+  /// Camera setting
+  CameraSetting get cameraSetting => _cameraSetting;
+
+  /// Camera controller
   CameraController? get cameraController => _cameraController;
 
   /// Camera playground controller i,e. text view
@@ -83,11 +95,6 @@ class CamController extends ValueNotifier<CamValue> {
 
   /// Camera exposure controller
   ExposureController get exposureController => _exposureController;
-
-  ///
-  void update({bool? isPlaygroundActive}) {
-    value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
-  }
 
   ///
   void changeCameraType(CameraType type) {
@@ -127,9 +134,9 @@ class CamController extends ValueNotifier<CamValue> {
     // create camera controller
     _cameraController = CameraController(
       description,
-      value.resolutionPreset,
+      cameraSetting.resolutionPreset,
       enableAudio: value.enableAudio,
-      imageFormatGroup: value.imageFormatGroup,
+      imageFormatGroup: cameraSetting.imageFormatGroup,
     );
 
     final controller = _cameraController!;
@@ -215,7 +222,7 @@ class CamController extends ValueNotifier<CamValue> {
       final file = File(xFile.path);
       final bytes = await file.readAsBytes();
 
-      if (value.editAfterCapture) {
+      if (cameraSetting.editAfterCapture) {
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: PhotoEditor(
             setting: EditorSetting(
@@ -449,10 +456,6 @@ class CamController extends ValueNotifier<CamValue> {
 class CamValue {
   ///
   CamValue({
-    required this.resolutionPreset,
-    required this.imageFormatGroup,
-    required this.videoDuration,
-    this.editAfterCapture = true,
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
@@ -463,18 +466,6 @@ class CamValue {
     this.isRecordingPaused = false,
     this.isPlaygroundActive = false,
   });
-
-  /// Image resolution. Default value is [ResolutionPreset.medium]
-  final ResolutionPreset resolutionPreset;
-
-  /// Image format group. Default value is [ImageFormatGroup.jpeg]
-  final ImageFormatGroup imageFormatGroup;
-
-  /// Video duration. Default value is 10 seconds
-  final Duration videoDuration;
-
-  ///
-  final bool editAfterCapture;
 
   /// Current active camera description e,g. Front camera or back camera
   final CameraDescription? cameraDescription;
@@ -514,12 +505,8 @@ class CamValue {
     bool? isRecordingVideo,
     bool? isRecordingPaused,
     bool? isPlaygroundActive,
-    bool? editAfterCapture,
   }) {
     return CamValue(
-      resolutionPreset: resolutionPreset,
-      imageFormatGroup: imageFormatGroup,
-      videoDuration: videoDuration,
       cameraDescription: cameraDescription ?? this.cameraDescription,
       cameras: cameras ?? this.cameras,
       cameraType: cameraType ?? this.cameraType,
@@ -529,7 +516,6 @@ class CamValue {
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
-      editAfterCapture: editAfterCapture ?? this.editAfterCapture,
     );
   }
 

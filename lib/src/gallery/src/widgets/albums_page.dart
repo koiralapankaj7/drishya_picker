@@ -4,9 +4,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
-import '../gallery_view.dart';
 import 'gallery_permission_view.dart';
 
 const _imageSize = 48;

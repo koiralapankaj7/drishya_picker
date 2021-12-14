@@ -6,14 +6,10 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
-import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../entities/gallery_value.dart';
-import '../gallery_view.dart';
 import 'album_builder.dart';
 import 'gallery_permission_view.dart';
 

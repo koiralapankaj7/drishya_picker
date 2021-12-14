@@ -150,7 +150,10 @@ class _StickersViewState extends State<StickersView> {
                     },
                     onScaleUpdate: _onScaleUpdate,
                     size: asset.sticker.size,
-                    constraints: asset.getImageConstraints(),
+                    constraints: BoxConstraints(
+                      minWidth: asset.sticker.size.width * _minStickerScale,
+                      minHeight: asset.sticker.size.height * _minStickerScale,
+                    ),
                     initialPosition: asset.position.offset,
                     initialAngle: asset.angle,
                     child: Opacity(
@@ -189,15 +192,6 @@ class _StickersViewState extends State<StickersView> {
           ),
         );
       },
-    );
-  }
-}
-
-extension on StickerAsset {
-  BoxConstraints getImageConstraints() {
-    return BoxConstraints(
-      minWidth: sticker.size.width * _minStickerScale,
-      minHeight: sticker.size.height * _minStickerScale,
     );
   }
 }

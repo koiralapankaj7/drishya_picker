@@ -1,19 +1,13 @@
 // ignore_for_file: always_use_package_imports
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
-import 'controllers/cam_controller.dart';
-import 'entities/camera_type.dart';
-import 'widgets/cam_controller_provider.dart';
 import 'widgets/camera_overlay.dart';
 import 'widgets/raw_camera_view.dart';
 
@@ -25,10 +19,14 @@ class CameraView extends StatefulWidget {
   const CameraView({
     Key? key,
     this.controller,
+    this.cameraSetting,
   }) : super(key: key);
 
   /// Camera controller
   final CamController? controller;
+
+  ///
+  final CameraSetting? cameraSetting;
 
   /// Camera view route name
   static const String name = 'CameraView';
@@ -57,22 +55,24 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late PhotoEditingController _playgroundController;
+  late PhotoEditingController _photoEditingController;
   late CamController _camController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _camController = widget.controller ?? CamController(context: context);
-    _playgroundController = _camController.photoEditingController
-      ..addListener(_playgroundListener);
+    _camController = (widget.controller ?? CamController())
+      ..init(context, setting: widget.cameraSetting);
+    _photoEditingController = _camController.photoEditingController
+      ..addListener(_photoEditingListener);
     _hideSB();
     _camController.createCamera();
   }
 
-  void _playgroundListener() {
-    final value = _playgroundController.value;
+  // Listen photo editing state
+  void _photoEditingListener() {
+    final value = _photoEditingController.value;
     final isPlaygroundActive =
         value.hasFocus || value.isEditing || value.hasStickers;
     _camController.update(isPlaygroundActive: isPlaygroundActive);
@@ -82,9 +82,10 @@ class _CameraViewState extends State<CameraView>
   void didUpdateWidget(covariant CameraView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _camController = widget.controller ?? CamController(context: context);
-      _playgroundController = _camController.photoEditingController
-        ..addListener(_playgroundListener);
+      _camController = (widget.controller ?? CamController())
+        ..init(context, setting: widget.cameraSetting);
+      _photoEditingController = _camController.photoEditingController
+        ..addListener(_photoEditingListener);
       _hideSB();
       _camController.createCamera();
     }
@@ -119,7 +120,7 @@ class _CameraViewState extends State<CameraView>
   void dispose() {
     _showSB();
     WidgetsBinding.instance?.removeObserver(this);
-    _playgroundController.removeListener(_playgroundListener);
+    _photoEditingController.removeListener(_photoEditingListener);
     if (widget.controller == null) {
       _camController.dispose();
     }
@@ -168,7 +169,7 @@ class _CameraViewState extends State<CameraView>
                   builder: (value, child) {
                     if (value.cameraType == CameraType.text) {
                       return PhotoEditor(
-                        controller: _playgroundController,
+                        controller: _photoEditingController,
                         hideOverlay: true,
                       );
                     }
