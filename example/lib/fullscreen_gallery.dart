@@ -27,7 +27,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
       albumSubtitle: 'All',
       requestType: RequestType.all,
     );
-    controller = GalleryController(gallerySetting: setting);
+    controller = GalleryController(setting: setting);
     notifier = ValueNotifier(<DrishyaEntity>[]);
   }
 

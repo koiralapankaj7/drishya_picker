@@ -1,9 +1,8 @@
 // ignore_for_file: always_use_package_imports
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import '../gallery_view.dart';
 
 ///
 class GalleryControllerProvider extends InheritedWidget {

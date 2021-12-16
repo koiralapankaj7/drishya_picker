@@ -3,8 +3,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../entities/gallery_value.dart';
-
 ///
 class GalleryAssetSelector extends StatefulWidget {
   ///

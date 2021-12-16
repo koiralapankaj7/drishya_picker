@@ -199,7 +199,7 @@ class _SlidablePanelState extends State<SlidablePanel>
       duration: const Duration(milliseconds: 400),
     )..addListener(() {
         _panelController.attach(
-          SliderValue(
+          PnaelValue(
             factor: _animationController.value,
             state: _aboveHalfWay ? PanelState.max : PanelState.min,
           ),
@@ -298,7 +298,7 @@ class _SlidablePanelState extends State<SlidablePanel>
 
   void _slidePanelWithPosition(double factor, PanelState state) {
     _panelController.attach(
-      SliderValue(
+      PnaelValue(
         factor: factor,
         state: state,
       ),
@@ -344,7 +344,7 @@ class _SlidablePanelState extends State<SlidablePanel>
           // Sliding panel
           ValueListenableBuilder(
             valueListenable: _panelController,
-            builder: (context, SliderValue value, child) {
+            builder: (context, PnaelValue value, child) {
               final height =
                   (_panelMinHeight + (_remainingSpace * value.factor))
                       .clamp(_panelMinHeight, _panelMaxHeight);
@@ -373,13 +373,13 @@ class _SlidablePanelState extends State<SlidablePanel>
 }
 
 /// Sliding panel controller
-class PanelController extends ValueNotifier<SliderValue> {
+class PanelController extends ValueNotifier<PnaelValue> {
   ///
   PanelController({
     ScrollController? scrollController,
   })  : _scrollController = scrollController ?? ScrollController(),
         _panelVisibility = ValueNotifier(false),
-        super(SliderValue());
+        super(PnaelValue());
 
   final ScrollController _scrollController;
   final ValueNotifier<bool> _panelVisibility;
@@ -475,7 +475,7 @@ class PanelController extends ValueNotifier<SliderValue> {
 
   ///
   @internal
-  void attach(SliderValue sliderValue) {
+  void attach(PnaelValue sliderValue) {
     _internal = true;
     value = value.copyWith(
       factor: sliderValue.factor,
@@ -487,7 +487,7 @@ class PanelController extends ValueNotifier<SliderValue> {
   }
 
   @override
-  set value(SliderValue newValue) {
+  set value(PnaelValue newValue) {
     if (!_internal) return;
     super.value = newValue;
   }
@@ -503,9 +503,9 @@ class PanelController extends ValueNotifier<SliderValue> {
 }
 
 ///
-class SliderValue {
+class PnaelValue {
   ///
-  SliderValue({
+  PnaelValue({
     this.state = PanelState.close,
     this.factor = 0.0,
     this.offset = 0.0,
@@ -525,13 +525,13 @@ class SliderValue {
   final Offset position;
 
   ///
-  SliderValue copyWith({
+  PnaelValue copyWith({
     PanelState? state,
     double? factor,
     double? offset,
     Offset? position,
   }) {
-    return SliderValue(
+    return PnaelValue(
       state: state ?? this.state,
       factor: factor ?? this.factor,
       offset: offset ?? this.offset,

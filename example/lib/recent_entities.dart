@@ -18,7 +18,8 @@ class RecentEntities extends StatelessWidget {
       height: 100.0,
       width: MediaQuery.of(context).size.width,
       child: FutureBuilder<List<DrishyaEntity?>>(
-        future: controller.recentEntities(),
+        // TODO
+        // future: controller.recentEntities(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done ||
               (snapshot.data?.isEmpty ?? true)) {

@@ -9,7 +9,6 @@ import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dar
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../entities/gallery_value.dart';
 import 'album_builder.dart';
 import 'gallery_permission_view.dart';
 

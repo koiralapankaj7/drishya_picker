@@ -24,7 +24,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
     notifier = ValueNotifier(<DrishyaEntity>[]);
     controller = GalleryController(
-      gallerySetting: const GallerySetting(
+      setting: const GallerySetting(
         albumSubtitle: 'Collapsable',
         enableCamera: true,
         maximum: 10,

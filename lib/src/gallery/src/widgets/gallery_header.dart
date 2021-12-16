@@ -2,12 +2,11 @@
 
 import 'dart:math';
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:flutter/material.dart';
-
-import '../gallery_view.dart';
-import 'gallery_builder.dart';
 
 ///
 class GalleryHeader extends StatefulWidget {
