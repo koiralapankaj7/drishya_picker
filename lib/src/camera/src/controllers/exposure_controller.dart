@@ -1,45 +1,52 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/ui_handler.dart';
-
 ///
 class ExposureController extends ValueNotifier<ExposureValue> {
   ///
-  ExposureController(
-    CamController controllerNotifier,
-    UIHandler uiHandler,
-  )   : _controllerNotifier = controllerNotifier,
-        _uiHandler = uiHandler,
+  ExposureController(CamController camController)
+      : _camController = camController,
         super(ExposureValue());
 
-  final CamController _controllerNotifier;
-  final UIHandler _uiHandler;
+  final CamController _camController;
 
-  bool get _initialized => _controllerNotifier.initialized;
+  bool get _initialized => _camController.initialized;
 
-  /// Call this only when [_initialized] is true
-  CameraController? get _controller => _controllerNotifier.cameraController;
+  CameraController? get _controller => _camController.cameraController;
 
+  //
+  bool _hasCamera(ValueSetter<Exception>? onException) {
+    if (!_initialized) {
+      onException?.call(Exception("Couldn't find the camera!"));
+      return false;
+    }
+    return true;
+  }
+
+  ///
+  /// Set maximum exposure value
   ///
   void setMaxExposure(double offset) {
     value = value.copyWith(maxAvailableExposurer: offset);
   }
 
   ///
+  /// Set minimum exposure value
+  ///
   void setMinExposure(double offset) {
     value = value.copyWith(minAvailableExposure: offset);
   }
 
+  ///
   /// Set exposure and focus point on the screen
+  ///
   Future<void> setExposureAndFocus(
     TapDownDetails details,
-    BoxConstraints constraints,
-  ) async {
-    if (!_initialized) return;
+    BoxConstraints constraints, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
 
     final offset = Offset(
       details.localPosition.dx / constraints.maxWidth,
@@ -52,32 +59,43 @@ class ExposureController extends ValueNotifier<ExposureValue> {
         _controller!.setFocusPoint(offset),
       ]);
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
-      rethrow;
+      onException?.call(e);
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 
+  ///
   /// Set exposure mode
-  Future<void> setExposureMode(ExposureMode mode) async {
-    if (!_initialized) return;
-
+  ///
+  Future<void> setExposureMode(
+    ExposureMode mode, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
     try {
       await _controller!.setExposureMode(mode);
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
-      rethrow;
+      onException?.call(e);
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 
+  ///
   /// Set focus mode
-  Future<void> setFocusMode(FocusMode mode) async {
-    if (!_initialized) return;
-
+  ///
+  Future<void> setFocusMode(
+    FocusMode mode, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
     try {
       await _controller!.setFocusMode(mode);
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
-      rethrow;
+      onException?.call(e);
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 }
@@ -97,7 +115,7 @@ class ExposureValue {
   /// Max available Offset
   final double maxAvailableExposurer;
 
-  /// Current  Offset
+  /// Current exposure  Offset
   final double currentExposure;
 
   ///

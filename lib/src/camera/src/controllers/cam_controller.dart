@@ -1,5 +1,4 @@
-// ignore_for_file: always_use_package_imports, use_build_context_synchronously
-
+import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -11,83 +10,71 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../widgets/ui_handler.dart';
-
 ///
 class CamController extends ValueNotifier<CamValue> {
   ///
-  CamController() : super(CamValue());
+  CamController({
+    CameraSetting? setting,
+    EditorSetting? editorSetting,
+    EditorSetting? photoEditorSetting,
+  })  : _editorSetting = editorSetting ?? const EditorSetting(),
+        _photoEditorSetting =
+            photoEditorSetting ?? editorSetting ?? const EditorSetting(),
+        super(
+          CamValue(setting: setting ?? const CameraSetting()),
+        ) {
+    _photoEditingController = PhotoEditingController();
+    _zoomController = ZoomController(this);
+    _exposureController = ExposureController(this);
+  }
 
-  //
-  late BuildContext _context;
-
-  //
-  late UIHandler _uiHandler;
-
-  // Text view editing controller
-  late PhotoEditingController _photoEditingController;
-
-  //
-  late CameraSetting _cameraSetting;
-
-  // Zoom controller
-  late ZoomController _zoomController;
-
-  // Exposure controller
-  late ExposureController _exposureController;
-
+  late final PhotoEditingController _photoEditingController;
+  late final ZoomController _zoomController;
+  late final ExposureController _exposureController;
+  late final EditorSetting _photoEditorSetting;
+  late final EditorSetting _editorSetting;
   // Value will be set after creating camera
   CameraController? _cameraController;
-
-  //
-  var _init = false;
-
-  ///
-  @internal
-  void init(BuildContext context, {CameraSetting? setting}) {
-    _init = true;
-    _context = context;
-    _uiHandler = UIHandler(context);
-    _photoEditingController = PhotoEditingController();
-    _cameraSetting = setting ?? const CameraSetting();
-    _zoomController = ZoomController(this);
-    _exposureController = ExposureController(this, _uiHandler);
-  }
-
-  @internal
-  @override
-  set value(CamValue newValue) {
-    if (!_init) return;
-    super.value = newValue;
-  }
+  var _isDisposed = false;
 
   ///
   @internal
   void update({bool? isPlaygroundActive}) {
-    if (!_init) return;
     value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
   }
 
   @override
+  set value(CamValue newValue) {
+    if (_isDisposed) return;
+    super.value = newValue;
+  }
+
+  @override
   void dispose() {
-    if (!_init) return;
     _zoomController.dispose();
     _exposureController.dispose();
     _photoEditingController.dispose();
     _cameraController?.dispose();
+    _isDisposed = true;
     super.dispose();
   }
 
-  ///
+  //
+  bool _hasCamera(ValueSetter<Exception>? onException) {
+    if (!initialized) {
+      onException?.call(Exception("Couldn't find the camera!"));
+      return false;
+    }
+    return true;
+  }
+
+  /// Check if camera has been initialized or not
   bool get initialized => _cameraController?.value.isInitialized ?? false;
 
-  /// Camera setting
-  CameraSetting get cameraSetting => _cameraSetting;
-
-  /// Camera controller
+  /// Flutter Camera controller
   CameraController? get cameraController => _cameraController;
 
-  /// Camera playground controller i,e. text view
+  /// Photo editing controller
   PhotoEditingController get photoEditingController => _photoEditingController;
 
   /// Camera zoom controller
@@ -97,18 +84,29 @@ class CamController extends ValueNotifier<CamValue> {
   ExposureController get exposureController => _exposureController;
 
   ///
-  void changeCameraType(CameraType type) {
+  /// Change camera type
+  ///
+  void changeCameraType(
+    CameraType type, {
+    ValueSetter<Exception>? onException,
+  }) {
     final canSwitch = type == CameraType.selfi &&
         value.lensDirection != CameraLensDirection.front;
     if (canSwitch) {
-      switchCameraDirection(CameraLensDirection.front);
+      switchCameraDirection(
+        CameraLensDirection.front,
+        onException: onException,
+      );
     }
     value = value.copyWith(cameraType: type);
   }
 
+  ///
   /// Create new camera
+  ///
   Future<CameraController?> createCamera({
     CameraDescription? cameraDescription,
+    ValueSetter<Exception>? onException,
   }) async {
     // if (cameraDescription == null) {
     //   _controllerNotifier.value = const ControllerValue();
@@ -134,9 +132,9 @@ class CamController extends ValueNotifier<CamValue> {
     // create camera controller
     _cameraController = CameraController(
       description,
-      cameraSetting.resolutionPreset,
+      value.setting.resolutionPreset,
       enableAudio: value.enableAudio,
-      imageFormatGroup: cameraSetting.imageFormatGroup,
+      imageFormatGroup: value.setting.imageFormatGroup,
     );
 
     final controller = _cameraController!;
@@ -145,7 +143,7 @@ class CamController extends ValueNotifier<CamValue> {
     controller.addListener(() {
       if (controller.value.hasError) {
         final error = 'Camera error ${controller.value.errorDescription}';
-        _uiHandler.showSnackBar(error);
+        onException?.call(Exception(error));
         // _controllerNotifier.value =
         //     _controllerNotifier.value.copyWith(error: error);
       }
@@ -163,56 +161,45 @@ class CamController extends ValueNotifier<CamValue> {
       );
 
       if (controller.description.lensDirection == CameraLensDirection.back) {
-        // ignore: unawaited_futures
-        controller.setFlashMode(value.flashMode);
+        unawaited(controller.setFlashMode(value.flashMode));
       }
-      // ignore: unawaited_futures
-      Future.wait([
-        controller
-            .getMinExposureOffset()
-            .then(_exposureController.setMinExposure),
-        controller
-            .getMaxExposureOffset()
-            .then(_exposureController.setMaxExposure),
-        controller.getMaxZoomLevel().then(_zoomController.setMaxZoom),
-        controller.getMinZoomLevel().then(_zoomController.setMinZoom),
-      ]);
+      unawaited(
+        Future.wait([
+          controller
+              .getMinExposureOffset()
+              .then(_exposureController.setMinExposure),
+          controller
+              .getMaxExposureOffset()
+              .then(_exposureController.setMaxExposure),
+          controller.getMaxZoomLevel().then(_zoomController.setMaxZoom),
+          controller.getMinZoomLevel().then(_zoomController.setMinZoom),
+        ]),
+      );
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
+      onException?.call(e);
     } catch (e) {
-      _uiHandler.showSnackBar(e.toString());
+      onException?.call(Exception(e));
     }
-
     return controller;
-
-    //
   }
 
-  // //
-  // void _finishTakingPicture(DrishyaEntity? drishyaEntity) {
-  //   // if (!value.editAfterCapture) {
-  //   //   SystemChrome.setEnabledSystemUIMode(
-  //   //     SystemUiMode.manual,
-  //   //     overlays: SystemUiOverlay.values,
-  //   //   );
-  //   // }
-  //   Navigator.of(_context).pop(drishyaEntity);
-  //   // _uiHandler.pop<DrishyaEntity?>(drishyaEntity);
-  // }
-
+  ///
   /// Take picture
-  Future<DrishyaEntity?> takePicture() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return null;
-    }
+  ///
+  Future<DrishyaEntity?> takePicture(
+    BuildContext context, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return null;
 
     if (value.isTakingPicture) {
-      _uiHandler.showSnackBar('Capturing is currently running..');
+      onException?.call(Exception('Capturing is currently running..'));
       return null;
     }
 
     try {
+      final navigator = Navigator.of(context);
+
       final controller = _cameraController!;
 
       // Update state
@@ -222,9 +209,9 @@ class CamController extends ValueNotifier<CamValue> {
       final file = File(xFile.path);
       final bytes = await file.readAsBytes();
 
-      if (cameraSetting.editAfterCapture) {
+      if (value.setting.editAfterCapture) {
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
-          builder: PhotoEditor(
+          builder: DrishyaEditor(
             setting: EditorSetting(
               backgrounds: [PhotoBackground(bytes: bytes)],
             ),
@@ -232,11 +219,10 @@ class CamController extends ValueNotifier<CamValue> {
           begainHorizontal: true,
           endHorizontal: true,
         );
-        final de = await Navigator.of(_context).push(route);
-        if (de != null) {
-          _uiHandler.pop(de);
+        final de = await navigator.push(route);
+        if (de != null && navigator.mounted) {
+          navigator.pop(de);
         }
-        // pc.dispose();
         value = value.copyWith(isTakingPicture: false);
         return de;
       } else {
@@ -254,66 +240,78 @@ class CamController extends ValueNotifier<CamValue> {
             pickedThumbData: bytes,
             pickedFile: file,
           );
-          _uiHandler.pop(drishyaEntity);
+          if (navigator.mounted) {
+            navigator.pop(drishyaEntity);
+          }
           return drishyaEntity;
         } else {
-          _uiHandler.showSnackBar('Something went wrong! Please try again');
+          onException?.call(
+            Exception('Something went wrong! Please try again'),
+          );
           value = value.copyWith(isTakingPicture: false);
           return null;
         }
       }
     } on CameraException catch (e) {
-      _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
+      onException?.call(e);
       value = value.copyWith(isTakingPicture: false);
       return null;
     } catch (e) {
-      _uiHandler.showSnackBar('Exception occured while capturing picture : $e');
+      onException?.call(Exception(e));
       return null;
     }
   }
 
+  ///
   /// Switch camera direction
-  void switchCameraDirection(CameraLensDirection direction) {
+  ///
+  void switchCameraDirection(
+    CameraLensDirection direction, {
+    ValueSetter<Exception>? onException,
+  }) {
+    if (!_hasCamera(onException)) return;
     try {
       final description = value.cameras.firstWhere(
         (element) => element.lensDirection == direction,
       );
       createCamera(cameraDescription: description);
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
+      onException?.call(e);
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 
+  ///
   /// Set flash mode
-  Future<void> changeFlashMode() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
-
+  ///
+  Future<void> changeFlashMode({ValueSetter<Exception>? onException}) async {
+    if (!_hasCamera(onException)) return;
     try {
       final controller = _cameraController!;
-
       final mode = controller.value.flashMode == FlashMode.off
           ? FlashMode.always
           : FlashMode.off;
       value = value.copyWith(flashMode: mode);
       await controller.setFlashMode(mode);
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
+      onException?.call(e);
       rethrow;
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 
+  ///
   /// Start video recording
-  Future<void> startVideoRecording() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
+  ///
+  Future<void> startVideoRecording({
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
 
     if (value.isRecordingVideo) {
-      _uiHandler.showSnackBar('Recording is already started!');
+      onException?.call(Exception('Recording is already started!'));
       return;
     }
 
@@ -325,21 +323,26 @@ class CamController extends ValueNotifier<CamValue> {
         isRecordingPaused: false,
       );
     } on CameraException catch (e) {
-      _uiHandler.showExceptionSnackbar(e);
+      onException?.call(e);
       value = value.copyWith(isRecordingVideo: false);
-      return;
+    } catch (e) {
+      onException?.call(Exception(e));
     }
   }
 
+  ///
   /// Stop/Complete video recording
-  Future<void> stopVideoRecording() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
+  ///
+  Future<void> stopVideoRecording(
+    BuildContext context, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
 
     if (value.isRecordingVideo) {
       try {
+        final navigator = Navigator.of(context);
+
         final controller = _cameraController!;
 
         final xfile = await controller.stopVideoRecording();
@@ -362,100 +365,96 @@ class CamController extends ValueNotifier<CamValue> {
             SystemUiMode.manual,
             overlays: SystemUiOverlay.values,
           );
-          _uiHandler.pop<DrishyaEntity>(drishyaEntity);
-          return;
+          if (navigator.mounted) {
+            navigator.pop(drishyaEntity);
+          }
         } else {
-          _uiHandler.showSnackBar('Something went wrong! Please try again');
-          return;
+          onException?.call(
+            Exception('Something went wrong! Please try again'),
+          );
         }
       } on CameraException catch (e) {
-        _uiHandler.showExceptionSnackbar(e);
+        onException?.call(Exception(e));
         // Update state
         value = value.copyWith(isRecordingVideo: false);
-        rethrow;
+      } catch (e) {
+        onException?.call(Exception(e));
       }
     } else {
-      _uiHandler.showSnackBar('Recording not found!');
-      return;
+      onException?.call(Exception('Recording not found!'));
     }
   }
 
+  ///
   /// Pause video recording
-  Future<void> pauseVideoRecording() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
+  ///
+  Future<void> pauseVideoRecording({
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
 
     if (value.isRecordingVideo) {
       try {
         final controller = _cameraController!;
-
         await controller.pauseVideoRecording();
         // Update state
         value = value.copyWith(isRecordingPaused: true);
       } on CameraException catch (e) {
-        // Update state
-        _uiHandler.showExceptionSnackbar(e);
-        rethrow;
+        onException?.call(e);
+      } catch (e) {
+        onException?.call(Exception(e));
       }
     } else {
-      _uiHandler.showSnackBar('Recording not found!');
-      return;
+      onException?.call(Exception('Recording not found!'));
     }
   }
 
+  ///
   /// Resume video recording
-  Future<void> resumeVideoRecording() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
+  ///
+  Future<void> resumeVideoRecording({
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
 
     if (value.isRecordingPaused) {
       try {
         final controller = _cameraController!;
-
         await controller.resumeVideoRecording();
-        // Update state
         value = value.copyWith(isRecordingPaused: false);
       } on CameraException catch (e) {
-        _uiHandler.showExceptionSnackbar(e);
-        rethrow;
+        onException?.call(e);
+      } catch (e) {
+        onException?.call(Exception(e));
       }
     } else {
-      _uiHandler.showSnackBar("Couldn't resume the video!");
-      return;
+      onException?.call(Exception("Couldn't resume the video!"));
     }
   }
 
+  ///
   /// Lock unlock capture orientation i,e. Portrait and Landscape
-  Future<void> lockUnlockCaptureOrientation() async {
-    if (!initialized) {
-      _uiHandler.showSnackBar("Couldn't find the camera!");
-      return;
-    }
-
+  ///
+  Future<void> lockUnlockCaptureOrientation({
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
     final controller = _cameraController!;
-
     if (controller.value.isCaptureOrientationLocked) {
       await controller.unlockCaptureOrientation();
-      _uiHandler.showSnackBar('Capture orientation unlocked');
     } else {
       await controller.lockCaptureOrientation();
-      _uiHandler.showSnackBar(
-        '''Capture orientation locked to ${controller.value.lockedCaptureOrientation.toString().split('.').last}''',
-      );
     }
   }
 
   //
 }
 
-///
+/// Camera controller value
 class CamValue {
   ///
   CamValue({
+    this.setting = const CameraSetting(),
     this.cameraDescription,
     this.cameras = const [],
     this.enableAudio = true,
@@ -466,6 +465,9 @@ class CamValue {
     this.isRecordingPaused = false,
     this.isPlaygroundActive = false,
   });
+
+  /// Camera settings
+  final CameraSetting setting;
 
   /// Current active camera description e,g. Front camera or back camera
   final CameraDescription? cameraDescription;
@@ -496,6 +498,7 @@ class CamValue {
 
   ///
   CamValue copyWith({
+    CameraSetting? setting,
     CameraDescription? cameraDescription,
     List<CameraDescription>? cameras,
     CameraType? cameraType,
@@ -507,6 +510,7 @@ class CamValue {
     bool? isPlaygroundActive,
   }) {
     return CamValue(
+      setting: setting ?? this.setting,
       cameraDescription: cameraDescription ?? this.cameraDescription,
       cameras: cameras ?? this.cameras,
       cameraType: cameraType ?? this.cameraType,

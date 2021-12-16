@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 ///
-class PhotoEditor extends StatefulWidget {
+class DrishyaEditor extends StatefulWidget {
   ///
-  const PhotoEditor({
+  const DrishyaEditor({
     Key? key,
     this.controller,
     this.setting,
@@ -25,7 +25,7 @@ class PhotoEditor extends StatefulWidget {
   ///
   final bool hideOverlay;
 
-  /// Open playground
+  /// Open drishya editor
   static Future<DrishyaEntity?> open(
     BuildContext context, {
     PhotoEditingController? controller,
@@ -34,7 +34,7 @@ class PhotoEditor extends StatefulWidget {
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
-        builder: PhotoEditor(
+        builder: DrishyaEditor(
           controller: controller,
           setting: setting,
           hideOverlay: hideOverlay,
@@ -44,10 +44,10 @@ class PhotoEditor extends StatefulWidget {
   }
 
   @override
-  State<PhotoEditor> createState() => _PhotoEditorState();
+  State<DrishyaEditor> createState() => _DrishyaEditorState();
 }
 
-class _PhotoEditorState extends State<PhotoEditor> {
+class _DrishyaEditorState extends State<DrishyaEditor> {
   late PhotoEditingController _controller;
 
   @override
@@ -58,7 +58,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
   }
 
   @override
-  void didUpdateWidget(covariant PhotoEditor oldWidget) {
+  void didUpdateWidget(covariant DrishyaEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller ||
         oldWidget.setting != widget.setting) {

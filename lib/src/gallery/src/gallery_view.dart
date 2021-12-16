@@ -720,7 +720,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     final bytes = await entity.originBytes;
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: PhotoEditor(
+      builder: DrishyaEditor(
         setting: editorSetting.copyWith(
           backgrounds: [PhotoBackground(bytes: bytes)],
         ),

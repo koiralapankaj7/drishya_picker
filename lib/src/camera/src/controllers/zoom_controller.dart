@@ -16,6 +16,15 @@ class ZoomController extends ValueNotifier<ZoomValue> {
   //
   bool get _initialized => _controller.initialized;
 
+  //
+  bool _hasCamera(ValueSetter<Exception>? onException) {
+    if (!_initialized) {
+      onException?.call(Exception("Couldn't find the camera!"));
+      return false;
+    }
+    return true;
+  }
+
   ///
   void addPointer(PointerDownEvent event) {
     value = value.copyWith(pointers: value.pointers + 1);
@@ -42,11 +51,14 @@ class ZoomController extends ValueNotifier<ZoomValue> {
   }
 
   ///
-  Future<void> startZooming(ScaleUpdateDetails details) async {
+  Future<void> startZooming(
+    ScaleUpdateDetails details, {
+    ValueSetter<Exception>? onException,
+  }) async {
+    if (!_hasCamera(onException)) return;
+
     // When there are not exactly two fingers on screen don't scale
-    if (!_initialized || value.pointers != 2) {
-      return;
-    }
+    if (value.pointers != 2) return;
 
     value = value.copyWith(
       currentScale: (value.baseScale * details.scale)

@@ -19,14 +19,10 @@ class CameraView extends StatefulWidget {
   const CameraView({
     Key? key,
     this.controller,
-    this.cameraSetting,
   }) : super(key: key);
 
   /// Camera controller
   final CamController? controller;
-
-  ///
-  final CameraSetting? cameraSetting;
 
   /// Camera view route name
   static const String name = 'CameraView';
@@ -62,8 +58,7 @@ class _CameraViewState extends State<CameraView>
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _camController = (widget.controller ?? CamController())
-      ..init(context, setting: widget.cameraSetting);
+    _camController = widget.controller ?? CamController();
     _photoEditingController = _camController.photoEditingController
       ..addListener(_photoEditingListener);
     _hideSB();
@@ -82,8 +77,7 @@ class _CameraViewState extends State<CameraView>
   void didUpdateWidget(covariant CameraView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _camController = (widget.controller ?? CamController())
-        ..init(context, setting: widget.cameraSetting);
+      _camController = widget.controller ?? CamController();
       _photoEditingController = _camController.photoEditingController
         ..addListener(_photoEditingListener);
       _hideSB();
@@ -168,7 +162,7 @@ class _CameraViewState extends State<CameraView>
                   controller: _camController,
                   builder: (value, child) {
                     if (value.cameraType == CameraType.text) {
-                      return PhotoEditor(
+                      return DrishyaEditor(
                         controller: _photoEditingController,
                         hideOverlay: true,
                       );
