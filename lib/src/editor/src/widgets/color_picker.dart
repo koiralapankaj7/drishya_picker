@@ -10,7 +10,7 @@ class ColorPicker extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class _ColorCircle extends StatelessWidget {
   }) : super(key: key);
 
   final Color color;
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   @override
   Widget build(BuildContext context) {

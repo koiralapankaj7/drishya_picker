@@ -127,7 +127,7 @@ abstract class Sticker {
   final Map<String, Object> extra;
 
   /// Build sticker widget
-  Widget? build(BuildContext context, PhotoEditingController controller) =>
+  Widget? build(BuildContext context, DrishyaEditingController controller) =>
       null;
 }
 
@@ -165,7 +165,7 @@ class TextSticker extends Sticker {
   final Color? background;
 
   @override
-  Widget? build(BuildContext context, PhotoEditingController controller) {
+  Widget? build(BuildContext context, DrishyaEditingController controller) {
     return Container(
       constraints: BoxConstraints.loose(size),
       decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class ImageSticker extends Sticker {
   final bool isNetworkImage;
 
   @override
-  Widget build(BuildContext context, PhotoEditingController controller) {
+  Widget build(BuildContext context, DrishyaEditingController controller) {
     if (isNetworkImage) {
       return Image.network(
         path,
@@ -260,7 +260,7 @@ class IconSticker extends Sticker {
   final IconData iconData;
 
   @override
-  Widget? build(BuildContext context, PhotoEditingController controller) {
+  Widget? build(BuildContext context, DrishyaEditingController controller) {
     return ValueListenableBuilder<Color>(
       valueListenable: controller.colorNotifier,
       builder: (context, color, child) {

@@ -11,7 +11,7 @@ class BackgroundSwitcher extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   @override
   Widget build(BuildContext context) {

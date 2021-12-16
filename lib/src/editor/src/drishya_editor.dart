@@ -12,15 +12,11 @@ class DrishyaEditor extends StatefulWidget {
   const DrishyaEditor({
     Key? key,
     this.controller,
-    this.setting,
     this.hideOverlay = false,
   }) : super(key: key);
 
   ///
-  final PhotoEditingController? controller;
-
-  ///
-  final EditorSetting? setting;
+  final DrishyaEditingController? controller;
 
   ///
   final bool hideOverlay;
@@ -28,7 +24,7 @@ class DrishyaEditor extends StatefulWidget {
   /// Open drishya editor
   static Future<DrishyaEntity?> open(
     BuildContext context, {
-    PhotoEditingController? controller,
+    DrishyaEditingController? controller,
     EditorSetting? setting,
     bool hideOverlay = false,
   }) async {
@@ -36,7 +32,6 @@ class DrishyaEditor extends StatefulWidget {
       SlideTransitionPageRoute(
         builder: DrishyaEditor(
           controller: controller,
-          setting: setting,
           hideOverlay: hideOverlay,
         ),
       ),
@@ -48,23 +43,20 @@ class DrishyaEditor extends StatefulWidget {
 }
 
 class _DrishyaEditorState extends State<DrishyaEditor> {
-  late PhotoEditingController _controller;
+  late DrishyaEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = (widget.controller ?? PhotoEditingController())
-      ..init(context, setting: widget.setting);
+    _controller = widget.controller ?? DrishyaEditingController();
   }
 
   @override
   void didUpdateWidget(covariant DrishyaEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller ||
-        oldWidget.setting != widget.setting) {
+    if (oldWidget.controller != widget.controller) {
       _controller.dispose();
-      _controller = (widget.controller ?? PhotoEditingController())
-        ..init(context, setting: widget.setting);
+      _controller = widget.controller ?? DrishyaEditingController();
     }
   }
 
@@ -102,7 +94,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
           resizeToAvoidBottomInset: false,
           body: PhotoEditingControllerProvider(
             controller: _controller,
-            child: ValueListenableBuilder<PhotoValue>(
+            child: ValueListenableBuilder<EditorValue>(
               valueListenable: _controller,
               builder: (context, value, child) {
                 return Stack(
@@ -115,7 +107,9 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                         fit: StackFit.expand,
                         children: [
                           // Playground background
-                          value.background?.build(context) ?? const SizedBox(),
+                          (value.background ??
+                                  _controller.setting.backgrounds.first)
+                              .build(context),
 
                           // Stickers
                           Opacity(

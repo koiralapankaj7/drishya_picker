@@ -2,9 +2,9 @@ import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///
-class PhotoValue {
+class EditorValue {
   ///
-  PhotoValue({
+  EditorValue({
     this.textAlign = TextAlign.center,
     this.fillTextfield = false,
     this.maxLines = 1,
@@ -51,7 +51,7 @@ class PhotoValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   ///
-  PhotoValue copyWith({
+  EditorValue copyWith({
     TextAlign? textAlign,
     bool? fillTextfield,
     bool? hasFocus,
@@ -64,7 +64,7 @@ class PhotoValue {
     bool? isStickerPickerOpen,
     bool? isColorPickerVisible,
   }) {
-    return PhotoValue(
+    return EditorValue(
       textAlign: textAlign ?? this.textAlign,
       fillTextfield: fillTextfield ?? this.fillTextfield,
       hasFocus: hasFocus ?? this.hasFocus,

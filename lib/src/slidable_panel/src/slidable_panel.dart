@@ -2,25 +2,26 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
-///
-enum SlidingState {
-  ///
+/// State of the panel
+enum PanelState {
+  /// Panel is currently sliding up
   slidingUp,
 
-  ///
+  /// Panel is currently sliding down
   slidingDown,
 
-  ///
+  /// Panel is at its max size
   max,
 
-  ///
+  /// Panel is at its min size
   min,
 
-  ///
+  /// Panel is closed
   close,
 
-  ///
+  /// Panel is in pause state, where gesture will not work
   paused,
 }
 
@@ -200,7 +201,7 @@ class _SlidablePanelState extends State<SlidablePanel>
         _panelController.attach(
           SliderValue(
             factor: _animationController.value,
-            state: _aboveHalfWay ? SlidingState.max : SlidingState.min,
+            state: _aboveHalfWay ? PanelState.max : PanelState.min,
           ),
         );
       });
@@ -221,33 +222,24 @@ class _SlidablePanelState extends State<SlidablePanel>
     _velocityTracker!.addPosition(event.timeStamp, event.position);
 
     final state = _pointerInitialPosition.dy - event.position.dy < 0.0
-        ? SlidingState.slidingDown
-        : SlidingState.slidingUp;
+        ? PanelState.slidingDown
+        : PanelState.slidingUp;
     final panelState = _panelController.value.state;
     final mediaQuery = MediaQuery.of(context);
 
     if (!_scrollToTop &&
-        panelState == SlidingState.min &&
-        state == SlidingState.slidingUp) {
+        panelState == PanelState.min &&
+        state == PanelState.slidingUp) {
       final pointerReachedHandler =
           (mediaQuery.size.height - event.position.dy) > _panelMinHeight;
       _scrollToTop = pointerReachedHandler;
     }
 
     if (!_scrollToBottom &&
-        panelState == SlidingState.max &&
-        state == SlidingState.slidingDown) {
+        panelState == PanelState.max &&
+        state == PanelState.slidingDown) {
       final isControllerOffsetZero =
           _scrollController.hasClients && _scrollController.offset == 0.0;
-
-      // final isControllerOffsetZero = _scrollController.hasClients
-      //     ? _scrollController.offset == 0.0
-      //     : false;
-      // final headerMinPosition = mediaQuery.padding.top;
-      // final headerMaxPosition = headerMinPosition + _panelHeaderMaxHeight;
-      // final isHandler = event.position.dy >= headerMinPosition &&
-      //     event.position.dy <= headerMaxPosition;
-      // _scrollToBottom = isHandler || isControllerOffsetZero;
 
       final headerMinPosition = _mediaQuery.size.height - _panelMaxHeight;
       final headerMaxPosition = headerMinPosition + _setting.headerMaxHeight;
@@ -304,7 +296,7 @@ class _SlidablePanelState extends State<SlidablePanel>
     return (currentDY.abs() - _pointerInitialPosition.dy.abs()).abs() > 2.0;
   }
 
-  void _slidePanelWithPosition(double factor, SlidingState state) {
+  void _slidePanelWithPosition(double factor, PanelState state) {
     _panelController.attach(
       SliderValue(
         factor: factor,
@@ -380,7 +372,7 @@ class _SlidablePanelState extends State<SlidablePanel>
   //
 }
 
-///
+/// Sliding panel controller
 class PanelController extends ValueNotifier<SliderValue> {
   ///
   PanelController({
@@ -408,26 +400,29 @@ class PanelController extends ValueNotifier<SliderValue> {
   ///
   ValueNotifier<bool> get panelVisibility => _panelVisibility;
 
-  ///
-  SlidingState get panelState => value.state;
+  /// Current state of the pannel
+  PanelState get panelState => value.state;
 
   /// If panel is open return true, otherwise false
   bool get isVisible => _panelVisibility.value;
 
-  ///
+  /// Gestaure status
   bool get isGestureEnabled => _gesture;
 
+  /// Change gesture status
   set isGestureEnabled(bool isEnable) {
     if (isGestureEnabled && isEnable) return;
     _gesture = isEnable;
   }
 
-  /// Minimize panel
+  ///
+  /// Open panel to the viewport
+  ///
   void openPanel() {
     _internal = true;
-    if (value.state == SlidingState.min) return;
+    if (value.state == PanelState.min) return;
     value = value.copyWith(
-      state: SlidingState.min,
+      state: PanelState.min,
       factor: 0,
       offset: 0,
       position: Offset.zero,
@@ -437,24 +432,28 @@ class PanelController extends ValueNotifier<SliderValue> {
     _internal = false;
   }
 
-  /// Maximize panel
+  ///
+  /// Maximize panel to its full size
+  ///
   void maximizePanel() {
-    if (value.state == SlidingState.max) return;
+    if (value.state == PanelState.max) return;
     _state._snapToPosition(1);
   }
 
-  ///
+  /// Minimize panel to its minimum size
   void minimizePanel() {
-    if (value.state == SlidingState.min) return;
+    if (value.state == PanelState.min) return;
     _state._snapToPosition(0);
   }
 
-  /// Close Panel
+  ///
+  /// Close Panel from viewport
+  ///
   void closePanel() {
     _internal = true;
-    if (value.state == SlidingState.close) return;
+    if (value.state == PanelState.close) return;
     value = value.copyWith(
-      state: SlidingState.close,
+      state: PanelState.close,
       factor: 0,
       offset: 0,
       position: Offset.zero,
@@ -465,15 +464,17 @@ class PanelController extends ValueNotifier<SliderValue> {
   }
 
   ///
+  @internal
   void pausePanel() {
     _internal = true;
-    if (value.state == SlidingState.paused) return;
-    value = value.copyWith(state: SlidingState.paused);
+    if (value.state == PanelState.paused) return;
+    value = value.copyWith(state: PanelState.paused);
     _panelVisibility.value = false;
     _internal = false;
   }
 
   ///
+  @internal
   void attach(SliderValue sliderValue) {
     _internal = true;
     value = value.copyWith(
@@ -505,14 +506,14 @@ class PanelController extends ValueNotifier<SliderValue> {
 class SliderValue {
   ///
   SliderValue({
-    this.state = SlidingState.close,
+    this.state = PanelState.close,
     this.factor = 0.0,
     this.offset = 0.0,
     this.position = Offset.zero,
   });
 
   /// Sliding state
-  final SlidingState state;
+  final PanelState state;
 
   /// From 0.0 - 1.0
   final double factor;
@@ -525,7 +526,7 @@ class SliderValue {
 
   ///
   SliderValue copyWith({
-    SlidingState? state,
+    PanelState? state,
     double? factor,
     double? offset,
     Offset? position,

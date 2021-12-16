@@ -10,29 +10,34 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-///
+/// Camera controller
 class CamController extends ValueNotifier<CamValue> {
   ///
   CamController({
+    /// Camera setting
     CameraSetting? setting,
+
+    /// Setting for text editing
     EditorSetting? editorSetting,
+
+    /// Setting for photo editing after taking picture
     EditorSetting? photoEditorSetting,
-  })  : _editorSetting = editorSetting ?? const EditorSetting(),
-        _photoEditorSetting =
+  })  : _photoEditorSetting =
             photoEditorSetting ?? editorSetting ?? const EditorSetting(),
         super(
           CamValue(setting: setting ?? const CameraSetting()),
         ) {
-    _photoEditingController = PhotoEditingController();
+    _drishyaEditingController = DrishyaEditingController(
+      setting: editorSetting ?? const EditorSetting(),
+    );
     _zoomController = ZoomController(this);
     _exposureController = ExposureController(this);
   }
 
-  late final PhotoEditingController _photoEditingController;
+  late final DrishyaEditingController _drishyaEditingController;
   late final ZoomController _zoomController;
   late final ExposureController _exposureController;
   late final EditorSetting _photoEditorSetting;
-  late final EditorSetting _editorSetting;
   // Value will be set after creating camera
   CameraController? _cameraController;
   var _isDisposed = false;
@@ -53,7 +58,7 @@ class CamController extends ValueNotifier<CamValue> {
   void dispose() {
     _zoomController.dispose();
     _exposureController.dispose();
-    _photoEditingController.dispose();
+    _drishyaEditingController.dispose();
     _cameraController?.dispose();
     _isDisposed = true;
     super.dispose();
@@ -75,7 +80,8 @@ class CamController extends ValueNotifier<CamValue> {
   CameraController? get cameraController => _cameraController;
 
   /// Photo editing controller
-  PhotoEditingController get photoEditingController => _photoEditingController;
+  DrishyaEditingController get photoEditingController =>
+      _drishyaEditingController;
 
   /// Camera zoom controller
   ZoomController get zoomController => _zoomController;
@@ -210,16 +216,18 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (value.setting.editAfterCapture) {
-        final route = SlideTransitionPageRoute<DrishyaEntity?>(
-          builder: DrishyaEditor(
-            setting: EditorSetting(
-              backgrounds: [PhotoBackground(bytes: bytes)],
-            ),
+        final controller = DrishyaEditingController(
+          setting: _photoEditorSetting.copyWith(
+            backgrounds: [PhotoBackground(bytes: bytes)],
           ),
+        );
+        final route = SlideTransitionPageRoute<DrishyaEntity?>(
+          builder: DrishyaEditor(controller: controller),
           begainHorizontal: true,
           endHorizontal: true,
         );
         final de = await navigator.push(route);
+        controller.dispose();
         if (de != null && navigator.mounted) {
           navigator.pop(de);
         }

@@ -51,7 +51,7 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late PhotoEditingController _photoEditingController;
+  late DrishyaEditingController _photoEditingController;
   late CamController _camController;
 
   @override

@@ -12,7 +12,7 @@ class StickersView extends StatefulWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   @override
   State<StickersView> createState() => _StickersViewState();
@@ -20,7 +20,7 @@ class StickersView extends StatefulWidget {
 
 class _StickersViewState extends State<StickersView> {
   late final GlobalKey _deleteKey;
-  late final PhotoEditingController _controller;
+  late final DrishyaEditingController _controller;
   var _collied = false;
 
   @override

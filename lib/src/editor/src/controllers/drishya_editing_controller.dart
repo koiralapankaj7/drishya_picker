@@ -1,77 +1,75 @@
-import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
-///
-class PhotoEditingController extends ValueNotifier<PhotoValue> {
+/// Drishya editing controller
+class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
-  PhotoEditingController() : super(PhotoValue());
-
-  ///
-  late GlobalKey _editorKey;
-
-  ///
-  late EditorSetting _setting;
-
-  ///
-  late ValueNotifier<Color> _colorNotifier;
-
-  ///
-  late StickerController _stickerController;
-
-  ///
-  late TextEditingController _textController;
-
-  ///
-  GlobalKey get editorKey => _editorKey;
-
-  ///
-  bool get hasStickers => !value.hasStickers;
-
-  ///
-  ValueNotifier<Color> get colorNotifier => _colorNotifier;
-
-  /// Editor sticker controller
-  StickerController get stickerController => _stickerController;
-
-  /// Editor text editing controller
-  TextEditingController get textController => _textController;
-
-  /// Photo editing settings
-  EditorSetting get setting => _setting;
-
-  //
-  var _init = false;
-
-  /// Initialize photo editing controller properties
-  @internal
-  void init(BuildContext context, {EditorSetting? setting}) {
-    _init = true;
-    _setting = setting ?? const EditorSetting();
+  DrishyaEditingController({
+    EditorSetting? setting,
+  })  : assert(
+          setting == null || setting.backgrounds.isNotEmpty,
+          'Editor backgrounds cannot be empty!',
+        ),
+        _setting = setting ?? const EditorSetting(),
+        super(EditorValue()) {
     _editorKey = GlobalKey();
     _colorNotifier = ValueNotifier(_setting.colors.first);
     _stickerController = StickerController();
     _textController = TextEditingController();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      if (value.background == null) {
-        changeBackground();
-      }
-    });
+  }
+
+  ///
+  late final GlobalKey _editorKey;
+
+  ///
+  late final EditorSetting _setting;
+
+  ///
+  late final ValueNotifier<Color> _colorNotifier;
+
+  ///
+  late final StickerController _stickerController;
+
+  ///
+  late final TextEditingController _textController;
+
+  /// Editor key
+  GlobalKey get editorKey => _editorKey;
+
+  /// true, if editor has  stickers
+  bool get hasStickers => !value.hasStickers;
+
+  /// Color picker notifier
+  ValueNotifier<Color> get colorNotifier => _colorNotifier;
+
+  /// Sticker controller
+  StickerController get stickerController => _stickerController;
+
+  /// Editor text field controller
+  TextEditingController get textController => _textController;
+
+  /// Editor settings
+  EditorSetting get setting => _setting;
+
+  var _isDisposed = false;
+
+  @override
+  set value(EditorValue newValue) {
+    if (_isDisposed) return;
+    super.value = newValue;
   }
 
   @override
   void dispose() {
-    if (!_init) return;
     _colorNotifier.dispose();
     _stickerController.dispose();
     _textController.dispose();
-    _init = false;
+    _isDisposed = true;
     super.dispose();
   }
 
@@ -90,12 +88,6 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     bool? isColorPickerVisible,
     EditorBackground? background,
   }) {
-    if (!_init) return;
-
-    if (!(hasFocus ?? false)) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    }
-
     value = value.copyWith(
       fillTextfield: fillTextfield,
       textColor: textColor,
@@ -111,23 +103,23 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     );
   }
 
+  ///
   /// Clear editor
+  ///
   void clear() {
-    if (!_init) return;
     _stickerController.clearStickers();
     value = value.copyWith(hasStickers: false);
   }
 
+  ///
   /// Change editor background
+  ///
   void changeBackground() {
-    if (!_init) return;
-
     final current = value.background;
 
     if (current == null) {
       final bg = _setting.backgrounds.first;
-
-      value = value.copyWith(
+      updateValue(
         background: bg,
         textColor:
             bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
@@ -140,41 +132,19 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
     final nextIndex =
         index >= 0 && index + 1 < _setting.backgrounds.length ? index + 1 : 0;
     final bg = _setting.backgrounds[nextIndex];
-    value = value.copyWith(
+    updateValue(
       background: bg,
       textColor:
           bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
     );
-
-    // if (background is GradientBackground) {
-    //   final current = value.background as GradientBackground;
-    //   final index = _setting.gradients.indexOf(current);
-
-    //   final nextIndex = (index + 1).clamp(0, setting.gradients.length - 1);
-    //   // index >= 0 && index + 1 < setting.gradients.length ? index + 1 : 0;
-    //   final bg = _setting.gradients[nextIndex];
-    //   value = value.copyWith(background: bg, textBackground: bg);
-    // } else {
-    //   value = value.copyWith(background: background);
-    // }
-    // if (background != null && background is PhotoBackground) {
-    //   value = value.copyWith(background: background);
-    // } else {
-    //   final current = value.background;
-    //   final index = value.background is GradientBackground
-    //       ? gradients.indexOf(current as GradientBackground)
-    //       : 0;
-    //   final hasMatch = index != -1;
-    //   final nextIndex =
-    //       hasMatch && index + 1 < gradients.length ? index + 1 : 0;
-    //   final bg = gradients[nextIndex];
-    //   value = value.copyWith(background: bg, textBackground: bg);
-    // }
   }
 
-  /// Take screen shot of the editor
-  Future<DrishyaEntity?> completeEditing() async {
-    if (!_init) return null;
+  ///
+  /// Complete editing and generate image
+  ///
+  Future<DrishyaEntity?> completeEditing({
+    ValueSetter<Exception>? onException,
+  }) async {
     try {
       final bg = value.background;
       if (bg is PhotoBackground && bg.bytes != null && !value.hasStickers) {
@@ -190,7 +160,9 @@ class PhotoEditingController extends ValueNotifier<PhotoValue> {
         return entity?.toDrishya;
       }
     } catch (e) {
-      log('Exception occured while capturing picture : $e');
+      onException?.call(
+        Exception('Exception occured while capturing picture : $e'),
+      );
     }
   }
 

@@ -13,7 +13,7 @@ class EditorCloseButton extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   void _onPressed(BuildContext context) {
     if (controller.hasStickers) {

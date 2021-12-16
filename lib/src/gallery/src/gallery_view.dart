@@ -282,7 +282,7 @@ class _GalleryViewState extends State<GalleryView>
       return true;
     }
 
-    final isPanelMax = _panelController.value.state == SlidingState.max;
+    final isPanelMax = _panelController.value.state == PanelState.max;
 
     if (!_controller.fullScreenMode && isPanelMax) {
       _controller._panelController.minimizePanel();
@@ -718,13 +718,14 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     DrishyaEntity? pickedEntity;
 
     final bytes = await entity.originBytes;
+    final controller = DrishyaEditingController(
+      setting: editorSetting.copyWith(
+        backgrounds: [PhotoBackground(bytes: bytes)],
+      ),
+    );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: DrishyaEditor(
-        setting: editorSetting.copyWith(
-          backgrounds: [PhotoBackground(bytes: bytes)],
-        ),
-      ),
+      builder: DrishyaEditor(controller: controller),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -735,6 +736,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       pickedEntity = await Navigator.of(context).push(route);
       _closeOnCameraSelect();
     }
+
+    controller.dispose();
 
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {

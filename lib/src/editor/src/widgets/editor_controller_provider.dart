@@ -4,31 +4,31 @@ import 'package:flutter/material.dart';
 
 ///
 class PhotoEditingControllerProvider extends InheritedWidget {
-  /// Creates a widget that associates a [PhotoEditingController] with a
+  /// Creates a widget that associates a [DrishyaEditingController] with a
   /// subtree.
   const PhotoEditingControllerProvider({
     Key? key,
-    required PhotoEditingController this.controller,
+    required DrishyaEditingController this.controller,
     required Widget child,
   }) : super(key: key, child: child);
 
-  /// Creates a subtree without an associated [PhotoEditingController].
+  /// Creates a subtree without an associated [DrishyaEditingController].
   const PhotoEditingControllerProvider.none({
     Key? key,
     required Widget child,
   })  : controller = null,
         super(key: key, child: child);
 
-  /// The [PhotoEditingController] associated with the subtree.
+  /// The [DrishyaEditingController] associated with the subtree.
   ///
-  final PhotoEditingController? controller;
+  final DrishyaEditingController? controller;
 
-  /// Returns the [PhotoEditingController] most closely associated
+  /// Returns the [DrishyaEditingController] most closely associated
   /// with the given context.
   ///
-  /// Returns null if there is no [PhotoEditingController] associated with the
+  /// Returns null if there is no [DrishyaEditingController] associated with the
   /// given context.
-  static PhotoEditingController? of(BuildContext context) {
+  static DrishyaEditingController? of(BuildContext context) {
     final result = context
         .dependOnInheritedWidgetOfExactType<PhotoEditingControllerProvider>();
     return result?.controller;
@@ -42,7 +42,7 @@ class PhotoEditingControllerProvider extends InheritedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<PhotoEditingController>(
+      DiagnosticsProperty<DrishyaEditingController>(
         'controller',
         controller,
         ifNull: 'no controller',
@@ -54,7 +54,7 @@ class PhotoEditingControllerProvider extends InheritedWidget {
 
 ///
 extension PlaygroundControllerProviderExtension on BuildContext {
-  /// [PhotoEditingController] instance
-  PhotoEditingController? get photoEditingController =>
+  /// [DrishyaEditingController] instance
+  DrishyaEditingController? get photoEditingController =>
       PhotoEditingControllerProvider.of(this);
 }

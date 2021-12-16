@@ -12,7 +12,7 @@ class EditorTextfield extends StatefulWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   @override
   State<EditorTextfield> createState() => _EditorTextfieldState();
@@ -21,7 +21,7 @@ class EditorTextfield extends StatefulWidget {
 class _EditorTextfieldState extends State<EditorTextfield> {
   late final GlobalKey _tfSizeKey;
   late final GlobalKey _widthKey;
-  late final PhotoEditingController _controller;
+  late final DrishyaEditingController _controller;
   late final TextEditingController _textController;
 
   @override

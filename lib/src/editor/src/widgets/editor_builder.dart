@@ -12,12 +12,12 @@ class EditorBuilder extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   ///
   final Widget Function(
     BuildContext context,
-    PhotoValue value,
+    EditorValue value,
     Widget? child,
   ) builder;
 
@@ -26,7 +26,7 @@ class EditorBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<PhotoValue>(
+    return ValueListenableBuilder<EditorValue>(
       valueListenable: controller,
       builder: builder,
       child: child,

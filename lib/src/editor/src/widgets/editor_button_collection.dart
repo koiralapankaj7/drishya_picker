@@ -15,7 +15,7 @@ class EditorButtonCollection extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final PhotoEditingController controller;
+  final DrishyaEditingController controller;
 
   ///
   final Color? stickerViewBackground;
