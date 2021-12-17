@@ -62,7 +62,7 @@ class GalleryViewField extends StatefulWidget {
 
 class _GalleryViewFieldState extends State<GalleryViewField> {
   late GalleryController _controller;
-  bool _dispose = false;
+  var _dispose = false;
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class _GalleryViewFieldState extends State<GalleryViewField> {
           context,
         );
       },
-      child: widget.child,
+      child: widget.child ?? const Icon(Icons.image),
     );
   }
 }

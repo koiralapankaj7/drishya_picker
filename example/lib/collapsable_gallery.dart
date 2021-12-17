@@ -10,6 +10,7 @@ class CollapsableGallery extends StatefulWidget {
   const CollapsableGallery({
     Key? key,
   }) : super(key: key);
+
   @override
   _CollapsableGalleryState createState() => _CollapsableGalleryState();
 }
@@ -46,49 +47,60 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
     return SlidableGalleryView(
       controller: controller,
       child: Scaffold(
-        backgroundColor: Colors.amber,
         appBar: AppBar(
-          title: const Text('Pick using picker view'),
+          title: const Text('Slidable Gallery'),
         ),
         body: Column(
           children: [
             // Grid view
-            Expanded(child: GridViewWidget(notifier: notifier)),
-
-            const SizedBox(height: 8.0),
-
-            RecentEntities(controller: controller),
-
-            const SizedBox(height: 8.0),
-
-            //
-            Builder(builder: (context) {
-              return TextButton(
-                onPressed: () async {
+            Expanded(
+              child: GridViewWidget(
+                notifier: notifier,
+                controller: controller,
+                onAddButtonPressed: () async {
                   final entities = await controller.pick(
                     context,
                     selectedEntities: notifier.value,
                   );
                   notifier.value = entities;
                 },
-                style: TextButton.styleFrom(
-                  primary: Colors.white,
-                  backgroundColor: Colors.green,
-                ),
-                child: const Text('Use Controller'),
-              );
-            }),
+              ),
+            ),
+
+            const SizedBox(height: 8.0),
+
+            RecentEntities(controller: controller, notifier: notifier),
+
+            const SizedBox(height: 8.0),
 
             // Textfield
-            Padding(
+            Container(
               padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
                   // Textfield
-                  const Expanded(
+                  Expanded(
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Test field',
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
                       ),
                     ),
                   ),

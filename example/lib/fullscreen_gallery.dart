@@ -48,11 +48,23 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
       body: Column(
         children: [
           // Grid view
-          Expanded(child: GridViewWidget(notifier: notifier)),
+          Expanded(
+            child: GridViewWidget(
+              notifier: notifier,
+              controller: controller,
+              onAddButtonPressed: () async {
+                final entities = await controller.pick(
+                  context,
+                  selectedEntities: notifier.value,
+                );
+                notifier.value = entities;
+              },
+            ),
+          ),
 
           const SizedBox(height: 8.0),
 
-          RecentEntities(controller: controller),
+          RecentEntities(controller: controller, notifier: notifier),
 
           const SizedBox(height: 8.0),
 

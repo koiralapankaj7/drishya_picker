@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -292,11 +293,15 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Recent entities list
   ///
-  // Future<List<DrishyaEntity>> recentEntities({
-  //   RequestType? type,
-  //   int count = 20,
-  // }) =>
-  //     _albums.recentEntities(type: type, count: count);
+  Future<List<DrishyaEntity>> recentEntities({
+    RequestType? type,
+    int count = 20,
+  }) {
+    final albums = Albums();
+    final entities = albums.recentEntities(type: type, count: count);
+    albums.dispose();
+    return entities;
+  }
 
   ///
   /// return true if gallery is in full screen mode,
