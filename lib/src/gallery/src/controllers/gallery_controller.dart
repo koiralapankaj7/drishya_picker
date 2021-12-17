@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports, use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -15,19 +13,36 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Gallery controller constructor
   GalleryController({
+    /// Gallery slidable panel setting
     PanelSetting? panelSetting,
+
+    /// Gallery setting
     GallerySetting? setting,
-    EditorSetting? editorSetting,
+
+    /// Gallery photo editor setting
+    EditorSetting? galleryPhotoEditorSetting,
+
+    /// Camera setting
+    CameraSetting? cameraSetting,
+
+    /// Camera text editor setting
+    EditorSetting? cameraTextEditorSetting,
+
+    /// Camera photo editor setting
+    EditorSetting? cameraPhotoEditorSetting,
   })  : panelSetting = panelSetting ?? const PanelSetting(),
         setting = setting ?? const GallerySetting(),
-        editorSetting = editorSetting ?? const EditorSetting(),
+        _editorSetting = galleryPhotoEditorSetting ?? const EditorSetting(),
+        _cameraSetting = cameraSetting,
+        _cameraPhotoEditorSetting = cameraPhotoEditorSetting,
+        _cameraTextEditorSetting = cameraTextEditorSetting,
         panelKey = GlobalKey(),
         _panelController = PanelController(),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue());
 
-  ///
-  late final GlobalKey panelKey;
+  /// Slidable gallery key
+  final GlobalKey panelKey;
 
   /// Panel setting
   final PanelSetting panelSetting;
@@ -36,7 +51,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   final GallerySetting setting;
 
   /// Editor setting
-  final EditorSetting editorSetting;
+  final EditorSetting _editorSetting;
 
   /// Panel controller
   final PanelController _panelController;
@@ -44,7 +59,14 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Recent entities notifier
   final ValueNotifier<bool> _albumVisibility;
 
-  ValueNotifier<bool> get albumVisibility => _albumVisibility;
+  // Camera controller
+  final CameraSetting? _cameraSetting;
+
+  // Camera text editor setting
+  final EditorSetting? _cameraTextEditorSetting;
+
+  // Camera photo editor setting
+  final EditorSetting? _cameraPhotoEditorSetting;
 
   // Completer for gallerry picker controller
   late Completer<List<DrishyaEntity>> _completer;
@@ -64,8 +86,11 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   // Full screen mode or collapsable mode
   var _fullScreenMode = false;
 
+  //
   var _accessCamera = false;
 
+  ///
+  /// Update album visibility
   ///
   @internal
   void setAlbumVisibility({required bool visible}) {
@@ -74,16 +99,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   ///
-  /// Clear selected entities
-  ///
-  void clearSelection() {
-    _onSubmitted?.call([]);
-    _clearedSelection = true;
-    _internal = true;
-    value = const GalleryValue();
-  }
-
   /// Selecting and unselecting entities
+  ///
   @internal
   void select(DrishyaEntity entity, BuildContext context) {
     if (singleSelection) {
@@ -120,7 +137,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     }
   }
 
-  /// When selection is completed
+  ///
+  /// Complete selection process
+  ///
   @internal
   void completeTask(BuildContext context, List<DrishyaEntity>? entities) {
     if (_fullScreenMode) {
@@ -136,20 +155,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   ///
-  /// When panel closed without any selection
-  void closePanel() {
-    _panelController.closePanel();
-    final entities = (_clearedSelection || value.selectedEntities.isEmpty)
-        ? <DrishyaEntity>[]
-        : value.selectedEntities;
-    _completer.complete(entities);
-    // _onSubmitted?.call(entities);
-    // _checkKeyboard.value = false;
-    _internal = true;
-    value = const GalleryValue();
-  }
-
   /// Close collapsable panel if camera is selected from inside gallery view
+  ///
   void _closeOnCameraSelect() {
     _panelController.closePanel();
     // _checkKeyboard.value = false;
@@ -157,14 +164,22 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     value = const GalleryValue();
   }
 
+  ///
   /// Open camera from [GalleryView]
+  ///
   @internal
   Future<void> openCamera(BuildContext context) async {
     _accessCamera = true;
     DrishyaEntity? entity;
 
+    final camController = CamController(
+      setting: _cameraSetting,
+      editorSetting: _cameraTextEditorSetting,
+      photoEditorSetting: _cameraPhotoEditorSetting,
+    );
+
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: const CameraView(),
+      builder: CameraView(controller: camController),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -175,6 +190,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       entity = await Navigator.of(context).push(route);
       _closeOnCameraSelect();
     }
+
+    camController.dispose();
 
     final entities = [...value.selectedEntities];
     if (entity != null) {
@@ -198,27 +215,30 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _accessCamera = true;
     DrishyaEntity? pickedEntity;
 
+    final navigator = Navigator.of(context);
+
     final bytes = await entity.originBytes;
-    final controller = DrishyaEditingController(
-      setting: editorSetting.copyWith(
+    final editingController = DrishyaEditingController(
+      setting: _editorSetting.copyWith(
         backgrounds: [PhotoBackground(bytes: bytes)],
       ),
     );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: DrishyaEditor(controller: controller),
+      builder: DrishyaEditor(controller: editingController),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
 
+    if (!navigator.mounted) return;
+
     if (fullScreenMode) {
-      pickedEntity = await Navigator.of(context).pushReplacement(route);
+      pickedEntity = await navigator.pushReplacement(route);
     } else {
-      pickedEntity = await Navigator.of(context).push(route);
+      pickedEntity = await navigator.push(route);
       _closeOnCameraSelect();
     }
-
-    controller.dispose();
+    editingController.dispose();
 
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {
@@ -230,9 +250,11 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _completer.complete(entities);
   }
 
+  ///
   /// Open gallery using [GalleryViewField]
+  ///
   @internal
-  void openGallery(
+  void onGalleryFieldPressed(
     void Function(DrishyaEntity entity, bool removed)? onChanged,
     final void Function(List<DrishyaEntity> entities)? onSubmitted,
     List<DrishyaEntity>? selectedEntities,
@@ -240,38 +262,62 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ) {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
-    pick(context, selectedEntities: selectedEntities);
+    pick(context, selectedEntities: selectedEntities).then((value) {
+      _onChanged = null;
+      _onSubmitted = null;
+    });
   }
 
   // ===================== PUBLIC ==========================
 
+  ///
+  /// Close gallery when it is in slidable mode
+  ///
+  void closeSlidableGallery() {
+    if (panelKey.currentState == null) return;
+    _panelController.closePanel();
+    final entities = (_clearedSelection || value.selectedEntities.isEmpty)
+        ? <DrishyaEntity>[]
+        : value.selectedEntities;
+    _completer.complete(entities);
+    _internal = true;
+    value = const GalleryValue();
+  }
+
+  ///
+  /// Clear selected entities
+  ///
+  void clearSelection() {
+    _onSubmitted?.call([]);
+    _clearedSelection = true;
+    _internal = true;
+    value = const GalleryValue();
+  }
+
+  ///
   /// Pick assets
+  ///
   Future<List<DrishyaEntity>> pick(
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
   }) async {
     // If dont have permission dont do anything
-    final permission = await PhotoManager.requestPermissionExtend();
-    if (permission != PermissionState.authorized &&
-        permission != PermissionState.limited) {
-      PhotoManager.openSetting();
-      return [];
-    }
-
+    // TODO
+    // final permission = await PhotoManager.requestPermissionExtend();
+    // if (permission != PermissionState.authorized &&
+    //     permission != PermissionState.limited) {
+    //   PhotoManager.openSetting();
+    //   return [];
+    // }
     _completer = Completer<List<DrishyaEntity>>();
 
     if (panelKey.currentState == null) {
       _fullScreenMode = true;
-      final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
-        builder: GalleryView(controller: this),
-      );
-
-      await Navigator.of(context).push(route).then((result) {
-        // Closed by user
-        if (result == null && !_accessCamera) {
-          _completer.complete(value.selectedEntities);
-        }
-      });
+      final entity = await GalleryView.pick(context, controller: this);
+      // User did't open the camera and also didn't pick any assets
+      if (entity == null && !_accessCamera) {
+        _completer.complete(value.selectedEntities);
+      }
     } else {
       _fullScreenMode = false;
       _panelController.openPanel();
@@ -288,8 +334,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     return _completer.future;
   }
 
-  // ===================== GETTERS ==========================
-
   ///
   /// Recent entities list
   ///
@@ -302,6 +346,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     albums.dispose();
     return entities;
   }
+
+  // ===================== GETTERS ==========================
+
+  ///
+  /// Album visibility notifier
+  ///
+  ValueNotifier<bool> get albumVisibility => _albumVisibility;
 
   ///
   /// return true if gallery is in full screen mode,

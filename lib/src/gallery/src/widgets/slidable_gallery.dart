@@ -1,7 +1,4 @@
-// ignore_for_file: always_use_package_imports, use_build_context_synchronously
-
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 const _defaultMin = 0.37;
@@ -13,7 +10,6 @@ class SlidableGalleryView extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.editorSetting,
   }) : super(key: key);
 
   ///
@@ -21,9 +17,6 @@ class SlidableGalleryView extends StatefulWidget {
 
   ///
   final GalleryController? controller;
-
-  ///
-  final EditorSetting? editorSetting;
 
   @override
   State<SlidableGalleryView> createState() => _SlidableGalleryViewState();
@@ -71,7 +64,7 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
                         focusNode.unfocus();
                       }
                       if (_panelController.isVisible) {
-                        _controller.closePanel();
+                        _controller.closeSlidableGallery();
                       }
                     },
                     // TODO : why using builder
@@ -98,10 +91,7 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
               setting: _setting,
               controller: _panelController,
               child: Builder(
-                builder: (_) => GalleryView(
-                  controller: _controller,
-                  editorSetting: widget.editorSetting,
-                ),
+                builder: (_) => GalleryView(controller: _controller),
               ),
             ),
 

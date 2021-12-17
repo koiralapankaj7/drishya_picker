@@ -94,7 +94,7 @@ class _GalleryViewFieldState extends State<GalleryViewField> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _controller.openGallery(
+        _controller.onGalleryFieldPressed(
           widget.onChanged,
           widget.onSubmitted,
           widget.selectedEntities,

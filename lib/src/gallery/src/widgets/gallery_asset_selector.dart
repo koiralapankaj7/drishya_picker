@@ -9,19 +9,10 @@ class GalleryAssetSelector extends StatefulWidget {
   const GalleryAssetSelector({
     Key? key,
     required this.controller,
-    required this.onSubmit,
-    required this.onEdit,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
-
-  ///
-  final void Function(BuildContext context, List<DrishyaEntity> entities)
-      onSubmit;
-
-  ///
-  final ValueSetter<DrishyaEntity> onEdit;
 
   @override
   GalleryAssetSelectorState createState() => GalleryAssetSelectorState();
@@ -147,8 +138,10 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         child: SizedBox(
                           width: buttonWidth,
                           child: _TextButton(
-                            onPressed: () =>
-                                widget.onEdit(value.selectedEntities.first),
+                            onPressed: () => widget.controller.editEntity(
+                              context,
+                              value.selectedEntities.first,
+                            ),
                             label: 'EDIT',
                             background: Colors.white,
                             labelColor: Colors.black,
@@ -189,8 +182,8 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                           );
                         },
                         child: _TextButton(
-                          onPressed: () =>
-                              widget.onSubmit(context, value.selectedEntities),
+                          onPressed: () => widget.controller
+                              .completeTask(context, value.selectedEntities),
                           label: 'SELECT',
                         ),
                       ),

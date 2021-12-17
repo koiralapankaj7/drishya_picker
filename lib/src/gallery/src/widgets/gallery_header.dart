@@ -16,7 +16,6 @@ class GalleryHeader extends StatefulWidget {
     required this.controller,
     required this.onClose,
     required this.onAlbumToggle,
-    required this.albumVisibility,
     required this.albums,
     this.headerSubtitle,
   }) : super(key: key);
@@ -32,9 +31,6 @@ class GalleryHeader extends StatefulWidget {
 
   ///
   final void Function(bool visible) onAlbumToggle;
-
-  ///
-  final ValueNotifier<bool> albumVisibility;
 
   ///
   final Albums albums;
@@ -98,7 +94,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                       child: _AnimatedDropdown(
                         controller: _controller,
                         onPressed: widget.onAlbumToggle,
-                        albumVisibility: widget.albumVisibility,
+                        albumVisibility: _controller.albumVisibility,
                       ),
                     ),
                   ),

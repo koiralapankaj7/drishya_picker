@@ -18,26 +18,14 @@ class GalleryGridView extends StatelessWidget {
   const GalleryGridView({
     Key? key,
     required this.controller,
-    required this.onCameraRequest,
-    required this.onSelect,
     required this.albums,
-    required this.panelController,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
 
   ///
-  final ValueSetter<BuildContext> onCameraRequest;
-
-  ///
-  final void Function(DrishyaEntity, BuildContext) onSelect;
-
-  ///
   final Albums albums;
-
-  ///
-  final PanelController panelController;
 
   @override
   Widget build(BuildContext context) {
@@ -81,17 +69,18 @@ class GalleryGridView extends StatelessWidget {
                 onEndOfPage: album.fetchAssets,
                 scrollOffset: MediaQuery.of(context).size.height * 0.4,
                 child: GridView.builder(
-                  controller: panelController.scrollController,
+                  controller: controller.panelController.scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: controller.setting.crossAxisCount ?? 3,
                     crossAxisSpacing: 1.5,
                     mainAxisSpacing: 1.5,
                   ),
                   itemCount: itemCount,
+                  padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     if (controller.setting.enableCamera && index == 0) {
                       return InkWell(
-                        onTap: () => onCameraRequest(context),
+                        onTap: () => controller.openCamera(context),
                         child: Icon(
                           CupertinoIcons.camera,
                           color: Colors.lightBlue.shade300,
@@ -109,13 +98,7 @@ class GalleryGridView extends StatelessWidget {
 
                     if (entity == null) return const SizedBox();
 
-                    return _MediaTile(
-                      controller: controller,
-                      entity: entity,
-                      onPressed: (entity) {
-                        onSelect(entity, context);
-                      },
-                    );
+                    return _MediaTile(controller: controller, entity: entity);
                   },
                 ),
               );
@@ -136,7 +119,6 @@ class _MediaTile extends StatelessWidget {
     Key? key,
     required this.entity,
     required this.controller,
-    required this.onPressed,
   }) : super(key: key);
 
   ///
@@ -144,9 +126,6 @@ class _MediaTile extends StatelessWidget {
 
   ///
   final AssetEntity entity;
-
-  ///
-  final ValueSetter<DrishyaEntity> onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -158,9 +137,7 @@ class _MediaTile extends StatelessWidget {
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
-          onPressed(
-            drishya.copyWith(pickedThumbData: bytes),
-          );
+          controller.select(drishya.copyWith(pickedThumbData: bytes), context);
         },
         child: Stack(
           fit: StackFit.expand,
