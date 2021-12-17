@@ -35,7 +35,7 @@ class _PickerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.cyan,
+      appBar: AppBar(title: const Text('Drishya Picker')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

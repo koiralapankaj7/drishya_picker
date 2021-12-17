@@ -41,9 +41,8 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.yellow,
       appBar: AppBar(
-        title: const Text('Fullscreen gallery picker'),
+        title: const Text('Fullscreen Gallery'),
       ),
       body: Column(
         children: [
@@ -68,31 +67,34 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
 
           const SizedBox(height: 8.0),
 
-          TextButton(
-            onPressed: () async {
-              final entities = await controller.pick(
-                context,
-                selectedEntities: notifier.value,
-              );
-              notifier.value = entities;
-            },
-            style: TextButton.styleFrom(
-              primary: Colors.white,
-              backgroundColor: Colors.green,
-            ),
-            child: const Text('Use Controller'),
-          ),
-
           // Textfield
-          Padding(
+          Container(
             padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
             child: Row(
               children: [
                 // Textfield
-                const Expanded(
+                Expanded(
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Test field',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
                     ),
                   ),
                 ),
