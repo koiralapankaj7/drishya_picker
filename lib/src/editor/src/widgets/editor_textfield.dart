@@ -45,7 +45,6 @@ class _EditorTextfieldState extends State<EditorTextfield> {
       // _controller.removeListener(_listener);
       final sticker = TextSticker(
         // size: box.size, // This size will be the smallest one
-
         size: _editingTextAsset?.size.size ?? box.size,
         extra: {'text': _textController.text},
         onPressed: (asset) {
@@ -55,19 +54,15 @@ class _EditorTextfieldState extends State<EditorTextfield> {
         text: _textController.text,
         style: TextStyle(
           textBaseline: TextBaseline.ideographic,
-          color: widget.controller.value.background is! GradientBackground &&
-                  !widget.controller.value.fillTextfield
-              ? widget.controller.value.textColor
-              : Colors.white,
+          color: widget.controller.value.textColor,
           fontSize: 32,
           fontWeight: FontWeight.w700,
           decoration: TextDecoration.none,
           decorationColor: Colors.transparent,
           decorationThickness: 0,
         ),
-        background: widget.controller.value.background is! GradientBackground &&
-                widget.controller.value.fillTextfield
-            ? widget.controller.value.textColor
+        background: widget.controller.value.fillTextfield
+            ? widget.controller.value.color
             : Colors.white,
         textAlign: _controller.value.textAlign,
         withBackground: _controller.value.fillTextfield,
@@ -122,8 +117,7 @@ class _EditorTextfieldState extends State<EditorTextfield> {
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color:
-                    value.fillTextfield ? value.textColor : Colors.transparent,
+                color: value.fillTextfield ? value.color : Colors.transparent,
               ),
               child: TextFormField(
                 key: _tfSizeKey,
@@ -139,11 +133,7 @@ class _EditorTextfieldState extends State<EditorTextfield> {
                 smartDashesType: SmartDashesType.disabled,
                 style: TextStyle(
                   textBaseline: TextBaseline.ideographic,
-                  color: widget.controller.value.background
-                              is! GradientBackground &&
-                          !widget.controller.value.fillTextfield
-                      ? widget.controller.value.textColor
-                      : Colors.white,
+                  color: widget.controller.value.textColor,
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   decoration: TextDecoration.none,

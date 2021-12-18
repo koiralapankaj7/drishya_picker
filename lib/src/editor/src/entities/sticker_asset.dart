@@ -170,7 +170,7 @@ class TextSticker extends Sticker {
       constraints: BoxConstraints.loose(size),
       decoration: BoxDecoration(
         color: background ??
-            (withBackground ? controller.value.textColor : Colors.transparent),
+            (withBackground ? controller.value.color : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),

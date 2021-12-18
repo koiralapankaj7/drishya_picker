@@ -46,7 +46,7 @@ class BackgroundSwitcher extends StatelessWidget {
           child: SizedBox(
             width: 54,
             height: 54,
-            child: controller.value.background?.build(context),
+            child: controller.value.background.build(context),
           ),
         ),
       ),

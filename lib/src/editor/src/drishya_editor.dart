@@ -105,9 +105,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                         fit: StackFit.expand,
                         children: [
                           // Playground background
-                          (value.background ??
-                                  _controller.setting.backgrounds.first)
-                              .build(context),
+                          value.background.build(context),
 
                           // Stickers
                           Opacity(

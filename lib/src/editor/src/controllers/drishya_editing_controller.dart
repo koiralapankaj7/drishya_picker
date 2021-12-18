@@ -3,26 +3,32 @@ import 'dart:ui' as ui;
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 /// Drishya editing controller
 class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
   DrishyaEditingController({
-    EditorSetting? setting,
+    EditorSetting setting = const EditorSetting(),
   })  : assert(
-          setting == null || setting.backgrounds.isNotEmpty,
+          setting.backgrounds.isNotEmpty,
           'Editor backgrounds cannot be empty!',
         ),
         assert(
-          setting == null || setting.colors.isNotEmpty,
+          setting.colors.isNotEmpty,
           'Editor colors cannot be empty!',
         ),
-        _setting = setting ?? const EditorSetting(),
+        _setting = setting,
         _editorKey = GlobalKey(),
         _stickerController = StickerController(),
         _textController = TextEditingController(),
-        super(EditorValue()) {
+        super(
+          EditorValue(
+            color: setting.colors.first,
+            background: setting.backgrounds.first,
+          ),
+        ) {
     _colorNotifier = ValueNotifier(_setting.colors.first);
   }
 
@@ -88,9 +94,13 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     bool? isColorPickerVisible,
     EditorBackground? background,
   }) {
+    final oldValue = value;
+    if (oldValue.hasFocus && !(hasFocus ?? false)) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
     value = value.copyWith(
       fillTextfield: fillTextfield,
-      textColor: textColor,
+      color: textColor,
       maxLines: maxLines,
       textAlign: textAlign,
       hasFocus: hasFocus,
@@ -117,15 +127,15 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   void changeBackground() {
     final current = value.background;
 
-    if (current == null) {
-      final bg = _setting.backgrounds.first;
-      updateValue(
-        background: bg,
-        textColor:
-            bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
-      );
-      return;
-    }
+    // if (current == null) {
+    //   final bg = _setting.backgrounds.first;
+    //   updateValue(
+    //     background: bg,
+    //     textColor:
+    //         bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
+    //   );
+    //   return;
+    // }
 
     final index = _setting.backgrounds.indexOf(current);
 

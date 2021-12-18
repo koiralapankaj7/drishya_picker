@@ -67,7 +67,6 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
                         _controller.closeSlidableGallery();
                       }
                     },
-                    // TODO : why using builder
                     child: Builder(builder: (_) => widget.child),
                   ),
                 ),

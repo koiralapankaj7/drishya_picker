@@ -301,14 +301,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
   }) async {
-    // If dont have permission dont do anything
-    // TODO
-    // final permission = await PhotoManager.requestPermissionExtend();
-    // if (permission != PermissionState.authorized &&
-    //     permission != PermissionState.limited) {
-    //   PhotoManager.openSetting();
-    //   return [];
-    // }
     _completer = Completer<List<DrishyaEntity>>();
 
     if (panelKey.currentState == null) {
