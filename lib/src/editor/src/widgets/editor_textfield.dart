@@ -122,6 +122,7 @@ class _EditorTextfieldState extends State<EditorTextfield> {
               child: TextFormField(
                 key: _tfSizeKey,
                 controller: _textController,
+                focusNode: _controller.focusNode,
                 autofocus: true,
                 textAlign: value.textAlign,
                 autocorrect: false,

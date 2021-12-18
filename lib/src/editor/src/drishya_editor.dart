@@ -49,15 +49,6 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
     _controller = widget.controller ?? DrishyaEditingController();
   }
 
-  // @override
-  // void didUpdateWidget(covariant DrishyaEditor oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   if (oldWidget.controller != widget.controller) {
-  //     _controller.dispose();
-  //     _controller = widget.controller ?? DrishyaEditingController();
-  //   }
-  // }
-
   @override
   void dispose() {
     if (widget.controller == null) {
@@ -79,7 +70,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
       child: KeyboardVisibility(
         listener: (visible) {
           if (!visible) {
-            FocusScope.of(context).unfocus();
+            _controller.focusNode.unfocus();
             _controller.updateValue(
               hasFocus: false,
               isColorPickerVisible: false,
@@ -108,10 +99,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                           value.background.build(context),
 
                           // Stickers
-                          Opacity(
-                            opacity: value.isStickerPickerOpen ? 0.0 : 1.0,
-                            child: StickersView(controller: _controller),
-                          ),
+                          StickersView(controller: _controller),
 
                           //
                         ],

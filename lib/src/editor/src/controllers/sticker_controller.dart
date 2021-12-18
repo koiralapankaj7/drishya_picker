@@ -83,17 +83,7 @@ class StickerController extends ValueNotifier<StickerValue> {
   void deleteSticker(StickerAsset asset) {
     final stickers = List.of(value.assets)
       ..removeWhere((element) => element.id == asset.id);
-    // final index = stickers.indexWhere(
-    //   (element) => element.id == value.selectedAssetId,
-    // );
-    // final stickerExists = index != -1;
-    // if (stickerExists) {
-    //   stickers.removeAt(index);
-    // }
-    value = value.copyWith(
-      assets: stickers,
-      selectedAssetId: emptyAssetId,
-    );
+    value = value.copyWith(assets: stickers, selectedAssetId: emptyAssetId);
   }
 
   /// clear stickers tapped

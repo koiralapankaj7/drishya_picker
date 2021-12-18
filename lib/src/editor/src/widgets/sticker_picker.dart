@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +110,7 @@ class _StickersTabsState extends State<StickersTabs>
     _stickers = widget.setting.stickers!;
     _tabController = TabController(
       length: _stickers.length,
-      initialIndex: widget.initialIndex,
+      initialIndex: math.min(widget.initialIndex, _stickers.length - 1),
       vsync: this,
     );
     _tabController.addListener(() {
@@ -143,28 +145,8 @@ class _StickersTabsState extends State<StickersTabs>
                   key: Key('stickersTabs_${key}TabBarView'),
                   stickers: stickers,
                   onStickerSelected: widget.onStickerSelected,
-                  maxCrossAxisExtent: 100,
                 );
               }).toList(),
-              // [
-              //   StickersTabBarView(
-              //     key: const Key('stickersTabs_artsTabBarView'),
-              //     stickers: arts,
-              //     onStickerSelected: widget.onStickerSelected,
-              //     maxCrossAxisExtent: 100,
-              //   ),
-              //   StickersTabBarView(
-              //     key: const Key('stickersTabs_emojisTabBarView'),
-              //     stickers: gifs,
-              //     onStickerSelected: widget.onStickerSelected,
-              //     maxCrossAxisExtent: 70,
-              //   ),
-              //   StickersTabBarView(
-              //     key: const Key('stickersTabs_shapesTabBarView'),
-              //     stickers: shapes,
-              //     onStickerSelected: widget.onStickerSelected,
-              //   ),
-              // ],
             ),
           ),
           TabBar(
@@ -183,21 +165,6 @@ class _StickersTabsState extends State<StickersTabs>
                 label: key,
               );
             }).toList(),
-
-            // const [
-            //   StickersTab(
-            //     key: Key('stickersTabs_artsTab'),
-            //     label: 'ARTS',
-            //   ),
-            //   StickersTab(
-            //     key: Key('stickersTabs_emojisTab'),
-            //     label: 'EMOJIS',
-            //   ),
-            //   StickersTab(
-            //     key: Key('stickersTabs_shapesTab'),
-            //     label: 'SHAPES',
-            //   ),
-            // ],
           ),
         ],
       ),
@@ -254,7 +221,7 @@ class StickersTabBarView extends StatelessWidget {
     Key? key,
     required this.stickers,
     required this.onStickerSelected,
-    this.maxCrossAxisExtent = 50.0,
+    this.maxCrossAxisExtent = 80.0,
   }) : super(key: key);
 
   ///

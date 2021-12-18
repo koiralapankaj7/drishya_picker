@@ -34,10 +34,19 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
       ),
       panelSetting: const PanelSetting(topMargin: 24.0),
       galleryPhotoEditorSetting: EditorSetting(
-        backgrounds: _defaultBackgrounds,
         colors: _colors,
-        stickers: _stickers,
+        stickers: _stickers1,
       ),
+      cameraTextEditorSetting: EditorSetting(
+        backgrounds: _defaultBackgrounds,
+        colors: _colors.take(4).toList(),
+        stickers: _stickers2,
+      ),
+      cameraPhotoEditorSetting: EditorSetting(
+        colors: _colors.skip(4).toList(),
+        stickers: _stickers3,
+      ),
+      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
     );
   }
 
@@ -189,7 +198,16 @@ const _colors = [
 ];
 
 ///
-final _stickers = {'ARTS': _arts, 'EMOJIS': _gifs, 'SHAPES': _shapes};
+final _stickers1 = {'ARTS': _arts, 'EMOJIS': _gifs, 'SHAPES': _shapes};
+final _stickers2 = {'EMOJIS': _gifs, 'SHAPES': _shapes};
+final _stickers3 = {
+  'SHAPES': _shapes,
+  'SHAPES1': _shapes,
+  'SHAPES2': _shapes,
+  'SHAPES3': _shapes,
+  'SHAPES4': _shapes,
+  'SHAPES5': _shapes,
+};
 
 ///
 const _gifs = {

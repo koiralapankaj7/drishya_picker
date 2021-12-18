@@ -114,7 +114,6 @@ class _StickersViewState extends State<StickersView> {
                 fit: StackFit.expand,
                 children: stickerValue.assets.map((asset) {
                   final isSelected = asset.id == stickerValue.selectedAssetId;
-
                   return DraggableResizable(
                     key: Key(asset.id),
                     canTransform: isSelected,

@@ -23,6 +23,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         _editorKey = GlobalKey(),
         _stickerController = StickerController(),
         _textController = TextEditingController(),
+        _focusNode = FocusNode(),
         super(
           EditorValue(
             color: setting.colors.first,
@@ -47,6 +48,9 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
   late final TextEditingController _textController;
 
+  /// Editor textfield focus node
+  late final FocusNode _focusNode;
+
   /// Editor key
   GlobalKey get editorKey => _editorKey;
 
@@ -58,6 +62,9 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   /// Editor text field controller
   TextEditingController get textController => _textController;
+
+  /// Editor text field focus node
+  FocusNode get focusNode => _focusNode;
 
   /// Editor settings
   EditorSetting get setting => _setting;
@@ -75,6 +82,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     _colorNotifier.dispose();
     _textController.dispose();
     _stickerController.dispose();
+    _focusNode.dispose();
     _isDisposed = true;
     super.dispose();
   }
@@ -126,16 +134,6 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
   void changeBackground() {
     final current = value.background;
-
-    // if (current == null) {
-    //   final bg = _setting.backgrounds.first;
-    //   updateValue(
-    //     background: bg,
-    //     textColor:
-    //         bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
-    //   );
-    //   return;
-    // }
 
     final index = _setting.backgrounds.indexOf(current);
 

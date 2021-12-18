@@ -189,7 +189,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       _closeOnNavigation();
     }
 
-    camController.dispose();
+    Future.delayed(const Duration(milliseconds: 400), camController.dispose);
 
     final entities = [...value.selectedEntities];
     if (entity != null) {

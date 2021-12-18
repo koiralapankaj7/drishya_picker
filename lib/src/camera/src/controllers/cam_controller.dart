@@ -226,7 +226,7 @@ class CamController extends ValueNotifier<CamValue> {
           endHorizontal: true,
         );
         final de = await navigator.push(route);
-        controller.dispose();
+        Future.delayed(const Duration(milliseconds: 400), controller.dispose);
         if (de != null && navigator.mounted) {
           navigator.pop(de);
         }
