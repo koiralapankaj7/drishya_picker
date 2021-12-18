@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
@@ -15,12 +14,16 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
           setting == null || setting.backgrounds.isNotEmpty,
           'Editor backgrounds cannot be empty!',
         ),
+        assert(
+          setting == null || setting.colors.isNotEmpty,
+          'Editor colors cannot be empty!',
+        ),
         _setting = setting ?? const EditorSetting(),
+        _editorKey = GlobalKey(),
+        _stickerController = StickerController(),
+        _textController = TextEditingController(),
         super(EditorValue()) {
-    _editorKey = GlobalKey();
     _colorNotifier = ValueNotifier(_setting.colors.first);
-    _stickerController = StickerController();
-    _textController = TextEditingController();
   }
 
   ///
@@ -40,9 +43,6 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   /// Editor key
   GlobalKey get editorKey => _editorKey;
-
-  /// true, if editor has  stickers
-  bool get hasStickers => !value.hasStickers;
 
   /// Color picker notifier
   ValueNotifier<Color> get colorNotifier => _colorNotifier;
@@ -67,8 +67,8 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   @override
   void dispose() {
     _colorNotifier.dispose();
-    _stickerController.dispose();
     _textController.dispose();
+    _stickerController.dispose();
     _isDisposed = true;
     super.dispose();
   }

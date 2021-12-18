@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -155,11 +154,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   }
 
   ///
-  /// Close collapsable panel if camera is selected from inside gallery view
+  /// Close collapsable panel if screen is push/replace by other screen
   ///
-  void _closeOnCameraSelect() {
+  void _closeOnNavigation() {
     _panelController.closePanel();
-    // _checkKeyboard.value = false;
     _internal = true;
     value = const GalleryValue();
   }
@@ -188,7 +186,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       entity = await Navigator.of(context).pushReplacement(route);
     } else {
       entity = await Navigator.of(context).push(route);
-      _closeOnCameraSelect();
+      _closeOnNavigation();
     }
 
     camController.dispose();
@@ -236,10 +234,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       pickedEntity = await navigator.pushReplacement(route);
     } else {
       pickedEntity = await navigator.push(route);
-      _closeOnCameraSelect();
+      _closeOnNavigation();
     }
-    editingController.dispose();
-
+    Future.delayed(
+      const Duration(milliseconds: 500),
+      editingController.dispose,
+    );
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {
       entities.add(pickedEntity);

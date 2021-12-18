@@ -1,7 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/drishya_entity.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/widgets/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +23,6 @@ class DrishyaEditor extends StatefulWidget {
   static Future<DrishyaEntity?> open(
     BuildContext context, {
     DrishyaEditingController? controller,
-    EditorSetting? setting,
     bool hideOverlay = false,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
@@ -48,17 +45,18 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _controller = widget.controller ?? DrishyaEditingController();
   }
 
-  @override
-  void didUpdateWidget(covariant DrishyaEditor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      _controller.dispose();
-      _controller = widget.controller ?? DrishyaEditingController();
-    }
-  }
+  // @override
+  // void didUpdateWidget(covariant DrishyaEditor oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (oldWidget.controller != widget.controller) {
+  //     _controller.dispose();
+  //     _controller = widget.controller ?? DrishyaEditingController();
+  //   }
+  // }
 
   @override
   void dispose() {

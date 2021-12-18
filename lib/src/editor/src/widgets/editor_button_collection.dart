@@ -21,6 +21,14 @@ class EditorButtonCollection extends StatelessWidget {
   final Color? stickerViewBackground;
 
   void _onStickerIconPressed(BuildContext context) {
+    if (controller.setting.stickers?.isEmpty ?? true) {
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Stickers not available!')),
+        );
+      return;
+    }
     controller.updateValue(isEditing: true, isStickerPickerOpen: true);
     Navigator.of(context)
         .push<Sticker>(

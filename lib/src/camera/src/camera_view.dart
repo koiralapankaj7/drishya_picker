@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'widgets/camera_overlay.dart';

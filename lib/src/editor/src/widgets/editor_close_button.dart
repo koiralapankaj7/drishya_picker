@@ -16,7 +16,7 @@ class EditorCloseButton extends StatelessWidget {
   final DrishyaEditingController controller;
 
   void _onPressed(BuildContext context) {
-    if (controller.hasStickers) {
+    if (!controller.value.hasStickers) {
       SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.manual,
         overlays: SystemUiOverlay.values,

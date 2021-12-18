@@ -105,7 +105,7 @@ class _StickersTabsState extends State<StickersTabs>
   @override
   void initState() {
     super.initState();
-    _stickers = widget.setting.stickers ?? stickers;
+    _stickers = widget.setting.stickers!;
     _tabController = TabController(
       length: _stickers.length,
       initialIndex: widget.initialIndex,

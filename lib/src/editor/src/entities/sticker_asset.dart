@@ -247,10 +247,12 @@ class IconSticker extends Sticker {
   ///
   const IconSticker({
     required this.iconData,
+    String name = '',
     Size size = const Size(100, 100),
     ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
+          name: name,
           size: size,
           onPressed: onPressed,
           extra: extra,
