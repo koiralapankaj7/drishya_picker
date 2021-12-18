@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -103,61 +102,66 @@ class Albums extends ValueNotifier<AlbumsValue> {
   Future<List<DrishyaEntity>> recentEntities({
     RequestType? type,
     int count = 20,
+    ValueSetter<Exception>? onException,
   }) async {
-    // final state = await PhotoManager.requestPermissionExtend();
-    // if (state == PermissionState.authorized) {
-    try {
-      final albums = await PhotoManager.getAssetPathList(
-        type: type ?? RequestType.all,
-      );
-      if (albums.isEmpty) return [];
-      final entities = await albums
-          .singleWhere((element) => element.isAll)
-          .getAssetListPaged(0, count);
-      final drishyaEntities = entities.map((e) => e.toDrishya).toList();
-      return drishyaEntities;
-    } catch (e) {
-      log('Exception fetching recent entities => $e');
+    final state = await PhotoManager.requestPermissionExtend();
+    if (state == PermissionState.authorized) {
+      try {
+        final albums = await PhotoManager.getAssetPathList(
+          type: type ?? RequestType.all,
+        );
+        if (albums.isEmpty) return [];
+        final entities = await albums
+            .singleWhere((element) => element.isAll)
+            .getAssetListPaged(0, count);
+        final drishyaEntities = entities.map((e) => e.toDrishya).toList();
+        return drishyaEntities;
+      } catch (e) {
+        debugPrint('Exception fetching recent entities => $e');
+        onException?.call(Exception(e));
+        return [];
+      }
+    } else {
+      onException?.call(Exception('Permission unavailable!'));
       return [];
     }
-    // } else {
-    //   debugPrint('Permission denied');
-    // }
   }
 
   /// Get album list
   Future<List<Album>> fetchAlbums(RequestType type) async {
-    // final state = await PhotoManager.requestPermissionExtend();
-    // if (state == PermissionState.authorized) {
-    try {
-      final albums = await PhotoManager.getAssetPathList(type: type);
-      // Update album list
-      final albumList = List.generate(albums.length, (index) {
-        final album = Album(album: albums[index]);
-        if (index == 0) {
-          currentAlbum.value = album;
-          album.fetchAssets();
-        }
-        return album;
-      });
-      value = value.copyWith(
-        state: BaseState.completed,
-        albums: albumList,
+    final state = await PhotoManager.requestPermissionExtend();
+    if (state == PermissionState.authorized) {
+      try {
+        final albums = await PhotoManager.getAssetPathList(type: type);
+        // Update album list
+        final albumList = List.generate(albums.length, (index) {
+          final album = Album(
+            albumValue: AlbumValue(assetPathEntity: albums[index]),
+          );
+          if (index == 0) {
+            currentAlbum.value = album;
+            album.fetchAssets();
+          }
+          return album;
+        });
+        value = value.copyWith(
+          state: BaseState.completed,
+          albums: albumList,
+        );
+        return albumList;
+      } catch (e) {
+        debugPrint('Exception fetching albums => $e');
+        value = value.copyWith(error: e.toString(), state: BaseState.error);
+        return [];
+      }
+    } else {
+      value =
+          value.copyWith(error: 'Permission', state: BaseState.unauthorised);
+      currentAlbum.value = Album(
+        albumValue: const AlbumValue(state: BaseState.unauthorised),
       );
-      return albumList;
-    } catch (e) {
-      log('Exception fetching albums => $e');
-      value = value.copyWith(error: e.toString(), state: BaseState.error);
       return [];
     }
-    // }
-    //  else {
-    //   value.copyWith(
-    //     error: 'Permission',
-    //     state: BaseState.unauthorised,
-    //   );
-    //   return [];
-    // }
   }
 
   ///
@@ -168,6 +172,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
 
   @override
   void dispose() {
+    currentAlbum.dispose();
     super.dispose();
   }
 }
@@ -175,33 +180,32 @@ class Albums extends ValueNotifier<AlbumsValue> {
 ///
 class Album extends ValueNotifier<AlbumValue> {
   ///
-  Album({AssetPathEntity? album}) : super(AlbumValue(assetPathEntity: album));
+  Album({AlbumValue? albumValue}) : super(albumValue ?? const AlbumValue());
 
   var _currentPage = 0;
 
   /// Get assets for the current album
   Future<List<AssetEntity>> fetchAssets() async {
-    // final state = await PhotoManager.requestPermissionExtend();
-    // if (state == PermissionState.authorized) {
-    try {
-      final entities =
-          (await value.assetPathEntity?.getAssetListPaged(_currentPage, 30)) ??
-              [];
+    final state = await PhotoManager.requestPermissionExtend();
+    if (state == PermissionState.authorized) {
+      try {
+        final entities = (await value.assetPathEntity
+                ?.getAssetListPaged(_currentPage, 30)) ??
+            [];
 
-      final updatedEntities = [...value.entities, ...entities];
-      ++_currentPage;
-      value = value.copyWith(
-        state: BaseState.completed,
-        entities: updatedEntities,
-      );
-    } catch (e) {
-      log('Exception fetching assets => $e');
-      value = value.copyWith(state: BaseState.error, error: e.toString());
+        final updatedEntities = [...value.entities, ...entities];
+        ++_currentPage;
+        value = value.copyWith(
+          state: BaseState.completed,
+          entities: updatedEntities,
+        );
+      } catch (e) {
+        debugPrint('Exception fetching assets => $e');
+        value = value.copyWith(state: BaseState.error, error: e.toString());
+      }
+    } else {
+      value = value.copyWith(state: BaseState.unauthorised);
     }
-    // } else {
-    //   value = value.copyWith(state: BaseState.unauthorised);
-    // }
-
     return value.entities;
   }
 }

@@ -5,8 +5,6 @@ import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:flutter/material.dart';
 
-import 'gallery_permission_view.dart';
-
 const _imageSize = 48;
 
 ///
@@ -31,38 +29,15 @@ class AlbumsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlbumBuilder(
+      controller: controller,
       albums: albums,
       builder: (context, value, child) {
-        // Loading
-        if (value.state == BaseState.fetching) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (value.state == BaseState.unauthorised) {
-          return const GalleryPermissionView();
-        }
-
-        // Error
-        if (value.state == BaseState.error) {
-          return Container(
-            alignment: Alignment.center,
-            color: Colors.black,
-            child: Text(
-              value.error ?? 'Something went wrong',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          );
-        }
-
         if (value.albums.isEmpty) {
           return Container(
             alignment: Alignment.center,
             color: Colors.black,
             child: const Text(
-              'No data',
+              'No albums',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

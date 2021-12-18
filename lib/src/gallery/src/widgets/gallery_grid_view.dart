@@ -1,16 +1,14 @@
-// ignore_for_file: always_use_package_imports
-
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'album_builder.dart';
-import 'gallery_permission_view.dart';
 
 ///
 class GalleryGridView extends StatelessWidget {
@@ -40,7 +38,15 @@ class GalleryGridView extends StatelessWidget {
               // Error
               if (value.state == BaseState.unauthorised &&
                   value.entities.isEmpty) {
-                return const GalleryPermissionView();
+                return GalleryPermissionView(
+                  onRefresh: () {
+                    if (value.assetPathEntity == null) {
+                      albums.fetchAlbums(controller.setting.requestType);
+                    } else {
+                      album.fetchAssets();
+                    }
+                  },
+                );
               }
 
               // No data
@@ -49,6 +55,18 @@ class GalleryGridView extends StatelessWidget {
                 return const Center(
                   child: Text(
                     'No media available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              }
+
+              if (value.state == BaseState.error) {
+                return const Center(
+                  child: Text(
+                    'Something went wrong. Please try again!',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
