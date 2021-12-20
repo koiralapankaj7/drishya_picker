@@ -135,6 +135,8 @@ class _PlaygroundOverlay extends StatelessWidget {
                 controller: controller.photoEditingController,
               ),
             ),
+
+            //
           ],
         );
       },

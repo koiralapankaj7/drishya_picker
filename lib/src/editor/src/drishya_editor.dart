@@ -69,18 +69,18 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
       },
       child: KeyboardVisibility(
         listener: (visible) {
-          if (!visible) {
-            _controller.focusNode.unfocus();
-            _controller.updateValue(
-              hasFocus: false,
-              isColorPickerVisible: false,
-            );
-          }
+          // if (!visible) {
+          //   _controller.focusNode.unfocus();
+          //   _controller.updateValue(
+          //     hasFocus: false,
+          //     isColorPickerVisible: false,
+          //   );
+          // }
         },
         builder: (context, visible, child) => child!,
         child: Scaffold(
           extendBody: true,
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           body: PhotoEditingControllerProvider(
             controller: _controller,
             child: ValueListenableBuilder<EditorValue>(
@@ -107,8 +107,8 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                     ),
 
                     // Textfield
-                    if (value.hasFocus)
-                      EditorTextfield(controller: _controller),
+                    // if (value.hasFocus)
+                    EditorTextfield(controller: _controller),
 
                     // Overlay
                     if (!widget.hideOverlay)

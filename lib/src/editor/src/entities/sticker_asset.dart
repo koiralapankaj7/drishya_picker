@@ -140,6 +140,7 @@ class TextSticker extends Sticker {
     this.withBackground = false,
     this.textAlign,
     this.background,
+    this.originalSize = Size.zero,
     Size size = const Size(200, 200),
     ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
@@ -163,6 +164,9 @@ class TextSticker extends Sticker {
 
   ///
   final Color? background;
+
+  ///
+  final Size originalSize;
 
   @override
   Widget? build(BuildContext context, DrishyaEditingController controller) {
@@ -275,4 +279,27 @@ class IconSticker extends Sticker {
       },
     );
   }
+}
+
+class WidgetSticker extends Sticker {
+  ///
+  const WidgetSticker({
+    required this.child,
+    String name = '',
+    Size size = const Size(100, 100),
+    ValueSetter<StickerAsset>? onPressed,
+    Map<String, Object> extra = const {},
+  }) : super(
+          name: name,
+          size: size,
+          onPressed: onPressed,
+          extra: extra,
+        );
+
+  ///
+  final Widget child;
+
+  @override
+  Widget? build(BuildContext context, DrishyaEditingController controller) =>
+      FittedBox(child: IntrinsicWidth(child: child));
 }

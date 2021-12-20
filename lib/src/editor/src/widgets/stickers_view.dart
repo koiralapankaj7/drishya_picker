@@ -262,14 +262,19 @@ class _StickerEditingViewState extends State<_StickerEditingView>
       controller: _draggableResizableController,
       onTap: () {
         asset.sticker.onPressed?.call(asset);
-        if (asset.sticker is TextSticker) {
-          _draggableResizableController.moveToCenter(
-            onComplete: () {
-              _controller.stickerController.deleteSticker(asset);
-              _controller.updateValue(hasFocus: true);
-            },
-          );
-        } else if (asset.sticker is IconSticker) {
+        _controller.stickerController.deleteSticker(asset);
+        _controller.updateValue(hasFocus: true);
+        // if (asset.sticker is TextSticker) {
+        // _draggableResizableController.moveToCenter(
+        //   onComplete: () {
+        //     _controller.stickerController.deleteSticker(asset);
+        //     // Future.delayed(const Duration(milliseconds: 200), () {
+        //     _controller.updateValue(hasFocus: true);
+        //     // });
+        //   },
+        // );
+        // } else
+        if (asset.sticker is IconSticker) {
           _controller.updateValue(isColorPickerVisible: true);
         }
       },

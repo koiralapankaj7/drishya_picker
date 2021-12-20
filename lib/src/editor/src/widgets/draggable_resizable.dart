@@ -1,8 +1,6 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 
 /// {@template drag_update}
 /// Drag update model which includes the position and size.
@@ -112,6 +110,8 @@ class _DraggableResizableState extends State<DraggableResizable>
   var _centerDY = 0.0;
   VoidCallback? _onCompleteMovingToCenter;
 
+  var _initialSize = Size.zero;
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +123,7 @@ class _DraggableResizableState extends State<DraggableResizable>
     angle = widget.initialAngle ?? 0;
     baseAngle = 0;
     angleDelta = 0;
+    _initialSize = size;
   }
 
   void _initAnim() {
@@ -139,6 +140,22 @@ class _DraggableResizableState extends State<DraggableResizable>
             lerpDouble(position.dy, _centerDY, _animationController.value) ??
                 0.0,
           );
+          if (_initialSize != Size.zero) {
+            size = Size(
+              lerpDouble(
+                    size.width,
+                    _initialSize.width,
+                    _animationController.value,
+                  ) ??
+                  0,
+              lerpDouble(
+                    size.height,
+                    _initialSize.height,
+                    _animationController.value,
+                  ) ??
+                  0,
+            );
+          }
         });
       })
       ..addStatusListener((status) {
@@ -181,10 +198,17 @@ class _DraggableResizableState extends State<DraggableResizable>
 
   @override
   Widget build(BuildContext context) {
-    final aspectRatio = widget.size.width / widget.size.height;
-    Navigator.of(context);
+    // final aspectRatio = widget.size.width / widget.size.height;
     return LayoutBuilder(
       builder: (context, constraints) {
+        final aspectRatio = widget.size != Size.zero
+            ? widget.size.width / widget.size.height
+            : constraints.maxWidth / constraints.maxHeight;
+
+        if (widget.size == Size.zero) {
+          size = constraints.smallest;
+        }
+
         _centerDX = (constraints.maxWidth - size.width) / 2;
         _centerDY = (constraints.maxHeight - size.height) / 2;
         position =
