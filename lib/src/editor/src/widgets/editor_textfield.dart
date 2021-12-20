@@ -39,17 +39,19 @@ class _EditorTextfieldState extends State<EditorTextfield>
     _textController = _controller.textController;
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           widget.controller.updateValue(hasFocus: false, hasStickers: true);
         }
       });
     // ignore: prefer_int_literals
-    _animation = Tween(begin: 0.0, end: 1.0).animate(
+    _animation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.easeOutBack,
+        curve: Curves.easeIn,
+        // curve: Curves.easeOutBack,
+        // reverseCurve: Curves.easeOut,
       ),
     );
   }
@@ -72,19 +74,35 @@ class _EditorTextfieldState extends State<EditorTextfield>
     return value == null ? Alignment(x, y) : Alignment(x * value, y * value);
   }
 
+  Offset _getOffset({double? value}) {
+    if (_editingTextAsset == null) return Offset.zero;
+    final size = MediaQuery.of(context).size;
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final xFactor = _editingTextAsset!.position.dx < centerX ? -1 : 1;
+    final yFactor = _editingTextAsset!.position.dy < centerY ? -1 : 1;
+
+    final dx = _editingTextAsset!.position.dx * (value ?? 0) * xFactor;
+    final dy = _editingTextAsset!.position.dy * (value ?? 0) * yFactor;
+    return Offset(dx, dy);
+  }
+
   Size? _getSize({double value = 1}) {
     if (_editingTextAsset != null) {
-      final height = _editingTextAsset!.size.height;
-      final width = _editingTextAsset!.size.width;
-      final clampedWidth = (width * value).clamp(
+      final maxHeight = _editingTextAsset!.size.height;
+      final maxWidth = _editingTextAsset!.size.width;
+      final clampedWidth = (maxWidth + (maxWidth * value)).clamp(
         _originalSize?.width ?? 0.0,
-        width,
+        maxWidth,
       );
-      final clampedHeight = (height * value).clamp(
+      final clampedHeight = (maxHeight + (maxHeight * value)).clamp(
         _originalSize?.height ?? 0.0,
-        height,
+        maxHeight,
       );
-      return Size(clampedWidth, clampedHeight);
+      return Size(
+        lerpDouble(_originalSize?.width ?? 0.0, maxWidth, value) ?? 0.0,
+        lerpDouble(_originalSize?.height ?? 0.0, maxHeight, value) ?? 0.0,
+      );
     }
     return null;
   }
@@ -174,81 +192,66 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
     if (!value.hasFocus) return const SizedBox();
 
-    return Container(
-      color: value.hasFocus ? Colors.black54 : Colors.transparent,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          _controller.focusNode.unfocus();
-        },
-        child: KeyboardVisibility(
-          listener: (visible) {
-            if (visible) {
-              _animationController.forward();
-            } else {
-              _animationController.reverse();
-            }
-          },
-          builder: (context, visible, child) {
-            return child!;
-            // return TweenAnimationBuilder<double>(
-            //   tween: Tween(begin: 0.0, end: 1.0),
-            //   duration: const Duration(milliseconds: 900),
-            //   builder: (context, value, child) {
-            //     return Container(
-            //       alignment: _getAlignment(lerp: value),
-            //       child: child,
-            //     );
-            //   },
-            //   child: child,
-            // );
-            // return AnimatedContainer(
-            //   duration: const Duration(milliseconds: 400),
-            //   curve: visible ? Curves.easeOutBack : Curves.decelerate,
-            //   alignment: visible ? Alignment.center : alignment,
-            //   child: Transform(
-            //     alignment: Alignment.center,
-            //     transform: Matrix4.identity()
-            //       // ..translate(1)
-            //       ..rotateZ(visible ? 0 : _editingTextAsset?.angle ?? 0),
-            //     // ..translate(10),
-            //     child: child,
-            //   ),
-            // );
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 60,
-              vertical: 30,
-            ),
-            child: AnimatedBuilder(
-              animation: _animation,
-              builder: (context, child) {
-                final size = _getSize(value: 1 - _animation.value);
-                log('$size : ${_animation.value}');
-                return Container(
-                  alignment: _getAlignment(value: 1 - _animation.value),
-                  height: size?.height,
-                  width: size?.width,
-                  child: Transform.rotate(
-                    angle: (_editingTextAsset?.angle ?? 0) *
-                        (1 - _animation.value),
-                    child: child,
-                  ),
-                );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          color: value.hasFocus ? Colors.black54 : Colors.transparent,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              _controller.focusNode.unfocus();
+            },
+            child: KeyboardVisibility(
+              listener: (visible) {
+                if (visible) {
+                  _animationController.forward();
+                } else {
+                  _animationController.reverse();
+                }
               },
-              child: IntrinsicWidth(
-                key: _tfSizeKey,
-                child: _TextField(
-                  controller: _controller,
-                  textController: _textController,
-                  focusNode: _controller.focusNode,
+              builder: (context, visible, child) {
+                return child!;
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 60,
+                  vertical: 30,
+                ),
+                child: AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    final size = _getSize(value: _animation.value);
+                    log('$size : ${_animation.value}');
+                    return Container(
+                      alignment: Alignment.center,
+                      // alignment: _getAlignment(value: _animation.value),
+                      height: size?.height,
+                      width: size?.width,
+                      child: Transform.translate(
+                        offset: _getOffset(value: _animation.value),
+                        child: Transform.rotate(
+                          angle: (_editingTextAsset?.angle ?? 0) *
+                              _animation.value,
+                          child: child,
+                        ),
+                      ),
+                    );
+                  },
+                  child: IntrinsicWidth(
+                    key: _tfSizeKey,
+                    child: _TextField(
+                      controller: _controller,
+                      textController: _textController,
+                      focusNode: _controller.focusNode,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
