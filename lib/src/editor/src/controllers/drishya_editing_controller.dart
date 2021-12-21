@@ -24,6 +24,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         _stickerController = StickerController(),
         _textController = TextEditingController(),
         _focusNode = FocusNode(),
+        _currentAsset = ValueNotifier(null),
         super(
           EditorValue(
             color: setting.colors.first,
@@ -51,6 +52,9 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   /// Editor textfield focus node
   late final FocusNode _focusNode;
 
+  ///
+  late final ValueNotifier<StickerAsset?> _currentAsset;
+
   /// Editor key
   GlobalKey get editorKey => _editorKey;
 
@@ -69,6 +73,10 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   /// Editor settings
   EditorSetting get setting => _setting;
 
+  ///
+  @internal
+  ValueNotifier<StickerAsset?> get currentAsset => _currentAsset;
+
   var _isDisposed = false;
 
   @override
@@ -83,6 +91,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     _textController.dispose();
     _stickerController.dispose();
     _focusNode.dispose();
+    _currentAsset.dispose();
     _isDisposed = true;
     super.dispose();
   }

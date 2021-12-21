@@ -12,6 +12,7 @@ class DragUpdate {
     required this.position,
     required this.size,
     required this.constraints,
+    required this.scale,
   });
 
   /// The angle of the draggable asset.
@@ -25,6 +26,9 @@ class DragUpdate {
 
   /// The constraints of the parent view.
   final Size constraints;
+
+  ///
+  final double scale;
 }
 
 /// {@template draggable_resizable}
@@ -40,6 +44,7 @@ class DraggableResizable extends StatefulWidget {
     BoxConstraints? constraints,
     this.initialPosition,
     this.initialAngle,
+    this.initialScale,
     this.onUpdate,
     this.onScaleUpdate,
     this.onStart,
@@ -77,6 +82,9 @@ class DraggableResizable extends StatefulWidget {
   /// Initial angle of the widget
   final double? initialAngle;
 
+  /// Initial scale of the widget
+  final double? initialScale;
+
   /// The child's original size.
   final Size size;
 
@@ -96,8 +104,10 @@ class _DraggableResizableState extends State<DraggableResizable>
   late Size size;
   late BoxConstraints constraints;
   late double angle;
+  late double scale;
   late double angleDelta;
   late double baseAngle;
+  double? _aspectRatio;
 
   bool get isTouchInputSupported => true;
 
@@ -118,9 +128,18 @@ class _DraggableResizableState extends State<DraggableResizable>
     widget.controller?._init(this);
     _initAnim();
     position = widget.initialPosition ?? Offset.zero;
-    size = widget.size;
+    size = widget.size != Size.zero
+        ? Size(
+            widget.size.width * (widget.initialScale ?? 1),
+            widget.size.height * (widget.initialScale ?? 1),
+          )
+        : widget.size;
+    if (widget.size != Size.zero) {
+      _aspectRatio = size.width / size.height;
+    }
     constraints = widget.constraints;
     angle = widget.initialAngle ?? 0;
+    scale = widget.initialScale ?? 1;
     baseAngle = 0;
     angleDelta = 0;
     _initialSize = size;
@@ -140,6 +159,7 @@ class _DraggableResizableState extends State<DraggableResizable>
             lerpDouble(position.dy, _centerDY, _animationController.value) ??
                 0.0,
           );
+          scale = lerpDouble(scale, 1, _animationController.value) ?? 0.0;
           if (_initialSize != Size.zero) {
             size = Size(
               lerpDouble(
@@ -184,6 +204,7 @@ class _DraggableResizableState extends State<DraggableResizable>
           size: size,
           constraints: Size(constraints.maxWidth, constraints.maxHeight),
           angle: angle,
+          scale: scale,
         ),
         key,
       );
@@ -201,9 +222,8 @@ class _DraggableResizableState extends State<DraggableResizable>
     // final aspectRatio = widget.size.width / widget.size.height;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final aspectRatio = widget.size != Size.zero
-            ? widget.size.width / widget.size.height
-            : constraints.maxWidth / constraints.maxHeight;
+        final aspectRatio =
+            _aspectRatio ?? constraints.maxWidth / constraints.maxHeight;
 
         if (widget.size == Size.zero) {
           size = constraints.smallest;
@@ -211,12 +231,16 @@ class _DraggableResizableState extends State<DraggableResizable>
 
         _centerDX = (constraints.maxWidth - size.width) / 2;
         _centerDY = (constraints.maxHeight - size.height) / 2;
+
         position =
             position == Offset.zero ? Offset(_centerDX, _centerDY) : position;
 
         final normalizedWidth = size.width;
         final normalizedHeight = normalizedWidth / aspectRatio;
-        final newSize = Size(normalizedWidth, normalizedHeight);
+        final newSize = Size(
+          normalizedWidth,
+          normalizedHeight,
+        );
 
         if (widget.constraints.isSatisfiedBy(newSize)) {
           size = newSize;
@@ -280,6 +304,7 @@ class _DraggableResizableState extends State<DraggableResizable>
                     setState(() {
                       size = updatedSize;
                       position = updatedPosition;
+                      scale = s;
                     });
                     onUpdate(normalizedLeft, normalizedTop);
                   },

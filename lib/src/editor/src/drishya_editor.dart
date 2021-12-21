@@ -68,7 +68,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
         return true;
       },
       child: KeyboardVisibility(
-        listener: (visible) {
+        listener: (visible, size) {
           // if (!visible) {
           //   _controller.focusNode.unfocus();
           //   _controller.updateValue(
@@ -88,6 +88,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
               builder: (context, value, child) {
                 return Stack(
                   fit: StackFit.expand,
+                  alignment: Alignment.center,
                   children: [
                     // Captureable view that shows the background and stickers
                     RepaintBoundary(

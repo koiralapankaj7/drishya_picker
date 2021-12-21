@@ -25,8 +25,6 @@ class _EditorTextfieldState extends State<EditorTextfield>
   late final GlobalKey _tfSizeKey;
   late final DrishyaEditingController _controller;
   late final TextEditingController _textController;
-  StickerAsset? _editingTextAsset;
-  Size? _originalSize;
 
   late final AnimationController _animationController;
   late final Animation<double> _animation;
@@ -39,12 +37,15 @@ class _EditorTextfieldState extends State<EditorTextfield>
     _textController = _controller.textController;
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
-    )..addStatusListener((status) {
+      duration: const Duration(milliseconds: 300),
+    )
+      ..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           widget.controller.updateValue(hasFocus: false, hasStickers: true);
+          _controller.currentAsset.value = null;
         }
-      });
+      })
+      ..forward();
     // ignore: prefer_int_literals
     _animation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -63,45 +64,65 @@ class _EditorTextfieldState extends State<EditorTextfield>
   }
 
   Alignment _getAlignment({double? value}) {
-    if (_editingTextAsset == null) return Alignment.center;
+    final asset = _controller.currentAsset.value;
+
+    if (asset == null) return Alignment.center;
     final size = MediaQuery.of(context).size;
     final centerX = size.width / 2;
     final centerY = size.height / 2;
-    final xFactor = _editingTextAsset!.position.dx < centerX ? -1 : 1;
-    final yFactor = _editingTextAsset!.position.dy < centerY ? -1 : 1;
-    final x = _editingTextAsset!.position.dx / size.width * xFactor;
-    final y = _editingTextAsset!.position.dy / size.height * yFactor;
+    final xFactor = asset.position.dx < centerX ? -1 : 1;
+    final yFactor = asset.position.dy < centerY ? -1 : 1;
+    final x = asset.position.dx / size.width * xFactor;
+    final y = asset.position.dy / size.height * yFactor;
     return value == null ? Alignment(x, y) : Alignment(x * value, y * value);
   }
 
   Offset _getOffset({double? value}) {
-    if (_editingTextAsset == null) return Offset.zero;
+    final asset = _controller.currentAsset.value;
+
+    if (asset == null) return Offset.zero;
+
     final size = MediaQuery.of(context).size;
     final centerX = size.width / 2;
     final centerY = size.height / 2;
-    final xFactor = _editingTextAsset!.position.dx < centerX ? -1 : 1;
-    final yFactor = _editingTextAsset!.position.dy < centerY ? -1 : 1;
+    final xFactor = asset.position.dx < centerX ? -1 : 1;
+    final yFactor = asset.position.dy < centerY ? -1 : 1;
 
-    final dx = _editingTextAsset!.position.dx * (value ?? 0) * xFactor;
-    final dy = _editingTextAsset!.position.dy * (value ?? 0) * yFactor;
-    return Offset(dx, dy);
+    // final dx = asset.position.dx * xFactor;
+    // final dy = asset.position.dy * yFactor;
+    final dx = (centerX - asset.position.dx - asset.size.width) * xFactor;
+    final dy = (centerY - asset.position.dy - asset.size.height) * yFactor;
+
+    log(
+      '${asset.position.dx} : ${asset.position.dy} ||| $dx:$dy',
+    );
+
+    final toCenter = _animationController.status == AnimationStatus.dismissed;
+
+    return Offset(
+      lerpDouble(toCenter ? dx : 0, toCenter ? 0 : dx, value ?? 1.0) ?? 0.0,
+      lerpDouble(toCenter ? dy : 0, toCenter ? 0 : dy, value ?? 1.0) ?? 0.0,
+    );
   }
 
   Size? _getSize({double value = 1}) {
-    if (_editingTextAsset != null) {
-      final maxHeight = _editingTextAsset!.size.height;
-      final maxWidth = _editingTextAsset!.size.width;
+    final asset = _controller.currentAsset.value;
+    final assetSize = (asset?.sticker as TextSticker?)?.originalSize;
+
+    if (asset != null) {
+      final maxHeight = asset.size.height;
+      final maxWidth = asset.size.width;
       final clampedWidth = (maxWidth + (maxWidth * value)).clamp(
-        _originalSize?.width ?? 0.0,
+        assetSize?.width ?? 0.0,
         maxWidth,
       );
       final clampedHeight = (maxHeight + (maxHeight * value)).clamp(
-        _originalSize?.height ?? 0.0,
+        assetSize?.height ?? 0.0,
         maxHeight,
       );
       return Size(
-        lerpDouble(_originalSize?.width ?? 0.0, maxWidth, value) ?? 0.0,
-        lerpDouble(_originalSize?.height ?? 0.0, maxHeight, value) ?? 0.0,
+        lerpDouble(assetSize?.width ?? 0.0, maxWidth, value) ?? 0.0,
+        lerpDouble(assetSize?.height ?? 0.0, maxHeight, value) ?? 0.0,
       );
     }
     return null;
@@ -113,7 +134,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
       // final tc = TextEditingController(text: _textController.text);
 
       // final widgetSticker = WidgetSticker(
-      //   size: _editingTextAsset?.size.size ?? box.size,
+      //   size: asset.size.size ?? box.size,
       //   extra: {'text': _textController.text},
       //   child: _TextField(
       //     controller: _controller,
@@ -138,17 +159,18 @@ class _EditorTextfieldState extends State<EditorTextfield>
       // _editingTextAsset = null;
       // _controller.updateValue(hasStickers: true);
 
+      final asset = _controller.currentAsset.value;
+
       final sticker = TextSticker(
         // size: box.size, // This size will be the smallest one
-        size: _editingTextAsset?.size.size ?? box.size,
+        // size: asset?.size.size ?? box.size,
+        size: box.size,
         originalSize: box.size,
         extra: {'text': _textController.text},
-        onPressed: (asset) {
-          _editingTextAsset = asset;
-          final textSticker = asset.sticker as TextSticker;
-          _textController.text = textSticker.text;
-          _originalSize = textSticker.originalSize;
-        },
+        // onPressed: (asset) {
+        // final textSticker = asset.sticker as TextSticker;
+        // _textController.text = textSticker.text;
+        // },
         text: _textController.text,
         style: TextStyle(
           textBaseline: TextBaseline.ideographic,
@@ -167,14 +189,14 @@ class _EditorTextfieldState extends State<EditorTextfield>
       );
 
       _textController.clear();
-      _controller.stickerController.addSticker(
+      _controller.currentAsset.value = _controller.stickerController.addSticker(
         sticker,
-        size: _editingTextAsset?.size,
-        angle: _editingTextAsset?.angle,
-        constraint: _editingTextAsset?.constraint,
-        position: _editingTextAsset?.position,
+        size: asset?.size,
+        angle: asset?.angle,
+        constraint: asset?.constraint,
+        position: asset?.position,
+        scale: asset?.scale,
       );
-      _editingTextAsset = null;
       // _controller.updateValue(hasStickers: true);
     }
   }
@@ -192,72 +214,185 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
     if (!value.hasFocus) return const SizedBox();
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Container(
+    return KeyboardVisibility(
+      listener: (visible, size) {
+        if (visible) {
+          _animationController.forward();
+        } else {
+          _animationController.reverse();
+        }
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          _controller.focusNode.unfocus();
+          // if (_animationController.status == AnimationStatus.completed) {
+          //   _animationController.reverse();
+          // }
+        },
+        child: Container(
           color: value.hasFocus ? Colors.black54 : Colors.transparent,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              _controller.focusNode.unfocus();
-            },
-            child: KeyboardVisibility(
-              listener: (visible) {
-                if (visible) {
-                  _animationController.forward();
-                } else {
-                  _animationController.reverse();
-                }
-              },
-              builder: (context, visible, child) {
-                return child!;
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 60,
-                  vertical: 30,
-                ),
-                child: AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    final size = _getSize(value: _animation.value);
-                    log('$size : ${_animation.value}');
-                    return Container(
-                      alignment: Alignment.center,
-                      // alignment: _getAlignment(value: _animation.value),
-                      height: size?.height,
-                      width: size?.width,
-                      child: Transform.translate(
-                        offset: _getOffset(value: _animation.value),
-                        child: Transform.rotate(
-                          angle: (_editingTextAsset?.angle ?? 0) *
-                              _animation.value,
+          child: ValueListenableBuilder<StickerAsset?>(
+            valueListenable: _controller.currentAsset,
+            builder: (context, asset, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      final size = MediaQuery.of(context).size;
+                      final originalSize =
+                          (asset?.sticker as TextSticker?)?.originalSize;
+
+                      // final size = constraints.biggest;
+                      // final centerX = size.width / 2;
+                      final centerY = size.height / 2;
+
+                      final centerTop = (size.height -
+                              (originalSize?.height ?? 0) -
+                              (centerY * 0.8)) /
+                          2;
+
+                      final centerLeft =
+                          (size.width - (originalSize?.width ?? 0)) / 2;
+
+                      // final scale = (asset?.size.height ?? 1) /
+                      //     (originalSize?.height ?? 1);
+
+                      // final width = lerpDouble(
+                      //   originalSize?.width,
+                      //   asset?.size.width,
+                      //   _animation.value,
+                      // );
+                      // final height = lerpDouble(
+                      //   originalSize?.height,
+                      //   asset?.size.height,
+                      //   _animation.value,
+                      // );
+
+                      final left = lerpDouble(
+                        centerLeft,
+                        asset?.position.dx,
+                        _animation.value,
+                      );
+
+                      final top = lerpDouble(
+                        centerTop,
+                        asset?.position.dy,
+                        _animation.value,
+                      );
+
+                      final scale =
+                          lerpDouble(1, asset?.scale, _animation.value) ?? 1;
+
+                      log('$scale');
+
+                      if (_animationController.status ==
+                          AnimationStatus.completed) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 60,
+                            vertical: 30,
+                          ),
                           child: child,
+                        );
+                      }
+
+                      return Positioned(
+                        left: left,
+                        top: top,
+                        child: Transform.rotate(
+                          angle: (asset?.angle ?? 0) * _animation.value,
+                          child: Transform.scale(
+                            scale: scale,
+                            origin: Offset(-48, -48),
+                            child: child,
+                          ),
                         ),
+                      );
+                    },
+                    child: IntrinsicWidth(
+                      key: _tfSizeKey,
+                      child: StickerTextField(
+                        controller: _controller,
+                        textController: _textController,
+                        focusNode: _controller.focusNode,
                       ),
-                    );
-                  },
-                  child: IntrinsicWidth(
-                    key: _tfSizeKey,
-                    child: _TextField(
-                      controller: _controller,
-                      textController: _textController,
-                      focusNode: _controller.focusNode,
                     ),
                   ),
-                ),
-              ),
-            ),
+                ],
+              );
+            },
           ),
         ),
-      ],
+      ),
     );
+
+    // return Container(
+    //   color: value.hasFocus ? Colors.black54 : Colors.transparent,
+    //   child: GestureDetector(
+    //     behavior: HitTestBehavior.opaque,
+    //     onTap: () {
+    //       _controller.focusNode.unfocus();
+    //       if (_animationController.status == AnimationStatus.completed) {
+    //         _animationController.reverse();
+    //       }
+    //     },
+    //     child: KeyboardVisibility(
+    //       listener: (visible) {
+    //         // if (!visible) {
+    //         //   _animationController.forward();
+    //         // } else {
+    //         //   _animationController.reverse();
+    //         // }
+    //       },
+    //       builder: (context, visible, child) {
+    //         return child!;
+    //       },
+    //       child: Container(
+    //         margin: const EdgeInsets.symmetric(
+    //           horizontal: 60,
+    //           vertical: 30,
+    //         ),
+    //         child: AnimatedBuilder(
+    //           animation: _animation,
+    //           builder: (context, child) {
+    //             final size = _getSize(value: _animation.value);
+    //             log('$size : ${_animation.value}');
+    //             return Container(
+    //               alignment: Alignment.center,
+    //               // alignment: _getAlignment(value: _animation.value),
+    //               // height: size?.height,
+    //               // width: size?.width,
+    //               child: Transform.translate(
+    //                 offset: _getOffset(value: _animation.value),
+    //                 child: Transform.rotate(
+    //                   angle: (_editingTextAsset?.angle ?? 0) * _animation.value,
+    //                   child: child,
+    //                 ),
+    //               ),
+    //             );
+    //           },
+    //           child: IntrinsicWidth(
+    //             key: _tfSizeKey,
+    //             child: _TextField(
+    //               controller: _controller,
+    //               textController: _textController,
+    //               focusNode: _controller.focusNode,
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
 
-class _TextField extends StatefulWidget {
-  const _TextField({
+///
+class StickerTextField extends StatefulWidget {
+  const StickerTextField({
     Key? key,
     required this.controller,
     this.textController,
@@ -273,16 +408,13 @@ class _TextField extends StatefulWidget {
   final bool enabled;
 
   @override
-  _TextFieldState createState() => _TextFieldState();
+  _StickerTextFieldState createState() => _StickerTextFieldState();
 }
 
-class _TextFieldState extends State<_TextField> {
-  late bool _enabled;
-
+class _StickerTextFieldState extends State<StickerTextField> {
   @override
   void initState() {
     super.initState();
-    _enabled = widget.enabled;
   }
 
   @override
@@ -297,7 +429,7 @@ class _TextFieldState extends State<_TextField> {
   Widget build(BuildContext context) {
     final value = widget.controller.value;
     return TextField(
-      enabled: _enabled,
+      enabled: widget.enabled,
       controller: widget.textController,
       focusNode: widget.focusNode,
       autofocus: true,
@@ -320,7 +452,7 @@ class _TextFieldState extends State<_TextField> {
       ),
       decoration: InputDecoration(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -329,14 +461,6 @@ class _TextFieldState extends State<_TextField> {
         filled: true,
         fillColor: value.fillTextfield ? value.color : Colors.transparent,
       ),
-      onTap: () {
-        log('Pressed.....');
-        if (widget.editable && !_enabled) {
-          setState(() {
-            _enabled = true;
-          });
-        }
-      },
     );
   }
 }

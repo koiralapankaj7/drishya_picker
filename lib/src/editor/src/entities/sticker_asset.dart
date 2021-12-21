@@ -12,6 +12,7 @@ class StickerAsset {
     this.constraint = const StickerConstraint(),
     this.position = const StickerPosition(),
     this.size = const StickerSize(),
+    this.scale = 1.0,
   });
 
   ///
@@ -33,12 +34,16 @@ class StickerAsset {
   final StickerSize size;
 
   ///
+  final double scale;
+
+  ///
   StickerAsset copyWith({
     Sticker? sticker,
     double? angle,
     StickerConstraint? constraint,
     StickerPosition? position,
     StickerSize? size,
+    double? scale,
   }) {
     return StickerAsset(
       id: id,
@@ -47,6 +52,7 @@ class StickerAsset {
       constraint: constraint ?? this.constraint,
       position: position ?? this.position,
       size: size ?? this.size,
+      scale: scale ?? this.scale,
     );
   }
 }
@@ -171,7 +177,7 @@ class TextSticker extends Sticker {
   @override
   Widget? build(BuildContext context, DrishyaEditingController controller) {
     return Container(
-      constraints: BoxConstraints.loose(size),
+      // constraints: BoxConstraints.loose(size),
       decoration: BoxDecoration(
         color: background ??
             (withBackground ? controller.value.color : Colors.transparent),

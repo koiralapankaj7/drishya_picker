@@ -261,9 +261,17 @@ class _StickerEditingViewState extends State<_StickerEditingView>
       canTransform: widget.isSelected,
       controller: _draggableResizableController,
       onTap: () {
+        if (asset.sticker is TextSticker) {
+          _controller.currentAsset.value = asset;
+          _controller.textController.text = (asset.sticker as TextSticker).text;
+        }
         asset.sticker.onPressed?.call(asset);
-        _controller.stickerController.deleteSticker(asset);
         _controller.updateValue(hasFocus: true);
+        _controller.stickerController.deleteSticker(asset);
+        if (asset.sticker is IconSticker) {
+          _controller.updateValue(isColorPickerVisible: true);
+        }
+
         // if (asset.sticker is TextSticker) {
         // _draggableResizableController.moveToCenter(
         //   onComplete: () {
@@ -274,9 +282,6 @@ class _StickerEditingViewState extends State<_StickerEditingView>
         //   },
         // );
         // } else
-        if (asset.sticker is IconSticker) {
-          _controller.updateValue(isColorPickerVisible: true);
-        }
       },
       onStart: () {
         _controller.updateValue(isEditing: true);
@@ -308,6 +313,7 @@ class _StickerEditingViewState extends State<_StickerEditingView>
       ),
       initialPosition: asset.position.offset,
       initialAngle: asset.angle,
+      initialScale: asset.scale,
       child: Opacity(
         opacity: widget.isSelected && _collied ? 0.3 : 1.0,
         child: asset.sticker.build(context, _controller),
