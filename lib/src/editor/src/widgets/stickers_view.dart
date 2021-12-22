@@ -92,53 +92,6 @@ class _StickersViewState extends State<StickersView> {
                     isSelected: isSelected,
                     isCollied: _collied,
                   );
-                  // return DraggableResizable(
-                  //   key: Key(asset.id),
-                  //   canTransform: isSelected,
-                  //   onTap: () {
-                  //     asset.sticker.onPressed?.call(asset);
-                  //     if (asset.sticker is TextSticker) {
-                  //       stickerController.deleteSticker(asset);
-                  //       _controller.updateValue(hasFocus: true);
-                  //     } else if (asset.sticker is IconSticker) {
-                  //       _controller.updateValue(isColorPickerVisible: true);
-                  //     }
-                  //   },
-                  //   onStart: () {
-                  //     _controller.updateValue(isEditing: true);
-                  //   },
-                  //   onEnd: () {
-                  //     Future.delayed(const Duration(milliseconds: 50), () {
-                  //       if (_collied) {
-                  //         stickerController.deleteSticker(asset);
-                  //         _controller.updateValue(
-                  //           hasStickers: stickerValue.assets.length > 1,
-                  //         );
-                  //         _collied = false;
-                  //       }
-                  //     });
-                  //     _controller.updateValue(isEditing: false);
-                  //   },
-                  //   onUpdate: (update, key) {
-                  //     stickerController.dragSticker(
-                  //       asset: asset,
-                  //       update: update,
-                  //     );
-                  //   },
-                  //   onScaleUpdate: _onScaleUpdate,
-                  //   size: asset.sticker.size,
-                  //   constraints: BoxConstraints(
-                  //     minWidth: asset.sticker.size.width * _minStickerScale,
-                  //     minHeight: asset.sticker.size.height * _minStickerScale,
-                  //   ),
-                  //   initialPosition: asset.position.offset,
-                  //   initialAngle: asset.angle,
-                  //   child: Opacity(
-                  //     opacity: isSelected && _collied ? 0.3 : 1.0,
-                  //     // child: _stickerChild(asset.sticker),
-                  //     child: asset.sticker.build(context, _controller),
-                  //   ),
-                  // );
                 }).toList(),
               ),
 

@@ -15,7 +15,10 @@ class KeyboardVisibility extends StatefulWidget {
 
   ///
   final Widget Function(
-      BuildContext context, bool isKeyboardVisible, Widget? child)? builder;
+    BuildContext context,
+    bool isKeyboardVisible,
+    Widget? child,
+  )? builder;
 
   ///
   final void Function(bool visible, double size)? listener;
