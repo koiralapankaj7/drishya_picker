@@ -47,7 +47,10 @@ class EditorButtonCollection extends StatelessWidget {
               controller.updateValue(hasStickers: true);
               Navigator.of(context).pop();
             },
-            imageBackground: controller.value.background is PhotoBackground,
+            background: controller.value.background is GradientBackground
+                ? (controller.value.background as GradientBackground).lastColor
+                : Colors.black54,
+            onBackground: controller.value.textColor,
           );
         },
       ),

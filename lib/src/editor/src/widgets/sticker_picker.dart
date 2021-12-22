@@ -14,7 +14,8 @@ class StickerPicker extends StatelessWidget {
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.bucket,
-    required this.imageBackground,
+    required this.background,
+    required this.onBackground,
   }) : super(key: key);
 
   ///
@@ -33,7 +34,10 @@ class StickerPicker extends StatelessWidget {
   final PageStorageBucket bucket;
 
   ///
-  final bool imageBackground;
+  final Color background;
+
+  ///
+  final Color onBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +62,8 @@ class StickerPicker extends StatelessWidget {
                 initialIndex: initialIndex,
                 onTabChanged: onTabChanged,
                 onStickerSelected: onStickerSelected,
-                imageBackground: imageBackground,
+                background: background,
+                onBackground: onBackground,
               ),
             ),
           ],
@@ -76,7 +81,8 @@ class StickersTabs extends StatefulWidget {
     required this.setting,
     required this.onStickerSelected,
     required this.onTabChanged,
-    required this.imageBackground,
+    required this.background,
+    required this.onBackground,
     this.initialIndex = 0,
   }) : super(key: key);
 
@@ -93,7 +99,10 @@ class StickersTabs extends StatefulWidget {
   final int initialIndex;
 
   ///
-  final bool imageBackground;
+  final Color background;
+
+  ///
+  final Color onBackground;
 
   @override
   State<StickersTabs> createState() => _StickersTabsState();
@@ -131,7 +140,7 @@ class _StickersTabsState extends State<StickersTabs>
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.imageBackground ? Colors.black54 : Colors.white54,
+        color: widget.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Column(
@@ -143,6 +152,7 @@ class _StickersTabsState extends State<StickersTabs>
                 final stickers = _stickers[key] ?? {};
                 return StickersTabBarView(
                   key: Key('stickersTabs_${key}TabBarView'),
+                  color: widget.onBackground,
                   stickers: stickers,
                   onStickerSelected: widget.onStickerSelected,
                 );
@@ -221,6 +231,7 @@ class StickersTabBarView extends StatelessWidget {
     Key? key,
     required this.stickers,
     required this.onStickerSelected,
+    required this.color,
     this.maxCrossAxisExtent = 80.0,
   }) : super(key: key);
 
@@ -232,6 +243,9 @@ class StickersTabBarView extends StatelessWidget {
 
   ///
   final double maxCrossAxisExtent;
+
+  ///
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -249,6 +263,7 @@ class StickersTabBarView extends StatelessWidget {
         final sticker = stickers.elementAt(index);
         return StickerChoice(
           sticker: sticker,
+          color: color,
           onPressed: () => onStickerSelected(sticker),
         );
       },
@@ -264,6 +279,7 @@ class StickerChoice extends StatelessWidget {
     Key? key,
     required this.sticker,
     required this.onPressed,
+    required this.color,
   }) : super(key: key);
 
   ///
@@ -271,6 +287,9 @@ class StickerChoice extends StatelessWidget {
 
   ///
   final VoidCallback onPressed;
+
+  ///
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -289,7 +308,7 @@ class StickerChoice extends StatelessWidget {
         child: FittedBox(
           child: Icon(
             (sticker as IconSticker).iconData,
-            color: Theme.of(context).primaryColor,
+            color: color,
           ),
         ),
       );

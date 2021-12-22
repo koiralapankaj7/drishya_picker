@@ -286,26 +286,3 @@ class IconSticker extends Sticker {
     );
   }
 }
-
-class WidgetSticker extends Sticker {
-  ///
-  const WidgetSticker({
-    required this.child,
-    String name = '',
-    Size size = const Size(100, 100),
-    ValueSetter<StickerAsset>? onPressed,
-    Map<String, Object> extra = const {},
-  }) : super(
-          name: name,
-          size: size,
-          onPressed: onPressed,
-          extra: extra,
-        );
-
-  ///
-  final Widget child;
-
-  @override
-  Widget? build(BuildContext context, DrishyaEditingController controller) =>
-      FittedBox(child: IntrinsicWidth(child: child));
-}

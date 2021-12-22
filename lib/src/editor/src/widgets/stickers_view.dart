@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
@@ -59,38 +57,6 @@ class _StickersViewState extends State<StickersView> {
       });
     }
   }
-
-  // Widget? _stickerChild(Sticker sticker) {
-  //   if (sticker is ImageSticker) {
-  //     return sticker.build(context, _controller);
-  //   } else if (sticker is TextSticker) {
-  //     return sticker.build(context, _controller);
-  //     // return Container(
-  //     //   constraints: BoxConstraints.loose(sticker.size),
-  //     //   decoration: BoxDecoration(
-  //     //     color: sticker.withBackground
-  //     //         ? _controller.value.textBackground.colors.first
-  //     //         : Colors.transparent,
-  //     //     borderRadius: BorderRadius.circular(10),
-  //     //   ),
-  //     //   padding: const EdgeInsets.symmetric(horizontal: 16),
-  //     //   child: FittedBox(
-  //     //     child: Text(
-  //     //       sticker.text,
-  //     //       textAlign: sticker.textAlign,
-  //     //       style: sticker.style,
-  //     //     ),
-  //     //   ),
-  //     // );
-  //   } else if (sticker is IconSticker) {
-  //     return _IconSticker(
-  //       colorNotifier: _controller.colorNotifier,
-  //       sticker: sticker,
-  //     );
-  //   } else {
-  //     return const SizedBox();
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +143,8 @@ class _StickersViewState extends State<StickersView> {
               ),
 
               // Delete popup area
-              if (_controller.value.isEditing)
+              if (_controller.value.isEditing &&
+                  !_controller.value.isStickerPickerOpen)
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: AnimatedContainer(
@@ -271,17 +238,6 @@ class _StickerEditingViewState extends State<_StickerEditingView>
         if (asset.sticker is IconSticker) {
           _controller.updateValue(isColorPickerVisible: true);
         }
-
-        // if (asset.sticker is TextSticker) {
-        // _draggableResizableController.moveToCenter(
-        //   onComplete: () {
-        //     _controller.stickerController.deleteSticker(asset);
-        //     // Future.delayed(const Duration(milliseconds: 200), () {
-        //     _controller.updateValue(hasFocus: true);
-        //     // });
-        //   },
-        // );
-        // } else
       },
       onStart: () {
         _controller.updateValue(isEditing: true);
