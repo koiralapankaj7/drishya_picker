@@ -183,7 +183,7 @@ class TextSticker extends Sticker {
             (withBackground ? controller.value.color : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: FittedBox(
         child: Text(text, textAlign: textAlign, style: style),
       ),
