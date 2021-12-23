@@ -58,7 +58,7 @@ class _CameraViewState extends State<CameraView>
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
     _camController = widget.controller ?? CamController();
-    _photoEditingController = _camController.photoEditingController
+    _photoEditingController = _camController.drishyaEditingController
       ..addListener(_photoEditingListener);
     _hideSB();
     _camController.createCamera();
@@ -77,7 +77,7 @@ class _CameraViewState extends State<CameraView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       _camController = widget.controller ?? CamController();
-      _photoEditingController = _camController.photoEditingController
+      _photoEditingController = _camController.drishyaEditingController
         ..addListener(_photoEditingListener);
       _hideSB();
       _camController.createCamera();

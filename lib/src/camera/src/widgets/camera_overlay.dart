@@ -94,7 +94,7 @@ class _PlaygroundOverlay extends StatelessWidget {
             // Add text button
             Align(
               child: EditorTextfieldButton(
-                controller: controller.photoEditingController,
+                controller: controller.drishyaEditingController,
               ),
             ),
 
@@ -103,7 +103,7 @@ class _PlaygroundOverlay extends StatelessWidget {
               left: 8,
               top: _top,
               child: EditorCloseButton(
-                controller: controller.photoEditingController,
+                controller: controller.drishyaEditingController,
               ),
             ),
 
@@ -112,7 +112,7 @@ class _PlaygroundOverlay extends StatelessWidget {
               left: 16,
               bottom: 16,
               child: BackgroundSwitcher(
-                controller: controller.photoEditingController,
+                controller: controller.drishyaEditingController,
               ),
             ),
 
@@ -121,18 +121,18 @@ class _PlaygroundOverlay extends StatelessWidget {
               right: 16,
               bottom: 16,
               child: EditorShutterButton(
-                controller: controller.photoEditingController,
+                controller: controller.drishyaEditingController,
               ),
             ),
 
             // Sticker buttons
             Positioned(
               right: 16,
-              top: controller.photoEditingController.value.isStickerPickerOpen
+              top: controller.drishyaEditingController.value.isStickerPickerOpen
                   ? 0.0
                   : _top,
               child: EditorButtonCollection(
-                controller: controller.photoEditingController,
+                controller: controller.drishyaEditingController,
               ),
             ),
 

@@ -79,7 +79,7 @@ class CamController extends ValueNotifier<CamValue> {
   CameraController? get cameraController => _cameraController;
 
   /// Photo editing controller
-  DrishyaEditingController get photoEditingController =>
+  DrishyaEditingController get drishyaEditingController =>
       _drishyaEditingController;
 
   /// Camera zoom controller

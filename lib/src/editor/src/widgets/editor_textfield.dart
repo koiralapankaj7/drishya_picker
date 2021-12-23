@@ -119,26 +119,26 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
     if (!value.hasFocus) return const SizedBox();
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _controller.focusNode.unfocus,
-      child: KeyboardVisibility(
-        listener: (visible) {
-          // TODO: Remove this
-          log('Keyboard visible > $visible');
-          _controller.updateValue(
-            keyboardVisible: visible,
-            isColorPickerOpen: visible,
-          );
-          if (visible) {
-            _animationController.forward();
-          } else {
-            if (_textController.text.isNotEmpty) {
-              _addSticker();
-            }
-            _animationController.reverse();
+    return KeyboardVisibility(
+      listener: (visible) {
+        // TODO: Remove this
+        log('Keyboard visible > $visible');
+        _controller.updateValue(
+          keyboardVisible: visible,
+          isColorPickerOpen: visible,
+        );
+        if (visible) {
+          _animationController.forward();
+        } else {
+          if (_textController.text.isNotEmpty) {
+            _addSticker();
           }
-        },
+          _animationController.reverse();
+        }
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _controller.focusNode.unfocus,
         child: ColoredBox(
           color: value.keyboardVisible ? Colors.black54 : Colors.transparent,
           child: ValueListenableBuilder<StickerAsset?>(

@@ -64,31 +64,8 @@ class EditorButtonCollection extends StatelessWidget {
     });
   }
 
-  void _textAlignButtonPressed() {
-    late TextAlign textAlign;
-    switch (controller.value.textAlign) {
-      case TextAlign.center:
-        textAlign = TextAlign.end;
-        break;
-      case TextAlign.end:
-        textAlign = TextAlign.start;
-        break;
-      // ignore: no_default_cases
-      default:
-        textAlign = TextAlign.center;
-    }
-    controller.updateValue(textAlign: textAlign);
-  }
-
-  // void _textBackgroundButtonPressed() {
-  //   final value = controller.value;
-  //   controller.value = value.copyWith(fillColor: !value.fillColor);
-  // }
-
   @override
   Widget build(BuildContext context) {
-    final hasFocus = controller.value.hasFocus;
-
     return EditorBuilder(
       controller: controller,
       builder: (context, value, child) {
@@ -109,59 +86,102 @@ class EditorButtonCollection extends StatelessWidget {
 
         return AppAnimatedCrossFade(
           firstChild: firstChild,
-          secondChild: child!,
+          secondChild: _ButtonList(
+            controller: controller,
+            onStickerIconPressed: _onStickerIconPressed,
+          ),
           crossFadeState: crossFadeState,
           alignment: Alignment.topCenter,
           duration: const Duration(milliseconds: 200),
         );
-
-        //
       },
-      child: Column(
-        children: [
-          _DoneButton(
-            onPressed: () {
-              controller.updateValue(hasFocus: false);
-            },
-            isVisible: hasFocus,
+    );
+  }
+}
+
+class _ButtonList extends StatelessWidget {
+  const _ButtonList({
+    Key? key,
+    required this.controller,
+    required this.onStickerIconPressed,
+  }) : super(key: key);
+
+  ///
+  final DrishyaEditingController controller;
+
+  ///
+  final ValueSetter<BuildContext> onStickerIconPressed;
+
+  void _textAlignButtonPressed() {
+    late TextAlign textAlign;
+    switch (controller.value.textAlign) {
+      case TextAlign.center:
+        textAlign = TextAlign.end;
+        break;
+      case TextAlign.end:
+        textAlign = TextAlign.start;
+        break;
+      // ignore: no_default_cases
+      default:
+        textAlign = TextAlign.center;
+    }
+    controller.updateValue(textAlign: textAlign);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasFocus = controller.value.hasFocus;
+
+    return Column(
+      children: [
+        _DoneButton(
+          onPressed: () {
+            controller.updateValue(
+              hasFocus: false,
+              isColorPickerOpen: false,
+              keyboardVisible: false,
+            );
+          },
+          isVisible: hasFocus,
+        ),
+        _Button(
+          label: 'Aa',
+          size: hasFocus ? 48.0 : 44.0,
+          fontSize: hasFocus ? 24.0 : 20.0,
+          background: hasFocus ? Colors.white : Colors.black38,
+          labelColor: hasFocus ? Colors.black : Colors.white,
+          onPressed: () {
+            controller.updateValue(
+              hasFocus: !hasFocus,
+              isColorPickerOpen: !hasFocus,
+              keyboardVisible: !hasFocus,
+            );
+          },
+        ),
+        _Button(
+          isVisible: hasFocus,
+          onPressed: _textAlignButtonPressed,
+          child: _TextAlignmentIcon(align: controller.value.textAlign),
+        ),
+        _Button(
+          isVisible: hasFocus,
+          onPressed: () {
+            controller.updateValue(
+              fillTextfield: !controller.value.fillTextfield,
+              isColorPickerOpen: !controller.value.fillTextfield &&
+                  controller.value.background is PhotoBackground,
+            );
+          },
+          child: _TextBackgroundIcon(
+            isSelected: controller.value.fillTextfield,
           ),
-          _Button(
-            label: 'Aa',
-            size: hasFocus ? 48.0 : 44.0,
-            fontSize: hasFocus ? 24.0 : 20.0,
-            background: hasFocus ? Colors.white : Colors.black38,
-            labelColor: hasFocus ? Colors.black : Colors.white,
-            onPressed: () {
-              controller.updateValue(hasFocus: !hasFocus);
-            },
-          ),
-          _Button(
-            isVisible: hasFocus,
-            onPressed: _textAlignButtonPressed,
-            child: _TextAlignmentIcon(align: controller.value.textAlign),
-          ),
-          _Button(
-            isVisible: hasFocus,
-            onPressed: () {
-              controller.updateValue(
-                fillTextfield: !controller.value.fillTextfield,
-                isColorPickerOpen: !controller.value.fillTextfield &&
-                    controller.value.background is PhotoBackground,
-              );
-            },
-            child: _TextBackgroundIcon(
-              isSelected: controller.value.fillTextfield,
-            ),
-          ),
-          _Button(
-            isVisible: !hasFocus,
-            iconData: Icons.emoji_emotions,
-            onPressed: () {
-              _onStickerIconPressed(context);
-            },
-          ),
-        ],
-      ),
+        ),
+        _Button(
+          isVisible: !hasFocus,
+          iconData: Icons.emoji_emotions,
+          onPressed: () => onStickerIconPressed(context),
+        ),
+      ],
     );
   }
 }
@@ -253,7 +273,8 @@ class _Button extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         height: size ?? 44.0,
         width: size ?? 44.0,
         alignment: Alignment.center,
