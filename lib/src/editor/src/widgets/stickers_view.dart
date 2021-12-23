@@ -30,6 +30,7 @@ class _StickersViewState extends State<StickersView> {
     _controller = widget.controller;
   }
 
+  // On tap outside of the stickers
   void _onTapOutside() {
     _controller.stickerController.unselectSticker();
     if (_controller.value.isColorPickerOpen) {
@@ -37,6 +38,20 @@ class _StickersViewState extends State<StickersView> {
     }
   }
 
+  // On sticker select
+  void _onStickerSelect(StickerAsset asset) {
+    if (asset.sticker is TextSticker) {
+      _controller.currentAsset.value = asset;
+      _controller.textController.text = (asset.sticker as TextSticker).text;
+      _controller.stickerController.deleteSticker(asset);
+    }
+    _controller.updateValue(
+      hasFocus: asset.sticker is TextSticker,
+      isColorPickerOpen: asset.sticker is IconSticker,
+    );
+  }
+
+  // On updating sticker position/scale/rotation
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final deleteBox =
         _deleteKey.currentContext?.findRenderObject() as RenderBox?;
@@ -81,16 +96,44 @@ class _StickersViewState extends State<StickersView> {
                 fit: StackFit.expand,
                 children: stickerValue.assets.map((asset) {
                   final isSelected = asset.id == stickerValue.selectedAssetId;
-                  return _StickerEditingView(
-                    stickerValue: stickerValue,
-                    asset: asset,
-                    controller: _controller,
-                    onUpdate: _onScaleUpdate,
-                    onColliedUpdate: (value) {
-                      _collied = value;
+                  return DraggableResizable(
+                    key: Key(asset.id),
+                    canTransform: isSelected,
+                    onTap: () => _onStickerSelect(asset),
+                    onStart: () {
+                      _controller.updateValue(isEditing: true);
                     },
-                    isSelected: isSelected,
-                    isCollied: _collied,
+                    onEnd: () {
+                      Future.delayed(const Duration(milliseconds: 50), () {
+                        if (_collied) {
+                          _controller.stickerController.deleteSticker(asset);
+                          _controller.updateValue(
+                            hasStickers: stickerValue.assets.length > 1,
+                          );
+                          _collied = false;
+                        }
+                      });
+                      _controller.updateValue(isEditing: false);
+                    },
+                    onUpdate: (update, key) {
+                      _controller.stickerController.dragSticker(
+                        asset: asset,
+                        update: update,
+                      );
+                    },
+                    onScaleUpdate: _onScaleUpdate,
+                    size: asset.sticker.size,
+                    constraints: BoxConstraints(
+                      minWidth: asset.sticker.size.width * _minStickerScale,
+                      minHeight: asset.sticker.size.height * _minStickerScale,
+                    ),
+                    initialPosition: asset.position.offset,
+                    initialAngle: asset.angle,
+                    initialScale: asset.scale,
+                    child: Opacity(
+                      opacity: isSelected && _collied ? 0.3 : 1.0,
+                      child: asset.sticker.build(context, _controller, null),
+                    ),
                   );
                 }).toList(),
               ),
@@ -123,109 +166,6 @@ class _StickersViewState extends State<StickersView> {
           ),
         );
       },
-    );
-  }
-}
-
-class _StickerEditingView extends StatefulWidget {
-  const _StickerEditingView({
-    Key? key,
-    required this.stickerValue,
-    required this.asset,
-    required this.controller,
-    required this.onUpdate,
-    required this.onColliedUpdate,
-    required this.isSelected,
-    required this.isCollied,
-    // required this.child,
-  }) : super(key: key);
-
-  final StickerValue stickerValue;
-  final StickerAsset asset;
-  final bool isSelected;
-  final DrishyaEditingController controller;
-  final bool isCollied;
-  final ValueSetter<ScaleUpdateDetails> onUpdate;
-  final ValueSetter<bool> onColliedUpdate;
-  // final Widget child;
-
-  @override
-  _StickerEditingViewState createState() => _StickerEditingViewState();
-}
-
-class _StickerEditingViewState extends State<_StickerEditingView>
-    with TickerProviderStateMixin {
-  late final DrishyaEditingController _controller;
-  late final DraggableResizableController _draggableResizableController;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller;
-    _draggableResizableController = DraggableResizableController();
-  }
-
-  @override
-  void dispose() {
-    _draggableResizableController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final asset = widget.asset;
-    final _collied = widget.isCollied;
-
-    return DraggableResizable(
-      key: Key(asset.id),
-      canTransform: widget.isSelected,
-      controller: _draggableResizableController,
-      onTap: () {
-        if (asset.sticker is TextSticker) {
-          _controller.currentAsset.value = asset;
-          _controller.textController.text = (asset.sticker as TextSticker).text;
-        }
-        _controller.updateValue(
-          hasFocus: asset.sticker is TextSticker,
-          isColorPickerOpen: asset.sticker is IconSticker,
-        );
-        _controller.stickerController.deleteSticker(asset);
-      },
-      onStart: () {
-        _controller.updateValue(isEditing: true);
-      },
-      onEnd: () {
-        Future.delayed(const Duration(milliseconds: 50), () {
-          if (_collied) {
-            _controller.stickerController.deleteSticker(asset);
-            _controller.updateValue(
-              hasStickers: widget.stickerValue.assets.length > 1,
-            );
-            widget.onColliedUpdate.call(false);
-            // _collied = false;
-          }
-        });
-        _controller.updateValue(isEditing: false);
-      },
-      onUpdate: (update, key) {
-        _controller.stickerController.dragSticker(
-          asset: asset,
-          update: update,
-        );
-      },
-      onScaleUpdate: widget.onUpdate,
-      size: asset.sticker.size,
-      constraints: BoxConstraints(
-        minWidth: asset.sticker.size.width * _minStickerScale,
-        minHeight: asset.sticker.size.height * _minStickerScale,
-      ),
-      initialPosition: asset.position.offset,
-      initialAngle: asset.angle,
-      initialScale: asset.scale,
-      child: Opacity(
-        opacity: widget.isSelected && _collied ? 0.3 : 1.0,
-        child: asset.sticker.build(context, _controller, null),
-      ),
     );
   }
 }

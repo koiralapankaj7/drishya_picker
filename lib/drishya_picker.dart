@@ -10,7 +10,6 @@ export 'src/slidable_panel/slidable_panel.dart';
 
 
 
-// . First drag will stop and need to drag again
 
 // . While permission was denied for camera and microphone and tried to open
 // camera black screen was shown.

@@ -22,27 +22,32 @@ class ColorPicker extends StatelessWidget {
 
         if (!visible) return const SizedBox();
 
-        return child!;
-      },
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: controller.setting.colors
-                .map(
-                  (color) => _ColorCircle(
-                    color: color,
-                    controller: controller,
-                  ),
-                )
-                .toList(),
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              top: 16,
+              right: 16,
+              bottom: value.keyboardVisible ? 16 : 100,
+            ),
+            child: child,
           ),
-        ),
+        );
+      },
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
+        children: controller.setting.colors
+            .map(
+              (color) => _ColorCircle(
+                color: color,
+                controller: controller,
+              ),
+            )
+            .toList(),
       ),
     );
   }
