@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:drishya_picker/src/editor/editor.dart';
@@ -90,7 +91,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
         ),
         background: widget.controller.value.fillTextfield
             ? widget.controller.value.color
-            : Colors.white,
+            : Colors.transparent,
         textAlign: _controller.value.textAlign,
         withBackground: _controller.value.fillTextfield,
       );
@@ -123,16 +124,14 @@ class _EditorTextfieldState extends State<EditorTextfield>
       onTap: _controller.focusNode.unfocus,
       child: KeyboardVisibility(
         listener: (visible, size) {
+          log('$visible');
           if (visible) {
             _animationController.forward();
           } else {
             _addSticker();
             _animationController.reverse();
           }
-          _controller.updateValue(
-            keyboardVisible: visible,
-            isColorPickerOpen: value.background is PhotoBackground && visible,
-          );
+          _controller.updateValue(keyboardVisible: visible);
         },
         child: ColoredBox(
           color: value.keyboardVisible ? Colors.black54 : Colors.transparent,
@@ -306,6 +305,7 @@ class _StickerTextFieldState extends State<_StickerTextField> {
         filled: true,
         fillColor: value.fillTextfield ? value.color : Colors.transparent,
       ),
+      cursorColor: value.fillTextfield ? value.textColor : value.color,
       onChanged: widget.onChanged,
     );
   }

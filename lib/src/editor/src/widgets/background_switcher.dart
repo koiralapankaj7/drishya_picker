@@ -15,7 +15,8 @@ class BackgroundSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.value.background is! GradientBackground) {
+    if (controller.value.background is! GradientBackground ||
+        controller.value.keyboardVisible) {
       return const SizedBox();
     }
 

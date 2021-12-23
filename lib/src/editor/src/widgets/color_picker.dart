@@ -64,9 +64,7 @@ class _ColorCircle extends StatelessWidget {
         return InkWell(
           onTap: () {
             controller.colorNotifier.value = color;
-            if (controller.value.background is! GradientBackground) {
-              controller.updateValue(textColor: color);
-            }
+            controller.updateValue(textColor: color);
           },
           child: SizedBox(
             height: 40,

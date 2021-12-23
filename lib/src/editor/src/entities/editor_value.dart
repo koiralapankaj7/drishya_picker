@@ -55,20 +55,15 @@ class EditorValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   /// Computed text color as per the background
-  Color get textColor =>
-      !fillTextfield ? color : generateForegroundColor(color);
+  Color get textColor => fillTextfield ? generateForegroundColor(color) : color;
 
   /// Generate foreground color from background color
   Color generateForegroundColor(Color background) =>
       background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
 
   /// true, if color picker is visible currently
-  bool get isColorPickerVisible => !isEditing && isColorPickerOpen;
-
-  // ((value.keyboardVisible &&
-  //                               value.background is! GradientBackground) ||
-  //                           value.isColorPickerOpen) &&
-  //                       !value.isEditing
+  bool get isColorPickerVisible =>
+      !isEditing && (isColorPickerOpen || keyboardVisible);
 
   ///
   EditorValue copyWith({
