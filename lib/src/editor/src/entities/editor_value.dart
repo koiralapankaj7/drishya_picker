@@ -8,13 +8,14 @@ class EditorValue {
     required this.color,
     required this.background,
     this.textAlign = TextAlign.center,
+    this.keyboardVisible = false,
     this.fillTextfield = false,
     this.maxLines = 1,
     this.hasFocus = false,
     this.hasStickers = false,
     this.isEditing = false,
     this.isStickerPickerOpen = false,
-    this.isColorPickerVisible = false,
+    this.isColorPickerOpen = false,
   });
 
   /// Background of the editor
@@ -25,6 +26,9 @@ class EditorValue {
 
   /// Alignment of the text
   final TextAlign textAlign;
+
+  /// true, if keyboard is visible
+  final bool keyboardVisible;
 
   /// if true, textfield will be filled by [color]
   final bool fillTextfield;
@@ -45,7 +49,7 @@ class EditorValue {
   final bool isStickerPickerOpen;
 
   /// true, if color picker is visible
-  final bool isColorPickerVisible;
+  final bool isColorPickerOpen;
 
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
@@ -54,13 +58,22 @@ class EditorValue {
   Color get textColor =>
       !fillTextfield ? color : generateForegroundColor(color);
 
-  ///
+  /// Generate foreground color from background color
   Color generateForegroundColor(Color background) =>
       background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+
+  /// true, if color picker is visible currently
+  bool get isColorPickerVisible => !isEditing && isColorPickerOpen;
+
+  // ((value.keyboardVisible &&
+  //                               value.background is! GradientBackground) ||
+  //                           value.isColorPickerOpen) &&
+  //                       !value.isEditing
 
   ///
   EditorValue copyWith({
     TextAlign? textAlign,
+    bool? keyboardVisible,
     bool? fillTextfield,
     bool? hasFocus,
     bool? editingMode,
@@ -70,10 +83,11 @@ class EditorValue {
     EditorBackground? background,
     Color? color,
     bool? isStickerPickerOpen,
-    bool? isColorPickerVisible,
+    bool? isColorPickerOpen,
   }) {
     return EditorValue(
       textAlign: textAlign ?? this.textAlign,
+      keyboardVisible: keyboardVisible ?? this.keyboardVisible,
       fillTextfield: fillTextfield ?? this.fillTextfield,
       hasFocus: hasFocus ?? this.hasFocus,
       maxLines: maxLines ?? this.maxLines,
@@ -82,7 +96,7 @@ class EditorValue {
       background: background ?? this.background,
       color: color ?? this.color,
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
-      isColorPickerVisible: isColorPickerVisible ?? this.isColorPickerVisible,
+      isColorPickerOpen: isColorPickerOpen ?? this.isColorPickerOpen,
     );
   }
 }

@@ -99,6 +99,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   /// Update editor value
   @internal
   void updateValue({
+    bool? keyboardVisible,
     bool? fillTextfield,
     Color? textColor,
     int? maxLines,
@@ -108,7 +109,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     bool? hasStickers,
     bool? isEditing,
     bool? isStickerPickerOpen,
-    bool? isColorPickerVisible,
+    bool? isColorPickerOpen,
     EditorBackground? background,
   }) {
     final oldValue = value;
@@ -116,6 +117,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
     value = value.copyWith(
+      keyboardVisible: keyboardVisible,
       fillTextfield: fillTextfield,
       color: textColor,
       maxLines: maxLines,
@@ -125,7 +127,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
       hasStickers: hasStickers,
       isEditing: isEditing,
       isStickerPickerOpen: isStickerPickerOpen,
-      isColorPickerVisible: isColorPickerVisible,
+      isColorPickerOpen: isColorPickerOpen,
       background: background,
     );
   }

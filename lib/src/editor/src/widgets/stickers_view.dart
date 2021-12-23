@@ -32,8 +32,8 @@ class _StickersViewState extends State<StickersView> {
 
   void _onTapOutside() {
     _controller.stickerController.unselectSticker();
-    if (_controller.value.isColorPickerVisible) {
-      _controller.updateValue(isColorPickerVisible: false);
+    if (_controller.value.isColorPickerOpen) {
+      _controller.updateValue(isColorPickerOpen: false);
     }
   }
 
@@ -188,7 +188,7 @@ class _StickerEditingViewState extends State<_StickerEditingView>
         _controller.updateValue(hasFocus: true);
         _controller.stickerController.deleteSticker(asset);
         if (asset.sticker is IconSticker) {
-          _controller.updateValue(isColorPickerVisible: true);
+          _controller.updateValue(isColorPickerOpen: true);
         }
       },
       onStart: () {
@@ -228,7 +228,9 @@ class _StickerEditingViewState extends State<_StickerEditingView>
           context,
           _controller,
           () {
-            _controller.updateValue(isColorPickerVisible: true);
+            if (asset.sticker is IconSticker) {
+              _controller.updateValue(isColorPickerOpen: true);
+            }
           },
         ),
       ),

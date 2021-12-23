@@ -145,12 +145,13 @@ class EditorButtonCollection extends StatelessWidget {
             onPressed: () {
               controller.updateValue(
                 fillTextfield: !controller.value.fillTextfield,
-                isColorPickerVisible: !controller.value.fillTextfield &&
-                    controller.value.background is! GradientBackground,
+                isColorPickerOpen: !controller.value.fillTextfield &&
+                    controller.value.background is PhotoBackground,
               );
             },
-            child:
-                _TextBackgroundIcon(isSelected: controller.value.fillTextfield),
+            child: _TextBackgroundIcon(
+              isSelected: controller.value.fillTextfield,
+            ),
           ),
           _Button(
             isVisible: !hasFocus,

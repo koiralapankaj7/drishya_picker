@@ -116,10 +116,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                       EditorOverlay(controller: _controller),
 
                     // Color picker
-                    if (((value.hasFocus &&
-                                value.background is! GradientBackground) ||
-                            value.isColorPickerVisible) &&
-                        !value.isEditing)
+                    if (value.isColorPickerVisible)
                       ColorPicker(controller: _controller),
 
                     //

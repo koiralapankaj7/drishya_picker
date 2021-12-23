@@ -9,10 +9,8 @@ export 'src/gallery/gallery_view.dart';
 export 'src/slidable_panel/slidable_panel.dart';
 
 
-// . While editing photo bg and on opening textfield color picker is visible at 
-// the center
+
 // . First drag will stop and need to drag again
-// . Change icon color in photo editor sticker picker
 // . While editing photo after capturing image text doesnot display for white 
 // background
 // . While permission was denied for camera and microphone and tried to open

@@ -121,105 +121,108 @@ class _EditorTextfieldState extends State<EditorTextfield>
       onTap: _controller.focusNode.unfocus,
       child: KeyboardVisibility(
         listener: (visible, size) {
+          _controller.updateValue(
+            keyboardVisible: visible,
+            isColorPickerOpen: value.background is PhotoBackground && visible,
+          );
           if (visible) {
             _animationController.forward();
           } else {
             _animationController.reverse();
           }
         },
-        builder: (context, visible, child) {
-          return ColoredBox(
-            color: visible ? Colors.black54 : Colors.transparent,
-            child: child,
-          );
-        },
-        child: ValueListenableBuilder<StickerAsset?>(
-          valueListenable: _controller.currentAsset,
-          builder: (context, asset, child) {
-            final size = MediaQuery.of(context).size;
-            final originalSize = (asset?.sticker as TextSticker?)?.originalSize;
+        child: ColoredBox(
+          color: value.keyboardVisible ? Colors.black54 : Colors.transparent,
+          child: ValueListenableBuilder<StickerAsset?>(
+            valueListenable: _controller.currentAsset,
+            builder: (context, asset, child) {
+              final size = MediaQuery.of(context).size;
+              final originalSize =
+                  (asset?.sticker as TextSticker?)?.originalSize;
 
-            final centerX = size.width / 2;
-            final centerY = size.height / 2;
+              final centerX = size.width / 2;
+              final centerY = size.height / 2;
 
-            final centerTop = (size.height -
-                    (originalSize?.height ?? _tfSize.height) -
-                    (centerY * 0.92)) /
-                2;
+              final centerTop = (size.height -
+                      (originalSize?.height ?? _tfSize.height) -
+                      (centerY * 0.92)) /
+                  2;
 
-            final centerLeft =
-                (size.width - (originalSize?.width ?? _tfSize.width)) / 2;
+              final centerLeft =
+                  (size.width - (originalSize?.width ?? _tfSize.width)) / 2;
 
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    if (_animationController.status ==
-                        AnimationStatus.completed) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 60,
-                          vertical: 30,
-                        ),
-                        child: child,
-                      );
-                    }
-
-                    final animValue = _animation.value;
-
-                    final left = lerpDouble(
-                      centerLeft,
-                      asset?.position.dx ?? centerX - (_tfSize.width / 2),
-                      animValue,
-                    );
-
-                    final top = lerpDouble(
-                      centerTop,
-                      asset?.position.dy ?? centerY - (_tfSize.height / 2),
-                      animValue,
-                    );
-
-                    final scale = asset == null
-                        ? 1.0
-                        : lerpDouble(1, asset.scale, animValue) ?? 1.0;
-
-                    final angle = asset == null ? 0.0 : asset.angle * animValue;
-
-                    return Positioned(
-                      left: left,
-                      top: top,
-                      child: Transform.rotate(
-                        angle: angle,
-                        child: Transform.scale(
-                          scale: scale,
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      if (_animationController.status ==
+                          AnimationStatus.completed) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 60,
+                            vertical: 30,
+                          ),
                           child: child,
+                        );
+                      }
+
+                      final animValue = _animation.value;
+
+                      final left = lerpDouble(
+                        centerLeft,
+                        asset?.position.dx ?? centerX - (_tfSize.width / 2),
+                        animValue,
+                      );
+
+                      final top = lerpDouble(
+                        centerTop,
+                        asset?.position.dy ?? centerY - (_tfSize.height / 2),
+                        animValue,
+                      );
+
+                      final scale = asset == null
+                          ? 1.0
+                          : lerpDouble(1, asset.scale, animValue) ?? 1.0;
+
+                      final angle =
+                          asset == null ? 0.0 : asset.angle * animValue;
+
+                      return Positioned(
+                        left: left,
+                        top: top,
+                        child: Transform.rotate(
+                          angle: angle,
+                          child: Transform.scale(
+                            scale: scale,
+                            child: child,
+                          ),
                         ),
+                      );
+                    },
+                    child: IntrinsicWidth(
+                      key: _tfSizeKey,
+                      child: _StickerTextField(
+                        controller: _controller,
+                        textController: _textController,
+                        focusNode: _controller.focusNode,
+                        onChanged: (t) {
+                          final box = _tfSizeKey.currentContext
+                              ?.findRenderObject() as RenderBox?;
+                          if (box != null) {
+                            setState(() {
+                              _tfSize = box.size;
+                            });
+                          }
+                        },
                       ),
-                    );
-                  },
-                  child: IntrinsicWidth(
-                    key: _tfSizeKey,
-                    child: _StickerTextField(
-                      controller: _controller,
-                      textController: _textController,
-                      focusNode: _controller.focusNode,
-                      onChanged: (t) {
-                        final box = _tfSizeKey.currentContext
-                            ?.findRenderObject() as RenderBox?;
-                        if (box != null) {
-                          setState(() {
-                            _tfSize = box.size;
-                          });
-                        }
-                      },
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

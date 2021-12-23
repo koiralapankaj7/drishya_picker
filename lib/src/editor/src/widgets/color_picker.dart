@@ -17,7 +17,7 @@ class ColorPicker extends StatelessWidget {
     final value = controller.value;
 
     return Align(
-      alignment: value.hasFocus ? Alignment.center : Alignment.bottomCenter,
+      alignment: Alignment.bottomCenter,
       child: Padding(
         padding: EdgeInsets.only(
           left: 16,
