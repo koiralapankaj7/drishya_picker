@@ -14,30 +14,34 @@ class ColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final value = controller.value;
+    return ValueListenableBuilder<EditorValue>(
+      valueListenable: controller,
+      builder: (context, value, child) {
+        final visible = !value.isEditing &&
+            (value.isColorPickerOpen || value.keyboardVisible);
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          top: 16,
-          right: 16,
-          bottom: value.hasFocus ? 32 : 100,
-        ),
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          runSpacing: 8,
-          children: controller.setting.colors
-              .map(
-                (color) => _ColorCircle(
-                  color: color,
-                  controller: controller,
-                ),
-              )
-              .toList(),
+        if (!visible) return const SizedBox();
+
+        return child!;
+      },
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: controller.setting.colors
+                .map(
+                  (color) => _ColorCircle(
+                    color: color,
+                    controller: controller,
+                  ),
+                )
+                .toList(),
+          ),
         ),
       ),
     );

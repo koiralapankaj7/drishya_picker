@@ -59,9 +59,9 @@ class _EditorTextfieldState extends State<EditorTextfield>
   }
 
   void _finishTask() {
-    widget.controller.updateValue(
+    _controller.updateValue(
       hasFocus: false,
-      hasStickers: _textController.text.isNotEmpty,
+      hasStickers: _controller.stickerController.value.assets.isNotEmpty,
     );
     _textController.clear();
     _controller.currentAsset.value = null;
@@ -123,15 +123,21 @@ class _EditorTextfieldState extends State<EditorTextfield>
       behavior: HitTestBehavior.opaque,
       onTap: _controller.focusNode.unfocus,
       child: KeyboardVisibility(
-        listener: (visible, size) {
-          log('$visible');
+        listener: (visible) {
+          // TODO: Remove this
+          log('Keyboard visible > $visible');
+          _controller.updateValue(
+            keyboardVisible: visible,
+            isColorPickerOpen: visible,
+          );
           if (visible) {
             _animationController.forward();
           } else {
-            _addSticker();
+            if (_textController.text.isNotEmpty) {
+              _addSticker();
+            }
             _animationController.reverse();
           }
-          _controller.updateValue(keyboardVisible: visible);
         },
         child: ColoredBox(
           color: value.keyboardVisible ? Colors.black54 : Colors.transparent,

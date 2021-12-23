@@ -28,18 +28,33 @@ class PhotoBackground implements EditorBackground {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black,
-      child: Builder(
-        builder: (_) {
-          if (bytes != null) {
-            return Image.memory(bytes!, fit: BoxFit.contain);
-          } else if (url != null) {
-            return Image.network(url!, fit: BoxFit.cover);
-          }
-          return const SizedBox();
-        },
+    ImageProvider? image;
+
+    if (bytes != null) {
+      image = MemoryImage(bytes!);
+    } else if (url != null) {
+      image = NetworkImage(url!);
+    }
+
+    if (image == null) return const SizedBox();
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black,
+        image: DecorationImage(
+          image: image,
+        ),
       ),
+      // child: Builder(
+      //   builder: (_) {
+      //     if (bytes != null) {
+      //       return Image.memory(bytes!, fit: BoxFit.contain);
+      //     } else if (url != null) {
+      //       return Image.network(url!, fit: BoxFit.cover);
+      //     }
+      //     return const SizedBox();
+      //   },
+      // ),
     );
   }
 }

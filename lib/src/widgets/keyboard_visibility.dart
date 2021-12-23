@@ -21,7 +21,7 @@ class KeyboardVisibility extends StatefulWidget {
   )? builder;
 
   ///
-  final void Function(bool visible, double size)? listener;
+  final void Function(bool visible)? listener;
 
   @override
   State<KeyboardVisibility> createState() => _KeyboardVisibilityState();
@@ -47,22 +47,26 @@ class _KeyboardVisibilityState extends State<KeyboardVisibility>
   void didChangeMetrics() {
     final viewInsets = WidgetsBinding.instance!.window.viewInsets;
     final bottomInset = viewInsets.bottom;
-    final visibility = bottomInset > 0.0;
-    if (visibility != _isKeyboardVisible) {
-      widget.listener?.call(visibility, bottomInset);
-      setState(() {
-        _isKeyboardVisible = visibility;
-      });
+
+    final visible = bottomInset > 0.0;
+
+    if (visible != _isKeyboardVisible) {
+      _isKeyboardVisible = visible;
+      widget.listener?.call(visible);
+      if (widget.builder != null) {
+        setState(() {});
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) =>
-      widget.builder?.call(
-        context,
-        _isKeyboardVisible,
-        widget.child,
-      ) ??
-      widget.child ??
-      const SizedBox();
+  Widget build(BuildContext context) {
+    return widget.builder?.call(
+          context,
+          _isKeyboardVisible,
+          widget.child,
+        ) ??
+        widget.child ??
+        const SizedBox();
+  }
 }

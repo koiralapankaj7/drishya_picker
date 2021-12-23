@@ -2,9 +2,10 @@ import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///
+@immutable
 class EditorValue {
   ///
-  EditorValue({
+  const EditorValue({
     required this.color,
     required this.background,
     this.textAlign = TextAlign.center,
@@ -93,5 +94,38 @@ class EditorValue {
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
       isColorPickerOpen: isColorPickerOpen ?? this.isColorPickerOpen,
     );
+  }
+
+  @override
+  int get hashCode => hashValues(
+        color,
+        background,
+        textAlign,
+        keyboardVisible,
+        fillTextfield,
+        maxLines,
+        hasFocus,
+        hasStickers,
+        isEditing,
+        isStickerPickerOpen,
+        isColorPickerOpen,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! EditorValue) {
+      return false;
+    }
+    return color == other.color &&
+        background == other.background &&
+        textAlign == other.textAlign &&
+        keyboardVisible == other.keyboardVisible &&
+        fillTextfield == other.fillTextfield &&
+        maxLines == other.maxLines &&
+        hasFocus == other.hasFocus &&
+        hasStickers == other.hasStickers &&
+        isEditing == other.isEditing &&
+        isStickerPickerOpen == other.isStickerPickerOpen &&
+        isColorPickerOpen == other.isColorPickerOpen;
   }
 }

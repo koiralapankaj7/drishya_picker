@@ -1,6 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/widgets/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -59,71 +58,50 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
-        return true;
-      },
-      child: KeyboardVisibility(
-        listener: (visible, size) {
-          // if (!visible) {
-          //   _controller.focusNode.unfocus();
-          //   _controller.updateValue(
-          //     hasFocus: false,
-          //     isColorPickerVisible: false,
-          //   );
-          // }
+    return Scaffold(
+      body: WillPopScope(
+        onWillPop: () async {
+          await SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.manual,
+            overlays: SystemUiOverlay.values,
+          );
+          return true;
         },
-        builder: (context, visible, child) => child!,
-        child: Scaffold(
-          extendBody: true,
-          resizeToAvoidBottomInset: true,
-          body: PhotoEditingControllerProvider(
-            controller: _controller,
-            child: ValueListenableBuilder<EditorValue>(
-              valueListenable: _controller,
-              builder: (context, value, child) {
-                return Stack(
+        child: PhotoEditingControllerProvider(
+          controller: _controller,
+          child: Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: [
+              // Captureable view that shows the background and stickers
+              RepaintBoundary(
+                key: _controller.editorKey,
+                child: Stack(
                   fit: StackFit.expand,
                   alignment: Alignment.center,
                   children: [
-                    // Captureable view that shows the background and stickers
-                    RepaintBoundary(
-                      key: _controller.editorKey,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // Playground background
-                          value.background.build(context),
+                    // Playground background
+                    _controller.value.background.build(context),
 
-                          // Stickers
-                          StickersView(controller: _controller),
-
-                          //
-                        ],
-                      ),
-                    ),
-
-                    // Textfield
-                    // if (value.hasFocus)
-                    EditorTextfield(controller: _controller),
-
-                    // Overlay
-                    if (!widget.hideOverlay)
-                      EditorOverlay(controller: _controller),
-
-                    // Color picker
-                    if (value.isColorPickerVisible)
-                      ColorPicker(controller: _controller),
+                    // Stickers
+                    StickersView(controller: _controller),
 
                     //
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+
+              // Textfield
+              EditorTextfield(controller: _controller),
+
+              // Overlay
+              if (!widget.hideOverlay) EditorOverlay(controller: _controller),
+
+              // Color picker
+              ColorPicker(controller: _controller),
+
+              //
+            ],
           ),
         ),
       ),
