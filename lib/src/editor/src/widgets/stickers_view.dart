@@ -185,7 +185,6 @@ class _StickerEditingViewState extends State<_StickerEditingView>
           _controller.currentAsset.value = asset;
           _controller.textController.text = (asset.sticker as TextSticker).text;
         }
-        asset.sticker.onPressed?.call(asset);
         _controller.updateValue(hasFocus: true);
         _controller.stickerController.deleteSticker(asset);
         if (asset.sticker is IconSticker) {
@@ -225,7 +224,13 @@ class _StickerEditingViewState extends State<_StickerEditingView>
       initialScale: asset.scale,
       child: Opacity(
         opacity: widget.isSelected && _collied ? 0.3 : 1.0,
-        child: asset.sticker.build(context, _controller),
+        child: asset.sticker.build(
+          context,
+          _controller,
+          () {
+            _controller.updateValue(isColorPickerVisible: true);
+          },
+        ),
       ),
     );
   }

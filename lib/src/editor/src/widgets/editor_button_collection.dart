@@ -35,8 +35,12 @@ class EditorButtonCollection extends StatelessWidget {
       SwipeablePageRoute(
         notificationDepth: 1,
         builder: (context) {
+          final background = controller.value.background is GradientBackground
+              ? (controller.value.background as GradientBackground).lastColor
+              : Colors.black54;
+
           return StickerPicker(
-            setting: controller.setting,
+            controller: controller,
             initialIndex: _initialIndex,
             bucket: _bucket,
             onTabChanged: (index) {
@@ -47,10 +51,8 @@ class EditorButtonCollection extends StatelessWidget {
               controller.updateValue(hasStickers: true);
               Navigator.of(context).pop();
             },
-            background: controller.value.background is GradientBackground
-                ? (controller.value.background as GradientBackground).lastColor
-                : Colors.black54,
-            onBackground: controller.value.textColor,
+            background: background,
+            onBackground: controller.value.generateForegroundColor(background),
           );
         },
       ),

@@ -116,7 +116,7 @@ abstract class Sticker {
   const Sticker({
     this.name = '',
     this.size = const Size(200, 200),
-    this.onPressed,
+    // this.onPressed,
     this.extra = const {},
   });
 
@@ -126,15 +126,20 @@ abstract class Sticker {
   /// The size of the asset. Default Size(100.0, 100.0)
   final Size size;
 
-  /// Sticker onPressed callback
-  final ValueSetter<StickerAsset>? onPressed;
-
   /// Extra information about sticker
   final Map<String, Object> extra;
 
+  // /// Sticker onPressed callback
+  // final ValueSetter<StickerAsset>? onPressed;
+
   /// Build sticker widget
-  Widget? build(BuildContext context, DrishyaEditingController controller) =>
-      null;
+  Widget build(
+    BuildContext context,
+    DrishyaEditingController controller,
+    VoidCallback onPressed,
+  );
+
+  //
 }
 
 ///
@@ -148,13 +153,8 @@ class TextSticker extends Sticker {
     this.background,
     this.originalSize = Size.zero,
     Size size = const Size(200, 200),
-    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
-  }) : super(
-          size: size,
-          onPressed: onPressed,
-          extra: extra,
-        );
+  }) : super(size: size, extra: extra);
 
   ///
   final String text;
@@ -175,7 +175,11 @@ class TextSticker extends Sticker {
   final Size originalSize;
 
   @override
-  Widget? build(BuildContext context, DrishyaEditingController controller) {
+  Widget build(
+    BuildContext context,
+    DrishyaEditingController controller,
+    VoidCallback? onPressed,
+  ) {
     return Container(
       // constraints: BoxConstraints.loose(size),
       decoration: BoxDecoration(
@@ -199,12 +203,10 @@ class ImageSticker extends Sticker {
     this.isNetworkImage = true,
     String name = '',
     Size size = const Size(200, 200),
-    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
           name: name,
           size: size,
-          onPressed: onPressed,
           extra: extra,
         );
 
@@ -215,7 +217,11 @@ class ImageSticker extends Sticker {
   final bool isNetworkImage;
 
   @override
-  Widget build(BuildContext context, DrishyaEditingController controller) {
+  Widget build(
+    BuildContext context,
+    DrishyaEditingController controller,
+    VoidCallback? onPressed,
+  ) {
     if (isNetworkImage) {
       return Image.network(
         path,
@@ -231,9 +237,7 @@ class ImageSticker extends Sticker {
               child: const AppCircularProgressIndicator(strokeWidth: 2),
             ),
             secondChild: InkWell(
-              onTap: () {
-                // onPressed?.call(this);
-              },
+              onTap: onPressed,
               child: child,
             ),
             crossFadeState: frame == null
@@ -244,10 +248,13 @@ class ImageSticker extends Sticker {
       );
     }
 
-    return Image.asset(
-      path,
-      fit: BoxFit.contain,
-      gaplessPlayback: true,
+    return InkWell(
+      onTap: onPressed,
+      child: Image.asset(
+        path,
+        fit: BoxFit.contain,
+        gaplessPlayback: true,
+      ),
     );
   }
 }
@@ -257,29 +264,54 @@ class IconSticker extends Sticker {
   ///
   const IconSticker({
     required this.iconData,
+    this.color,
     String name = '',
     Size size = const Size(100, 100),
-    ValueSetter<StickerAsset>? onPressed,
     Map<String, Object> extra = const {},
   }) : super(
           name: name,
           size: size,
-          onPressed: onPressed,
           extra: extra,
         );
 
   ///
   final IconData iconData;
 
+  ///
+  final Color? color;
+
+  /// Copy object
+  IconSticker copyWith({
+    IconData? iconData,
+    Color? color,
+    String? name,
+    Size? size,
+    Map<String, Object>? extra,
+  }) =>
+      IconSticker(
+        iconData: iconData ?? this.iconData,
+        color: color ?? this.color,
+        extra: extra ?? this.extra,
+        name: name ?? this.name,
+        size: size ?? this.size,
+      );
+
   @override
-  Widget? build(BuildContext context, DrishyaEditingController controller) {
+  Widget build(
+    BuildContext context,
+    DrishyaEditingController controller,
+    VoidCallback? onPressed,
+  ) {
     return ValueListenableBuilder<Color>(
       valueListenable: controller.colorNotifier,
-      builder: (context, color, child) {
-        return FittedBox(
-          child: Icon(
-            iconData,
-            color: color,
+      builder: (context, c, child) {
+        return InkWell(
+          onTap: onPressed,
+          child: FittedBox(
+            child: Icon(
+              iconData,
+              color: color ?? c,
+            ),
           ),
         );
       },

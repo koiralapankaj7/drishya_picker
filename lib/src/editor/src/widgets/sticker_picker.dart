@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +8,7 @@ class StickerPicker extends StatelessWidget {
   ///
   const StickerPicker({
     Key? key,
-    required this.setting,
+    required this.controller,
     required this.initialIndex,
     required this.onStickerSelected,
     required this.onTabChanged,
@@ -19,7 +18,7 @@ class StickerPicker extends StatelessWidget {
   }) : super(key: key);
 
   ///
-  final EditorSetting setting;
+  final DrishyaEditingController controller;
 
   ///
   final int initialIndex;
@@ -58,7 +57,7 @@ class StickerPicker extends StatelessWidget {
             ),
             Expanded(
               child: StickersTabs(
-                setting: setting,
+                controller: controller,
                 initialIndex: initialIndex,
                 onTabChanged: onTabChanged,
                 onStickerSelected: onStickerSelected,
@@ -78,7 +77,7 @@ class StickersTabs extends StatefulWidget {
   ///
   const StickersTabs({
     Key? key,
-    required this.setting,
+    required this.controller,
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.background,
@@ -87,7 +86,7 @@ class StickersTabs extends StatefulWidget {
   }) : super(key: key);
 
   ///
-  final EditorSetting setting;
+  final DrishyaEditingController controller;
 
   ///
   final ValueSetter<Sticker> onStickerSelected;
@@ -116,7 +115,7 @@ class _StickersTabsState extends State<StickersTabs>
   @override
   void initState() {
     super.initState();
-    _stickers = widget.setting.stickers!;
+    _stickers = widget.controller.setting.stickers ?? {};
     _tabController = TabController(
       length: _stickers.length,
       initialIndex: math.min(widget.initialIndex, _stickers.length - 1),
@@ -138,6 +137,8 @@ class _StickersTabsState extends State<StickersTabs>
 
   @override
   Widget build(BuildContext context) {
+    if (_stickers.isEmpty) return const SizedBox();
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: widget.background,
@@ -152,6 +153,7 @@ class _StickersTabsState extends State<StickersTabs>
                 final stickers = _stickers[key] ?? {};
                 return StickersTabBarView(
                   key: Key('stickersTabs_${key}TabBarView'),
+                  controller: widget.controller,
                   color: widget.onBackground,
                   stickers: stickers,
                   onStickerSelected: widget.onStickerSelected,
@@ -168,7 +170,8 @@ class _StickersTabsState extends State<StickersTabs>
               color: Colors.white24,
               borderRadius: BorderRadius.circular(16),
             ),
-            isScrollable: _stickers.length > widget.setting.fixedTabSize,
+            isScrollable:
+                _stickers.length > widget.controller.setting.fixedTabSize,
             tabs: _stickers.keys.map((key) {
               return StickersTab(
                 key: Key('stickersTabs_${key}Tab'),
@@ -229,11 +232,15 @@ class StickersTabBarView extends StatelessWidget {
   ///
   const StickersTabBarView({
     Key? key,
+    required this.controller,
     required this.stickers,
     required this.onStickerSelected,
     required this.color,
     this.maxCrossAxisExtent = 80.0,
   }) : super(key: key);
+
+  ///
+  final DrishyaEditingController controller;
 
   ///
   final Set<Sticker> stickers;
@@ -261,97 +268,105 @@ class StickersTabBarView extends StatelessWidget {
       itemCount: stickers.length,
       itemBuilder: (context, index) {
         final sticker = stickers.elementAt(index);
-        return StickerChoice(
-          sticker: sticker,
-          color: color,
-          onPressed: () => onStickerSelected(sticker),
+        final updatedSticker =
+            sticker is IconSticker ? sticker.copyWith(color: color) : sticker;
+        return updatedSticker.build(
+          context,
+          controller,
+          () => onStickerSelected(sticker),
         );
+        // return StickerChoice(
+        //   sticker: sticker,
+        //   color: color,
+        //   onPressed: () => onStickerSelected(sticker),
+        // );
       },
     );
   }
 }
 
-///
-@visibleForTesting
-class StickerChoice extends StatelessWidget {
-  ///
-  const StickerChoice({
-    Key? key,
-    required this.sticker,
-    required this.onPressed,
-    required this.color,
-  }) : super(key: key);
+// ///
+// @visibleForTesting
+// class StickerChoice extends StatelessWidget {
+//   ///
+//   const StickerChoice({
+//     Key? key,
+//     required this.sticker,
+//     required this.onPressed,
+//     required this.color,
+//   }) : super(key: key);
 
-  ///
-  final Sticker sticker;
+//   ///
+//   final Sticker sticker;
 
-  ///
-  final VoidCallback onPressed;
+//   ///
+//   final VoidCallback onPressed;
 
-  ///
-  final Color color;
+//   ///
+//   final Color color;
 
-  @override
-  Widget build(BuildContext context) {
-    if (sticker is ImageSticker) {
-      final s = sticker as ImageSticker;
-      if (s.isNetworkImage) {
-        return _Network(
-          url: s.path,
-          onPressed: onPressed,
-        );
-      }
-      return const SizedBox();
-    } else if (sticker is IconSticker) {
-      return InkWell(
-        onTap: onPressed,
-        child: FittedBox(
-          child: Icon(
-            (sticker as IconSticker).iconData,
-            color: color,
-          ),
-        ),
-      );
-    } else {
-      return const SizedBox();
-    }
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     if (sticker is ImageSticker) {
+//       final s = sticker as ImageSticker;
+//       if (s.isNetworkImage) {
+//         return _Network(
+//           url: s.path,
+//           onPressed: onPressed,
+//         );
+//       }
+//       return const SizedBox();
+//     } else if (sticker is IconSticker) {
+//       return InkWell(
+//         onTap: onPressed,
+//         child: FittedBox(
+//           child: Icon(
+//             (sticker as IconSticker).iconData,
+//             color: color,
+//           ),
+//         ),
+//       );
+//     } else {
+//       return const SizedBox();
+//     }
+//   }
+// }
 
-class _Network extends StatelessWidget {
-  const _Network({
-    Key? key,
-    required this.url,
-    this.onPressed,
-  }) : super(key: key);
 
-  final String url;
-  final void Function()? onPressed;
+// class _Network extends StatelessWidget {
+//   const _Network({
+//     Key? key,
+//     required this.url,
+//     this.onPressed,
+//   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(
-      url,
-      frameBuilder: (
-        BuildContext context,
-        Widget child,
-        int? frame,
-        bool wasSynchronouslyLoaded,
-      ) {
-        return AppAnimatedCrossFade(
-          firstChild: SizedBox.fromSize(
-            size: const Size(20, 20),
-            child: const AppCircularProgressIndicator(strokeWidth: 2),
-          ),
-          secondChild: InkWell(
-            onTap: onPressed,
-            child: child,
-          ),
-          crossFadeState: frame == null
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-        );
-      },
-    );
-  }
-}
+//   final String url;
+//   final void Function()? onPressed;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Image.network(
+//       url,
+//       frameBuilder: (
+//         BuildContext context,
+//         Widget child,
+//         int? frame,
+//         bool wasSynchronouslyLoaded,
+//       ) {
+//         return AppAnimatedCrossFade(
+//           firstChild: SizedBox.fromSize(
+//             size: const Size(20, 20),
+//             child: const AppCircularProgressIndicator(strokeWidth: 2),
+//           ),
+//           secondChild: InkWell(
+//             onTap: onPressed,
+//             child: child,
+//           ),
+//           crossFadeState: frame == null
+//               ? CrossFadeState.showFirst
+//               : CrossFadeState.showSecond,
+//         );
+//       },
+//     );
+//   }
+// }

@@ -51,14 +51,12 @@ class EditorValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   /// Computed text color as per the background
-  Color get textColor {
-    final c = !fillTextfield
-        ? color
-        : color.computeLuminance() > 0.5
-            ? Colors.black
-            : Colors.white;
-    return c;
-  }
+  Color get textColor =>
+      !fillTextfield ? color : generateForegroundColor(color);
+
+  ///
+  Color generateForegroundColor(Color background) =>
+      background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
 
   ///
   EditorValue copyWith({
