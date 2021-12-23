@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 ///
 enum TriggerMode {
@@ -86,7 +85,7 @@ class ScrollListenerState extends State<ScrollListener> {
 
   void _overScroll(OverscrollNotification notification) {
     final overScroll =
-        (_triggerAnyWhere || (_triggerOnEdge && !_continuousScroll));
+        _triggerAnyWhere || (_triggerOnEdge && !_continuousScroll);
     _finish(notification, overScroll);
   }
 
@@ -150,7 +149,7 @@ class ScrollListenerState extends State<ScrollListener> {
   bool _handleGlowNotification(OverscrollIndicatorNotification notification) {
     if (notification.depth != 0) return false;
     if (_disableGlow) {
-      notification.disallowGlow();
+      notification.disallowIndicator();
       return true;
     }
     return false;
@@ -158,7 +157,7 @@ class ScrollListenerState extends State<ScrollListener> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMaterialLocalizations(context), '');
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(

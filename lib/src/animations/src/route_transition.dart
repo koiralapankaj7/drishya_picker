@@ -67,8 +67,8 @@ class SlideTransitionPageRoute<T> extends PageRoute<T> {
         horizontal != endHorizontal) {
       horizontal = endHorizontal;
     }
-    var begin = horizontal ? const Offset(1.0, 0.0) : const Offset(0.0, 1.0);
-    var tween = Tween(begin: begin, end: Offset.zero).chain(
+    final begin = horizontal ? const Offset(1, 0) : const Offset(0, 1);
+    final tween = Tween(begin: begin, end: Offset.zero).chain(
       CurveTween(curve: transitionCurve),
     );
 
@@ -78,27 +78,3 @@ class SlideTransitionPageRoute<T> extends PageRoute<T> {
     );
   }
 }
-
-// /// Camera and gallery route
-// Route<T> _route<T>(
-//   Widget page, {
-//   bool horizontal = false,
-//   String? name,
-// }) {
-//   return PageRouteBuilder<T>(
-//     pageBuilder: (context, animation, secondaryAnimation) => page,
-//     settings: RouteSettings(name: name),
-//     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-//       var begin = horizontal ? const Offset(1.0, 0.0) :
-//const Offset(0.0, 1.0);
-//       var end = Offset.zero;
-//       var curve = Curves.ease;
-//       var tween = Tween(begin: begin, end: end).
-//chain(CurveTween(curve: curve));
-//       return SlideTransition(
-//         position: animation.drive(tween),
-//         child: child,
-//       );
-//     },
-//   );
-// }

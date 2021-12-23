@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:flutter/material.dart';
 
 import '../controllers/cam_controller.dart';
@@ -16,14 +18,14 @@ class CameraBuilder extends StatelessWidget {
   final CamController controller;
 
   ///
-  final Widget Function(ActionValue value, Widget? child) builder;
+  final Widget Function(CamValue value, Widget? child) builder;
 
   ///
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ActionValue>(
+    return ValueListenableBuilder<CamValue>(
       valueListenable: controller,
       builder: (context, v, c) => builder(v, c),
       child: child,

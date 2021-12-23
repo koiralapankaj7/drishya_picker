@@ -56,6 +56,11 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       );
 
   bool _onNotification(ScrollNotification notification) {
+    if (notification.metrics.axisDirection == AxisDirection.left ||
+        notification.metrics.axisDirection == AxisDirection.right) {
+      return true;
+    }
+
     if (notification is ScrollStartNotification) {
       if (widget.onPageScrollStart != null) {
         widget.onPageScrollStart!();

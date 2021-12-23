@@ -34,7 +34,7 @@ class GallerySetting {
   final bool enableCamera;
 
   ///
-  /// Gallery cross axis count. Default is 3
+  /// Gallery grid cross axis count. Default is 3
   ///
   final int? crossAxisCount;
 }

@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 /// State for the fetching process
 enum BaseState {
@@ -22,6 +19,7 @@ enum BaseState {
   error,
 }
 
+// Albums =>
 ///
 class AlbumsValue {
   ///
@@ -58,7 +56,7 @@ class AlbumValue {
   ///
   const AlbumValue({
     this.assetPathEntity,
-    this.entities = const <DrishyaEntity>[],
+    this.entities = const <AssetEntity>[],
     this.state = BaseState.fetching,
     this.error,
   });
@@ -67,7 +65,7 @@ class AlbumValue {
   final AssetPathEntity? assetPathEntity;
 
   ///
-  final List<DrishyaEntity> entities;
+  final List<AssetEntity> entities;
 
   ///
   final BaseState state;
@@ -78,7 +76,7 @@ class AlbumValue {
   ///
   AlbumValue copyWith({
     AssetPathEntity? assetPathEntity,
-    List<DrishyaEntity>? entities,
+    List<AssetEntity>? entities,
     String? error,
     BaseState? state,
   }) =>
@@ -104,6 +102,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
   Future<List<DrishyaEntity>> recentEntities({
     RequestType? type,
     int count = 20,
+    ValueSetter<Exception>? onException,
   }) async {
     final state = await PhotoManager.requestPermissionExtend();
     if (state == PermissionState.authorized) {
@@ -115,14 +114,17 @@ class Albums extends ValueNotifier<AlbumsValue> {
         final entities = await albums
             .singleWhere((element) => element.isAll)
             .getAssetListPaged(0, count);
-        return Future.wait(entities.map(_getDrishya));
+        final drishyaEntities = entities.map((e) => e.toDrishya).toList();
+        return drishyaEntities;
       } catch (e) {
-        debugPrint('Exception => $e');
+        debugPrint('Exception fetching recent entities => $e');
+        onException?.call(Exception(e));
+        return [];
       }
     } else {
-      debugPrint('Permission denied');
+      onException?.call(Exception('Permission unavailable!'));
+      return [];
     }
-    return [];
   }
 
   /// Get album list
@@ -133,7 +135,9 @@ class Albums extends ValueNotifier<AlbumsValue> {
         final albums = await PhotoManager.getAssetPathList(type: type);
         // Update album list
         final albumList = List.generate(albums.length, (index) {
-          final album = Album(album: albums[index]);
+          final album = Album(
+            albumValue: AlbumValue(assetPathEntity: albums[index]),
+          );
           if (index == 0) {
             currentAlbum.value = album;
             album.fetchAssets();
@@ -146,13 +150,15 @@ class Albums extends ValueNotifier<AlbumsValue> {
         );
         return albumList;
       } catch (e) {
+        debugPrint('Exception fetching albums => $e');
         value = value.copyWith(error: e.toString(), state: BaseState.error);
         return [];
       }
     } else {
-      value.copyWith(
-        error: 'Permission',
-        state: BaseState.unauthorised,
+      value =
+          value.copyWith(error: 'Permission', state: BaseState.unauthorised);
+      currentAlbum.value = Album(
+        albumValue: const AlbumValue(state: BaseState.unauthorised),
       );
       return [];
     }
@@ -166,6 +172,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
 
   @override
   void dispose() {
+    currentAlbum.dispose();
     super.dispose();
   }
 }
@@ -173,27 +180,27 @@ class Albums extends ValueNotifier<AlbumsValue> {
 ///
 class Album extends ValueNotifier<AlbumValue> {
   ///
-  Album({AssetPathEntity? album}) : super(AlbumValue(assetPathEntity: album));
+  Album({AlbumValue? albumValue}) : super(albumValue ?? const AlbumValue());
 
   var _currentPage = 0;
 
   /// Get assets for the current album
-  Future<List<DrishyaEntity>> fetchAssets() async {
+  Future<List<AssetEntity>> fetchAssets() async {
     final state = await PhotoManager.requestPermissionExtend();
     if (state == PermissionState.authorized) {
       try {
         final entities = (await value.assetPathEntity
-                ?.getAssetListPaged(_currentPage, 50)) ??
+                ?.getAssetListPaged(_currentPage, 30)) ??
             [];
 
-        final drishyaEntities = await Future.wait(entities.map(_getDrishya));
-        final updatedEntities = [...value.entities, ...drishyaEntities];
+        final updatedEntities = [...value.entities, ...entities];
         ++_currentPage;
         value = value.copyWith(
           state: BaseState.completed,
           entities: updatedEntities,
         );
       } catch (e) {
+        debugPrint('Exception fetching assets => $e');
         value = value.copyWith(state: BaseState.error, error: e.toString());
       }
     } else {
@@ -201,16 +208,4 @@ class Album extends ValueNotifier<AlbumValue> {
     }
     return value.entities;
   }
-}
-
-Future<DrishyaEntity> _getDrishya(AssetEntity entity) async {
-  final bytes = entity.type == AssetType.image || entity.type == AssetType.video
-      ? await entity.thumbData
-      : Uint8List(0);
-  final file = await entity.file;
-  return DrishyaEntity(
-    entity: entity,
-    thumbBytes: bytes ?? Uint8List(0),
-    file: file ?? File(''),
-  );
 }

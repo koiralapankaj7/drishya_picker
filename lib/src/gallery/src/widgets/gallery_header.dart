@@ -1,12 +1,12 @@
+// ignore_for_file: always_use_package_imports
+
 import 'dart:math';
 
-import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
-import 'package:flutter/material.dart';
-
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
-
-import '../gallery_view.dart';
-import 'gallery_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
+import 'package:flutter/material.dart';
 
 ///
 class GalleryHeader extends StatefulWidget {
@@ -16,7 +16,6 @@ class GalleryHeader extends StatefulWidget {
     required this.controller,
     required this.onClose,
     required this.onAlbumToggle,
-    required this.albumVisibility,
     required this.albums,
     this.headerSubtitle,
   }) : super(key: key);
@@ -34,13 +33,10 @@ class GalleryHeader extends StatefulWidget {
   final void Function(bool visible) onAlbumToggle;
 
   ///
-  final ValueNotifier<bool> albumVisibility;
-
-  ///
   final Albums albums;
 
   @override
-  _GalleryHeaderState createState() => _GalleryHeaderState();
+  State<GalleryHeader> createState() => _GalleryHeaderState();
 }
 
 class _GalleryHeaderState extends State<GalleryHeader> {
@@ -94,11 +90,11 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
+                      padding: const EdgeInsets.only(left: 16),
                       child: _AnimatedDropdown(
                         controller: _controller,
                         onPressed: widget.onAlbumToggle,
-                        albumVisibility: widget.albumVisibility,
+                        albumVisibility: _controller.albumVisibility,
                       ),
                     ),
                   ),
@@ -140,7 +136,7 @@ class _AnimatedDropdown extends StatelessWidget {
         return AnimatedOpacity(
           opacity: value.selectedEntities.isEmpty ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 200),
-          child: child!,
+          child: child,
         );
       },
       child: ValueListenableBuilder<bool>(
@@ -165,7 +161,7 @@ class _AnimatedDropdown extends StatelessWidget {
                   onPressed(visible);
                 }
               },
-              size: 34.0,
+              size: 34,
             ),
           );
         },
@@ -191,10 +187,9 @@ class _IconButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       clipBehavior: Clip.hardEdge,
-      borderRadius: BorderRadius.circular(40.0),
-      elevation: 0.0,
+      borderRadius: BorderRadius.circular(40),
       child: IconButton(
-        padding: const EdgeInsets.all(0.0),
+        padding: EdgeInsets.zero,
         icon: Icon(
           iconData ?? Icons.close,
           color: Colors.lightBlue.shade300,
@@ -242,7 +237,7 @@ class _AlbumDetail extends StatelessWidget {
           },
         ),
 
-        const SizedBox(height: 2.0),
+        const SizedBox(height: 2),
 
         // Receiver name
         Text(
@@ -275,10 +270,10 @@ class _Handler extends StatelessWidget {
       height: controller.panelSetting.headerMinHeight,
       child: Center(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(4.0),
+          borderRadius: BorderRadius.circular(4),
           child: Container(
-            width: 40.0,
-            height: 5.0,
+            width: 40,
+            height: 5,
             color: Colors.grey.shade700,
           ),
         ),

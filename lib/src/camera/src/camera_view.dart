@@ -1,49 +1,27 @@
-import 'dart:async';
-import 'dart:ui';
+// ignore_for_file: always_use_package_imports
 
-import 'package:camera/camera.dart';
+import 'dart:async';
+
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
-import 'package:drishya_picker/src/playground/playground.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
-import 'controllers/cam_controller.dart';
-import 'controllers/controller_notifier.dart';
-import 'entities/camera_type.dart';
-import 'widgets/cam_controller_provider.dart';
 import 'widgets/camera_overlay.dart';
 import 'widgets/raw_camera_view.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
-const Duration _defaultVideoDuration = Duration(seconds: 10);
 
 ///
 class CameraView extends StatefulWidget {
   ///
   const CameraView({
     Key? key,
-    this.videoDuration,
-    this.resolutionPreset,
-    this.imageFormatGroup,
+    this.controller,
   }) : super(key: key);
 
-  ///
-  /// Vide duration. Default is 10 seconds.
-  ///
-  final Duration? videoDuration;
-
-  ///
-  /// Camera resolution. Default to [ResolutionPreset.medium]
-  ///
-  final ResolutionPreset? resolutionPreset;
-
-  ///
-  /// Camera image format. Default to [ImageFormatGroup.jpeg]
-  ///
-  final ImageFormatGroup? imageFormatGroup;
+  /// Camera controller
+  final CamController? controller;
 
   /// Camera view route name
   static const String name = 'CameraView';
@@ -51,16 +29,12 @@ class CameraView extends StatefulWidget {
   /// Open camera view for picking.
   static Future<DrishyaEntity?> pick(
     BuildContext context, {
-    Duration? videoDuration,
-    ResolutionPreset? resolutionPreset,
-    ImageFormatGroup? imageFormatGroup,
+    CamController? controller,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: CameraView(
-          videoDuration: videoDuration,
-          resolutionPreset: resolutionPreset,
-          imageFormatGroup: imageFormatGroup,
+          controller: controller,
         ),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
@@ -71,47 +45,49 @@ class CameraView extends StatefulWidget {
   }
 
   @override
-  _CameraViewState createState() {
-    return _CameraViewState();
-  }
+  State<CameraView> createState() => _CameraViewState();
 }
 
 class _CameraViewState extends State<CameraView>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late final ControllerNotifier _controllerNotifier;
-  late final PlaygroundController _playgroundController;
-  late final CamController _camController;
+  late DrishyaEditingController _photoEditingController;
+  late CamController _camController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _controllerNotifier = ControllerNotifier();
-    _camController = CamController(
-      controllerNotifier: _controllerNotifier,
-      context: context,
-      imageFormatGroup: widget.imageFormatGroup,
-      resolutionPreset: widget.resolutionPreset,
-    );
-    _playgroundController = PlaygroundController()
-      ..addListener(_playgroundListener);
-    Future<void>.delayed(_kRouteDuration, () {
-      _hideSB();
-      _camController.createCamera();
-    });
+    _camController = widget.controller ?? CamController();
+    _photoEditingController = _camController.drishyaEditingController
+      ..addListener(_photoEditingListener);
+    _hideSB();
+    _camController.createCamera();
   }
 
-  void _playgroundListener() {
-    final value = _playgroundController.value;
+  // Listen photo editing state
+  void _photoEditingListener() {
+    final value = _photoEditingController.value;
     final isPlaygroundActive =
         value.hasFocus || value.isEditing || value.hasStickers;
     _camController.update(isPlaygroundActive: isPlaygroundActive);
   }
 
+  @override
+  void didUpdateWidget(covariant CameraView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _camController = widget.controller ?? CamController();
+      _photoEditingController = _camController.drishyaEditingController
+        ..addListener(_photoEditingListener);
+      _hideSB();
+      _camController.createCamera();
+    }
+  }
+
   // Handle app life cycle
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cameraController = _controllerNotifier.controller;
+    final cameraController = _camController.cameraController;
 
     // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
@@ -120,7 +96,7 @@ class _CameraViewState extends State<CameraView>
 
     if (state == AppLifecycleState.inactive) {
       _showSB();
-      _controllerNotifier.controller?.dispose();
+      cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _hideSB();
       _camController.createCamera();
@@ -137,22 +113,24 @@ class _CameraViewState extends State<CameraView>
   void dispose() {
     _showSB();
     WidgetsBinding.instance?.removeObserver(this);
-    _controllerNotifier.dispose();
-    _camController.dispose();
-    _playgroundController
-      ..removeListener(_playgroundListener)
-      ..dispose();
+    _photoEditingController.removeListener(_photoEditingListener);
+    if (widget.controller == null) {
+      _camController.dispose();
+    }
     super.dispose();
   }
 
   ///
   void _hideSB() {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   ///
   void _showSB() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
   }
 
   Future<bool> _onWillPop() async {
@@ -166,10 +144,10 @@ class _CameraViewState extends State<CameraView>
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: ValueListenableBuilder<ControllerValue>(
-          valueListenable: _controllerNotifier,
+        body: ValueListenableBuilder<CamValue>(
+          valueListenable: _camController,
           builder: (context, value, child) {
-            if (_controllerNotifier.initialized) {
+            if (_camController.initialized) {
               return child!;
             }
             return const SizedBox();
@@ -183,18 +161,17 @@ class _CameraViewState extends State<CameraView>
                   controller: _camController,
                   builder: (value, child) {
                     if (value.cameraType == CameraType.text) {
-                      return Playground(controller: _playgroundController);
+                      return DrishyaEditor(
+                        controller: _photoEditingController,
+                        hideOverlay: true,
+                      );
                     }
                     return RawCameraView(action: _camController);
                   },
                 ),
 
                 // Camera control overlay
-                CameraOverlay(
-                  controller: _camController,
-                  playgroundCntroller: _playgroundController,
-                  videoDuration: widget.videoDuration ?? _defaultVideoDuration,
-                ),
+                CameraOverlay(controller: _camController),
 
                 //
               ],

@@ -1,21 +1,13 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
-import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
-
-import '../entities/gallery_value.dart';
-import '../gallery_view.dart';
-import 'album_builder.dart';
-import 'gallery_permission_view.dart';
 
 ///
 class GalleryGridView extends StatelessWidget {
@@ -23,26 +15,14 @@ class GalleryGridView extends StatelessWidget {
   const GalleryGridView({
     Key? key,
     required this.controller,
-    required this.onCameraRequest,
-    required this.onSelect,
     required this.albums,
-    required this.panelController,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
 
   ///
-  final ValueSetter<BuildContext> onCameraRequest;
-
-  ///
-  final void Function(DrishyaEntity, BuildContext) onSelect;
-
-  ///
   final Albums albums;
-
-  ///
-  final PanelController panelController;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +37,15 @@ class GalleryGridView extends StatelessWidget {
               // Error
               if (value.state == BaseState.unauthorised &&
                   value.entities.isEmpty) {
-                return const GalleryPermissionView();
+                return GalleryPermissionView(
+                  onRefresh: () {
+                    if (value.assetPathEntity == null) {
+                      albums.fetchAlbums(controller.setting.requestType);
+                    } else {
+                      album.fetchAssets();
+                    }
+                  },
+                );
               }
 
               // No data
@@ -66,6 +54,18 @@ class GalleryGridView extends StatelessWidget {
                 return const Center(
                   child: Text(
                     'No media available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              }
+
+              if (value.state == BaseState.error) {
+                return const Center(
+                  child: Text(
+                    'Something went wrong. Please try again!',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -83,24 +83,25 @@ class GalleryGridView extends StatelessWidget {
                       : entities.length;
 
               return LazyLoadScrollView(
-                onEndOfPage: () => album.fetchAssets(),
+                onEndOfPage: album.fetchAssets,
+                scrollOffset: MediaQuery.of(context).size.height * 0.4,
                 child: GridView.builder(
-                  controller: panelController.scrollController,
-                  padding: const EdgeInsets.all(0.0),
+                  controller: controller.panelController.scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: controller.setting.crossAxisCount ?? 3,
                     crossAxisSpacing: 1.5,
                     mainAxisSpacing: 1.5,
                   ),
                   itemCount: itemCount,
+                  padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     if (controller.setting.enableCamera && index == 0) {
                       return InkWell(
-                        onTap: () => onCameraRequest(context),
+                        onTap: () => controller.openCamera(context),
                         child: Icon(
                           CupertinoIcons.camera,
                           color: Colors.lightBlue.shade300,
-                          size: 26.0,
+                          size: 26,
                         ),
                       );
                     }
@@ -114,13 +115,7 @@ class GalleryGridView extends StatelessWidget {
 
                     if (entity == null) return const SizedBox();
 
-                    return _MediaTile(
-                      controller: controller,
-                      entity: entity,
-                      onPressed: (entity) {
-                        onSelect(entity, context);
-                      },
-                    );
+                    return _MediaTile(controller: controller, entity: entity);
                   },
                 ),
               );
@@ -141,94 +136,38 @@ class _MediaTile extends StatelessWidget {
     Key? key,
     required this.entity,
     required this.controller,
-    required this.onPressed,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
 
   ///
-  final DrishyaEntity entity;
-
-  ///
-  final ValueSetter<DrishyaEntity> onPressed;
+  final AssetEntity entity;
 
   @override
   Widget build(BuildContext context) {
-    Widget? child;
     Uint8List? bytes;
-    File? file;
 
-    if (entity.type == AssetType.video || entity.type == AssetType.image) {
-      child = AspectRatio(
-        aspectRatio: 1,
-        child: Image(
-          image: MediaThumbnailProvider(media: entity),
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    if (entity.type == AssetType.audio) {
-      child = const Icon(Icons.audiotrack, color: Colors.white);
-    }
-
-    if (entity.type == AssetType.other) {
-      child = const Center(child: Icon(Icons.folder, color: Colors.white));
-    }
-
-    child = Stack(
-      fit: StackFit.expand,
-      children: [
-        child ?? const SizedBox(),
-        if (entity.type == AssetType.video || entity.type == AssetType.audio)
-          Positioned(
-            right: 4.0,
-            bottom: 4.0,
-            child: _VideoDuration(duration: entity.videoDuration.inSeconds),
-          ),
-        if (!controller.singleSelection)
-          _SelectionCount(controller: controller, entity: entity),
-      ],
-    );
+    final drishya = entity.toDrishya;
 
     return ColoredBox(
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
-          onPressed(entity.copyWith(thumbBytes: bytes, file: file));
+          controller.select(drishya.copyWith(pickedThumbData: bytes), context);
         },
-        child: child,
-      ),
-    );
-  }
-}
-
-class _VideoDuration extends StatelessWidget {
-  const _VideoDuration({
-    Key? key,
-    required this.duration,
-  }) : super(key: key);
-
-  final int duration;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20.0),
-      child: ColoredBox(
-        color: Colors.black.withOpacity(0.7),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-          child: Text(
-            duration.formatedDuration,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 13.0,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            EntityThumbnail(
+              entity: drishya,
+              onBytesGenerated: (b) {
+                bytes = b;
+              },
             ),
-          ),
+            if (!controller.singleSelection)
+              _SelectionCount(controller: controller, entity: entity),
+          ],
         ),
       ),
     );
@@ -243,7 +182,7 @@ class _SelectionCount extends StatelessWidget {
   }) : super(key: key);
 
   final GalleryController controller;
-  final DrishyaEntity entity;
+  final AssetEntity entity;
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +191,7 @@ class _SelectionCount extends StatelessWidget {
       builder: (context, value, child) {
         final isSelected = value.selectedEntities.contains(entity);
         // if (!isSelected) return const SizedBox();
-        final index = value.selectedEntities.indexOf(entity);
+        final index = value.selectedEntities.indexOf(entity.toDrishya);
 
         final crossFadeState =
             isSelected ? CrossFadeState.showFirst : CrossFadeState.showSecond;
@@ -261,7 +200,7 @@ class _SelectionCount extends StatelessWidget {
           child: Center(
             child: CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
-              radius: 14.0,
+              radius: 14,
               child: Text(
                 '${index + 1}',
                 style: Theme.of(context).textTheme.button?.copyWith(
@@ -280,72 +219,4 @@ class _SelectionCount extends StatelessWidget {
       },
     );
   }
-}
-
-///
-extension on int {
-  String get formatedDuration {
-    final duration = Duration(seconds: this);
-    final min = duration.inMinutes.remainder(60).toString();
-    final sec = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$min:$sec';
-  }
-}
-
-/// ImageProvider implementation
-class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
-  /// Constructor for creating a [MediaThumbnailProvider]
-  const MediaThumbnailProvider({
-    this.media,
-    this.entity,
-  }) : assert(
-          media != null || entity != null,
-          'Provide at least one media',
-        );
-
-  /// Media to load
-  final DrishyaEntity? media;
-
-  ///
-  final AssetEntity? entity;
-
-  @override
-  ImageStreamCompleter load(
-          MediaThumbnailProvider key, DecoderCallback decode) =>
-      MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Id: ${media?.id ?? entity?.id}');
-        },
-      );
-
-  Future<ui.Codec> _loadAsync(
-      MediaThumbnailProvider key, DecoderCallback decode) async {
-    assert(key == this, 'Checks MediaThumbnailProvider');
-    if (entity != null) {
-      final bytes = await entity!.thumbData;
-      return decode(bytes!);
-    }
-    return decode(media!.thumbBytes);
-  }
-
-  @override
-  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<MediaThumbnailProvider>(this);
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    // ignore: test_types_in_equals
-    final typedOther = other as MediaThumbnailProvider;
-    return media?.id == typedOther.media?.id ||
-        entity?.id == typedOther.entity?.id;
-  }
-
-  @override
-  int get hashCode => media?.id.hashCode ?? entity!.id.hashCode;
-
-  @override
-  String toString() => '$runtimeType("${media?.id ?? entity?.id}")';
 }

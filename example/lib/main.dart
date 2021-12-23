@@ -1,7 +1,6 @@
 import 'package:example/collapsable_gallery.dart';
 import 'package:example/fullscreen_gallery.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 void main() {
   runApp(MyApp());
@@ -36,7 +35,7 @@ class _PickerDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.cyan,
+      appBar: AppBar(title: const Text('Drishya Picker')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

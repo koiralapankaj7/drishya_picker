@@ -1,8 +1,7 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
-
-import '../entities/gallery_value.dart';
-import '../gallery_view.dart';
 
 ///
 class GalleryAssetSelector extends StatefulWidget {
@@ -10,19 +9,10 @@ class GalleryAssetSelector extends StatefulWidget {
   const GalleryAssetSelector({
     Key? key,
     required this.controller,
-    required this.onSubmit,
-    required this.onEdit,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
-
-  ///
-  final void Function(BuildContext context, List<DrishyaEntity> entities)
-      onSubmit;
-
-  ///
-  final ValueSetter<DrishyaEntity> onEdit;
 
   @override
   GalleryAssetSelectorState createState() => GalleryAssetSelectorState();
@@ -47,22 +37,29 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
     _selectSizeController =
         AnimationController(vsync: this, duration: duration);
 
+    // ignore: prefer_int_literals
     final tween = Tween(begin: 0.0, end: 1.0);
 
-    _editOpa = tween.animate(CurvedAnimation(
-      parent: _editOpaController,
-      curve: Curves.easeIn,
-    ));
+    _editOpa = tween.animate(
+      CurvedAnimation(
+        parent: _editOpaController,
+        curve: Curves.easeIn,
+      ),
+    );
 
-    _selectOpa = tween.animate(CurvedAnimation(
-      parent: _selectOpaController,
-      curve: Curves.easeIn,
-    ));
+    _selectOpa = tween.animate(
+      CurvedAnimation(
+        parent: _selectOpaController,
+        curve: Curves.easeIn,
+      ),
+    );
 
-    _selectSize = tween.animate(CurvedAnimation(
-      parent: _selectSizeController,
-      curve: Curves.easeIn,
-    ));
+    _selectSize = tween.animate(
+      CurvedAnimation(
+        parent: _selectSizeController,
+        curve: Curves.easeIn,
+      ),
+    );
 
     widget.controller.addListener(() {
       if (mounted) {
@@ -109,46 +106,52 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
     return ValueListenableBuilder<GalleryValue>(
       valueListenable: widget.controller,
       builder: (context, value, child) {
+        final emptyList = value.selectedEntities.isEmpty;
+        var canEdit = !emptyList;
+        if (!emptyList) {
+          canEdit = value.selectedEntities.first.type == AssetType.image;
+        }
+
         return Column(
           children: [
             const Expanded(child: SizedBox()),
             Container(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20),
               width: size.width,
               // color: Colors.cyan,
               child: Stack(
                 children: [
                   // Edit button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: AnimatedBuilder(
-                      animation: _editOpa,
-                      builder: (context, child) {
-                        final hide = (value.selectedEntities.isEmpty &&
-                                !_editOpaController.isAnimating) ||
-                            _editOpa.value == 0.0;
-                        return hide
-                            ? const SizedBox()
-                            : Opacity(
-                                opacity: _editOpa.value,
-                                child: child,
-                              );
-                      },
-                      child: SizedBox(
-                        width: buttonWidth,
-                        child: _TextButton(
-                          onPressed: () =>
-                              widget.onEdit(value.selectedEntities.first),
-                          label: 'EDIT',
-                          background: Colors.white,
-                          labelColor: Colors.black,
+                  if (canEdit)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedBuilder(
+                        animation: _editOpa,
+                        builder: (context, child) {
+                          final hide = (value.selectedEntities.isEmpty &&
+                                  !_editOpaController.isAnimating) ||
+                              _editOpa.value == 0.0;
+                          return hide
+                              ? const SizedBox()
+                              : Opacity(opacity: _editOpa.value, child: child);
+                        },
+                        child: SizedBox(
+                          width: buttonWidth,
+                          child: _TextButton(
+                            onPressed: () => widget.controller.editEntity(
+                              context,
+                              value.selectedEntities.first,
+                            ),
+                            label: 'EDIT',
+                            background: Colors.white,
+                            labelColor: Colors.black,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
                   // Margin
-                  const SizedBox(width: 16.0),
+                  if (canEdit) const SizedBox(width: 16),
 
                   // Select
                   Align(
@@ -171,14 +174,16 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         animation: _selectSize,
                         builder: (context, child) {
                           return SizedBox(
-                            width: buttonWidth +
-                                _selectSize.value * (buttonWidth + 20.0),
+                            width: !canEdit
+                                ? size.width
+                                : buttonWidth +
+                                    _selectSize.value * (buttonWidth + 20.0),
                             child: child,
                           );
                         },
                         child: _TextButton(
-                          onPressed: () =>
-                              widget.onSubmit(context, value.selectedEntities),
+                          onPressed: () => widget.controller
+                              .completeTask(context, value.selectedEntities),
                           label: 'SELECT',
                         ),
                       ),
@@ -217,9 +222,9 @@ class _TextButton extends StatelessWidget {
       style: TextButton.styleFrom(
         backgroundColor: background ?? Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14.0),
+        padding: const EdgeInsets.symmetric(vertical: 14),
       ),
       child: Text(
         label ?? '',

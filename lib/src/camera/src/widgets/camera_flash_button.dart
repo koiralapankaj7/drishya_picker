@@ -1,3 +1,5 @@
+// ignore_for_file: always_use_package_imports
+
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +30,8 @@ class CameraFlashButton extends StatelessWidget {
         return GestureDetector(
           onTap: controller.changeFlashMode,
           child: Container(
-            height: 36.0,
-            width: 36.0,
+            height: 36,
+            width: 36,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black26,
