@@ -34,7 +34,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
   void initState() {
     super.initState();
     _tfSizeKey = GlobalKey();
-    _controller = widget.controller..addListener(_listener);
+    _controller = widget.controller;
     _textController = _controller.textController;
     _animationController = AnimationController(
       vsync: this,
@@ -42,9 +42,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
     )
       ..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
-          widget.controller.updateValue(hasFocus: false, hasStickers: true);
-          _controller.currentAsset.value = null;
-          _tfSize = const Size(20, 40);
+          _finishTask();
         }
       })
       ..forward();
@@ -59,13 +57,19 @@ class _EditorTextfieldState extends State<EditorTextfield>
     );
   }
 
-  void _listener() {
-    if (!_controller.value.hasFocus && _textController.text.isNotEmpty) {
-      _addSticker();
-    }
+  void _finishTask() {
+    widget.controller.updateValue(
+      hasFocus: false,
+      hasStickers: _textController.text.isNotEmpty,
+    );
+    _textController.clear();
+    _controller.currentAsset.value = null;
+    _tfSize = const Size(20, 40);
   }
 
   void _addSticker() {
+    if (_controller.textController.text.isEmpty) return;
+
     final box = _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
       final asset = _controller.currentAsset.value;
@@ -91,7 +95,6 @@ class _EditorTextfieldState extends State<EditorTextfield>
         withBackground: _controller.value.fillTextfield,
       );
 
-      _textController.clear();
       _controller.stickerController.addSticker(
         sticker,
         size: asset?.size,
@@ -105,7 +108,6 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
   @override
   void dispose() {
-    _controller.removeListener(_listener);
     _animationController.dispose();
     super.dispose();
   }
@@ -121,15 +123,16 @@ class _EditorTextfieldState extends State<EditorTextfield>
       onTap: _controller.focusNode.unfocus,
       child: KeyboardVisibility(
         listener: (visible, size) {
+          if (visible) {
+            _animationController.forward();
+          } else {
+            _addSticker();
+            _animationController.reverse();
+          }
           _controller.updateValue(
             keyboardVisible: visible,
             isColorPickerOpen: value.background is PhotoBackground && visible,
           );
-          if (visible) {
-            _animationController.forward();
-          } else {
-            _animationController.reverse();
-          }
         },
         child: ColoredBox(
           color: value.keyboardVisible ? Colors.black54 : Colors.transparent,
@@ -250,10 +253,10 @@ class _StickerTextField extends StatefulWidget {
   final ValueSetter<String>? onChanged;
 
   @override
-  __StickerTextFieldState createState() => __StickerTextFieldState();
+  _StickerTextFieldState createState() => _StickerTextFieldState();
 }
 
-class __StickerTextFieldState extends State<_StickerTextField> {
+class _StickerTextFieldState extends State<_StickerTextField> {
   @override
   void initState() {
     super.initState();

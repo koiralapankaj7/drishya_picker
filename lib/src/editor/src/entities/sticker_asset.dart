@@ -116,7 +116,6 @@ abstract class Sticker {
   const Sticker({
     this.name = '',
     this.size = const Size(200, 200),
-    // this.onPressed,
     this.extra = const {},
   });
 
@@ -129,14 +128,11 @@ abstract class Sticker {
   /// Extra information about sticker
   final Map<String, Object> extra;
 
-  // /// Sticker onPressed callback
-  // final ValueSetter<StickerAsset>? onPressed;
-
-  /// Build sticker widget
+  /// Build sticker
   Widget build(
     BuildContext context,
     DrishyaEditingController controller,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   );
 
   //
@@ -180,16 +176,17 @@ class TextSticker extends Sticker {
     DrishyaEditingController controller,
     VoidCallback? onPressed,
   ) {
-    return Container(
-      // constraints: BoxConstraints.loose(size),
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: background ??
             (withBackground ? controller.value.color : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: FittedBox(
-        child: Text(text, textAlign: textAlign, style: style),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(text, textAlign: textAlign, style: style),
+        ),
       ),
     );
   }
@@ -236,10 +233,12 @@ class ImageSticker extends Sticker {
               size: const Size(20, 20),
               child: const AppCircularProgressIndicator(strokeWidth: 2),
             ),
-            secondChild: InkWell(
-              onTap: onPressed,
-              child: child,
-            ),
+            secondChild: onPressed != null
+                ? InkWell(
+                    onTap: onPressed,
+                    child: child,
+                  )
+                : child,
             crossFadeState: frame == null
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,
@@ -248,14 +247,15 @@ class ImageSticker extends Sticker {
       );
     }
 
-    return InkWell(
-      onTap: onPressed,
-      child: Image.asset(
-        path,
-        fit: BoxFit.contain,
-        gaplessPlayback: true,
-      ),
+    final img = Image.asset(
+      path,
+      fit: BoxFit.contain,
+      gaplessPlayback: true,
     );
+
+    if (onPressed == null) return img;
+
+    return InkWell(onTap: onPressed, child: img);
   }
 }
 
@@ -305,15 +305,16 @@ class IconSticker extends Sticker {
     return ValueListenableBuilder<Color>(
       valueListenable: controller.colorNotifier,
       builder: (context, c, child) {
-        return InkWell(
-          onTap: onPressed,
-          child: FittedBox(
-            child: Icon(
-              iconData,
-              color: color ?? c,
-            ),
+        final icon = FittedBox(
+          child: Icon(
+            iconData,
+            color: color ?? c,
           ),
         );
+
+        if (onPressed == null) return icon;
+
+        return InkWell(onTap: onPressed, child: icon);
       },
     );
   }
