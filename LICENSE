@@ -1,6 +1,5 @@
-MIT License
-
-Copyright (c) 2019-2020 Ryan Heise and the project contributors.
+The MIT License (MIT)
+Copyright (c) 2020 Pankaj Koirala
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==============================================================================
-
-This software includes the ExoPlayer library which is licensed under the Apache
-License, Version 2.0.
-
 
                                  Apache License
                            Version 2.0, January 2004
@@ -115,7 +110,7 @@ License, Version 2.0.
       as of the date such litigation is filed.
 
    4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
+      Work or Derivative Works thereof in any medium, without
       modifications, and in Source or Object form, provided that You
       meet the following conditions:
 
