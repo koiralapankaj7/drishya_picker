@@ -28,46 +28,44 @@ class CameraOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // preview, input type page view and camera
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CameraFooter(controller: controller),
-          ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // preview, input type page view and camera
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: CameraFooter(controller: controller),
+        ),
 
-          // Close button
-          Positioned(
-            left: 8,
-            top: _top,
-            child: CameraCloseButton(controller: controller),
-          ),
+        // Close button
+        Positioned(
+          left: 8,
+          top: _top,
+          child: CameraCloseButton(controller: controller),
+        ),
 
-          // Flash Light
-          Positioned(
-            right: 8,
-            top: _top,
-            child: CameraFlashButton(controller: controller),
-          ),
+        // Flash Light
+        Positioned(
+          right: 8,
+          top: _top,
+          child: CameraFlashButton(controller: controller),
+        ),
 
-          // Shutter view
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 64,
-            child: CameraShutterButton(controller: controller),
-          ),
+        // Shutter view
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 64,
+          child: CameraShutterButton(controller: controller),
+        ),
 
-          // Playground controls
-          _PlaygroundOverlay(controller: controller),
+        // Playground controls
+        _PlaygroundOverlay(controller: controller),
 
-          //
-        ],
-      ),
+        //
+      ],
     );
   }
 }
