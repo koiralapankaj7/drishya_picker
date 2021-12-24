@@ -20,6 +20,30 @@ class EditorButtonCollection extends StatelessWidget {
   ///
   final Color? stickerViewBackground;
 
+  void _onTextAlignButtonPressed(BuildContext context) {
+    late TextAlign textAlign;
+    switch (controller.value.textAlign) {
+      case TextAlign.center:
+        textAlign = TextAlign.end;
+        break;
+      case TextAlign.end:
+        textAlign = TextAlign.start;
+        break;
+      // ignore: no_default_cases
+      default:
+        textAlign = TextAlign.center;
+    }
+    controller.updateValue(textAlign: textAlign);
+  }
+
+  void _onTextColorChangerPressed(BuildContext context) {
+    controller.updateValue(
+      fillTextfield: !controller.value.fillTextfield,
+      isColorPickerOpen: !controller.value.fillTextfield &&
+          controller.value.background is PhotoBackground,
+    );
+  }
+
   void _onStickerIconPressed(BuildContext context) {
     if (controller.setting.stickers?.isEmpty ?? true) {
       ScaffoldMessenger.of(context)
@@ -64,6 +88,46 @@ class EditorButtonCollection extends StatelessWidget {
     });
   }
 
+  ///
+  List<_EditingOption> get _options {
+    return [
+      _EditingOption(
+        id: 'text-setting',
+        label: 'Aa',
+        onPressed: (_) {
+          final value = !controller.value.hasFocus;
+          controller.updateValue(
+            hasFocus: value,
+            isColorPickerOpen: value,
+            keyboardVisible: value,
+          );
+        },
+        items: [
+          _EditingOption(
+            id: 'text-align-setting',
+            onPressed: _onTextAlignButtonPressed,
+            disableOnpressed: true,
+            child: _TextAlignmentIcon(align: controller.value.textAlign),
+          ),
+          _EditingOption(
+            id: 'text-color-setting',
+            onPressed: _onTextColorChangerPressed,
+            disableOnpressed: true,
+            child: _TextBackgroundIcon(
+              isSelected: controller.value.fillTextfield,
+            ),
+          ),
+        ],
+      ),
+      _EditingOption(
+        id: 'sticker-picker',
+        icon: Icons.emoji_emotions,
+        onPressed: _onStickerIconPressed,
+        disableOnpressed: true,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return EditorBuilder(
@@ -89,6 +153,7 @@ class EditorButtonCollection extends StatelessWidget {
           secondChild: _ButtonList(
             controller: controller,
             onStickerIconPressed: _onStickerIconPressed,
+            options: _options,
           ),
           crossFadeState: crossFadeState,
           alignment: Alignment.topCenter,
@@ -99,12 +164,16 @@ class EditorButtonCollection extends StatelessWidget {
   }
 }
 
-class _ButtonList extends StatelessWidget {
+class _ButtonList extends StatefulWidget {
   const _ButtonList({
     Key? key,
+    required this.options,
     required this.controller,
     required this.onStickerIconPressed,
   }) : super(key: key);
+
+  ///
+  final List<_EditingOption> options;
 
   ///
   final DrishyaEditingController controller;
@@ -112,9 +181,14 @@ class _ButtonList extends StatelessWidget {
   ///
   final ValueSetter<BuildContext> onStickerIconPressed;
 
+  @override
+  State<_ButtonList> createState() => _ButtonListState();
+}
+
+class _ButtonListState extends State<_ButtonList> {
   void _textAlignButtonPressed() {
     late TextAlign textAlign;
-    switch (controller.value.textAlign) {
+    switch (widget.controller.value.textAlign) {
       case TextAlign.center:
         textAlign = TextAlign.end;
         break;
@@ -125,62 +199,167 @@ class _ButtonList extends StatelessWidget {
       default:
         textAlign = TextAlign.center;
     }
-    controller.updateValue(textAlign: textAlign);
+    widget.controller.updateValue(textAlign: textAlign);
   }
+
+  _EditingOption? _currentOption;
 
   @override
   Widget build(BuildContext context) {
-    final hasFocus = controller.value.hasFocus;
+    final hasFocus = widget.controller.value.hasFocus;
+
+    return Container(
+      color: Colors.amber,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _DoneButton(
+            onPressed: () {
+              widget.controller.updateValue(
+                hasFocus: false,
+                isColorPickerOpen: false,
+                keyboardVisible: false,
+              );
+            },
+            isVisible: hasFocus,
+          ),
+
+          ...widget.options
+              .map(
+                (option) => _OptionView(
+                  option: option,
+                  isSelected: _currentOption?.id == option.id,
+                  visible: _currentOption == null ||
+                      _currentOption?.id == option.id ||
+                      (_currentOption?.items.isEmpty ?? true),
+                  onPressed: () {
+                    setState(() {
+                      _currentOption =
+                          _currentOption?.id == option.id ? null : option;
+                    });
+                  },
+                ),
+              )
+              .toList(),
+
+          // _Button(
+          //   label: 'Aa',
+          //   size: hasFocus ? 48.0 : 44.0,
+          //   fontSize: hasFocus ? 24.0 : 20.0,
+          //   background: hasFocus ? Colors.white : Colors.black38,
+          //   labelColor: hasFocus ? Colors.black : Colors.white,
+          //   onPressed: () {
+          //     controller.updateValue(
+          //       hasFocus: !hasFocus,
+          //       isColorPickerOpen: !hasFocus,
+          //       keyboardVisible: !hasFocus,
+          //     );
+          //   },
+          // ),
+          // _Button(
+          //   isVisible: hasFocus,
+          //   onPressed: _textAlignButtonPressed,
+          //   child: _TextAlignmentIcon(align: controller.value.textAlign),
+          // ),
+          // _Button(
+          //   isVisible: hasFocus,
+          //   onPressed: () {
+          //     controller.updateValue(
+          //       fillTextfield: !controller.value.fillTextfield,
+          //       isColorPickerOpen: !controller.value.fillTextfield &&
+          //           controller.value.background is PhotoBackground,
+          //     );
+          //   },
+          //   child: _TextBackgroundIcon(
+          //     isSelected: controller.value.fillTextfield,
+          //   ),
+          // ),
+          // _Button(
+          //   isVisible: !hasFocus,
+          //   iconData: Icons.emoji_emotions,
+          //   onPressed: () => onStickerIconPressed(context),
+          // ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OptionView extends StatefulWidget {
+  const _OptionView({
+    Key? key,
+    required this.option,
+    required this.onPressed,
+    this.isSelected = false,
+    this.visible = true,
+  }) : super(key: key);
+
+  final _EditingOption option;
+  final VoidCallback onPressed;
+  final bool isSelected;
+  final bool visible;
+
+  @override
+  _OptionViewState createState() => _OptionViewState();
+}
+
+class _OptionViewState extends State<_OptionView> {
+  _EditingOption? _currentOption;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.visible) return const SizedBox();
+
+    final option = widget.option;
+    final selected = widget.isSelected;
+    final background = selected ? Colors.white : Colors.black38;
+    final labelColor = selected ? Colors.black : Colors.white;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _DoneButton(
-          onPressed: () {
-            controller.updateValue(
-              hasFocus: false,
-              isColorPickerOpen: false,
-              keyboardVisible: false,
-            );
-          },
-          isVisible: hasFocus,
-        ),
+        // Main button
         _Button(
-          label: 'Aa',
-          size: hasFocus ? 48.0 : 44.0,
-          fontSize: hasFocus ? 24.0 : 20.0,
-          background: hasFocus ? Colors.white : Colors.black38,
-          labelColor: hasFocus ? Colors.black : Colors.white,
+          iconData: option.icon,
+          label: option.label,
+          background: background,
+          labelColor: labelColor,
           onPressed: () {
-            controller.updateValue(
-              hasFocus: !hasFocus,
-              isColorPickerOpen: !hasFocus,
-              keyboardVisible: !hasFocus,
-            );
+            option.onPressed?.call(context);
+            if (!option.disableOnpressed) {
+              widget.onPressed();
+            }
           },
+          child: option.child,
         ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: _textAlignButtonPressed,
-          child: _TextAlignmentIcon(align: controller.value.textAlign),
-        ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: () {
-            controller.updateValue(
-              fillTextfield: !controller.value.fillTextfield,
-              isColorPickerOpen: !controller.value.fillTextfield &&
-                  controller.value.background is PhotoBackground,
-            );
-          },
-          child: _TextBackgroundIcon(
-            isSelected: controller.value.fillTextfield,
+
+        if (option.items.isNotEmpty && selected)
+          // Child items
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            color: Colors.cyan,
+            child: Column(
+              children: option.items
+                  .map(
+                    (e) => _OptionView(
+                      option: e,
+                      isSelected: _currentOption?.id == e.id,
+                      visible: _currentOption == null ||
+                          _currentOption?.id == e.id ||
+                          (_currentOption?.items.isEmpty ?? true),
+                      onPressed: () {
+                        setState(() {
+                          _currentOption =
+                              _currentOption?.id == e.id ? null : e;
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
-        _Button(
-          isVisible: !hasFocus,
-          iconData: Icons.emoji_emotions,
-          onPressed: () => onStickerIconPressed(context),
-        ),
+
+        //
       ],
     );
   }
@@ -273,8 +452,8 @@ class _Button extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      child: Container(
+        // duration: const Duration(milliseconds: 100),
         height: size ?? 44.0,
         width: size ?? 44.0,
         alignment: Alignment.center,
@@ -361,4 +540,28 @@ class _TextBackgroundIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EditingOption {
+  _EditingOption({
+    required this.id,
+    this.onPressed,
+    this.disableOnpressed = false,
+    this.icon,
+    this.label,
+    this.child,
+    this.background,
+    this.foreground,
+    this.items = const [],
+  });
+
+  final String id;
+  final ValueSetter<BuildContext>? onPressed;
+  final bool disableOnpressed;
+  final IconData? icon;
+  final String? label;
+  final Widget? child;
+  final Color? background;
+  final Color? foreground;
+  final List<_EditingOption> items;
 }
