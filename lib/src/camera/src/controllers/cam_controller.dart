@@ -10,36 +10,47 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 /// Camera controller
+
 class CamController extends ValueNotifier<CamValue> {
   ///
-  CamController({
-    /// Camera setting
-    CameraSetting? setting,
-
-    /// Setting for text editing
-    EditorSetting? editorSetting,
-
-    /// Setting for photo editing after taking picture
-    EditorSetting? photoEditorSetting,
-  })  : _photoEditorSetting =
-            photoEditorSetting ?? editorSetting ?? const EditorSetting(),
-        super(
-          CamValue(setting: setting ?? const CameraSetting()),
-        ) {
-    _drishyaEditingController = DrishyaEditingController(
-      setting: editorSetting ?? const EditorSetting(),
-    );
+  ///
+  /// Dispose controller properly for better performance.
+  ///
+  /// Prefer using [CameraViewField] widget without controller,
+  /// as much as possible.
+  ///
+  /// You can also directly use `[CameraView.pick(context)]` for capturing media
+  ///
+  CamController() : super(CamValue()) {
     _zoomController = ZoomController(this);
     _exposureController = ExposureController(this);
   }
 
-  late final DrishyaEditingController _drishyaEditingController;
   late final ZoomController _zoomController;
   late final ExposureController _exposureController;
-  late final EditorSetting _photoEditorSetting;
+  late DrishyaEditingController _drishyaEditingController;
+  late EditorSetting _editorSetting;
+  late EditorSetting _photoEditorSetting;
   // Value will be set after creating camera
   CameraController? _cameraController;
   var _isDisposed = false;
+
+  /// initialize controller setting's
+  @internal
+  void init({
+    CameraSetting? setting,
+    EditorSetting? editorSetting,
+    EditorSetting? photoEditorSetting,
+  }) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      value = value.copyWith(setting: setting);
+    });
+    _editorSetting = editorSetting ?? const EditorSetting();
+    _photoEditorSetting = photoEditorSetting ?? _editorSetting;
+    _drishyaEditingController = DrishyaEditingController(
+      setting: editorSetting ?? const EditorSetting(),
+    );
+  }
 
   ///
   @internal

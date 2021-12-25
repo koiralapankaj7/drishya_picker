@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -9,27 +7,51 @@ class CameraViewField extends StatelessWidget {
   ///
   const CameraViewField({
     Key? key,
-    this.onCapture,
+    required this.child,
     this.controller,
-    this.child,
+    this.setting,
+    this.editorSetting,
+    this.photoEditorSetting,
+    this.onCapture,
   }) : super(key: key);
 
   ///
-  /// Triggered when picker capture media
-  ///
-  final void Function(DrishyaEntity entity)? onCapture;
+  /// Child widget
+  final Widget child;
 
+  ///
   /// Camera controller
   final CamController? controller;
 
-  /// Child widget
-  final Widget? child;
+  ///
+  /// Settings related to the camera
+  final CameraSetting? setting;
+
+  ///
+  /// Settings for text editor
+  /// If setting is null default setting's will be used
+  final EditorSetting? editorSetting;
+
+  ///
+  /// Setting for photo editing after taking picture,
+  /// If this setting is null [editorSetting] will be used
+  final EditorSetting? photoEditorSetting;
+
+  ///
+  /// Triggered when picker capture media
+  final void Function(DrishyaEntity entity)? onCapture;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
-        CameraView.pick(context, controller: controller).then((value) {
+        CameraView.pick(
+          context,
+          controller: controller,
+          setting: setting,
+          editorSetting: editorSetting,
+          photoEditorSetting: photoEditorSetting,
+        ).then((value) {
           if (value != null) {
             onCapture?.call(value);
           }

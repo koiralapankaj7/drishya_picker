@@ -18,10 +18,24 @@ class CameraView extends StatefulWidget {
   const CameraView({
     Key? key,
     this.controller,
+    this.setting,
+    this.editorSetting,
+    this.photoEditorSetting,
   }) : super(key: key);
 
   /// Camera controller
   final CamController? controller;
+
+  /// Settings related to the camera
+  final CameraSetting? setting;
+
+  /// Settings for text editor
+  /// If setting is null default setting's will be used
+  final EditorSetting? editorSetting;
+
+  /// Setting for photo editing after taking picture,
+  /// If this setting is null [editorSetting] will be used
+  final EditorSetting? photoEditorSetting;
 
   /// Camera view route name
   static const String name = 'CameraView';
@@ -29,12 +43,28 @@ class CameraView extends StatefulWidget {
   /// Open camera view for picking.
   static Future<DrishyaEntity?> pick(
     BuildContext context, {
+
+    /// Camera controller
     CamController? controller,
+
+    /// Settings related to the camera
+    CameraSetting? setting,
+
+    /// Settings for text editor
+    /// If setting is null default setting's will be used
+    EditorSetting? editorSetting,
+
+    /// Setting for photo editing after taking picture,
+    /// If this setting is null [editorSetting] will be used
+    EditorSetting? photoEditorSetting,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: CameraView(
           controller: controller,
+          setting: setting,
+          editorSetting: editorSetting,
+          photoEditorSetting: photoEditorSetting,
         ),
         transitionCurve: Curves.easeIn,
         transitionDuration: _kRouteDuration,
@@ -57,7 +87,12 @@ class _CameraViewState extends State<CameraView>
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _camController = widget.controller ?? CamController();
+    _camController = (widget.controller ?? CamController())
+      ..init(
+        setting: widget.setting,
+        editorSetting: widget.editorSetting,
+        photoEditorSetting: widget.photoEditorSetting,
+      );
     _photoEditingController = _camController.drishyaEditingController
       ..addListener(_photoEditingListener);
     _hideSB();

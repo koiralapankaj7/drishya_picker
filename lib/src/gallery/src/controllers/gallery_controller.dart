@@ -170,14 +170,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _accessCamera = true;
     DrishyaEntity? entity;
 
-    final camController = CamController(
-      setting: _cameraSetting,
-      editorSetting: _cameraTextEditorSetting,
-      photoEditorSetting: _cameraPhotoEditorSetting,
-    );
-
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: CameraView(controller: camController),
+      builder: CameraView(
+        setting: _cameraSetting,
+        editorSetting: _cameraTextEditorSetting,
+        photoEditorSetting: _cameraPhotoEditorSetting,
+      ),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -188,8 +186,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       entity = await Navigator.of(context).push(route);
       _closeOnNavigation();
     }
-
-    Future.delayed(const Duration(milliseconds: 400), camController.dispose);
 
     final entities = [...value.selectedEntities];
     if (entity != null) {

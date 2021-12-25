@@ -18,7 +18,6 @@ class CollapsableGallery extends StatefulWidget {
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
   late final GalleryController _controller;
-  late final CamController _camController;
   late final ValueNotifier<List<DrishyaEntity>> _notifier;
 
   @override
@@ -26,17 +25,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
     super.initState();
 
     _notifier = ValueNotifier(<DrishyaEntity>[]);
-    _camController = CamController(
-      editorSetting: EditorSetting(
-        colors:
-            _defaultBackgrounds.map((e) => e.colors!).expand((e) => e).toList(),
-        stickers: _stickers1,
-      ),
-      photoEditorSetting: EditorSetting(
-        colors: _colors.skip(4).toList(),
-        stickers: _stickers3,
-      ),
-    );
+
     _controller = GalleryController(
       setting: const GallerySetting(
         albumSubtitle: 'Collapsable',
@@ -65,7 +54,6 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   void dispose() {
     _controller.dispose();
-    _camController.dispose();
     _notifier.dispose();
     super.dispose();
   }
@@ -137,7 +125,17 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CameraViewField(
-                      controller: _camController,
+                      editorSetting: EditorSetting(
+                        colors: _defaultBackgrounds
+                            .map((e) => e.colors!)
+                            .expand((e) => e)
+                            .toList(),
+                        stickers: _stickers1,
+                      ),
+                      photoEditorSetting: EditorSetting(
+                        colors: _colors.skip(4).toList(),
+                        stickers: _stickers3,
+                      ),
                       onCapture: (entity) {
                         _notifier.value = [..._notifier.value, entity];
                       },
