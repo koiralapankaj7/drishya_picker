@@ -17,15 +17,27 @@ class CollapsableGallery extends StatefulWidget {
 }
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
-  late final GalleryController controller;
-  late final ValueNotifier<List<DrishyaEntity>> notifier;
+  late final GalleryController _controller;
+  late final CamController _camController;
+  late final ValueNotifier<List<DrishyaEntity>> _notifier;
 
   @override
   void initState() {
     super.initState();
 
-    notifier = ValueNotifier(<DrishyaEntity>[]);
-    controller = GalleryController(
+    _notifier = ValueNotifier(<DrishyaEntity>[]);
+    _camController = CamController(
+      editorSetting: EditorSetting(
+        colors:
+            _defaultBackgrounds.map((e) => e.colors!).expand((e) => e).toList(),
+        stickers: _stickers1,
+      ),
+      photoEditorSetting: EditorSetting(
+        colors: _colors.skip(4).toList(),
+        stickers: _stickers3,
+      ),
+    );
+    _controller = GalleryController(
       setting: const GallerySetting(
         albumSubtitle: 'Collapsable',
         enableCamera: true,
@@ -52,15 +64,16 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
   @override
   void dispose() {
-    controller.dispose();
-    notifier.dispose();
+    _controller.dispose();
+    _camController.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SlidableGalleryView(
-      controller: controller,
+      controller: _controller,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Slidable Gallery'),
@@ -70,21 +83,21 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
             // Grid view
             Expanded(
               child: GridViewWidget(
-                notifier: notifier,
-                controller: controller,
+                notifier: _notifier,
+                controller: _controller,
                 onAddButtonPressed: () async {
-                  final entities = await controller.pick(
+                  final entities = await _controller.pick(
                     context,
-                    selectedEntities: notifier.value,
+                    selectedEntities: _notifier.value,
                   );
-                  notifier.value = entities;
+                  _notifier.value = entities;
                 },
               ),
             ),
 
             const SizedBox(height: 8.0),
 
-            RecentEntities(controller: controller, notifier: notifier),
+            RecentEntities(controller: _controller, notifier: _notifier),
 
             const SizedBox(height: 8.0),
 
@@ -124,8 +137,9 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CameraViewField(
+                      controller: _camController,
                       onCapture: (entity) {
-                        notifier.value = [...notifier.value, entity];
+                        _notifier.value = [..._notifier.value, entity];
                       },
                       child: const Icon(Icons.camera),
                     ),
@@ -133,21 +147,21 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
                   // Gallery field
                   ValueListenableBuilder<List<DrishyaEntity>>(
-                    valueListenable: notifier,
+                    valueListenable: _notifier,
                     builder: (context, list, child) {
                       return GalleryViewField(
                         selectedEntities: list,
                         onChanged: (entity, isRemoved) {
-                          final value = notifier.value.toList();
+                          final value = _notifier.value.toList();
                           if (isRemoved) {
                             value.remove(entity);
                           } else {
                             value.add(entity);
                           }
-                          notifier.value = value;
+                          _notifier.value = value;
                         },
                         onSubmitted: (list) {
-                          notifier.value = list;
+                          _notifier.value = list;
                         },
                         child: child,
                       );
