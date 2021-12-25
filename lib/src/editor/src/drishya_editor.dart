@@ -9,25 +9,34 @@ class DrishyaEditor extends StatefulWidget {
   const DrishyaEditor({
     Key? key,
     this.controller,
+    this.setting,
     this.hideOverlay = false,
   }) : super(key: key);
 
   ///
+  /// Drishya editing controller
   final DrishyaEditingController? controller;
 
   ///
+  /// Setting for the editor
+  final EditorSetting? setting;
+
+  ///
+  /// Hide editor overlay
   final bool hideOverlay;
 
   /// Open drishya editor
   static Future<DrishyaEntity?> open(
     BuildContext context, {
     DrishyaEditingController? controller,
+    EditorSetting? setting,
     bool hideOverlay = false,
   }) async {
     return Navigator.of(context).push<DrishyaEntity>(
       SlideTransitionPageRoute(
         builder: DrishyaEditor(
           controller: controller,
+          setting: setting,
           hideOverlay: hideOverlay,
         ),
       ),
@@ -45,7 +54,8 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    _controller = widget.controller ?? DrishyaEditingController();
+    _controller = (widget.controller ?? DrishyaEditingController())
+      ..init(setting: widget.setting);
   }
 
   @override
@@ -58,6 +68,12 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      _controller.setting.backgrounds.isNotEmpty &&
+          _controller.setting.colors.isNotEmpty,
+      'Backgrounds and Colors cannot be empty',
+    );
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: WillPopScope(
@@ -87,7 +103,9 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                         Positioned(
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height,
-                          child: _controller.value.background.build(context),
+                          child: (_controller.value.background ??
+                                  _controller.setting.backgrounds.first)
+                              .build(context),
                         ),
                       ],
                     ),

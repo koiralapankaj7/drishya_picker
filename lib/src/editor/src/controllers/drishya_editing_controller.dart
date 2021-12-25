@@ -9,40 +9,24 @@ import 'package:meta/meta.dart';
 /// Drishya editing controller
 class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
-  DrishyaEditingController({
-    EditorSetting setting = const EditorSetting(),
-  })  : assert(
-          setting.backgrounds.isNotEmpty,
-          'Editor backgrounds cannot be empty!',
-        ),
-        assert(
-          setting.colors.isNotEmpty,
-          'Editor colors cannot be empty!',
-        ),
-        _setting = setting,
-        _editorKey = GlobalKey(),
+  /// Drishya editing controller
+  DrishyaEditingController()
+      : _editorKey = GlobalKey(),
         _stickerController = StickerController(),
         _textController = TextEditingController(),
         _focusNode = FocusNode(),
         _currentAssetState = ValueNotifier(null),
         _currentAsset = ValueNotifier(null),
-        super(
-          EditorValue(
-            color: setting.colors.first,
-            background: setting.backgrounds.first,
-          ),
-        ) {
-    _colorNotifier = ValueNotifier(_setting.colors.first);
-  }
+        super(const EditorValue());
+
+  ///
+  late EditorSetting _setting;
+
+  ///
+  late ValueNotifier<Color> _colorNotifier;
 
   ///
   late final GlobalKey _editorKey;
-
-  ///
-  late final EditorSetting _setting;
-
-  ///
-  late final ValueNotifier<Color> _colorNotifier;
 
   ///
   late final StickerController _stickerController;
@@ -76,6 +60,12 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   /// Editor settings
   EditorSetting get setting => _setting;
+
+  /// Initialize controller setting
+  void init({EditorSetting? setting}) {
+    _setting = setting ?? const EditorSetting();
+    _colorNotifier = ValueNotifier(_setting.colors.first);
+  }
 
   ///
   @internal
@@ -147,15 +137,21 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
   void clear() {
     _stickerController.clearStickers();
-    value = value.copyWith(hasStickers: false);
+    updateValue(hasStickers: false);
   }
 
   ///
-  /// Change editor background
+  /// Change editor gradient background
   ///
   void changeBackground() {
-    final current = value.background;
-    final index = _setting.backgrounds.indexOf(current);
+    assert(
+      _setting.backgrounds.isNotEmpty,
+      'Backgrounds cannot be empty',
+    );
+
+    final current = value.background ?? _setting.backgrounds.first;
+    final index =
+        value.background == null ? 0 : _setting.backgrounds.indexOf(current);
     final nextIndex =
         index >= 0 && index + 1 < _setting.backgrounds.length ? index + 1 : 0;
     final bg = _setting.backgrounds[nextIndex];

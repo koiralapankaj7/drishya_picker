@@ -212,14 +212,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     final navigator = Navigator.of(context);
 
     final bytes = await entity.originBytes;
-    final editingController = DrishyaEditingController(
-      setting: _editorSetting.copyWith(
-        backgrounds: [PhotoBackground(bytes: bytes)],
-      ),
-    );
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
-      builder: DrishyaEditor(controller: editingController),
+      builder: DrishyaEditor(
+        setting: _editorSetting.copyWith(
+          backgrounds: [PhotoBackground(bytes: bytes)],
+        ),
+      ),
       begainHorizontal: true,
       transitionDuration: const Duration(milliseconds: 300),
     );
@@ -232,10 +231,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       pickedEntity = await navigator.push(route);
       _closeOnNavigation();
     }
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      editingController.dispose,
-    );
     final entities = [...value.selectedEntities];
     if (pickedEntity != null) {
       entities.add(pickedEntity);

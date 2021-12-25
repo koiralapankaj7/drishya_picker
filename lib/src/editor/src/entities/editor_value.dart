@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 class EditorValue {
   ///
   const EditorValue({
-    required this.color,
-    required this.background,
+    this.color,
+    this.background,
     this.textAlign = TextAlign.center,
     this.keyboardVisible = false,
     this.fillTextfield = false,
@@ -20,10 +20,10 @@ class EditorValue {
   });
 
   /// Background of the editor
-  final EditorBackground background;
+  final EditorBackground? background;
 
   /// Color use to decorate text and icon
-  final Color color;
+  final Color? color;
 
   /// Alignment of the text
   final TextAlign textAlign;
@@ -56,7 +56,11 @@ class EditorValue {
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
   /// Computed text color as per the background
-  Color get textColor => fillTextfield ? generateForegroundColor(color) : color;
+  Color get textColor => color == null
+      ? Colors.black
+      : fillTextfield
+          ? generateForegroundColor(color!)
+          : color!;
 
   /// Generate foreground color from background color
   Color generateForegroundColor(Color background) =>

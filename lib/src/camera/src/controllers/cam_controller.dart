@@ -24,11 +24,12 @@ class CamController extends ValueNotifier<CamValue> {
   CamController() : super(CamValue()) {
     _zoomController = ZoomController(this);
     _exposureController = ExposureController(this);
+    _drishyaEditingController = DrishyaEditingController();
   }
 
   late final ZoomController _zoomController;
   late final ExposureController _exposureController;
-  late DrishyaEditingController _drishyaEditingController;
+  late final DrishyaEditingController _drishyaEditingController;
   late EditorSetting _editorSetting;
   late EditorSetting _photoEditorSetting;
   // Value will be set after creating camera
@@ -47,9 +48,6 @@ class CamController extends ValueNotifier<CamValue> {
     });
     _editorSetting = editorSetting ?? const EditorSetting();
     _photoEditorSetting = photoEditorSetting ?? _editorSetting;
-    _drishyaEditingController = DrishyaEditingController(
-      setting: editorSetting ?? const EditorSetting(),
-    );
   }
 
   ///
@@ -226,13 +224,12 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (value.setting.editAfterCapture) {
-        final controller = DrishyaEditingController(
-          setting: _photoEditorSetting.copyWith(
-            backgrounds: [PhotoBackground(bytes: bytes)],
-          ),
-        );
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
-          builder: DrishyaEditor(controller: controller),
+          builder: DrishyaEditor(
+            setting: _photoEditorSetting.copyWith(
+              backgrounds: [PhotoBackground(bytes: bytes)],
+            ),
+          ),
           begainHorizontal: true,
           endHorizontal: true,
         );

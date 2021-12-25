@@ -52,7 +52,11 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
   }
 
   void _onStickerIconPressed(BuildContext context) {
-    if (widget.controller.setting.stickers?.isEmpty ?? true) {
+    final controller = widget.controller;
+    final value = controller.value;
+    final setting = controller.setting;
+
+    if (setting.stickers?.isEmpty ?? true) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(
@@ -60,41 +64,45 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
         );
       return;
     }
-    widget.controller.updateValue(isEditing: true, isStickerPickerOpen: true);
+
+    assert(
+      setting.backgrounds.isNotEmpty,
+      'Backgrounds and Colors cannot be empty',
+    );
+
+    controller.updateValue(isEditing: true, isStickerPickerOpen: true);
     Navigator.of(context)
         .push<Sticker>(
       SwipeablePageRoute(
         notificationDepth: 1,
         builder: (context) {
-          final background =
-              widget.controller.value.background is GradientBackground
-                  ? (widget.controller.value.background as GradientBackground)
-                      .lastColor
-                  : Colors.black54;
+          final background = value.background is GradientBackground
+              ? ((value.background as GradientBackground?) ??
+                      setting.backgrounds.first as GradientBackground)
+                  .lastColor
+              : Colors.black54;
 
           return StickerPicker(
-            controller: widget.controller,
+            controller: controller,
             initialIndex: _initialIndex,
             bucket: _bucket,
             onTabChanged: (index) {
               _initialIndex = index;
             },
             onStickerSelected: (sticker) {
-              widget.controller.stickerController.addSticker(sticker);
-              widget.controller.updateValue(hasStickers: true);
+              controller.stickerController.addSticker(sticker);
+              controller.updateValue(hasStickers: true);
               Navigator.of(context).pop();
             },
             background: background,
-            onBackground:
-                widget.controller.value.generateForegroundColor(background),
+            onBackground: value.generateForegroundColor(background),
           );
         },
       ),
     )
         .then((value) {
       Future.delayed(const Duration(milliseconds: 300), () {
-        widget.controller
-            .updateValue(isEditing: false, isStickerPickerOpen: false);
+        controller.updateValue(isEditing: false, isStickerPickerOpen: false);
       });
     });
   }

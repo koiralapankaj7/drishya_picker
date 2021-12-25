@@ -15,6 +15,11 @@ class BackgroundSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      controller.setting.backgrounds.isNotEmpty,
+      'Backgrounds cannot be empty',
+    );
+
     if (controller.value.background is! GradientBackground ||
         controller.value.keyboardVisible) {
       return const SizedBox();
@@ -47,7 +52,9 @@ class BackgroundSwitcher extends StatelessWidget {
           child: SizedBox(
             width: 54,
             height: 54,
-            child: controller.value.background.build(context),
+            child: (controller.value.background ??
+                    controller.setting.backgrounds.first)
+                .build(context),
           ),
         ),
       ),
