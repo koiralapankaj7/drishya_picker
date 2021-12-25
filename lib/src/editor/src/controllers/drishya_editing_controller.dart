@@ -24,6 +24,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         _stickerController = StickerController(),
         _textController = TextEditingController(),
         _focusNode = FocusNode(),
+        _currentAssetState = ValueNotifier(null),
         _currentAsset = ValueNotifier(null),
         super(
           EditorValue(
@@ -53,6 +54,9 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   late final FocusNode _focusNode;
 
   ///
+  late final ValueNotifier<DraggableResizableState?> _currentAssetState;
+
+  ///
   late final ValueNotifier<StickerAsset?> _currentAsset;
 
   /// Editor key
@@ -75,6 +79,11 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   ///
   @internal
+  ValueNotifier<DraggableResizableState?> get currentAssetState =>
+      _currentAssetState;
+
+  ///
+  @internal
   ValueNotifier<StickerAsset?> get currentAsset => _currentAsset;
 
   var _isDisposed = false;
@@ -91,6 +100,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     _textController.dispose();
     _stickerController.dispose();
     _focusNode.dispose();
+    _currentAssetState.dispose();
     _currentAsset.dispose();
     _isDisposed = true;
     super.dispose();

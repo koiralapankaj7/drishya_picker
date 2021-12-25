@@ -59,6 +59,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: WillPopScope(
         onWillPop: () async {
           await SystemChrome.setEnabledSystemUIMode(
@@ -98,6 +99,9 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                   ],
                 ),
               ),
+
+              //
+              EditorTextfieldButton(controller: _controller),
 
               // Textfield
               EditorTextfield(controller: _controller),

@@ -274,6 +274,7 @@ class StickersTabBarView extends StatelessWidget {
           context,
           controller,
           () => onStickerSelected(sticker),
+          null,
         );
       },
     );

@@ -133,6 +133,7 @@ abstract class Sticker {
     BuildContext context,
     DrishyaEditingController controller,
     VoidCallback? onPressed,
+    StickerAsset? asset,
   );
 
   //
@@ -175,6 +176,7 @@ class TextSticker extends Sticker {
     BuildContext context,
     DrishyaEditingController controller,
     VoidCallback? onPressed,
+    StickerAsset? asset,
   ) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -184,7 +186,7 @@ class TextSticker extends Sticker {
       ),
       child: FittedBox(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.all(8),
           child: Text(text, textAlign: textAlign, style: style),
         ),
       ),
@@ -218,6 +220,7 @@ class ImageSticker extends Sticker {
     BuildContext context,
     DrishyaEditingController controller,
     VoidCallback? onPressed,
+    StickerAsset? asset,
   ) {
     if (isNetworkImage) {
       return Image.network(
@@ -301,6 +304,7 @@ class IconSticker extends Sticker {
     BuildContext context,
     DrishyaEditingController controller,
     VoidCallback? onPressed,
+    StickerAsset? asset,
   ) {
     return ValueListenableBuilder<Color>(
       valueListenable: controller.colorNotifier,
