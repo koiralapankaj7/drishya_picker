@@ -98,8 +98,8 @@ class _PlaygroundOverlay extends StatelessWidget {
 
             // Close button
             Positioned(
-              left: 8,
-              top: _top,
+              left: 16,
+              top: 24,
               child: EditorCloseButton(
                 controller: controller.drishyaEditingController,
               ),
@@ -128,7 +128,7 @@ class _PlaygroundOverlay extends StatelessWidget {
               right: 16,
               top: controller.drishyaEditingController.value.isStickerPickerOpen
                   ? 0.0
-                  : _top,
+                  : 24,
               child: EditorButtonCollection(
                 controller: controller.drishyaEditingController,
               ),
