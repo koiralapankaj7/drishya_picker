@@ -117,7 +117,23 @@ class _EditorTextfieldState extends State<EditorTextfield>
   Widget build(BuildContext context) {
     final value = widget.controller.value;
 
-    if (!value.hasFocus) return const SizedBox();
+    if (!value.hasFocus) {
+      return Center(
+        child: GestureDetector(
+          onTap: () {
+            _controller.updateValue(hasFocus: true);
+          },
+          child: const Text(
+            'Tap to type...',
+            style: TextStyle(
+              color: Colors.white60,
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      );
+    }
 
     return KeyboardVisibility(
       listener: (visible) {

@@ -90,11 +90,11 @@ class _PlaygroundOverlay extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             // Add text button
-            Align(
-              child: EditorTextfieldButton(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
+            // Align(
+            //   child: EditorTextfieldButton(
+            //     controller: controller.drishyaEditingController,
+            //   ),
+            // ),
 
             // Close button
             Positioned(

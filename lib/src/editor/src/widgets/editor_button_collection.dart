@@ -152,11 +152,9 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
           );
         }
 
-        // Button list
-        if (!value.hasFocus) {
-          _currentOption = null;
-        }
+        _currentOption = value.keyboardVisible ? _options[0] : null;
 
+        // Button list
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
