@@ -18,4 +18,5 @@ export 'src/slidable_panel/slidable_panel.dart';
 // . If flash is turned on during image capture it won’t turn off until 
 // confirm button is clicked and it shows error something went wrong.
 
-// Safe area for buttons
+
+

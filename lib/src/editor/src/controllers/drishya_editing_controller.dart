@@ -145,17 +145,11 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   ///
   void changeBackground() {
     final current = value.background;
-
     final index = _setting.backgrounds.indexOf(current);
-
     final nextIndex =
         index >= 0 && index + 1 < _setting.backgrounds.length ? index + 1 : 0;
     final bg = _setting.backgrounds[nextIndex];
-    updateValue(
-      background: bg,
-      textColor:
-          bg is GradientBackground ? bg.firstColor : _colorNotifier.value,
-    );
+    updateValue(background: bg);
   }
 
   ///

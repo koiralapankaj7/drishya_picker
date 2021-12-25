@@ -143,8 +143,6 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
     return EditorBuilder(
       controller: widget.controller,
       builder: (context, value, child) {
-        if (value.isEditing) return const SizedBox();
-
         // Done button while sticker picker is open
         if (value.isStickerPickerOpen) {
           return Container(
@@ -153,6 +151,8 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
             child: const _DoneButton(padding: EdgeInsets.zero),
           );
         }
+
+        if (value.isEditing) return const SizedBox();
 
         _currentOption = value.keyboardVisible ? _options[0] : null;
 
