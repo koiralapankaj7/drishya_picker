@@ -81,7 +81,15 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
                   alignment: Alignment.center,
                   children: [
                     // Playground background
-                    _controller.value.background.build(context),
+                    Stack(
+                      children: [
+                        Positioned(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          child: _controller.value.background.build(context),
+                        ),
+                      ],
+                    ),
 
                     // Stickers
                     StickersView(controller: _controller),

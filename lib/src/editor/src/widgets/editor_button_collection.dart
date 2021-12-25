@@ -143,6 +143,8 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
     return EditorBuilder(
       controller: widget.controller,
       builder: (context, value, child) {
+        if (value.isEditing) return const SizedBox();
+
         // Done button while sticker picker is open
         if (value.isStickerPickerOpen) {
           return Container(

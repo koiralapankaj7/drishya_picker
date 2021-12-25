@@ -118,6 +118,8 @@ class _EditorTextfieldState extends State<EditorTextfield>
     final value = widget.controller.value;
 
     if (!value.hasFocus) {
+      if (value.hasStickers || value.isEditing) return const SizedBox();
+
       return Center(
         child: GestureDetector(
           onTap: () {
