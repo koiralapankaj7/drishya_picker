@@ -68,7 +68,7 @@ class ColorPicker extends StatelessWidget {
                   },
                 ),
               ),
-              if (itemCount > 0)
+              if (itemCount > 1)
                 Container(
                   height: 6,
                   width: 50,
