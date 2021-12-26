@@ -106,7 +106,6 @@ class _ColorCircle extends StatelessWidget {
         return InkWell(
           onTap: () {
             controller.colorNotifier.value = color;
-            controller.updateValue(textColor: color);
           },
           child: SizedBox(
             height: 50,

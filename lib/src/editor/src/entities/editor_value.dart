@@ -1,4 +1,3 @@
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -6,8 +5,6 @@ import 'package:flutter/material.dart';
 class EditorValue {
   ///
   const EditorValue({
-    this.color,
-    this.background,
     this.textAlign = TextAlign.center,
     this.keyboardVisible = false,
     this.fillTextfield = false,
@@ -19,19 +16,13 @@ class EditorValue {
     this.isColorPickerOpen = false,
   });
 
-  /// Background of the editor
-  final EditorBackground? background;
-
-  /// Color use to decorate text and icon
-  final Color? color;
-
   /// Alignment of the text
   final TextAlign textAlign;
 
   /// true, if keyboard is visible
   final bool keyboardVisible;
 
-  /// if true, textfield will be filled by [color]
+  /// if true, textfield will be filled
   final bool fillTextfield;
 
   /// Consider -ve as null
@@ -55,17 +46,6 @@ class EditorValue {
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
-  /// Computed text color as per the background
-  Color get textColor => color == null
-      ? Colors.black
-      : fillTextfield
-          ? generateForegroundColor(color!)
-          : color!;
-
-  /// Generate foreground color from background color
-  Color generateForegroundColor(Color background) =>
-      background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
-
   /// true, if color picker is visible currently
   bool get isColorPickerVisible =>
       !isEditing && (isColorPickerOpen || keyboardVisible);
@@ -80,8 +60,6 @@ class EditorValue {
     int? maxLines,
     bool? hasStickers,
     bool? isEditing,
-    EditorBackground? background,
-    Color? color,
     bool? isStickerPickerOpen,
     bool? isColorPickerOpen,
   }) {
@@ -93,8 +71,6 @@ class EditorValue {
       maxLines: maxLines ?? this.maxLines,
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,
-      background: background ?? this.background,
-      color: color ?? this.color,
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
       isColorPickerOpen: isColorPickerOpen ?? this.isColorPickerOpen,
     );
@@ -102,8 +78,6 @@ class EditorValue {
 
   @override
   int get hashCode => hashValues(
-        color,
-        background,
         textAlign,
         keyboardVisible,
         fillTextfield,
@@ -120,9 +94,7 @@ class EditorValue {
     if (other is! EditorValue) {
       return false;
     }
-    return color == other.color &&
-        background == other.background &&
-        textAlign == other.textAlign &&
+    return textAlign == other.textAlign &&
         keyboardVisible == other.keyboardVisible &&
         fillTextfield == other.fillTextfield &&
         maxLines == other.maxLines &&

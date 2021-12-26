@@ -21,7 +21,8 @@ class EditorShutterButton extends StatelessWidget {
       controller: controller,
       builder: (context, value, child) {
         final crossFadeState =
-            (value.background is! PhotoBackground && !value.hasStickers) ||
+            (controller.currentBackground is! PhotoBackground &&
+                        !value.hasStickers) ||
                     value.isEditing ||
                     value.hasFocus
                 ? CrossFadeState.showFirst

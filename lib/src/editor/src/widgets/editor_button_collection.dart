@@ -46,14 +46,11 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
   void _onTextColorChangerPressed(BuildContext context) {
     widget.controller.updateValue(
       fillTextfield: !widget.controller.value.fillTextfield,
-      isColorPickerOpen: !widget.controller.value.fillTextfield &&
-          widget.controller.value.background is PhotoBackground,
     );
   }
 
   void _onStickerIconPressed(BuildContext context) {
     final controller = widget.controller;
-    final value = controller.value;
     final setting = controller.setting;
 
     if (setting.stickers?.isEmpty ?? true) {
@@ -76,10 +73,8 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
       SwipeablePageRoute(
         notificationDepth: 1,
         builder: (context) {
-          final background = value.background is GradientBackground
-              ? ((value.background as GradientBackground?) ??
-                      setting.backgrounds.first as GradientBackground)
-                  .lastColor
+          final background = controller.currentBackground is GradientBackground
+              ? (controller.currentBackground as GradientBackground).lastColor
               : Colors.black54;
 
           return StickerPicker(
@@ -95,7 +90,7 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
               Navigator.of(context).pop();
             },
             background: background,
-            onBackground: value.generateForegroundColor(background),
+            onBackground: controller.generateForegroundColor(background),
           );
         },
       ),

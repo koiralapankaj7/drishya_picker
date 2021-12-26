@@ -34,7 +34,7 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
   void initState() {
     super.initState();
     _controller = (widget.controller ?? GalleryController())
-      ..updateSetting(setting: widget.setting);
+      ..init(setting: widget.setting);
     _panelController = _controller.panelController;
   }
 

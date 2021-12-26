@@ -76,18 +76,17 @@ class _EditorTextfieldState extends State<EditorTextfield>
       text: _textController.text,
       style: TextStyle(
         textBaseline: TextBaseline.ideographic,
-        color: widget.controller.value.textColor,
+        color: _controller.textColor,
         fontSize: 32,
         fontWeight: FontWeight.w700,
         decoration: TextDecoration.none,
         decorationColor: Colors.transparent,
         decorationThickness: 0,
       ),
-      background: widget.controller.value.fillTextfield
-          ? widget.controller.value.color
+      background: _controller.value.fillTextfield
+          ? _controller.currentColor
           : Colors.transparent,
       textAlign: _controller.value.textAlign,
-      withBackground: _controller.value.fillTextfield,
     );
 
     _controller.stickerController.addSticker(
@@ -282,39 +281,45 @@ class _StickerTextFieldState extends State<_StickerTextField> {
   @override
   Widget build(BuildContext context) {
     final value = widget.controller.value;
-    return TextField(
-      enabled: widget.enabled,
-      controller: widget.textController,
-      focusNode: widget.focusNode,
-      autofocus: true,
-      textAlign: value.textAlign,
-      autocorrect: false,
-      minLines: 1,
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      textInputAction: TextInputAction.newline,
-      smartDashesType: SmartDashesType.disabled,
-      style: TextStyle(
-        textBaseline: TextBaseline.ideographic,
-        color: widget.controller.value.textColor,
-        fontSize: 28 * (widget.scale ?? 1.0),
-        fontWeight: FontWeight.w700,
-        decoration: TextDecoration.none,
-        decorationColor: Colors.transparent,
-        decorationThickness: 0,
-        decorationStyle: TextDecorationStyle.dashed,
-      ),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.all(8),
-        filled: true,
-        fillColor: value.fillTextfield ? value.color : Colors.transparent,
-      ),
-      cursorColor: value.fillTextfield ? value.textColor : value.color,
-      onChanged: widget.onChanged,
+    return ValueListenableBuilder<Color>(
+      valueListenable: widget.controller.colorNotifier,
+      builder: (context, color, child) {
+        return TextField(
+          enabled: widget.enabled,
+          controller: widget.textController,
+          focusNode: widget.focusNode,
+          autofocus: true,
+          textAlign: value.textAlign,
+          autocorrect: false,
+          minLines: 1,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          smartDashesType: SmartDashesType.disabled,
+          style: TextStyle(
+            textBaseline: TextBaseline.ideographic,
+            color: widget.controller.textColor,
+            fontSize: 28 * (widget.scale ?? 1.0),
+            fontWeight: FontWeight.w700,
+            decoration: TextDecoration.none,
+            decorationColor: Colors.transparent,
+            decorationThickness: 0,
+            decorationStyle: TextDecorationStyle.dashed,
+          ),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(8),
+            filled: true,
+            fillColor: value.fillTextfield ? color : Colors.transparent,
+          ),
+          cursorColor:
+              value.fillTextfield ? widget.controller.textColor : color,
+          onChanged: widget.onChanged,
+        );
+      },
     );
   }
 }

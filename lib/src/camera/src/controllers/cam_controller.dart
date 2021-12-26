@@ -22,6 +22,7 @@ class CamController extends ValueNotifier<CamValue> {
   /// You can also directly use `[CameraView.pick(context)]` for capturing media
   ///
   CamController() : super(CamValue()) {
+    init();
     _zoomController = ZoomController(this);
     _exposureController = ExposureController(this);
     _drishyaEditingController = DrishyaEditingController();
@@ -30,22 +31,21 @@ class CamController extends ValueNotifier<CamValue> {
   late final ZoomController _zoomController;
   late final ExposureController _exposureController;
   late final DrishyaEditingController _drishyaEditingController;
+  late CameraSetting _setting;
   late EditorSetting _editorSetting;
   late EditorSetting _photoEditorSetting;
   // Value will be set after creating camera
   CameraController? _cameraController;
   var _isDisposed = false;
 
-  /// initialize controller setting's
+  /// Initialize controller settings
   @internal
   void init({
     CameraSetting? setting,
     EditorSetting? editorSetting,
     EditorSetting? photoEditorSetting,
   }) {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      value = value.copyWith(setting: setting);
-    });
+    _setting = setting ?? const CameraSetting();
     _editorSetting = editorSetting ?? const EditorSetting();
     _photoEditorSetting = photoEditorSetting ?? _editorSetting;
   }
@@ -56,21 +56,14 @@ class CamController extends ValueNotifier<CamValue> {
     value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
   }
 
-  @override
-  set value(CamValue newValue) {
-    if (_isDisposed) return;
-    super.value = newValue;
-  }
+  /// Camera setting
+  CameraSetting get setting => _setting;
 
-  @override
-  void dispose() {
-    _zoomController.dispose();
-    _exposureController.dispose();
-    _drishyaEditingController.dispose();
-    _cameraController?.dispose();
-    _isDisposed = true;
-    super.dispose();
-  }
+  /// Text editor setting
+  EditorSetting get editorSetting => _editorSetting;
+
+  /// Photo editor setting
+  EditorSetting get photoEditorSetting => _photoEditorSetting;
 
   //
   bool _hasCamera(ValueSetter<Exception>? onException) {
@@ -146,9 +139,9 @@ class CamController extends ValueNotifier<CamValue> {
     // create camera controller
     _cameraController = CameraController(
       description,
-      value.setting.resolutionPreset,
+      setting.resolutionPreset,
       enableAudio: value.enableAudio,
-      imageFormatGroup: value.setting.imageFormatGroup,
+      imageFormatGroup: _setting.imageFormatGroup,
     );
 
     final controller = _cameraController!;
@@ -223,7 +216,7 @@ class CamController extends ValueNotifier<CamValue> {
       final file = File(xFile.path);
       final bytes = await file.readAsBytes();
 
-      if (value.setting.editAfterCapture) {
+      if (_setting.editAfterCapture) {
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
             setting: _photoEditorSetting.copyWith(
@@ -462,149 +455,21 @@ class CamController extends ValueNotifier<CamValue> {
     }
   }
 
-  //
-}
-
-/// Camera controller value
-class CamValue {
-  ///
-  CamValue({
-    this.setting = const CameraSetting(),
-    this.cameraDescription,
-    this.cameras = const [],
-    this.enableAudio = true,
-    this.cameraType = CameraType.normal,
-    this.flashMode = FlashMode.off,
-    this.isTakingPicture = false,
-    this.isRecordingVideo = false,
-    this.isRecordingPaused = false,
-    this.isPlaygroundActive = false,
-  });
-
-  /// Camera settings
-  final CameraSetting setting;
-
-  /// Current active camera description e,g. Front camera or back camera
-  final CameraDescription? cameraDescription;
-
-  /// Available camera description list
-  final List<CameraDescription> cameras;
-
-  /// Type of the active camera
-  final CameraType cameraType;
-
-  /// Audio will be enabled if value is true
-  final bool enableAudio;
-
-  /// Camera flash mode
-  final FlashMode flashMode;
-
-  /// Return true if camera is taking picture
-  final bool isTakingPicture;
-
-  /// Return true if camera is recording video
-  final bool isRecordingVideo;
-
-  /// Return true if video recording is in pause state
-  final bool isRecordingPaused;
-
-  /// Return true if playground is active
-  final bool isPlaygroundActive;
-
-  ///
-  CamValue copyWith({
-    CameraSetting? setting,
-    CameraDescription? cameraDescription,
-    List<CameraDescription>? cameras,
-    CameraType? cameraType,
-    bool? enableAudio,
-    FlashMode? flashMode,
-    bool? isTakingPicture,
-    bool? isRecordingVideo,
-    bool? isRecordingPaused,
-    bool? isPlaygroundActive,
-  }) {
-    return CamValue(
-      setting: setting ?? this.setting,
-      cameraDescription: cameraDescription ?? this.cameraDescription,
-      cameras: cameras ?? this.cameras,
-      cameraType: cameraType ?? this.cameraType,
-      enableAudio: enableAudio ?? this.enableAudio,
-      flashMode: flashMode ?? this.flashMode,
-      isTakingPicture: isTakingPicture ?? this.isTakingPicture,
-      isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
-      isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
-      isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
-    );
+  @override
+  set value(CamValue newValue) {
+    if (_isDisposed) return;
+    super.value = newValue;
   }
 
-  //========================== GETTERS ==================================
+  @override
+  void dispose() {
+    _zoomController.dispose();
+    _exposureController.dispose();
+    _drishyaEditingController.dispose();
+    _cameraController?.dispose();
+    _isDisposed = true;
+    super.dispose();
+  }
 
-  ///
-  /// Current lense direction
-  ///
-  CameraLensDirection get lensDirection =>
-      cameraDescription?.lensDirection ?? CameraLensDirection.back;
-
-  ///
-  /// Opposite lense direction of current [lensDirection]
-  ///
-  CameraLensDirection get oppositeLensDirection =>
-      lensDirection == CameraLensDirection.back
-          ? CameraLensDirection.front
-          : CameraLensDirection.back;
-
-  ///
-  /// Hide camera close button if :-
-  ///
-  /// 1. Camera type is [CameraType.text]
-  /// 2. Video recoring is active [isRecordingVideo]
-  ///
-  bool get hideCameraCloseButton =>
-      cameraType == CameraType.text || isRecordingVideo;
-
-  ///
-  /// Hide camera flash button if :-
-  ///
-  /// 1. Camera type is [CameraType.text]
-  /// 2. Camera lense direction is front
-  /// 3. Video recoring is active [isRecordingVideo]
-  ///
-  bool get hideCameraFlashButton =>
-      cameraType == CameraType.text ||
-      lensDirection == CameraLensDirection.front ||
-      isRecordingVideo;
-
-  ///
-  /// Hide camera shutter button if :-
-  ///
-  /// 1. Camera type is [CameraType.text]
-  ///
-  bool get hideCameraShutterButton => cameraType == CameraType.text;
-
-  ///
-  /// Hide camera footer if :-
-  ///
-  /// 1. Video recoring is active [isRecordingVideo]
-  /// 2. When [CameraType.text] playground is in editing mode
-  ///
-  bool get hideCameraFooter => isRecordingVideo || isPlaygroundActive;
-
-  ///
-  /// Hide camera gallery  button if :-
-  ///
-  /// 1. Camera type is [CameraType.text]
-  /// 2. Video recoring is active [isRecordingVideo]
-  ///
-  bool get hideCameraGalleryButton =>
-      cameraType == CameraType.text || isRecordingVideo;
-
-  ///
-  /// Hide camera rotation button if :-
-  ///
-  /// 1. Camera type is [CameraType.text]
-  /// 2. Video recoring is active [isRecordingVideo]
-  ///
-  bool get hideCameraRotationButton =>
-      cameraType == CameraType.text || isRecordingVideo;
+  //
 }

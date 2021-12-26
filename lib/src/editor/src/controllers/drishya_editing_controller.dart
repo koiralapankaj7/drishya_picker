@@ -17,7 +17,9 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         _focusNode = FocusNode(),
         _currentAssetState = ValueNotifier(null),
         _currentAsset = ValueNotifier(null),
-        super(const EditorValue());
+        super(const EditorValue()) {
+    init();
+  }
 
   ///
   late EditorSetting _setting;
@@ -26,28 +28,34 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   late ValueNotifier<Color> _colorNotifier;
 
   ///
-  late final GlobalKey _editorKey;
+  late ValueNotifier<EditorBackground> _backgroundNotifier;
 
   ///
-  late final StickerController _stickerController;
+  final GlobalKey _editorKey;
 
   ///
-  late final TextEditingController _textController;
+  final StickerController _stickerController;
+
+  ///
+  final TextEditingController _textController;
 
   /// Editor textfield focus node
-  late final FocusNode _focusNode;
+  final FocusNode _focusNode;
 
   ///
-  late final ValueNotifier<DraggableResizableState?> _currentAssetState;
+  final ValueNotifier<DraggableResizableState?> _currentAssetState;
 
   ///
-  late final ValueNotifier<StickerAsset?> _currentAsset;
+  final ValueNotifier<StickerAsset?> _currentAsset;
 
   /// Editor key
   GlobalKey get editorKey => _editorKey;
 
-  /// Color picker notifier
+  /// Current color notifier
   ValueNotifier<Color> get colorNotifier => _colorNotifier;
+
+  /// Current background notifier
+  ValueNotifier<EditorBackground> get backgroundNotifier => _backgroundNotifier;
 
   /// Sticker controller
   StickerController get stickerController => _stickerController;
@@ -62,9 +70,11 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   EditorSetting get setting => _setting;
 
   /// Initialize controller setting
+  @internal
   void init({EditorSetting? setting}) {
     _setting = setting ?? const EditorSetting();
     _colorNotifier = ValueNotifier(_setting.colors.first);
+    _backgroundNotifier = ValueNotifier(_setting.backgrounds.first);
   }
 
   ///
@@ -78,30 +88,11 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   var _isDisposed = false;
 
-  @override
-  set value(EditorValue newValue) {
-    if (_isDisposed) return;
-    super.value = newValue;
-  }
-
-  @override
-  void dispose() {
-    _colorNotifier.dispose();
-    _textController.dispose();
-    _stickerController.dispose();
-    _focusNode.dispose();
-    _currentAssetState.dispose();
-    _currentAsset.dispose();
-    _isDisposed = true;
-    super.dispose();
-  }
-
   /// Update editor value
   @internal
   void updateValue({
     bool? keyboardVisible,
     bool? fillTextfield,
-    Color? textColor,
     int? maxLines,
     TextAlign? textAlign,
     bool? hasFocus,
@@ -110,7 +101,6 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     bool? isEditing,
     bool? isStickerPickerOpen,
     bool? isColorPickerOpen,
-    EditorBackground? background,
   }) {
     final oldValue = value;
     if (oldValue.hasFocus && !(hasFocus ?? false)) {
@@ -119,7 +109,6 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
     value = value.copyWith(
       keyboardVisible: keyboardVisible,
       fillTextfield: fillTextfield,
-      color: textColor,
       maxLines: maxLines,
       textAlign: textAlign,
       hasFocus: hasFocus,
@@ -128,9 +117,23 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
       isEditing: isEditing,
       isStickerPickerOpen: isStickerPickerOpen,
       isColorPickerOpen: isColorPickerOpen,
-      background: background,
     );
   }
+
+  /// Current color
+  Color get currentColor => _colorNotifier.value;
+
+  /// Current background
+  EditorBackground get currentBackground => _backgroundNotifier.value;
+
+  /// Computed text color as per the background
+  Color get textColor => value.fillTextfield
+      ? generateForegroundColor(currentColor)
+      : currentColor;
+
+  /// Generate foreground color from background color
+  Color generateForegroundColor(Color background) =>
+      background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
 
   ///
   /// Clear editor
@@ -142,30 +145,25 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
 
   ///
   /// Change editor gradient background
-  ///
   void changeBackground() {
     assert(
       _setting.backgrounds.isNotEmpty,
       'Backgrounds cannot be empty',
     );
-
-    final current = value.background ?? _setting.backgrounds.first;
-    final index =
-        value.background == null ? 0 : _setting.backgrounds.indexOf(current);
+    final index = _setting.backgrounds.indexOf(currentBackground);
     final nextIndex =
         index >= 0 && index + 1 < _setting.backgrounds.length ? index + 1 : 0;
     final bg = _setting.backgrounds[nextIndex];
-    updateValue(background: bg);
+    _backgroundNotifier.value = bg;
   }
 
   ///
   /// Complete editing and generate image
-  ///
   Future<DrishyaEntity?> completeEditing({
     ValueSetter<Exception>? onException,
   }) async {
     try {
-      final bg = value.background;
+      final bg = _backgroundNotifier.value;
       if (bg is PhotoBackground && bg.bytes != null && !value.hasStickers) {
         final entity = await PhotoManager.editor.saveImage(bg.bytes!);
         return entity?.toDrishya;
@@ -183,6 +181,25 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         Exception('Exception occured while capturing picture : $e'),
       );
     }
+  }
+
+  @override
+  set value(EditorValue newValue) {
+    if (_isDisposed) return;
+    super.value = newValue;
+  }
+
+  @override
+  void dispose() {
+    _colorNotifier.dispose();
+    _backgroundNotifier.dispose();
+    _textController.dispose();
+    _stickerController.dispose();
+    _focusNode.dispose();
+    _currentAssetState.dispose();
+    _currentAsset.dispose();
+    _isDisposed = true;
+    super.dispose();
   }
 
   //

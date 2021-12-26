@@ -16,7 +16,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         _panelController = PanelController(),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue()) {
-    _init();
+    init();
   }
 
   /// Slidable gallery key
@@ -72,7 +72,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   var _accessCamera = false;
 
   /// Initialize controller setting
-  void _init({GallerySetting? setting}) {
+  @internal
+  void init({GallerySetting? setting}) {
     _setting = setting ?? const GallerySetting();
     _panelSetting = _setting.panelSetting ?? const PanelSetting();
     _editorSetting = _setting.editorSetting ?? const EditorSetting();
@@ -81,12 +82,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         _setting.cameraTextEditorSetting ?? _editorSetting;
     _cameraPhotoEditorSetting =
         _setting.cameraPhotoEditorSetting ?? _editorSetting;
-  }
-
-  /// Update controller settings
-  @internal
-  void updateSetting({GallerySetting? setting}) {
-    _init(setting: setting);
   }
 
   ///
@@ -306,7 +301,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     /// [SlidableGalleryView] is not used so we need to update setting
     if (panelKey.currentState == null && setting != null) {
-      updateSetting(setting: setting);
+      init(setting: setting);
     }
 
     if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {

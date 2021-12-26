@@ -1,14 +1,12 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_overlay.dart';
+import 'package:drishya_picker/src/camera/src/widgets/raw_camera_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'widgets/camera_overlay.dart';
-import 'widgets/raw_camera_view.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
 
@@ -198,6 +196,7 @@ class _CameraViewState extends State<CameraView>
                     if (value.cameraType == CameraType.text) {
                       return DrishyaEditor(
                         controller: _photoEditingController,
+                        setting: _camController.editorSetting,
                         hideOverlay: true,
                       );
                     }

@@ -145,10 +145,8 @@ class TextSticker extends Sticker {
   const TextSticker({
     this.text = '',
     this.style,
-    this.withBackground = false,
     this.textAlign,
     this.background,
-    this.originalSize = Size.zero,
     Size size = const Size(200, 200),
     Map<String, Object> extra = const {},
   }) : super(size: size, extra: extra);
@@ -163,13 +161,7 @@ class TextSticker extends Sticker {
   final TextAlign? textAlign;
 
   ///
-  final bool withBackground;
-
-  ///
   final Color? background;
-
-  ///
-  final Size originalSize;
 
   @override
   Widget build(
@@ -180,8 +172,9 @@ class TextSticker extends Sticker {
   ) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: background ??
-            (withBackground ? controller.value.color : Colors.transparent),
+        color: background ?? Colors.transparent,
+        // color: background ??
+        //     (withBackground ? controller.value.color : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
       child: FittedBox(

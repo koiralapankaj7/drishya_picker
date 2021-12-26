@@ -72,7 +72,7 @@ class _GalleryViewState extends State<GalleryView>
     super.initState();
 
     _controller = (widget.controller ?? GalleryController())
-      ..updateSetting(setting: widget.setting);
+      ..init(setting: widget.setting);
 
     _albums = Albums()..fetchAlbums(_controller.setting.requestType);
 
