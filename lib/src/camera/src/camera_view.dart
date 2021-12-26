@@ -5,6 +5,7 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_overlay.dart';
 import 'package:drishya_picker/src/camera/src/widgets/raw_camera_view.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -94,7 +95,8 @@ class _CameraViewState extends State<CameraView>
     _photoEditingController = _camController.drishyaEditingController
       ..addListener(_photoEditingListener);
     _hideSB();
-    _camController.createCamera();
+    Future<void>.delayed(_kRouteDuration, _camController.createCamera);
+    // _camController.createCamera();
   }
 
   // Listen photo editing state
@@ -167,7 +169,7 @@ class _CameraViewState extends State<CameraView>
   }
 
   Future<bool> _onWillPop() async {
-    _hideSB();
+    _showSB();
     return true;
   }
 
@@ -180,9 +182,23 @@ class _CameraViewState extends State<CameraView>
         body: ValueListenableBuilder<CamValue>(
           valueListenable: _camController,
           builder: (context, value, child) {
+            // Camera
             if (_camController.initialized) {
               return child!;
             }
+
+            // Camera permission
+            if (value.error != null &&
+                value.error!.code == 'cameraPermission') {
+              return Container(
+                alignment: Alignment.center,
+                child: GalleryPermissionView(
+                  isCamera: true,
+                  onRefresh: _camController.createCamera,
+                ),
+              );
+            }
+
             return const SizedBox();
           },
           child: CamControllerProvider(

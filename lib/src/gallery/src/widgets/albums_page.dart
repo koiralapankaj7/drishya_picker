@@ -31,6 +31,7 @@ class AlbumsPage extends StatelessWidget {
     return AlbumBuilder(
       controller: controller,
       albums: albums,
+      hidePermissionView: true,
       builder: (context, value, child) {
         if (value.albums.isEmpty) {
           return Container(

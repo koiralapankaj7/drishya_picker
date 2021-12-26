@@ -2,7 +2,6 @@ import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 ///
 class EditorCloseButton extends StatelessWidget {
@@ -17,10 +16,10 @@ class EditorCloseButton extends StatelessWidget {
 
   void _onPressed(BuildContext context) {
     if (!controller.value.hasStickers) {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
+      // SystemChrome.setEnabledSystemUIMode(
+      //   SystemUiMode.manual,
+      //   overlays: SystemUiOverlay.values,
+      // );
       Navigator.of(context).pop();
     } else {
       showDialog<bool>(

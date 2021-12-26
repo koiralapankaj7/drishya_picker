@@ -48,9 +48,10 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     final ps = _controller.panelSetting;
     final _panelMaxHeight = ps.maxHeight ??
-        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
+        mediaQuery.size.height - (ps.topMargin ?? mediaQuery.padding.top);
     final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
     final _setting =
         ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);

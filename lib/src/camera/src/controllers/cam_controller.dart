@@ -5,7 +5,6 @@ import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -13,14 +12,12 @@ import 'package:path/path.dart' as path;
 
 class CamController extends ValueNotifier<CamValue> {
   ///
-  ///
   /// Dispose controller properly for better performance.
   ///
   /// Prefer using [CameraViewField] widget without controller,
   /// as much as possible.
   ///
   /// You can also directly use `[CameraView.pick(context)]` for capturing media
-  ///
   CamController() : super(CamValue()) {
     init();
     _zoomController = ZoomController(this);
@@ -66,9 +63,13 @@ class CamController extends ValueNotifier<CamValue> {
   EditorSetting get photoEditorSetting => _photoEditorSetting;
 
   //
-  bool _hasCamera(ValueSetter<Exception>? onException) {
+  bool _hasCamera() {
     if (!initialized) {
-      onException?.call(Exception("Couldn't find the camera!"));
+      final exception = CameraException(
+        'cameraUnavailable',
+        "Couldn't find the camera!",
+      );
+      value = value.copyWith(error: exception);
       return false;
     }
     return true;
@@ -92,32 +93,31 @@ class CamController extends ValueNotifier<CamValue> {
 
   ///
   /// Change camera type
-  ///
-  void changeCameraType(
-    CameraType type, {
-    ValueSetter<Exception>? onException,
-  }) {
+  void changeCameraType(CameraType type) {
     final canSwitch = type == CameraType.selfi &&
         value.lensDirection != CameraLensDirection.front;
+    if (type == CameraType.video) {
+      cameraController?.prepareForVideoRecording();
+    }
     if (canSwitch) {
-      switchCameraDirection(
-        CameraLensDirection.front,
-        onException: onException,
-      );
+      switchCameraDirection(CameraLensDirection.front);
     }
     value = value.copyWith(cameraType: type);
   }
 
   ///
   /// Create new camera
-  ///
   Future<CameraController?> createCamera({
     CameraDescription? cameraDescription,
-    ValueSetter<Exception>? onException,
   }) async {
     // if (cameraDescription == null) {
     //   _controllerNotifier.value = const ControllerValue();
     // }
+
+    // Clear error first
+    if (value.error != null) {
+      value = value.copyWith();
+    }
 
     var description = cameraDescription ?? value.cameraDescription;
     var cameras = value.cameras;
@@ -150,7 +150,9 @@ class CamController extends ValueNotifier<CamValue> {
     controller.addListener(() {
       if (controller.value.hasError) {
         final error = 'Camera error ${controller.value.errorDescription}';
-        onException?.call(Exception(error));
+        final exception = CameraException('createCamera', error);
+        value = value.copyWith(error: exception);
+        return;
         // _controllerNotifier.value =
         //     _controllerNotifier.value.copyWith(error: error);
       }
@@ -183,26 +185,22 @@ class CamController extends ValueNotifier<CamValue> {
         ]),
       );
     } on CameraException catch (e) {
-      onException?.call(e);
+      value = value.copyWith(error: e);
+      return null;
     } catch (e) {
-      onException?.call(Exception(e));
+      final exception = CameraException('createCamera', e.toString());
+      value = value.copyWith(error: exception);
+      return null;
     }
     return controller;
   }
 
   ///
   /// Take picture
-  ///
-  Future<DrishyaEntity?> takePicture(
-    BuildContext context, {
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return null;
+  Future<DrishyaEntity?> takePicture(BuildContext context) async {
+    if (!_hasCamera()) return null;
 
-    if (value.isTakingPicture) {
-      onException?.call(Exception('Capturing is currently running..'));
-      return null;
-    }
+    if (value.isTakingPicture) return null;
 
     try {
       final navigator = Navigator.of(context);
@@ -213,10 +211,13 @@ class CamController extends ValueNotifier<CamValue> {
       value = value.copyWith(isTakingPicture: true);
 
       final xFile = await controller.takePicture();
+      await controller.setFlashMode(FlashMode.off);
+
       final file = File(xFile.path);
       final bytes = await file.readAsBytes();
 
       if (_setting.editAfterCapture) {
+        await controller.pausePreview();
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
             setting: _photoEditorSetting.copyWith(
@@ -229,8 +230,13 @@ class CamController extends ValueNotifier<CamValue> {
         final de = await navigator.push(route);
         if (de != null && navigator.mounted) {
           navigator.pop(de);
+          return de;
         }
-        value = value.copyWith(isTakingPicture: false);
+        await controller.resumePreview();
+        value = value.copyWith(
+          isTakingPicture: false,
+          flashMode: FlashMode.off,
+        );
         return de;
       } else {
         final entity = await PhotoManager.editor.saveImage(
@@ -252,75 +258,73 @@ class CamController extends ValueNotifier<CamValue> {
           }
           return drishyaEntity;
         } else {
-          onException?.call(
-            Exception('Something went wrong! Please try again'),
+          final exception = CameraException(
+            'takePictyre',
+            'Something went wrong! Please try again',
           );
-          value = value.copyWith(isTakingPicture: false);
+          value = value.copyWith(isTakingPicture: false, error: exception);
+
           return null;
         }
       }
     } on CameraException catch (e) {
-      onException?.call(e);
-      value = value.copyWith(isTakingPicture: false);
+      value = value.copyWith(isTakingPicture: false, error: e);
       return null;
     } catch (e) {
-      onException?.call(Exception(e));
+      final exception = CameraException('takePicture', e.toString());
+      value = value.copyWith(isTakingPicture: false, error: exception);
       return null;
     }
   }
 
   ///
   /// Switch camera direction
-  ///
-  void switchCameraDirection(
-    CameraLensDirection direction, {
-    ValueSetter<Exception>? onException,
-  }) {
-    if (!_hasCamera(onException)) return;
+  void switchCameraDirection(CameraLensDirection direction) {
+    if (!_hasCamera()) return;
+
     try {
       final description = value.cameras.firstWhere(
         (element) => element.lensDirection == direction,
       );
       createCamera(cameraDescription: description);
     } on CameraException catch (e) {
-      onException?.call(e);
+      value = value.copyWith(error: e);
+      return;
     } catch (e) {
-      onException?.call(Exception(e));
+      final exception = CameraException('switchingCameraLense', e.toString());
+      value = value.copyWith(error: exception);
+      return;
     }
   }
 
   ///
   /// Set flash mode
-  ///
-  Future<void> changeFlashMode({ValueSetter<Exception>? onException}) async {
-    if (!_hasCamera(onException)) return;
+  Future<void> changeFlashMode() async {
+    if (!_hasCamera()) return;
+
     try {
       final controller = _cameraController!;
       final mode = controller.value.flashMode == FlashMode.off
-          ? FlashMode.always
+          ? FlashMode.torch
           : FlashMode.off;
       value = value.copyWith(flashMode: mode);
       await controller.setFlashMode(mode);
     } on CameraException catch (e) {
-      onException?.call(e);
-      rethrow;
+      value = value.copyWith(error: e);
+      return;
     } catch (e) {
-      onException?.call(Exception(e));
+      final exception = CameraException('flashMode', e.toString());
+      value = value.copyWith(error: exception);
+      return;
     }
   }
 
   ///
   /// Start video recording
-  ///
-  Future<void> startVideoRecording({
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return;
+  Future<void> startVideoRecording() async {
+    if (!_hasCamera()) return;
 
-    if (value.isRecordingVideo) {
-      onException?.call(Exception('Recording is already started!'));
-      return;
-    }
+    if (value.isRecordingVideo) return;
 
     try {
       final controller = _cameraController!;
@@ -330,21 +334,17 @@ class CamController extends ValueNotifier<CamValue> {
         isRecordingPaused: false,
       );
     } on CameraException catch (e) {
-      onException?.call(e);
-      value = value.copyWith(isRecordingVideo: false);
+      value = value.copyWith(isRecordingVideo: false, error: e);
     } catch (e) {
-      onException?.call(Exception(e));
+      final exception = CameraException('startVideoRecording', e.toString());
+      value = value.copyWith(isRecordingVideo: false, error: exception);
     }
   }
 
   ///
   /// Stop/Complete video recording
-  ///
-  Future<void> stopVideoRecording(
-    BuildContext context, {
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return;
+  Future<void> stopVideoRecording(BuildContext context) async {
+    if (!_hasCamera()) return;
 
     if (value.isRecordingVideo) {
       try {
@@ -368,37 +368,43 @@ class CamController extends ValueNotifier<CamValue> {
           final drishyaEntity = entity.toDrishya.copyWith(
             pickedFile: file,
           );
-          await SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.manual,
-            overlays: SystemUiOverlay.values,
-          );
+          // await SystemChrome.setEnabledSystemUIMode(
+          //   SystemUiMode.manual,
+          //   overlays: SystemUiOverlay.values,
+          // );
           if (navigator.mounted) {
             navigator.pop(drishyaEntity);
           }
         } else {
-          onException?.call(
-            Exception('Something went wrong! Please try again'),
+          final exception = CameraException(
+            'stopVideoRecording',
+            'Something went wrong! Please try again',
           );
+          value = value.copyWith(isRecordingVideo: false, error: exception);
+          return;
         }
       } on CameraException catch (e) {
-        onException?.call(Exception(e));
-        // Update state
-        value = value.copyWith(isRecordingVideo: false);
+        value = value.copyWith(isRecordingVideo: false, error: e);
+        return;
       } catch (e) {
-        onException?.call(Exception(e));
+        final exception = CameraException('stopVideoRecording', e.toString());
+        value = value.copyWith(isRecordingVideo: false, error: exception);
+        return;
       }
     } else {
-      onException?.call(Exception('Recording not found!'));
+      final exception = CameraException(
+        'stopVideoRecording',
+        'Recording not found!',
+      );
+      value = value.copyWith(isRecordingVideo: false, error: exception);
+      return;
     }
   }
 
   ///
   /// Pause video recording
-  ///
-  Future<void> pauseVideoRecording({
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return;
+  Future<void> pauseVideoRecording() async {
+    if (!_hasCamera()) return;
 
     if (value.isRecordingVideo) {
       try {
@@ -407,22 +413,27 @@ class CamController extends ValueNotifier<CamValue> {
         // Update state
         value = value.copyWith(isRecordingPaused: true);
       } on CameraException catch (e) {
-        onException?.call(e);
+        value = value.copyWith(error: e);
+        return;
       } catch (e) {
-        onException?.call(Exception(e));
+        final exception = CameraException('pauseVideoRecording', e.toString());
+        value = value.copyWith(error: exception);
+        return;
       }
     } else {
-      onException?.call(Exception('Recording not found!'));
+      final exception = CameraException(
+        'pauseVideoRecording',
+        'Recording not found!',
+      );
+      value = value.copyWith(error: exception);
+      return;
     }
   }
 
   ///
   /// Resume video recording
-  ///
-  Future<void> resumeVideoRecording({
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return;
+  Future<void> resumeVideoRecording() async {
+    if (!_hasCamera()) return;
 
     if (value.isRecordingPaused) {
       try {
@@ -430,27 +441,45 @@ class CamController extends ValueNotifier<CamValue> {
         await controller.resumeVideoRecording();
         value = value.copyWith(isRecordingPaused: false);
       } on CameraException catch (e) {
-        onException?.call(e);
+        value = value.copyWith(error: e);
+        return;
       } catch (e) {
-        onException?.call(Exception(e));
+        final exception = CameraException('resumeVideoRecording', e.toString());
+        value = value.copyWith(error: exception);
+        return;
       }
     } else {
-      onException?.call(Exception("Couldn't resume the video!"));
+      final exception = CameraException(
+        'resumeVideoRecording',
+        "Couldn't resume the video!",
+      );
+      value = value.copyWith(error: exception);
+      return;
     }
   }
 
   ///
   /// Lock unlock capture orientation i,e. Portrait and Landscape
-  ///
-  Future<void> lockUnlockCaptureOrientation({
-    ValueSetter<Exception>? onException,
-  }) async {
-    if (!_hasCamera(onException)) return;
-    final controller = _cameraController!;
-    if (controller.value.isCaptureOrientationLocked) {
-      await controller.unlockCaptureOrientation();
-    } else {
-      await controller.lockCaptureOrientation();
+  Future<void> lockUnlockCaptureOrientation() async {
+    if (!_hasCamera()) return;
+
+    try {
+      final controller = _cameraController!;
+      if (controller.value.isCaptureOrientationLocked) {
+        await controller.unlockCaptureOrientation();
+      } else {
+        await controller.lockCaptureOrientation();
+      }
+    } on CameraException catch (e) {
+      value = value.copyWith(error: e);
+      return;
+    } catch (e) {
+      final exception = CameraException(
+        'orientationLockUnlock',
+        "Couldn't change the orientation",
+      );
+      value = value.copyWith(error: exception);
+      return;
     }
   }
 

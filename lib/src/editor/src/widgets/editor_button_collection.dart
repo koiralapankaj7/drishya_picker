@@ -75,7 +75,7 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
         builder: (context) {
           final background = controller.currentBackground is GradientBackground
               ? (controller.currentBackground as GradientBackground).lastColor
-              : Colors.black54;
+              : Colors.black.withOpacity(0.7);
 
           return StickerPicker(
             controller: controller,

@@ -14,6 +14,7 @@ class CamValue {
     this.isRecordingVideo = false,
     this.isRecordingPaused = false,
     this.isPlaygroundActive = false,
+    this.error,
   });
 
   /// Current active camera description e,g. Front camera or back camera
@@ -43,6 +44,9 @@ class CamValue {
   /// Return true if playground is active
   final bool isPlaygroundActive;
 
+  /// Any error that is related to camera
+  final CameraException? error;
+
   ///
   CamValue copyWith({
     CameraDescription? cameraDescription,
@@ -54,6 +58,7 @@ class CamValue {
     bool? isRecordingVideo,
     bool? isRecordingPaused,
     bool? isPlaygroundActive,
+    CameraException? error,
   }) {
     return CamValue(
       cameraDescription: cameraDescription ?? this.cameraDescription,
@@ -65,6 +70,7 @@ class CamValue {
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
+      error: error,
     );
   }
 

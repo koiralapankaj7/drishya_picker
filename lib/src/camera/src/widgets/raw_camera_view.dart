@@ -1,10 +1,6 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import '../controllers/cam_controller.dart';
 
 ///
 class RawCameraView extends StatelessWidget {
@@ -19,7 +15,7 @@ class RawCameraView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;

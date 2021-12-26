@@ -1,7 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 ///
 class DrishyaEditor extends StatefulWidget {
@@ -53,7 +52,8 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // check system ui mode
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _controller = (widget.controller ?? DrishyaEditingController())
       ..init(setting: widget.setting);
   }
@@ -78,10 +78,10 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
       backgroundColor: Colors.black,
       body: WillPopScope(
         onWillPop: () async {
-          await SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.manual,
-            overlays: SystemUiOverlay.values,
-          );
+          // await SystemChrome.setEnabledSystemUIMode(
+          //   SystemUiMode.manual,
+          //   overlays: SystemUiOverlay.values,
+          // );
           return true;
         },
         child: PhotoEditingControllerProvider(

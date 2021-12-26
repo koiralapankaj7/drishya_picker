@@ -27,7 +27,7 @@ class CameraFlashButton extends StatelessWidget {
           return const SizedBox();
         }
         final isOn = value.flashMode != FlashMode.off;
-        return GestureDetector(
+        return InkWell(
           onTap: controller.changeFlashMode,
           child: Container(
             height: 36,

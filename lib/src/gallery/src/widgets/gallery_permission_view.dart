@@ -7,10 +7,14 @@ class GalleryPermissionView extends StatefulWidget {
   const GalleryPermissionView({
     Key? key,
     this.onRefresh,
+    this.isCamera = false,
   }) : super(key: key);
 
   ///
   final VoidCallback? onRefresh;
+
+  ///
+  final bool isCamera;
 
   @override
   State<GalleryPermissionView> createState() => _GalleryPermissionViewState();
@@ -44,39 +48,71 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
-      color: Colors.white,
       padding: const EdgeInsets.all(24),
+      margin:
+          widget.isCamera ? const EdgeInsets.symmetric(horizontal: 32) : null,
+      decoration: BoxDecoration(
+        borderRadius: widget.isCamera ? BorderRadius.circular(12) : null,
+        color: Colors.white,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Heading
-          const Text(
-            'Access Your Album',
-            style: TextStyle(
+          Text(
+            'Access Your ${widget.isCamera ? 'Camera' : 'Album'}',
+            style: const TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 16,
+              fontSize: 18,
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
 
           // Description
-          const Text(
-            'Allow Drishya picker to access your album for picking media.',
+          Text(
+            '''Allow Drishya picker to access your ${widget.isCamera ? 'camera and microphone' : 'album for picking media'} .''',
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
 
           // Allow access button
-          TextButton(
-            onPressed: () {
-              PhotoManager.openSetting();
-              _setting = true;
-            },
-            child: const Text('Allow Access'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.isCamera)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: OutlinedButton(
+                    onPressed: Navigator.of(context).pop,
+                    style: OutlinedButton.styleFrom(
+                      primary: scheme.secondary,
+                      visualDensity: VisualDensity.comfortable,
+                    ),
+                    child: const Text('Deny Access'),
+                  ),
+                ),
+              OutlinedButton(
+                onPressed: () {
+                  PhotoManager.openSetting();
+                  _setting = true;
+                },
+                style: OutlinedButton.styleFrom(
+                  visualDensity: VisualDensity.comfortable,
+                  backgroundColor: scheme.primary,
+                  primary: scheme.onPrimary,
+                ),
+                child: const Text('Allow Access'),
+              ),
+            ],
           ),
+
+          //
         ],
       ),
     );

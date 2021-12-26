@@ -36,10 +36,12 @@ class _EditorTextfieldState extends State<EditorTextfield>
     _textController = _controller.textController;
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 300),
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           _finishTask();
+        } else if (status == AnimationStatus.completed) {
+          _controller.updateValue(isColorPickerOpen: true);
         }
       });
     // ignore: prefer_int_literals
@@ -126,17 +128,17 @@ class _EditorTextfieldState extends State<EditorTextfield>
             }
             _animationController.reverse();
           }
-          _controller.updateValue(
-            keyboardVisible: visible,
-            isColorPickerOpen: visible,
-          );
+          _controller.updateValue(keyboardVisible: visible);
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: _controller.focusNode.unfocus,
+          onTap: () {
+            _controller.updateValue(isColorPickerOpen: false);
+            _controller.focusNode.unfocus();
+          },
           child: ColoredBox(
             color: _controller.value.keyboardVisible
-                ? Colors.black54
+                ? Colors.black38
                 : Colors.transparent,
             child: ValueListenableBuilder<StickerAsset?>(
               valueListenable: _controller.currentAsset,

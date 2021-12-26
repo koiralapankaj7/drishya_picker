@@ -43,7 +43,6 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
         enableCamera: true,
         maximum: 10,
         requestType: RequestType.all,
-        panelSetting: const PanelSetting(topMargin: 24.0),
         editorSetting: EditorSetting(
           colors: _colors,
           stickers: _stickers1,
