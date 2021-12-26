@@ -200,7 +200,7 @@ class _CameraViewState extends State<CameraView>
                         hideOverlay: true,
                       );
                     }
-                    return RawCameraView(action: _camController);
+                    return RawCameraView(controller: _camController);
                   },
                 ),
 
