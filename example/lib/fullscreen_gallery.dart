@@ -22,12 +22,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
   @override
   void initState() {
     super.initState();
-    const setting = GallerySetting(
-      maximum: 1,
-      albumSubtitle: 'All',
-      requestType: RequestType.all,
-    );
-    controller = GalleryController(setting: setting);
+    controller = GalleryController();
     notifier = ValueNotifier(<DrishyaEntity>[]);
   }
 
@@ -55,6 +50,11 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 final entities = await controller.pick(
                   context,
                   selectedEntities: notifier.value,
+                  setting: const GallerySetting(
+                    maximum: 1,
+                    albumSubtitle: 'All',
+                    requestType: RequestType.all,
+                  ),
                 );
                 notifier.value = entities;
               },
@@ -103,9 +103,8 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CameraViewField(
-                    onCapture: (entity) {
-                      notifier.value = [...notifier.value, entity];
-                    },
+                    onCapture: (entity) =>
+                        notifier.value = [...notifier.value, entity],
                     child: const Icon(Icons.camera),
                   ),
                 ),
@@ -116,23 +115,17 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                   builder: (context, list, child) {
                     return GalleryViewField(
                       selectedEntities: list,
-                      gallerySetting: const GallerySetting(
+                      setting: const GallerySetting(
                         maximum: 10,
                         albumSubtitle: 'Image only',
                         requestType: RequestType.image,
                       ),
-                      onChanged: (entity, isRemoved) {
+                      onChanged: (entity, remove) {
                         final value = notifier.value.toList();
-                        if (isRemoved) {
-                          value.remove(entity);
-                        } else {
-                          value.add(entity);
-                        }
+                        remove ? value.remove(entity) : value.add(entity);
                         notifier.value = value;
                       },
-                      onSubmitted: (list) {
-                        notifier.value = list;
-                      },
+                      onSubmitted: (list) => notifier.value = list,
                       child: child,
                     );
                   },

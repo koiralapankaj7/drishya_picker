@@ -19,22 +19,33 @@ class GalleryView extends StatefulWidget {
   const GalleryView({
     Key? key,
     this.controller,
+    this.setting,
   }) : super(key: key);
 
-  ///
+  /// Gallery controller
   final GalleryController? controller;
+
+  /// Gallery setting
+  final GallerySetting? setting;
 
   ///
   static const String name = 'GalleryView';
 
   ///
+  /// Pick media
+  ///
   static Future<List<DrishyaEntity>?> pick(
     BuildContext context, {
+
+    /// Gallery controller
     GalleryController? controller,
+
+    /// Gallery setting
+    GallerySetting? setting,
   }) {
     return Navigator.of(context).push<List<DrishyaEntity>>(
       SlideTransitionPageRoute(
-        builder: GalleryView(controller: controller),
+        builder: GalleryView(controller: controller, setting: setting),
         transitionCurve: Curves.easeIn,
         settings: const RouteSettings(name: name),
       ),
@@ -60,7 +71,8 @@ class _GalleryViewState extends State<GalleryView>
   void initState() {
     super.initState();
 
-    _controller = widget.controller ?? GalleryController();
+    _controller = (widget.controller ?? GalleryController())
+      ..updateSetting(setting: widget.setting);
 
     _albums = Albums()..fetchAlbums(_controller.setting.requestType);
 

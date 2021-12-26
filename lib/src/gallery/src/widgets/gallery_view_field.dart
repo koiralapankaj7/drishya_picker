@@ -4,7 +4,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 ///
-class GalleryViewField extends StatefulWidget {
+class GalleryViewField extends StatelessWidget {
   ///
   /// Widget which pick media from gallery
   ///
@@ -16,8 +16,7 @@ class GalleryViewField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.selectedEntities,
-    this.panelSetting,
-    this.gallerySetting,
+    this.setting,
     this.child,
   }) : super(key: key);
 
@@ -41,67 +40,32 @@ class GalleryViewField extends StatefulWidget {
   /// If used [GalleryViewField] with [SlidableGalleryView]
   /// this setting will be ignored.
   ///
-  /// [PanelSetting] passed to the [SlidableGalleryView] will be applicable..
-  ///
-  final PanelSetting? panelSetting;
-
-  ///
-  /// If used [GalleryViewField] with [SlidableGalleryView]
-  /// this setting will be ignored.
-  ///
   /// [GallerySetting] passed to the [SlidableGalleryView] will be applicable..
   ///
-  final GallerySetting? gallerySetting;
+  final GallerySetting? setting;
 
   ///
   final Widget? child;
 
   @override
-  State<GalleryViewField> createState() => _GalleryViewFieldState();
-}
-
-class _GalleryViewFieldState extends State<GalleryViewField> {
-  late GalleryController _controller;
-  var _dispose = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback(_init);
-  }
-
-  void _init(Duration timeStamp) {
-    if (context.galleryController == null) {
-      _controller = GalleryController(
-        panelSetting: widget.panelSetting,
-        setting: widget.gallerySetting,
-      );
-      _dispose = true;
-    } else {
-      _controller = context.galleryController!;
-    }
-  }
-
-  @override
-  void dispose() {
-    if (_dispose) {
-      _controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
-        _controller.onGalleryFieldPressed(
-          widget.onChanged,
-          widget.onSubmitted,
-          widget.selectedEntities,
+        late GalleryController controller;
+        if (context.galleryController == null) {
+          controller = GalleryController();
+        } else {
+          controller = context.galleryController!;
+        }
+        controller.onGalleryFieldPressed(
           context,
+          onChanged: onChanged,
+          onSubmitted: onSubmitted,
+          selectedEntities: selectedEntities,
+          setting: setting,
         );
       },
-      child: widget.child ?? const Icon(Icons.image),
+      child: child ?? const Icon(Icons.image),
     );
   }
 }

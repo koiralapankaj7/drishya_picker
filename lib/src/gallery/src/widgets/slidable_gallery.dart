@@ -10,13 +10,17 @@ class SlidableGalleryView extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
+    this.setting,
   }) : super(key: key);
 
-  ///
+  /// Child
   final Widget child;
 
-  ///
+  /// Gallery controller
   final GalleryController? controller;
+
+  /// Gallery setting
+  final GallerySetting? setting;
 
   @override
   State<SlidableGalleryView> createState() => _SlidableGalleryViewState();
@@ -29,8 +33,17 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? GalleryController();
+    _controller = (widget.controller ?? GalleryController())
+      ..updateSetting(setting: widget.setting);
     _panelController = _controller.panelController;
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -90,7 +103,10 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
               setting: _setting,
               controller: _panelController,
               child: Builder(
-                builder: (_) => GalleryView(controller: _controller),
+                builder: (_) => GalleryView(
+                  controller: _controller,
+                  setting: widget.setting,
+                ),
               ),
             ),
 

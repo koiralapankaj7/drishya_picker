@@ -367,6 +367,9 @@ class _SlidablePanelState extends State<SlidablePanel>
   @override
   void dispose() {
     _animationController.dispose();
+    if (widget.controller == null) {
+      _panelController.dispose();
+    }
     super.dispose();
   }
   //

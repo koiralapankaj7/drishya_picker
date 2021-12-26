@@ -23,32 +23,8 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   void initState() {
     super.initState();
-
     _notifier = ValueNotifier(<DrishyaEntity>[]);
-
-    _controller = GalleryController(
-      setting: const GallerySetting(
-        albumSubtitle: 'Collapsable',
-        enableCamera: true,
-        maximum: 10,
-        requestType: RequestType.all,
-      ),
-      panelSetting: const PanelSetting(topMargin: 24.0),
-      galleryPhotoEditorSetting: EditorSetting(
-        colors: _colors,
-        stickers: _stickers1,
-      ),
-      cameraTextEditorSetting: EditorSetting(
-        backgrounds: _defaultBackgrounds,
-        colors: _colors.take(4).toList(),
-        stickers: _stickers2,
-      ),
-      cameraPhotoEditorSetting: EditorSetting(
-        colors: _colors.skip(4).toList(),
-        stickers: _stickers3,
-      ),
-      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
-    );
+    _controller = GalleryController();
   }
 
   @override
@@ -62,6 +38,29 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   Widget build(BuildContext context) {
     return SlidableGalleryView(
       controller: _controller,
+      setting: GallerySetting(
+        albumSubtitle: 'Collapsable',
+        enableCamera: true,
+        maximum: 10,
+        requestType: RequestType.all,
+        panelSetting: const PanelSetting(topMargin: 24.0),
+        editorSetting: EditorSetting(
+          colors: _colors,
+          stickers: _stickers1,
+        ),
+        cameraSetting: const CameraSetting(
+          videoDuration: Duration(seconds: 15),
+        ),
+        cameraTextEditorSetting: EditorSetting(
+          backgrounds: _defaultBackgrounds,
+          colors: _colors.take(4).toList(),
+          stickers: _stickers2,
+        ),
+        cameraPhotoEditorSetting: EditorSetting(
+          colors: _colors.skip(4).toList(),
+          stickers: _stickers3,
+        ),
+      ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Slidable Gallery'),

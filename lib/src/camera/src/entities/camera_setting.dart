@@ -22,6 +22,7 @@ class CameraSetting {
   final Duration videoDuration;
 
   ///
+  /// if true, photo editor will be open after capture
   final bool editAfterCapture;
 
   ///

@@ -11,46 +11,16 @@ import 'package:meta/meta.dart';
 class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Gallery controller constructor
-  GalleryController({
-    /// Gallery slidable panel setting
-    PanelSetting? panelSetting,
-
-    /// Gallery setting
-    GallerySetting? setting,
-
-    /// Gallery photo editor setting
-    EditorSetting? galleryPhotoEditorSetting,
-
-    /// Camera setting
-    CameraSetting? cameraSetting,
-
-    /// Camera text editor setting
-    EditorSetting? cameraTextEditorSetting,
-
-    /// Camera photo editor setting
-    EditorSetting? cameraPhotoEditorSetting,
-  })  : panelSetting = panelSetting ?? const PanelSetting(),
-        setting = setting ?? const GallerySetting(),
-        _editorSetting = galleryPhotoEditorSetting ?? const EditorSetting(),
-        _cameraSetting = cameraSetting,
-        _cameraPhotoEditorSetting = cameraPhotoEditorSetting,
-        _cameraTextEditorSetting = cameraTextEditorSetting,
-        panelKey = GlobalKey(),
+  GalleryController()
+      : panelKey = GlobalKey(),
         _panelController = PanelController(),
         _albumVisibility = ValueNotifier(false),
-        super(const GalleryValue());
+        super(const GalleryValue()) {
+    _init();
+  }
 
   /// Slidable gallery key
   final GlobalKey panelKey;
-
-  /// Panel setting
-  final PanelSetting panelSetting;
-
-  /// Gallery setting
-  final GallerySetting setting;
-
-  /// Editor setting
-  final EditorSetting _editorSetting;
 
   /// Panel controller
   final PanelController _panelController;
@@ -58,14 +28,27 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Recent entities notifier
   final ValueNotifier<bool> _albumVisibility;
 
+  late PanelSetting _panelSetting;
+
+  /// Panel setting
+  PanelSetting get panelSetting => _panelSetting;
+
+  late GallerySetting _setting;
+
+  /// Gallery setting
+  GallerySetting get setting => _setting;
+
+  /// Editor setting
+  late EditorSetting _editorSetting;
+
   // Camera controller
-  final CameraSetting? _cameraSetting;
+  late CameraSetting _cameraSetting;
 
   // Camera text editor setting
-  final EditorSetting? _cameraTextEditorSetting;
+  late EditorSetting _cameraTextEditorSetting;
 
   // Camera photo editor setting
-  final EditorSetting? _cameraPhotoEditorSetting;
+  late EditorSetting _cameraPhotoEditorSetting;
 
   // Completer for gallerry picker controller
   late Completer<List<DrishyaEntity>> _completer;
@@ -87,6 +70,24 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   //
   var _accessCamera = false;
+
+  /// Initialize controller setting
+  void _init({GallerySetting? setting}) {
+    _setting = setting ?? const GallerySetting();
+    _panelSetting = _setting.panelSetting ?? const PanelSetting();
+    _editorSetting = _setting.editorSetting ?? const EditorSetting();
+    _cameraSetting = _setting.cameraSetting ?? const CameraSetting();
+    _cameraTextEditorSetting =
+        _setting.cameraTextEditorSetting ?? _editorSetting;
+    _cameraPhotoEditorSetting =
+        _setting.cameraPhotoEditorSetting ?? _editorSetting;
+  }
+
+  /// Update controller settings
+  @internal
+  void updateSetting({GallerySetting? setting}) {
+    _init(setting: setting);
+  }
 
   ///
   /// Update album visibility
@@ -246,16 +247,24 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   @internal
   void onGalleryFieldPressed(
+    BuildContext context, {
     void Function(DrishyaEntity entity, bool removed)? onChanged,
     final void Function(List<DrishyaEntity> entities)? onSubmitted,
     List<DrishyaEntity>? selectedEntities,
-    BuildContext context,
-  ) {
+    GallerySetting? setting,
+  }) {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
-    pick(context, selectedEntities: selectedEntities).then((value) {
+    pick(
+      context,
+      selectedEntities: selectedEntities,
+      setting: setting,
+    ).then((value) {
       _onChanged = null;
       _onSubmitted = null;
+      if (panelKey.currentState == null) {
+        Future.delayed(const Duration(milliseconds: 500), dispose);
+      }
     });
   }
 
@@ -291,12 +300,30 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   Future<List<DrishyaEntity>> pick(
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
+    GallerySetting? setting,
   }) async {
     _completer = Completer<List<DrishyaEntity>>();
 
+    /// [SlidableGalleryView] is not used so we need to update setting
+    if (panelKey.currentState == null && setting != null) {
+      updateSetting(setting: setting);
+    }
+
+    if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {
+      _internal = true;
+      value = value.copyWith(
+        selectedEntities: selectedEntities,
+        previousSelection: true,
+      );
+    }
+
     if (panelKey.currentState == null) {
       _fullScreenMode = true;
-      final entity = await GalleryView.pick(context, controller: this);
+      final entity = await GalleryView.pick(
+        context,
+        controller: this,
+        setting: setting,
+      );
       // User did't open the camera and also didn't pick any assets
       if (entity == null && !_accessCamera) {
         _completer.complete(value.selectedEntities);
@@ -305,13 +332,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       _fullScreenMode = false;
       _panelController.openPanel();
       FocusScope.of(context).unfocus();
-    }
-    if (!singleSelection && (selectedEntities?.isNotEmpty ?? false)) {
-      _internal = true;
-      value = value.copyWith(
-        selectedEntities: selectedEntities,
-        previousSelection: true,
-      );
     }
 
     return _completer.future;
