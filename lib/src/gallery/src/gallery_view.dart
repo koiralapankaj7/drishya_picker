@@ -9,6 +9,11 @@ import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
+
+/// Ui mode, for internal purpose, => [handle differently later]
+@internal
+SystemUiMode drishyaUIMode = SystemUiMode.immersiveSticky;
 
 ///
 ///

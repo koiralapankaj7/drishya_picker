@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -15,7 +16,7 @@ class GridViewWidget extends StatelessWidget {
   final GalleryController controller;
 
   ///
-  final ValueNotifier<List<DrishyaEntity>> notifier;
+  final ValueNotifier<Data> notifier;
 
   ///
   final VoidCallback onAddButtonPressed;
@@ -36,10 +37,10 @@ class GridViewWidget extends StatelessWidget {
           ),
         ],
       ),
-      child: ValueListenableBuilder<List<DrishyaEntity>>(
+      child: ValueListenableBuilder<Data>(
         valueListenable: notifier,
-        builder: (context, list, child) {
-          if (list.isEmpty) {
+        builder: (context, data, child) {
+          if (data.entities.isEmpty) {
             return ValueListenableBuilder<PanelValue>(
               valueListenable: controller.panelController,
               builder: (context, value, child) {
@@ -66,9 +67,9 @@ class GridViewWidget extends StatelessWidget {
               crossAxisSpacing: 1.0,
               mainAxisSpacing: 1.0,
             ),
-            itemCount: list.length,
+            itemCount: data.entities.length,
             itemBuilder: (context, index) {
-              final entity = list[index];
+              final entity = data.entities[index];
               return EntityThumbnail(entity: entity);
             },
           );

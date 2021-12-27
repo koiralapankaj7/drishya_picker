@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 ///
 class EditorCloseButton extends StatelessWidget {
@@ -14,15 +17,20 @@ class EditorCloseButton extends StatelessWidget {
   ///
   final DrishyaEditingController controller;
 
-  void _onPressed(BuildContext context) {
+  Future<bool> _onPressed(BuildContext context) async {
     if (!controller.value.hasStickers) {
-      // SystemChrome.setEnabledSystemUIMode(
-      //   SystemUiMode.manual,
-      //   overlays: SystemUiOverlay.values,
-      // );
+      if (drishyaUIMode == SystemUiMode.manual) {
+        unawaited(
+          SystemChrome.setEnabledSystemUIMode(
+            drishyaUIMode,
+            overlays: SystemUiOverlay.values,
+          ),
+        );
+      }
       Navigator.of(context).pop();
+      return true;
     } else {
-      showDialog<bool>(
+      await showDialog<bool>(
         context: context,
         builder: (context) => const _AppDialog(),
       ).then((value) {
@@ -30,6 +38,7 @@ class EditorCloseButton extends StatelessWidget {
           controller.clear();
         }
       });
+      return false;
     }
   }
 
@@ -37,8 +46,7 @@ class EditorCloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        _onPressed(context);
-        return false;
+        return _onPressed(context);
       },
       child: EditorBuilder(
         controller: controller,

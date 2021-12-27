@@ -1,6 +1,8 @@
 import 'package:drishya_picker/assets/icons/shape_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:example/recent_entities.dart';
+import 'package:example/text_field_view.dart';
 import 'package:flutter/material.dart';
 
 import 'grid_view_widget.dart';
@@ -18,12 +20,12 @@ class CollapsableGallery extends StatefulWidget {
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
   late final GalleryController _controller;
-  late final ValueNotifier<List<DrishyaEntity>> _notifier;
+  late final ValueNotifier<Data> _notifier;
 
   @override
   void initState() {
     super.initState();
-    _notifier = ValueNotifier(<DrishyaEntity>[]);
+    _notifier = ValueNotifier(Data());
     _controller = GalleryController();
   }
 
@@ -74,9 +76,14 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                 onAddButtonPressed: () async {
                   final entities = await _controller.pick(
                     context,
-                    selectedEntities: _notifier.value,
+                    selectedEntities: _notifier.value.entities,
+                    setting: GallerySetting(
+                      maximum: _notifier.value.maxLimit,
+                      requestType: _notifier.value.requestType,
+                    ),
                   );
-                  _notifier.value = entities;
+                  _notifier.value =
+                      _notifier.value.copyWith(entities: entities);
                 },
               ),
             ),
@@ -103,21 +110,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
               child: Row(
                 children: [
                   // Textfield
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Test field',
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: TextFieldView(notifier: _notifier)),
 
                   // Camera field..
                   Padding(
@@ -135,29 +128,38 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                         stickers: _stickers3,
                       ),
                       onCapture: (entity) {
-                        _notifier.value = [..._notifier.value, entity];
+                        _notifier.value = _notifier.value.copyWith(
+                          entities: [..._notifier.value.entities, entity],
+                        );
                       },
                       child: const Icon(Icons.camera),
                     ),
                   ),
 
                   // Gallery field
-                  ValueListenableBuilder<List<DrishyaEntity>>(
+                  ValueListenableBuilder<Data>(
                     valueListenable: _notifier,
-                    builder: (context, list, child) {
+                    builder: (context, data, child) {
                       return GalleryViewField(
-                        selectedEntities: list,
+                        selectedEntities: data.entities,
+                        setting: GallerySetting(
+                          maximum: data.maxLimit,
+                          albumSubtitle: 'Image only',
+                          requestType: data.requestType,
+                        ),
                         onChanged: (entity, isRemoved) {
-                          final value = _notifier.value.toList();
+                          final entities = data.entities.toList();
                           if (isRemoved) {
-                            value.remove(entity);
+                            entities.remove(entity);
                           } else {
-                            value.add(entity);
+                            entities.add(entity);
                           }
-                          _notifier.value = value;
+                          _notifier.value =
+                              _notifier.value.copyWith(entities: entities);
                         },
                         onSubmitted: (list) {
-                          _notifier.value = list;
+                          _notifier.value =
+                              _notifier.value.copyWith(entities: list);
                         },
                         child: child,
                       );

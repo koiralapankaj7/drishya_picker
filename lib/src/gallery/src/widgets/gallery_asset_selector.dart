@@ -182,8 +182,13 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                           );
                         },
                         child: _TextButton(
-                          onPressed: () => widget.controller
-                              .completeTask(context, value.selectedEntities),
+                          onPressed: () {
+                            if (widget.controller.fullScreenMode) {
+                              Navigator.of(context).pop(value.selectedEntities);
+                            } else {
+                              widget.controller.completeTask();
+                            }
+                          },
                           label: 'SELECT',
                         ),
                       ),

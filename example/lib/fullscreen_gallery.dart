@@ -1,5 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:example/recent_entities.dart';
+import 'package:example/text_field_view.dart';
 import 'package:flutter/material.dart';
 
 import 'grid_view_widget.dart';
@@ -16,21 +17,21 @@ class FullscreenGallery extends StatefulWidget {
 }
 
 class _FullscreenGalleryState extends State<FullscreenGallery> {
-  late final GalleryController controller;
-  late final ValueNotifier<List<DrishyaEntity>> notifier;
+  late final GalleryController _controller;
+  late final ValueNotifier<Data> _notifier;
 
   @override
   void initState() {
     super.initState();
-    controller = GalleryController();
-    notifier = ValueNotifier(<DrishyaEntity>[]);
+    _controller = GalleryController();
+    _notifier = ValueNotifier(Data());
   }
 
   @override
   void dispose() {
     super.dispose();
-    notifier.dispose();
-    controller.dispose();
+    _notifier.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -44,26 +45,26 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
           // Grid view
           Expanded(
             child: GridViewWidget(
-              notifier: notifier,
-              controller: controller,
+              notifier: _notifier,
+              controller: _controller,
               onAddButtonPressed: () async {
-                final entities = await controller.pick(
+                final entities = await _controller.pick(
                   context,
-                  selectedEntities: notifier.value,
-                  setting: const GallerySetting(
-                    maximum: 1,
+                  selectedEntities: _notifier.value.entities,
+                  setting: GallerySetting(
+                    maximum: _notifier.value.maxLimit,
                     albumSubtitle: 'All',
-                    requestType: RequestType.all,
+                    requestType: _notifier.value.requestType,
                   ),
                 );
-                notifier.value = entities;
+                _notifier.value = _notifier.value.copyWith(entities: entities);
               },
             ),
           ),
 
           const SizedBox(height: 8.0),
 
-          RecentEntities(controller: controller, notifier: notifier),
+          RecentEntities(controller: _controller, notifier: _notifier),
 
           const SizedBox(height: 8.0),
 
@@ -83,49 +84,40 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
             child: Row(
               children: [
                 // Textfield
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Test field',
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                  ),
-                ),
+                Expanded(child: TextFieldView(notifier: _notifier)),
 
                 // Camera field..
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CameraViewField(
-                    onCapture: (entity) =>
-                        notifier.value = [...notifier.value, entity],
+                    onCapture: (entity) {
+                      _notifier.value = _notifier.value.copyWith(
+                        entities: [..._notifier.value.entities, entity],
+                      );
+                    },
                     child: const Icon(Icons.camera),
                   ),
                 ),
 
                 // Gallery field
-                ValueListenableBuilder<List<DrishyaEntity>>(
-                  valueListenable: notifier,
-                  builder: (context, list, child) {
+                ValueListenableBuilder<Data>(
+                  valueListenable: _notifier,
+                  builder: (context, data, child) {
                     return GalleryViewField(
-                      selectedEntities: list,
-                      setting: const GallerySetting(
-                        maximum: 10,
+                      selectedEntities: data.entities,
+                      setting: GallerySetting(
+                        maximum: data.maxLimit,
                         albumSubtitle: 'Image only',
-                        requestType: RequestType.image,
+                        requestType: data.requestType,
                       ),
                       onChanged: (entity, remove) {
-                        final value = notifier.value.toList();
-                        remove ? value.remove(entity) : value.add(entity);
-                        notifier.value = value;
+                        final entities = _notifier.value.entities.toList();
+                        remove ? entities.remove(entity) : entities.add(entity);
+                        _notifier.value =
+                            _notifier.value.copyWith(entities: entities);
                       },
-                      onSubmitted: (list) => notifier.value = list,
+                      onSubmitted: (list) => _notifier.value =
+                          _notifier.value.copyWith(entities: list),
                       child: child,
                     );
                   },
@@ -140,6 +132,38 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
           //
         ],
       ),
+    );
+  }
+}
+
+///
+class Data {
+  ///
+  Data({
+    this.entities = const [],
+    this.maxLimit = 10,
+    this.requestType = RequestType.all,
+  });
+
+  ///
+  final List<DrishyaEntity> entities;
+
+  ///
+  final int maxLimit;
+
+  ///
+  final RequestType requestType;
+
+  ///
+  Data copyWith({
+    List<DrishyaEntity>? entities,
+    int? maxLimit,
+    RequestType? requestType,
+  }) {
+    return Data(
+      entities: entities ?? this.entities,
+      maxLimit: maxLimit ?? this.maxLimit,
+      requestType: requestType ?? this.requestType,
     );
   }
 }

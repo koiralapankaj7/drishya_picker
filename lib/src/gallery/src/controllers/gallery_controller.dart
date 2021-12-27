@@ -4,6 +4,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 ///
@@ -100,10 +101,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void select(DrishyaEntity entity, BuildContext context) {
     if (singleSelection) {
       _onChanged?.call(entity, false);
-      completeTask(context, [entity]);
+      if (fullScreenMode) {
+        Navigator.of(context).pop([entity]);
+      }
+      completeTask(entities: [entity]);
     } else {
       _clearedSelection = false;
-      final selectedList = value.selectedEntities.toList();
+      final selectedList = List<DrishyaEntity>.from(value.selectedEntities);
       if (selectedList.contains(entity)) {
         selectedList.remove(entity);
         _onChanged?.call(entity, true);
@@ -134,37 +138,28 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Complete selection process
-  ///
   @internal
-  void completeTask(BuildContext context, List<DrishyaEntity>? entities) {
-    if (_fullScreenMode) {
-      Navigator.of(context).pop(entities);
-    } else {
-      _panelController.closePanel();
-      // _checkKeyboard.value = false;
-    }
-    _onSubmitted?.call(entities ?? []);
-    _completer.complete(entities ?? []);
-    _internal = true;
-    value = const GalleryValue();
-  }
+  void completeTask({List<DrishyaEntity>? entities}) {
+    final selectedEntities = entities ??
+        (_clearedSelection || value.selectedEntities.isEmpty
+            ? <DrishyaEntity>[]
+            : value.selectedEntities);
 
-  ///
-  /// Close collapsable panel if screen is push/replace by other screen
-  ///
-  void _closeOnNavigation() {
-    _panelController.closePanel();
+    if (!_fullScreenMode && _panelController.isVisible) {
+      _panelController.closePanel();
+    }
+
+    _onSubmitted?.call(selectedEntities);
+    _completer.complete(selectedEntities);
     _internal = true;
     value = const GalleryValue();
   }
 
   ///
   /// Open camera from [GalleryView]
-  ///
   @internal
   Future<void> openCamera(BuildContext context) async {
     _accessCamera = true;
-    DrishyaEntity? entity;
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: CameraView(
@@ -176,21 +171,25 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       transitionDuration: const Duration(milliseconds: 300),
     );
 
-    if (fullScreenMode) {
-      entity = await Navigator.of(context).pushReplacement(route);
-    } else {
-      entity = await Navigator.of(context).push(route);
-      _closeOnNavigation();
-    }
-
     final entities = [...value.selectedEntities];
-    if (entity != null) {
-      entities.add(entity);
-      _onChanged?.call(entity, false);
-      _onSubmitted?.call(entities);
+
+    if (fullScreenMode) {
+      final entity = await Navigator.of(context).pushReplacement(route);
+      if (entity != null) {
+        entities.add(entity);
+        _onChanged?.call(entity, false);
+      }
+      completeTask(entities: entities);
+      _accessCamera = false;
+    } else {
+      final entity = await Navigator.of(context).push(route);
+      _panelController.minimizePanel();
+      if (entity != null) {
+        entities.add(entity);
+        _onChanged?.call(entity, false);
+      }
+      _accessCamera = false;
     }
-    _accessCamera = false;
-    _completer.complete(entities);
   }
 
   ///
@@ -202,9 +201,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     DrishyaEntity entity,
   ) async {
     select(entity, context);
+    _completer = Completer<List<DrishyaEntity>>();
     _accessCamera = true;
-    DrishyaEntity? pickedEntity;
-
+    drishyaUIMode = SystemUiMode.manual;
     final navigator = Navigator.of(context);
 
     final bytes = await entity.originBytes;
@@ -222,19 +221,21 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     if (!navigator.mounted) return;
 
     if (fullScreenMode) {
-      pickedEntity = await navigator.pushReplacement(route);
+      final entity = await navigator.pushReplacement(route);
+      if (entity != null) {
+        _onChanged?.call(entity, false);
+      }
+      completeTask(entities: entity != null ? [entity] : null);
+      return;
     } else {
-      pickedEntity = await navigator.push(route);
-      _closeOnNavigation();
+      final entity = await navigator.push(route);
+      _panelController.minimizePanel();
+      final entities = [...value.selectedEntities];
+      if (entity != null) {
+        entities.add(entity);
+        _onChanged?.call(entity, false);
+      }
     }
-    final entities = [...value.selectedEntities];
-    if (pickedEntity != null) {
-      entities.add(pickedEntity);
-      _onChanged?.call(pickedEntity, false);
-      _onSubmitted?.call(entities);
-    }
-    _accessCamera = false;
-    _completer.complete(entities);
   }
 
   ///
@@ -266,22 +267,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   // ===================== PUBLIC ==========================
 
   ///
-  /// Close gallery when it is in slidable mode
-  ///
-  void closeSlidableGallery() {
-    if (panelKey.currentState == null) return;
-    _panelController.closePanel();
-    final entities = (_clearedSelection || value.selectedEntities.isEmpty)
-        ? <DrishyaEntity>[]
-        : value.selectedEntities;
-    _completer.complete(entities);
-    _internal = true;
-    value = const GalleryValue();
-  }
-
-  ///
   /// Clear selected entities
-  ///
   void clearSelection() {
     _onSubmitted?.call([]);
     _clearedSelection = true;
@@ -291,7 +277,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Pick assets
-  ///
   Future<List<DrishyaEntity>> pick(
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
@@ -321,7 +306,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       );
       // User did't open the camera and also didn't pick any assets
       if (entity == null && !_accessCamera) {
-        _completer.complete(value.selectedEntities);
+        completeTask(entities: value.selectedEntities);
       }
     } else {
       _fullScreenMode = false;
@@ -334,7 +319,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Recent entities list
-  ///
   Future<List<DrishyaEntity>> recentEntities({
     RequestType? type,
     int count = 20,
@@ -349,25 +333,22 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Album visibility notifier
-  ///
   ValueNotifier<bool> get albumVisibility => _albumVisibility;
 
   ///
   /// return true if gallery is in full screen mode,
-  ///
   bool get fullScreenMode => _fullScreenMode;
 
   ///
   /// return true if selected media reached to maximum selection limit
-  ///
   bool get reachedMaximumLimit =>
       value.selectedEntities.length == setting.maximum;
 
   ///
   /// return true is gallery is in single selection mode
-  ///
   bool get singleSelection => setting.maximum == 1;
 
+  ///
   /// Gallery view pannel controller
   PanelController get panelController => _panelController;
 

@@ -1,6 +1,7 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 ///
 class DrishyaEditor extends StatefulWidget {
@@ -52,8 +53,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
   @override
   void initState() {
     super.initState();
-    // check system ui mode
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _controller = (widget.controller ?? DrishyaEditingController())
       ..init(setting: widget.setting);
   }
@@ -76,64 +76,55 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: WillPopScope(
-        onWillPop: () async {
-          // await SystemChrome.setEnabledSystemUIMode(
-          //   SystemUiMode.manual,
-          //   overlays: SystemUiOverlay.values,
-          // );
-          return true;
-        },
-        child: PhotoEditingControllerProvider(
-          controller: _controller,
-          child: Stack(
-            fit: StackFit.expand,
-            alignment: Alignment.center,
-            children: [
-              // Captureable view that shows the background and stickers
-              RepaintBoundary(
-                key: _controller.editorKey,
-                child: Stack(
-                  fit: StackFit.expand,
-                  alignment: Alignment.center,
-                  children: [
-                    // Playground background
-                    Stack(
-                      children: [
-                        Positioned(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          child: ValueListenableBuilder<EditorBackground>(
-                            valueListenable: _controller.backgroundNotifier,
-                            builder: (context, bg, child) => bg.build(context),
-                          ),
+      body: PhotoEditingControllerProvider(
+        controller: _controller,
+        child: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: [
+            // Captureable view that shows the background and stickers
+            RepaintBoundary(
+              key: _controller.editorKey,
+              child: Stack(
+                fit: StackFit.expand,
+                alignment: Alignment.center,
+                children: [
+                  // Playground background
+                  Stack(
+                    children: [
+                      Positioned(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: ValueListenableBuilder<EditorBackground>(
+                          valueListenable: _controller.backgroundNotifier,
+                          builder: (context, bg, child) => bg.build(context),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
 
-                    // Stickers
-                    StickersView(controller: _controller),
+                  // Stickers
+                  StickersView(controller: _controller),
 
-                    //
-                  ],
-                ),
+                  //
+                ],
               ),
+            ),
 
-              //
-              EditorTextfieldButton(controller: _controller),
+            //
+            EditorTextfieldButton(controller: _controller),
 
-              // Textfield
-              EditorTextfield(controller: _controller),
+            // Textfield
+            EditorTextfield(controller: _controller),
 
-              // Overlay
-              if (!widget.hideOverlay) EditorOverlay(controller: _controller),
+            // Overlay
+            if (!widget.hideOverlay) EditorOverlay(controller: _controller),
 
-              // Color picker
-              ColorPicker(controller: _controller),
+            // Color picker
+            ColorPicker(controller: _controller),
 
-              //
-            ],
-          ),
+            //
+          ],
         ),
       ),
     );

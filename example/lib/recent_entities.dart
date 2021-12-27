@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -14,7 +15,7 @@ class RecentEntities extends StatefulWidget {
   final GalleryController controller;
 
   ///
-  final ValueNotifier<List<DrishyaEntity>> notifier;
+  final ValueNotifier<Data> notifier;
 
   @override
   State<RecentEntities> createState() => _RecentEntitiesState();
@@ -58,19 +59,24 @@ class _RecentEntitiesState extends State<RecentEntities> {
                 itemBuilder: (c, i) {
                   final entity = snapshot.data![i];
                   if (entity == null) return const SizedBox();
-                  return ValueListenableBuilder<List<DrishyaEntity>>(
+                  return ValueListenableBuilder<Data>(
                     valueListenable: widget.notifier,
-                    builder: (context, items, child) {
-                      final selected = items.contains(entity);
+                    builder: (context, data, child) {
+                      final selected = data.entities.contains(entity);
 
                       return Padding(
                         padding: const EdgeInsets.only(left: 4.0),
                         child: InkWell(
                           onTap: () {
-                            final entities = selected
-                                ? (widget.notifier.value..remove(entity))
-                                : (widget.notifier.value..add(entity));
-                            widget.notifier.value = [...entities];
+                            final entities =
+                                List<DrishyaEntity>.from(data.entities);
+                            if (selected) {
+                              entities.remove(entity);
+                            } else {
+                              entities.add(entity);
+                            }
+                            widget.notifier.value =
+                                data.copyWith(entities: entities);
                           },
                           child: Stack(
                             children: [
