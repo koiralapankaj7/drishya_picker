@@ -40,7 +40,7 @@ class GridViewWidget extends StatelessWidget {
         valueListenable: notifier,
         builder: (context, list, child) {
           if (list.isEmpty) {
-            return ValueListenableBuilder<PnaelValue>(
+            return ValueListenableBuilder<PanelValue>(
               valueListenable: controller.panelController,
               builder: (context, value, child) {
                 if (value.state == PanelState.close) {

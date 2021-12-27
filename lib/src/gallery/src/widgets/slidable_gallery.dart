@@ -1,8 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
-const _defaultMin = 0.37;
-
 ///
 class SlidableGalleryView extends StatefulWidget {
   ///
@@ -33,8 +31,8 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
   @override
   void initState() {
     super.initState();
-    _controller = (widget.controller ?? GalleryController())
-      ..init(setting: widget.setting);
+    // No need to init controller from here, [GalleryView] will do that for us.
+    _controller = widget.controller ?? GalleryController();
     _panelController = _controller.panelController;
   }
 
@@ -48,71 +46,70 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final ps = _controller.panelSetting;
-    final _panelMaxHeight = ps.maxHeight ??
-        mediaQuery.size.height - (ps.topMargin ?? mediaQuery.padding.top);
-    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
-    final _setting =
-        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
-
-    final showPanel = MediaQuery.of(context).viewInsets.bottom == 0.0;
-
     return Material(
       key: _controller.panelKey,
       child: GalleryControllerProvider(
         controller: _controller,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Parent view
-            Column(
+        child: PanelSettingBuilder(
+          setting: widget.setting?.panelSetting,
+          builder: (panelSetting) {
+            final showPanel = MediaQuery.of(context).viewInsets.bottom == 0.0;
+            return Stack(
+              fit: StackFit.expand,
               children: [
-                //
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      final focusNode = FocusScope.of(context);
-                      if (focusNode.hasFocus) {
-                        focusNode.unfocus();
-                      }
-                      if (_panelController.isVisible) {
-                        _controller.closeSlidableGallery();
-                      }
-                    },
-                    child: Builder(builder: (_) => widget.child),
-                  ),
+                // Parent view
+                Column(
+                  children: [
+                    //
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          final focusNode = FocusScope.of(context);
+                          if (focusNode.hasFocus) {
+                            focusNode.unfocus();
+                          }
+                          if (_panelController.isVisible) {
+                            _controller.closeSlidableGallery();
+                          }
+                        },
+                        child: widget.child,
+                      ),
+                    ),
+
+                    // Space for panel min height
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _panelController.panelVisibility,
+                      builder: (context, isVisible, child) {
+                        return SizedBox(
+                          height: showPanel && isVisible
+                              ? panelSetting.minHeight
+                              : 0.0,
+                        );
+                      },
+                    ),
+
+                    //
+                  ],
                 ),
 
-                // Space for panel min height
-                ValueListenableBuilder<bool>(
-                  valueListenable: _panelController.panelVisibility,
-                  builder: (context, isVisible, child) {
-                    return SizedBox(
-                      height: showPanel && isVisible ? _panelMinHeight : 0.0,
-                    );
-                  },
+                // Gallery
+                SlidablePanel(
+                  setting: panelSetting,
+                  controller: _panelController,
+                  child: Builder(
+                    builder: (_) => GalleryView(
+                      controller: _controller,
+                      setting: _controller.setting
+                          .copyWith(panelSetting: panelSetting),
+                    ),
+                  ),
                 ),
 
                 //
               ],
-            ),
-
-            // Gallery
-            SlidablePanel(
-              setting: _setting,
-              controller: _panelController,
-              child: Builder(
-                builder: (_) => GalleryView(
-                  controller: _controller,
-                  setting: widget.setting,
-                ),
-              ),
-            ),
-
-            //
-          ],
+            );
+          },
         ),
       ),
     );

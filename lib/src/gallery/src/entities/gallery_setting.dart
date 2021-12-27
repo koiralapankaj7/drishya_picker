@@ -59,4 +59,34 @@ class GallerySetting {
   ///
   /// Camera photo editor setting, if null [editorSetting] will be used
   final EditorSetting? cameraPhotoEditorSetting;
+
+  ///
+  /// Helper function to copy its properties
+  GallerySetting copyWith({
+    RequestType? requestType,
+    int? maximum,
+    String? albumSubtitle,
+    bool? enableCamera,
+    int? crossAxisCount,
+    PanelSetting? panelSetting,
+    EditorSetting? editorSetting,
+    CameraSetting? cameraSetting,
+    EditorSetting? cameraTextEditorSetting,
+    EditorSetting? cameraPhotoEditorSetting,
+  }) {
+    return GallerySetting(
+      requestType: requestType ?? this.requestType,
+      maximum: maximum ?? this.maximum,
+      albumSubtitle: albumSubtitle ?? this.albumSubtitle,
+      enableCamera: enableCamera ?? this.enableCamera,
+      crossAxisCount: crossAxisCount ?? this.crossAxisCount,
+      panelSetting: panelSetting ?? this.panelSetting,
+      editorSetting: editorSetting ?? this.editorSetting,
+      cameraSetting: cameraSetting ?? this.cameraSetting,
+      cameraTextEditorSetting:
+          cameraTextEditorSetting ?? this.cameraTextEditorSetting,
+      cameraPhotoEditorSetting:
+          cameraPhotoEditorSetting ?? this.cameraPhotoEditorSetting,
+    );
+  }
 }

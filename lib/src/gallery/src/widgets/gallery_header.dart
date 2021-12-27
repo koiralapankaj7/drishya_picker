@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:math';
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -51,11 +49,14 @@ class _GalleryHeaderState extends State<GalleryHeader> {
   @override
   Widget build(BuildContext context) {
     final panelSetting = _controller.panelSetting;
+    // final maxHeight = _controller.fullScreenMode
+    //     ? panelSetting.headerHeight + MediaQuery.of(context).padding.top
+    //     : panelSetting.headerHeight;
 
     return Container(
       constraints: BoxConstraints(
-        minHeight: panelSetting.headerMinHeight,
-        maxHeight: panelSetting.headerMaxHeight,
+        minHeight: panelSetting.thumbHandlerHeight,
+        maxHeight: panelSetting.headerHeight + panelSetting.thumbHandlerHeight,
       ),
       color: panelSetting.headerBackground,
       child: Column(
@@ -70,7 +71,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 // Close icon
                 Expanded(
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.centerLeft,
                     child: _IconButton(
                       iconData: Icons.close,
                       onPressed: widget.onClose,
@@ -79,16 +80,18 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 ),
 
                 // Album name and media receiver name
-                _AlbumDetail(
-                  subtitle: widget.headerSubtitle,
-                  controller: _controller,
-                  albums: widget.albums,
+                FittedBox(
+                  child: _AlbumDetail(
+                    subtitle: widget.headerSubtitle,
+                    controller: _controller,
+                    albums: widget.albums,
+                  ),
                 ),
 
                 // Dropdown
                 Expanded(
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 16),
                       child: _AnimatedDropdown(
@@ -267,7 +270,7 @@ class _Handler extends StatelessWidget {
     }
 
     return SizedBox(
-      height: controller.panelSetting.headerMinHeight,
+      height: controller.panelSetting.thumbHandlerHeight,
       child: Center(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4),
