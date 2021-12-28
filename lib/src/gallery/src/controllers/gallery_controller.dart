@@ -92,6 +92,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void setAlbumVisibility({required bool visible}) {
     _panelController.isGestureEnabled = !visible;
     _albumVisibility.value = visible;
+    _internal = true;
+    value = value.copyWith(isAlbumVisible: visible);
   }
 
   ///
@@ -134,6 +136,15 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         previousSelection: false,
       );
     }
+  }
+
+  /// Toogle force multi selection button
+  @internal
+  void forceMultiSelect() {
+    _internal = true;
+    value = value.copyWith(
+      forceMultiSelection: !value.forceMultiSelection,
+    );
   }
 
   ///
@@ -262,6 +273,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       }
     });
   }
+
+  //
 
   // ===================== PUBLIC ==========================
 

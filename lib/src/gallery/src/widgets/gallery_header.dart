@@ -4,6 +4,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -49,9 +50,6 @@ class _GalleryHeaderState extends State<GalleryHeader> {
   @override
   Widget build(BuildContext context) {
     final panelSetting = _controller.panelSetting;
-    // final maxHeight = _controller.fullScreenMode
-    //     ? panelSetting.headerHeight + MediaQuery.of(context).padding.top
-    //     : panelSetting.headerHeight;
 
     return Container(
       constraints: BoxConstraints(
@@ -90,16 +88,38 @@ class _GalleryHeaderState extends State<GalleryHeader> {
 
                 // Dropdown
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: _AnimatedDropdown(
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      _AnimatedDropdown(
                         controller: _controller,
                         onPressed: widget.onAlbumToggle,
                         albumVisibility: _controller.albumVisibility,
                       ),
-                    ),
+                      const Spacer(),
+                      if (_controller.setting.showMultiSelectionButton)
+                        GalleryBuilder(
+                          controller: _controller,
+                          builder: (value, child) {
+                            return InkWell(
+                              onTap: () {
+                                if (_controller.value.isAlbumVisible) {
+                                  widget.onAlbumToggle(true);
+                                } else {
+                                  _controller.forceMultiSelect();
+                                }
+                              },
+                              child: Icon(
+                                CupertinoIcons.rectangle_stack,
+                                color: value.forceMultiSelection
+                                    ? Colors.white
+                                    : Colors.white38,
+                              ),
+                            );
+                          },
+                        ),
+                      const SizedBox(width: 16),
+                    ],
                   ),
                 ),
 
@@ -230,8 +250,12 @@ class _AlbumDetail extends StatelessWidget {
         CurrentAlbumBuilder(
           albums: albums,
           builder: (context, album, child) {
+            final isAll = album.value.assetPathEntity?.isAll ?? true;
+
             return Text(
-              album.value.assetPathEntity?.name ?? 'Unknown',
+              isAll
+                  ? controller.setting.albumTitle
+                  : album.value.assetPathEntity?.name ?? 'Unknown',
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

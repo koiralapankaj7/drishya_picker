@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,6 +16,7 @@ class GalleryGridView extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.albums,
+    required this.onClosePressed,
   }) : super(key: key);
 
   ///
@@ -23,6 +24,9 @@ class GalleryGridView extends StatelessWidget {
 
   ///
   final Albums albums;
+
+  ///
+  final VoidCallback? onClosePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -75,49 +79,75 @@ class GalleryGridView extends StatelessWidget {
               }
 
               final entities = value.entities;
+              final enableCamera = controller.setting.enableCamera &&
+                  controller.setting.showCameraInsideGrid;
 
               final itemCount = albums.value.state == BaseState.fetching
                   ? 20
-                  : controller.setting.enableCamera
+                  : enableCamera
                       ? entities.length + 1
                       : entities.length;
 
-              return LazyLoadScrollView(
-                onEndOfPage: album.fetchAssets,
-                scrollOffset: MediaQuery.of(context).size.height * 0.4,
-                child: GridView.builder(
-                  controller: controller.panelController.scrollController,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: controller.setting.crossAxisCount ?? 3,
-                    crossAxisSpacing: 1.5,
-                    mainAxisSpacing: 1.5,
+              return Stack(
+                children: [
+                  // Assets grid
+                  LazyLoadScrollView(
+                    onEndOfPage: album.fetchAssets,
+                    scrollOffset: MediaQuery.of(context).size.height * 0.4,
+                    child: GridView.builder(
+                      controller: controller.panelController.scrollController,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: controller.setting.crossAxisCount ?? 3,
+                        crossAxisSpacing: 1.5,
+                        mainAxisSpacing: 1.5,
+                      ),
+                      itemCount: itemCount,
+                      padding: EdgeInsets.zero,
+                      itemBuilder: (context, index) {
+                        if (enableCamera && index == 0) {
+                          return InkWell(
+                            onTap: () => controller.openCamera(context),
+                            child: Icon(
+                              CupertinoIcons.camera,
+                              color: Colors.lightBlue.shade300,
+                              size: 26,
+                            ),
+                          );
+                        }
+
+                        final ind = enableCamera ? index - 1 : index;
+
+                        final entity = albums.value.state == BaseState.fetching
+                            ? null
+                            : entities[ind];
+
+                        if (entity == null) return const SizedBox();
+
+                        return _MediaTile(
+                            controller: controller, entity: entity);
+                      },
+                    ),
                   ),
-                  itemCount: itemCount,
-                  padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
-                    if (controller.setting.enableCamera && index == 0) {
-                      return InkWell(
-                        onTap: () => controller.openCamera(context),
-                        child: Icon(
-                          CupertinoIcons.camera,
-                          color: Colors.lightBlue.shade300,
-                          size: 26,
+
+                  // Camera switch button
+                  if (controller.setting.showMultiSelectionButton)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: InkWell(
+                        onTap: onClosePressed,
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            CupertinoIcons.camera_circle_fill,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
-                      );
-                    }
+                      ),
+                    ),
 
-                    final ind =
-                        controller.setting.enableCamera ? index - 1 : index;
-
-                    final entity = albums.value.state == BaseState.fetching
-                        ? null
-                        : entities[ind];
-
-                    if (entity == null) return const SizedBox();
-
-                    return _MediaTile(controller: controller, entity: entity);
-                  },
-                ),
+                  //
+                ],
               );
             },
           );
@@ -165,8 +195,7 @@ class _MediaTile extends StatelessWidget {
                 bytes = b;
               },
             ),
-            if (!controller.singleSelection)
-              _SelectionCount(controller: controller, entity: entity),
+            _SelectionCount(controller: controller, entity: entity),
           ],
         ),
       ),
@@ -186,35 +215,54 @@ class _SelectionCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<GalleryValue>(
-      valueListenable: controller,
-      builder: (context, value, child) {
+    return GalleryBuilder(
+      controller: controller,
+      builder: (value, child) {
+        final hasMultiSelectionButton =
+            controller.setting.showMultiSelectionButton;
+
+        final singleSelection = hasMultiSelectionButton
+            ? !value.forceMultiSelection
+            : controller.singleSelection;
+
         final isSelected = value.selectedEntities.contains(entity);
-        // if (!isSelected) return const SizedBox();
         final index = value.selectedEntities.indexOf(entity.toDrishya);
 
-        final crossFadeState =
-            isSelected ? CrossFadeState.showFirst : CrossFadeState.showSecond;
-        final firstChild = ColoredBox(
-          color: Theme.of(context).primaryColor.withOpacity(0.3),
-          child: Center(
-            child: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
-              radius: 14,
-              child: Text(
-                '${index + 1}',
-                style: Theme.of(context).textTheme.button?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-              ),
+        Widget counter = const SizedBox();
+
+        if (isSelected) {
+          counter = CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor,
+            radius: 14,
+            child: Text(
+              '${index + 1}',
+              style: Theme.of(context).textTheme.button?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ),
+          );
+        }
+
+        if (hasMultiSelectionButton && !singleSelection) {
+          counter = Container(
+            height: 30,
+            width: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: isSelected ? counter : const SizedBox(),
+          );
+        }
+
+        return Container(
+          color: isSelected ? Colors.white38 : Colors.transparent,
+          padding: const EdgeInsets.all(6),
+          child: Align(
+            alignment:
+                hasMultiSelectionButton ? Alignment.topRight : Alignment.center,
+            child: counter,
           ),
-        );
-        return AppAnimatedCrossFade(
-          firstChild: firstChild,
-          secondChild: const SizedBox(),
-          crossFadeState: crossFadeState,
-          duration: const Duration(milliseconds: 300),
         );
       },
     );

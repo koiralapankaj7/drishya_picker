@@ -7,6 +7,7 @@ import 'package:drishya_picker/src/gallery/src/widgets/albums_page.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_asset_selector.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/send_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
@@ -327,13 +328,23 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
                     child: GalleryGridView(
                       controller: _controller,
                       albums: _albums,
+                      onClosePressed: _onClosePressed,
                     ),
                   ),
                 ],
               ),
 
               // Send and edit button
-              GalleryAssetSelector(controller: _controller),
+              if (!_controller.setting.showMultiSelectionButton)
+                GalleryAssetSelector(controller: _controller),
+
+              // Send button
+              if (_controller.setting.showMultiSelectionButton)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: SendButton(controller: _controller),
+                ),
 
               // Album list
               AnimatedBuilder(

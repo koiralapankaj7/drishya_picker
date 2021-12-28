@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
@@ -55,7 +53,11 @@ class AlbumsPage extends StatelessWidget {
             itemCount: value.albums.length,
             itemBuilder: (context, index) {
               final album = value.albums[index];
-              return _AlbumTile(album: album, onPressed: onAlbumChange);
+              return _AlbumTile(
+                controller: controller,
+                album: album,
+                onPressed: onAlbumChange,
+              );
             },
           ),
         );
@@ -67,10 +69,12 @@ class AlbumsPage extends StatelessWidget {
 class _AlbumTile extends StatelessWidget {
   const _AlbumTile({
     Key? key,
+    required this.controller,
     required this.album,
     this.onPressed,
   }) : super(key: key);
 
+  final GalleryController controller;
   final Album album;
   final Function(Album album)? onPressed;
 
@@ -83,6 +87,8 @@ class _AlbumTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAll = album.value.assetPathEntity?.isAll ?? true;
+
     return GestureDetector(
       onTap: () {
         onPressed?.call(album);
@@ -121,7 +127,9 @@ class _AlbumTile extends StatelessWidget {
                 children: [
                   // Album name
                   Text(
-                    album.value.assetPathEntity?.name ?? '',
+                    isAll
+                        ? 'All Photos'
+                        : album.value.assetPathEntity?.name ?? '',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
