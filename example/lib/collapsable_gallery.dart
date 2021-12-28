@@ -73,18 +73,6 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
               child: GridViewWidget(
                 notifier: _notifier,
                 controller: _controller,
-                onAddButtonPressed: () async {
-                  final entities = await _controller.pick(
-                    context,
-                    selectedEntities: _notifier.value.entities,
-                    setting: GallerySetting(
-                      maximum: _notifier.value.maxLimit,
-                      requestType: _notifier.value.requestType,
-                    ),
-                  );
-                  _notifier.value =
-                      _notifier.value.copyWith(entities: entities);
-                },
               ),
             ),
 
@@ -147,13 +135,11 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                           albumSubtitle: 'Image only',
                           requestType: data.requestType,
                         ),
-                        onChanged: (entity, isRemoved) {
-                          final entities = data.entities.toList();
-                          if (isRemoved) {
-                            entities.remove(entity);
-                          } else {
-                            entities.add(entity);
-                          }
+                        onChanged: (entity, remove) {
+                          final entities = _notifier.value.entities.toList();
+                          remove
+                              ? entities.remove(entity)
+                              : entities.add(entity);
                           _notifier.value =
                               _notifier.value.copyWith(entities: entities);
                         },

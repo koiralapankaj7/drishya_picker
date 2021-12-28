@@ -9,7 +9,6 @@ class GridViewWidget extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.notifier,
-    required this.onAddButtonPressed,
   }) : super(key: key);
 
   ///
@@ -17,9 +16,6 @@ class GridViewWidget extends StatelessWidget {
 
   ///
   final ValueNotifier<Data> notifier;
-
-  ///
-  final VoidCallback onAddButtonPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +47,19 @@ class GridViewWidget extends StatelessWidget {
               },
               child: Center(
                 child: InkWell(
-                  onTap: onAddButtonPressed,
+                  onTap: () async {
+                    final entities = await controller.pick(
+                      context,
+                      selectedEntities: notifier.value.entities,
+                      setting: GallerySetting(
+                        maximum: notifier.value.maxLimit,
+                        albumSubtitle: 'All',
+                        requestType: notifier.value.requestType,
+                      ),
+                    );
+                    notifier.value =
+                        notifier.value.copyWith(entities: entities);
+                  },
                   child: const CircleAvatar(
                     child: Icon(Icons.add),
                   ),

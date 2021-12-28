@@ -44,22 +44,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
         children: [
           // Grid view
           Expanded(
-            child: GridViewWidget(
-              notifier: _notifier,
-              controller: _controller,
-              onAddButtonPressed: () async {
-                final entities = await _controller.pick(
-                  context,
-                  selectedEntities: _notifier.value.entities,
-                  setting: GallerySetting(
-                    maximum: _notifier.value.maxLimit,
-                    albumSubtitle: 'All',
-                    requestType: _notifier.value.requestType,
-                  ),
-                );
-                _notifier.value = _notifier.value.copyWith(entities: entities);
-              },
-            ),
+            child: GridViewWidget(notifier: _notifier, controller: _controller),
           ),
 
           const SizedBox(height: 8.0),

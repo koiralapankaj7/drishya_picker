@@ -24,9 +24,7 @@ class EditorSetting {
   final int fixedTabSize;
 
   ///
-  /// [PhotoBackground] => Colors will be used to change text/icon colors
-  /// [GradientBackground] => Colors will be used to change icon colors
-  ///
+  ///  Colors will be used to change icon/text colors
   final List<Color> colors;
 
   /// Helper function to copy object

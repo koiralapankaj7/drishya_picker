@@ -221,7 +221,7 @@ class CamController extends ValueNotifier<CamValue> {
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
             setting: _photoEditorSetting.copyWith(
-              backgrounds: [PhotoBackground(bytes: bytes)],
+              backgrounds: [MemoryAssetBackground(bytes: bytes)],
             ),
           ),
           begainHorizontal: true,

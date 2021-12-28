@@ -151,6 +151,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     _onSubmitted?.call(selectedEntities);
     _completer.complete(selectedEntities);
+    _fullScreenMode = false;
     _internal = true;
     value = const GalleryValue();
   }
@@ -206,12 +207,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     drishyaUIMode = SystemUiMode.manual;
     final navigator = Navigator.of(context);
 
-    final bytes = await entity.originBytes;
-
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: DrishyaEditor(
         setting: _editorSetting.copyWith(
-          backgrounds: [PhotoBackground(bytes: bytes)],
+          backgrounds: [DrishyaBackground(entity: entity)],
         ),
       ),
       begainHorizontal: true,
@@ -299,14 +298,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     if (panelKey.currentState == null) {
       _fullScreenMode = true;
-      final entity = await GalleryView.pick(
-        context,
-        controller: this,
-        setting: setting,
-      );
+      await GalleryView.pick(context, controller: this, setting: setting);
       // User did't open the camera and also didn't pick any assets
-      if (entity == null && !_accessCamera) {
-        completeTask(entities: value.selectedEntities);
+      if (!_accessCamera) {
+        completeTask();
       }
     } else {
       _fullScreenMode = false;

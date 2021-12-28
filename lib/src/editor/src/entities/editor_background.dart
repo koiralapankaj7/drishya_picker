@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -10,51 +11,77 @@ abstract class EditorBackground {
 }
 
 ///
-class PhotoBackground implements EditorBackground {
+class DrishyaBackground implements EditorBackground {
   ///
-  PhotoBackground({
-    this.bytes,
-    this.url,
-  });
+  /// Drishya background only support image background
+  const DrishyaBackground({required this.entity});
 
-  ///
-  final Uint8List? bytes;
-
-  ///
-  final String? url;
-
-  ///
-  bool get hasData => (url?.isNotEmpty ?? false) || (bytes != null);
+  /// Drishya entity
+  final DrishyaEntity entity;
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider? image;
-
-    if (bytes != null) {
-      image = MemoryImage(bytes!);
-    } else if (url != null) {
-      image = NetworkImage(url!);
+    if (entity.type != AssetType.image) {
+      return Center(
+        child: Text(
+          'Un-supported background!',
+          style: Theme.of(context).textTheme.subtitle1?.copyWith(
+                color: Colors.white,
+              ),
+        ),
+      );
     }
+    return FutureBuilder<Uint8List?>(
+      future: entity.originBytes,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
+        }
 
-    if (image == null) return const SizedBox();
+        if (snapshot.data == null) {
+          return Center(
+            child: Text(
+              'Failed to load background!',
+              style: Theme.of(context).textTheme.subtitle1?.copyWith(
+                    color: Colors.white,
+                  ),
+            ),
+          );
+        }
 
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            image: DecorationImage(
+              image: MemoryImage(snapshot.data!),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+///
+class MemoryAssetBackground implements EditorBackground {
+  ///
+  /// Background for memory asset
+  MemoryAssetBackground({required this.bytes});
+
+  /// Asset bytes
+  final Uint8List bytes;
+
+  @override
+  Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(
-          image: image,
+          image: MemoryImage(bytes),
         ),
       ),
-      // child: Builder(
-      //   builder: (_) {
-      //     if (bytes != null) {
-      //       return Image.memory(bytes!, fit: BoxFit.contain);
-      //     } else if (url != null) {
-      //       return Image.network(url!, fit: BoxFit.cover);
-      //     }
-      //     return const SizedBox();
-      //   },
-      // ),
     );
   }
 }

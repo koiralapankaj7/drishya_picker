@@ -164,10 +164,19 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   }) async {
     try {
       final bg = _backgroundNotifier.value;
-      if (bg is PhotoBackground && bg.bytes != null && !value.hasStickers) {
-        final entity = await PhotoManager.editor.saveImage(bg.bytes!);
+
+      if (bg is DrishyaBackground && !value.hasStickers) {
+        // If background is drishya background and user has not edit the image
+        // return its enity
+        return bg.entity;
+      } else if (bg is MemoryAssetBackground && !value.hasStickers) {
+        // If background is memory bytes background and user has not edited the
+        // image, create entity and return it
+        final entity = await PhotoManager.editor.saveImage(bg.bytes);
         return entity?.toDrishya;
       } else {
+        // If user has edited the background take screenshot
+        // todo: remove screenshot approach, edit image properly
         final boundary = _editorKey.currentContext?.findRenderObject()
             as RenderRepaintBoundary?;
         final image = await boundary!.toImage();

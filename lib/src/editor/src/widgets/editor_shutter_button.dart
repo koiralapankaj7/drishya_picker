@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 ///
 class EditorShutterButton extends StatelessWidget {
@@ -21,7 +24,7 @@ class EditorShutterButton extends StatelessWidget {
       controller: controller,
       builder: (context, value, child) {
         final crossFadeState =
-            (controller.currentBackground is! PhotoBackground &&
+            (controller.currentBackground is GradientBackground &&
                         !value.hasStickers) ||
                     value.isEditing ||
                     value.hasFocus
@@ -39,12 +42,22 @@ class EditorShutterButton extends StatelessWidget {
                   controller.updateValue(isColorPickerOpen: false);
                   return;
                 }
+                final navigator = Navigator.of(context);
+
                 final entity = await controller.completeEditing();
                 if (entity != null) {
-                  // ignore: use_build_context_synchronously
-                  Navigator.of(context).pop(entity);
+                  if (drishyaUIMode == SystemUiMode.manual) {
+                    unawaited(
+                      SystemChrome.setEnabledSystemUIMode(
+                        drishyaUIMode,
+                        overlays: SystemUiOverlay.values,
+                      ),
+                    );
+                  }
+                  if (!navigator.mounted) return;
+                  navigator.pop(entity);
                 } else {
-                  // ignore: use_build_context_synchronously
+                  if (!navigator.mounted) return;
                   UIHandler(context).showSnackBar(
                     'Something went wront! Please try again.',
                   );
