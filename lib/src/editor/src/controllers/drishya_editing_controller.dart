@@ -1,9 +1,9 @@
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 /// Drishya editing controller
@@ -104,7 +104,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   }) {
     final oldValue = value;
     if (oldValue.hasFocus && !(hasFocus ?? false)) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      UIHandler.hideStatusBar();
     }
     value = value.copyWith(
       keyboardVisible: keyboardVisible,

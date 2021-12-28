@@ -173,14 +173,16 @@ class TextSticker extends Sticker {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: background ?? Colors.transparent,
-        // color: background ??
-        //     (withBackground ? controller.value.color : Colors.transparent),
         borderRadius: BorderRadius.circular(10),
       ),
       child: FittedBox(
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Text(text, textAlign: textAlign, style: style),
+          child: Text(
+            text,
+            textAlign: textAlign,
+            style: style,
+          ),
         ),
       ),
     );

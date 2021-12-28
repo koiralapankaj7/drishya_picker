@@ -202,7 +202,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     DrishyaEntity entity,
   ) async {
     select(entity, context);
-    _completer = Completer<List<DrishyaEntity>>();
     _accessCamera = true;
     drishyaUIMode = SystemUiMode.manual;
     final navigator = Navigator.of(context);

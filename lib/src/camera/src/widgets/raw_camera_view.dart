@@ -15,7 +15,6 @@ class RawCameraView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;

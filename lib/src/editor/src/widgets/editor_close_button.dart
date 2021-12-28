@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 ///
 class EditorCloseButton extends StatelessWidget {
@@ -17,17 +17,13 @@ class EditorCloseButton extends StatelessWidget {
   ///
   final DrishyaEditingController controller;
 
-  Future<bool> _onPressed(BuildContext context) async {
+  Future<bool> _onPressed(BuildContext context, {bool pop = true}) async {
     if (!controller.value.hasStickers) {
-      if (drishyaUIMode == SystemUiMode.manual) {
-        unawaited(
-          SystemChrome.setEnabledSystemUIMode(
-            drishyaUIMode,
-            overlays: SystemUiOverlay.values,
-          ),
-        );
+      if (pop) {
+        UIHandler.of(context).pop();
+      } else {
+        await UIHandler.showStatusBar();
       }
-      Navigator.of(context).pop();
       return true;
     } else {
       await showDialog<bool>(
@@ -45,9 +41,7 @@ class EditorCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        return _onPressed(context);
-      },
+      onWillPop: () => _onPressed(context, pop: false),
       child: EditorBuilder(
         controller: controller,
         builder: (context, value, child) {

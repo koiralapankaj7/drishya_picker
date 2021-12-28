@@ -17,7 +17,7 @@ class ColorPicker extends StatelessWidget {
     return ValueListenableBuilder<EditorValue>(
       valueListenable: controller,
       builder: (context, value, child) {
-        final visible = !value.isEditing && (value.isColorPickerOpen);
+        final visible = !value.isEditing && value.isColorPickerOpen;
 
         if (!visible) return const SizedBox();
 

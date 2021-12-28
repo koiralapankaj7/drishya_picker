@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -217,6 +218,7 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (_setting.editAfterCapture) {
+        UIHandler.showStatusBarOnPop = false;
         await controller.pausePreview();
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
@@ -328,11 +330,11 @@ class CamController extends ValueNotifier<CamValue> {
 
     try {
       final controller = _cameraController!;
-      await controller.startVideoRecording();
       value = value.copyWith(
         isRecordingVideo: true,
         isRecordingPaused: false,
       );
+      await controller.startVideoRecording();
     } on CameraException catch (e) {
       value = value.copyWith(isRecordingVideo: false, error: e);
     } catch (e) {
@@ -343,53 +345,52 @@ class CamController extends ValueNotifier<CamValue> {
 
   ///
   /// Stop/Complete video recording
-  Future<void> stopVideoRecording(BuildContext context) async {
-    if (!_hasCamera()) return;
+  Future<DrishyaEntity?> stopVideoRecording(
+    BuildContext context, {
+    bool createEntity = true,
+  }) async {
+    if (!_hasCamera()) return null;
 
     if (value.isRecordingVideo) {
       try {
         final navigator = Navigator.of(context);
-
         final controller = _cameraController!;
-
         final xfile = await controller.stopVideoRecording();
-        final file = File(xfile.path);
-        final entity = await PhotoManager.editor.saveVideo(
-          file,
-          title: path.basename(file.path),
-        );
-        if (file.existsSync()) {
-          file.deleteSync();
-        }
-        // Update state
         value = value.copyWith(isRecordingVideo: false);
 
-        if (entity != null) {
-          final drishyaEntity = entity.toDrishya.copyWith(
-            pickedFile: file,
+        if (createEntity) {
+          final file = File(xfile.path);
+          final entity = await PhotoManager.editor.saveVideo(
+            file,
+            title: path.basename(file.path),
           );
-          // await SystemChrome.setEnabledSystemUIMode(
-          //   SystemUiMode.manual,
-          //   overlays: SystemUiOverlay.values,
-          // );
-          if (navigator.mounted) {
-            navigator.pop(drishyaEntity);
+          if (file.existsSync()) {
+            file.deleteSync();
           }
-        } else {
-          final exception = CameraException(
-            'stopVideoRecording',
-            'Something went wrong! Please try again',
-          );
-          value = value.copyWith(isRecordingVideo: false, error: exception);
-          return;
+
+          if (entity != null) {
+            final drishyaEntity = entity.toDrishya.copyWith(
+              pickedFile: file,
+            );
+            if (navigator.mounted) {
+              navigator.pop(drishyaEntity);
+            }
+            return drishyaEntity;
+          } else {
+            final exception = CameraException(
+              'stopVideoRecording',
+              'Something went wrong! Please try again',
+            );
+            value = value.copyWith(error: exception);
+            return null;
+          }
         }
+        return null;
       } on CameraException catch (e) {
         value = value.copyWith(isRecordingVideo: false, error: e);
-        return;
       } catch (e) {
         final exception = CameraException('stopVideoRecording', e.toString());
         value = value.copyWith(isRecordingVideo: false, error: exception);
-        return;
       }
     } else {
       final exception = CameraException(
@@ -397,8 +398,8 @@ class CamController extends ValueNotifier<CamValue> {
         'Recording not found!',
       );
       value = value.copyWith(isRecordingVideo: false, error: exception);
-      return;
     }
+    return null;
   }
 
   ///
@@ -410,7 +411,6 @@ class CamController extends ValueNotifier<CamValue> {
       try {
         final controller = _cameraController!;
         await controller.pauseVideoRecording();
-        // Update state
         value = value.copyWith(isRecordingPaused: true);
       } on CameraException catch (e) {
         value = value.copyWith(error: e);

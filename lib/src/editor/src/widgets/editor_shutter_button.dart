@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 ///
 class EditorShutterButton extends StatelessWidget {
@@ -46,19 +43,12 @@ class EditorShutterButton extends StatelessWidget {
 
                 final entity = await controller.completeEditing();
                 if (entity != null) {
-                  if (drishyaUIMode == SystemUiMode.manual) {
-                    unawaited(
-                      SystemChrome.setEnabledSystemUIMode(
-                        drishyaUIMode,
-                        overlays: SystemUiOverlay.values,
-                      ),
-                    );
-                  }
                   if (!navigator.mounted) return;
-                  navigator.pop(entity);
+                  UIHandler.showStatusBarOnPop = true;
+                  UIHandler.of(context).pop(entity);
                 } else {
                   if (!navigator.mounted) return;
-                  UIHandler(context).showSnackBar(
+                  UIHandler.of(context).showSnackBar(
                     'Something went wront! Please try again.',
                   );
                 }

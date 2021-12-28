@@ -67,6 +67,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
     );
   }
 
+  // TODO(koiralapankaj007): responsive textfield for long text
   void _addSticker() {
     if (_controller.textController.text.isEmpty) return;
 
@@ -74,7 +75,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
     final sticker = TextSticker(
       size: _tfSize,
-      extra: {'text': _textController.text},
+      // extra: {'text': _textController.text},
       text: _textController.text,
       style: TextStyle(
         textBaseline: TextBaseline.ideographic,
@@ -128,14 +129,14 @@ class _EditorTextfieldState extends State<EditorTextfield>
             }
             _animationController.reverse();
           }
-          _controller.updateValue(keyboardVisible: visible);
+          _controller.updateValue(
+            keyboardVisible: visible,
+            isColorPickerOpen: false,
+          );
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () {
-            _controller.updateValue(isColorPickerOpen: false);
-            _controller.focusNode.unfocus();
-          },
+          onTap: _controller.focusNode.unfocus,
           child: ColoredBox(
             color: _controller.value.keyboardVisible
                 ? Colors.black38
@@ -296,7 +297,7 @@ class _StickerTextFieldState extends State<_StickerTextField> {
           minLines: 1,
           maxLines: null,
           keyboardType: TextInputType.multiline,
-          textInputAction: TextInputAction.newline,
+          // textInputAction: TextInputAction.newline,
           smartDashesType: SmartDashesType.disabled,
           style: TextStyle(
             textBaseline: TextBaseline.ideographic,

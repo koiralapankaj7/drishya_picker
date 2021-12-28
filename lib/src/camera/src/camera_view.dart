@@ -5,6 +5,7 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_overlay.dart';
 import 'package:drishya_picker/src/camera/src/widgets/raw_camera_view.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,6 +86,7 @@ class _CameraViewState extends State<CameraView>
   @override
   void initState() {
     super.initState();
+    UIHandler.hideStatusBar();
     WidgetsBinding.instance?.addObserver(this);
     _camController = (widget.controller ?? CamController())
       ..init(
@@ -94,7 +96,6 @@ class _CameraViewState extends State<CameraView>
       );
     _photoEditingController = _camController.drishyaEditingController
       ..addListener(_photoEditingListener);
-    _hideSB();
     Future<void>.delayed(_kRouteDuration, _camController.createCamera);
     // _camController.createCamera();
   }
@@ -111,10 +112,10 @@ class _CameraViewState extends State<CameraView>
   void didUpdateWidget(covariant CameraView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
+      UIHandler.hideStatusBar();
       _camController = widget.controller ?? CamController();
       _photoEditingController = _camController.drishyaEditingController
         ..addListener(_photoEditingListener);
-      _hideSB();
       _camController.createCamera();
     }
   }
@@ -130,10 +131,10 @@ class _CameraViewState extends State<CameraView>
     }
 
     if (state == AppLifecycleState.inactive) {
-      _showSB();
+      UIHandler.showStatusBar();
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      _hideSB();
+      UIHandler.hideStatusBar();
       _camController.createCamera();
     }
   }
@@ -146,7 +147,7 @@ class _CameraViewState extends State<CameraView>
 
   @override
   void dispose() {
-    _showSB();
+    UIHandler.showStatusBar();
     WidgetsBinding.instance?.removeObserver(this);
     _photoEditingController.removeListener(_photoEditingListener);
     if (widget.controller == null) {
@@ -155,21 +156,14 @@ class _CameraViewState extends State<CameraView>
     super.dispose();
   }
 
-  ///
-  void _hideSB() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  }
-
-  ///
-  void _showSB() {
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
-    );
-  }
-
   Future<bool> _onWillPop() async {
-    _showSB();
+    /// [CameraShutterButton] is also using [WillPopScope] to handle
+    /// video recording stuff. So always return true from here so that
+    /// it will also get this callback. Returning false from here will
+    /// never trigger onWillPop callback in [CameraShutterButton]
+    if (!_camController.value.isRecordingVideo) {
+      await UIHandler.showStatusBar();
+    }
     return true;
   }
 
