@@ -183,8 +183,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       completeTask(entities: entities);
       _accessCamera = false;
     } else {
-      final entity = await Navigator.of(context).push(route);
       _panelController.minimizePanel();
+      final entity = await Navigator.of(context).push(route);
       if (entity != null) {
         entities.add(entity);
         _onChanged?.call(entity, false);
@@ -213,7 +213,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         ),
       ),
       begainHorizontal: true,
-      transitionDuration: const Duration(milliseconds: 300),
+      // transitionDuration: const Duration(seconds: 1),
+      // reverseTransitionDuration: const Duration(seconds: 1),
     );
 
     if (!navigator.mounted) return;
@@ -226,8 +227,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       completeTask(entities: entity != null ? [entity] : null);
       return;
     } else {
-      final entity = await navigator.push(route);
       _panelController.minimizePanel();
+      final entity = await navigator.push(route);
       final entities = [...value.selectedEntities];
       if (entity != null) {
         entities.add(entity);

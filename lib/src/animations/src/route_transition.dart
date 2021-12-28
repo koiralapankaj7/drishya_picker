@@ -7,7 +7,7 @@ class SlideTransitionPageRoute<T> extends PageRoute<T> {
     required this.builder,
     this.transitionCurve = Curves.fastLinearToSlowEaseIn,
     this.transitionDuration = const Duration(milliseconds: 400),
-    this.reverseTransitionDuration = const Duration(milliseconds: 300),
+    this.reverseTransitionDuration = const Duration(milliseconds: 400),
     this.begainHorizontal = false,
     this.endHorizontal = false,
     RouteSettings? settings,
