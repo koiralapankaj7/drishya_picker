@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -42,7 +43,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Editor setting
   late EditorSetting _editorSetting;
 
-  // Camera controller
+  //
+  // Camera setting, gallery view will be disabled even user opted to enable it.
   late CameraSetting _cameraSetting;
 
   // Camera text editor setting
@@ -67,7 +69,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void Function(List<DrishyaEntity> entities)? _onSubmitted;
 
   // Full screen mode or collapsable mode
-  var _fullScreenMode = false;
+  var _fullScreenMode = true;
 
   //
   var _accessCamera = false;
@@ -76,6 +78,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Initialize controller setting
   @internal
   void init({GallerySetting? setting}) {
+    _completer = Completer<List<DrishyaEntity>>();
     _setting = setting ?? const GallerySetting();
     _panelSetting = _setting.panelSetting ?? const PanelSetting();
     _editorSetting = _setting.editorSetting ?? const EditorSetting();
@@ -120,7 +123,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
               SnackBar(
                 content: Text(
                   'Maximum selection limit of '
-                  '${setting.maximum} has been reached!',
+                  '${setting.maximumCount} has been reached!',
                 ),
               ),
             );
@@ -143,7 +146,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void forceMultiSelect() {
     _internal = true;
     value = value.copyWith(
-      forceMultiSelection: !value.forceMultiSelection,
+      enableMultiSelection: !value.enableMultiSelection,
     );
   }
 
@@ -176,7 +179,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: CameraView(
-        setting: _cameraSetting,
+        setting: _cameraSetting.copyWith(enableGallery: false),
         editorSetting: _cameraTextEditorSetting,
         photoEditorSetting: _cameraPhotoEditorSetting,
       ),
@@ -219,7 +222,8 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     }
 
     _accessCamera = true;
-    final navigator = Navigator.of(context);
+
+    final uiHandler = UIHandler.of(context);
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
       builder: DrishyaEditor(
@@ -227,22 +231,24 @@ class GalleryController extends ValueNotifier<GalleryValue> {
           backgrounds: [DrishyaBackground(entity: entity)],
         ),
       ),
-      setting: const CustomRouteSetting(start: TransitionFrom.rightToLeft),
+      setting: const CustomRouteSetting(
+        start: TransitionFrom.rightToLeft,
+        reverse: TransitionFrom.leftToRight,
+      ),
     );
 
-    if (!navigator.mounted) return;
-
     if (fullScreenMode) {
-      final entity = await navigator.push(route);
+      // UIHandler.showStatusBarOnPop = false;
+      final entity = await uiHandler.push(route);
       if (entity != null) {
         _onChanged?.call(entity, false);
         final entities = [entity];
         completeTask(entities: entities);
-        navigator.pop(entities);
+        uiHandler.pop(entities);
       }
     } else {
       _panelController.minimizePanel();
-      final entity = await navigator.push(route);
+      final entity = await uiHandler.push(route);
       final entities = [...value.selectedEntities];
       if (entity != null) {
         entities.add(entity);
@@ -297,8 +303,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     GallerySetting? setting,
     CustomRouteSetting? routeSetting,
   }) async {
-    _completer = Completer<List<DrishyaEntity>>();
-
     /// [SlidableGalleryView] is not used so we need to update setting
     if (panelKey.currentState == null && setting != null) {
       init(setting: setting);
@@ -359,13 +363,14 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// return true if selected media reached to maximum selection limit
   bool get reachedMaximumLimit =>
-      value.selectedEntities.length == setting.maximum;
+      value.selectedEntities.length == setting.maximumCount;
 
   ///
   /// return true is gallery is in single selection mode
-  bool get singleSelection => _setting.showMultiSelectionButton
-      ? !value.forceMultiSelection
-      : setting.maximum == 1;
+  bool get singleSelection =>
+      _setting.selectionMode == SelectionMode.actionBased
+          ? !value.enableMultiSelection
+          : setting.maximumCount == 1;
 
   ///
   /// Gallery view pannel controller

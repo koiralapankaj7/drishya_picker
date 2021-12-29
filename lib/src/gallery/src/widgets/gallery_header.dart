@@ -97,7 +97,8 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                         albumVisibility: _controller.albumVisibility,
                       ),
                       const Spacer(),
-                      if (_controller.setting.showMultiSelectionButton)
+                      if (_controller.setting.selectionMode ==
+                          SelectionMode.actionBased)
                         GalleryBuilder(
                           controller: _controller,
                           builder: (value, child) {
@@ -111,7 +112,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                               },
                               child: Icon(
                                 CupertinoIcons.rectangle_stack,
-                                color: value.forceMultiSelection
+                                color: value.enableMultiSelection
                                     ? Colors.white
                                     : Colors.white38,
                               ),

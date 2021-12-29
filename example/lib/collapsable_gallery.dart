@@ -43,7 +43,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
       setting: GallerySetting(
         albumSubtitle: 'Collapsable',
         enableCamera: true,
-        maximum: 10,
+        maximumCount: 10,
         requestType: RequestType.all,
         editorSetting: EditorSetting(
           colors: _colors,
@@ -131,7 +131,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                       return GalleryViewField(
                         selectedEntities: data.entities,
                         setting: GallerySetting(
-                          maximum: data.maxLimit,
+                          maximumCount: data.maxLimit,
                           albumSubtitle: 'Image only',
                           requestType: data.requestType,
                         ),

@@ -52,7 +52,7 @@ class GridViewWidget extends StatelessWidget {
                       context,
                       selectedEntities: notifier.value.entities,
                       setting: GallerySetting(
-                        maximum: notifier.value.maxLimit,
+                        maximumCount: notifier.value.maxLimit,
                         albumSubtitle: 'All',
                         requestType: notifier.value.requestType,
                       ),

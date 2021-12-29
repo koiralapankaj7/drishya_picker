@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -19,16 +18,20 @@ class CamController extends ValueNotifier<CamValue> {
   /// as much as possible.
   ///
   /// You can also directly use `[CameraView.pick(context)]` for capturing media
-  CamController() : super(CamValue()) {
+  CamController() : super(const CamValue()) {
     init();
     _zoomController = ZoomController(this);
     _exposureController = ExposureController(this);
     _drishyaEditingController = DrishyaEditingController();
+    _pageController = PageController(initialPage: 1);
+    _galleryController = GalleryController();
   }
 
   late final ZoomController _zoomController;
   late final ExposureController _exposureController;
   late final DrishyaEditingController _drishyaEditingController;
+  late final PageController _pageController;
+  late final GalleryController _galleryController;
   late CameraSetting _setting;
   late EditorSetting _editorSetting;
   late EditorSetting _photoEditorSetting;
@@ -53,6 +56,24 @@ class CamController extends ValueNotifier<CamValue> {
   void update({bool? isPlaygroundActive}) {
     value = value.copyWith(isPlaygroundActive: isPlaygroundActive);
   }
+
+  ///
+  /// Open camera
+  @internal
+  void openCamera() => _pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeIn,
+      );
+
+  ///
+  /// Open gallery
+  @internal
+  void openGallery() => _pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeIn,
+      );
 
   /// Camera setting
   CameraSetting get setting => _setting;
@@ -91,6 +112,12 @@ class CamController extends ValueNotifier<CamValue> {
 
   /// Camera exposure controller
   ExposureController get exposureController => _exposureController;
+
+  /// Pageview controller
+  PageController get pageController => _pageController;
+
+  /// Gallery controller
+  GalleryController get galleryController => _galleryController;
 
   ///
   /// Change camera type
@@ -218,7 +245,7 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (_setting.editAfterCapture) {
-        UIHandler.showStatusBarOnPop = false;
+        // UIHandler.showStatusBarOnPop = false;
         await controller.pausePreview();
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
@@ -494,6 +521,8 @@ class CamController extends ValueNotifier<CamValue> {
     _exposureController.dispose();
     _drishyaEditingController.dispose();
     _cameraController?.dispose();
+    _pageController.dispose();
+    _galleryController.dispose();
     _isDisposed = true;
     super.dispose();
   }

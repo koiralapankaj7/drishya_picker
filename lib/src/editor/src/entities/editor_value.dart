@@ -55,9 +55,8 @@ class EditorValue {
     TextAlign? textAlign,
     bool? keyboardVisible,
     bool? fillTextfield,
-    bool? hasFocus,
-    bool? editingMode,
     int? maxLines,
+    bool? hasFocus,
     bool? hasStickers,
     bool? isEditing,
     bool? isStickerPickerOpen,
@@ -67,8 +66,8 @@ class EditorValue {
       textAlign: textAlign ?? this.textAlign,
       keyboardVisible: keyboardVisible ?? this.keyboardVisible,
       fillTextfield: fillTextfield ?? this.fillTextfield,
-      hasFocus: hasFocus ?? this.hasFocus,
       maxLines: maxLines ?? this.maxLines,
+      hasFocus: hasFocus ?? this.hasFocus,
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
@@ -77,31 +76,47 @@ class EditorValue {
   }
 
   @override
-  int get hashCode => hashValues(
-        textAlign,
-        keyboardVisible,
-        fillTextfield,
-        maxLines,
-        hasFocus,
-        hasStickers,
-        isEditing,
-        isStickerPickerOpen,
-        isColorPickerOpen,
-      );
+  String toString() {
+    return '''
+    EditorValue(
+      textAlign: $textAlign, 
+      keyboardVisible: $keyboardVisible, 
+      fillTextfield: $fillTextfield, 
+      maxLines: $maxLines, 
+      hasFocus: $hasFocus, 
+      hasStickers: $hasStickers, 
+      isEditing: $isEditing, 
+      isStickerPickerOpen: $isStickerPickerOpen, 
+      isColorPickerOpen: $isColorPickerOpen
+    )''';
+  }
 
   @override
   bool operator ==(Object other) {
-    if (other is! EditorValue) {
-      return false;
-    }
-    return textAlign == other.textAlign &&
-        keyboardVisible == other.keyboardVisible &&
-        fillTextfield == other.fillTextfield &&
-        maxLines == other.maxLines &&
-        hasFocus == other.hasFocus &&
-        hasStickers == other.hasStickers &&
-        isEditing == other.isEditing &&
-        isStickerPickerOpen == other.isStickerPickerOpen &&
-        isColorPickerOpen == other.isColorPickerOpen;
+    if (identical(this, other)) return true;
+
+    return other is EditorValue &&
+        other.textAlign == textAlign &&
+        other.keyboardVisible == keyboardVisible &&
+        other.fillTextfield == fillTextfield &&
+        other.maxLines == maxLines &&
+        other.hasFocus == hasFocus &&
+        other.hasStickers == hasStickers &&
+        other.isEditing == isEditing &&
+        other.isStickerPickerOpen == isStickerPickerOpen &&
+        other.isColorPickerOpen == isColorPickerOpen;
+  }
+
+  @override
+  int get hashCode {
+    return textAlign.hashCode ^
+        keyboardVisible.hashCode ^
+        fillTextfield.hashCode ^
+        maxLines.hashCode ^
+        hasFocus.hashCode ^
+        hasStickers.hashCode ^
+        isEditing.hashCode ^
+        isStickerPickerOpen.hashCode ^
+        isColorPickerOpen.hashCode;
   }
 }

@@ -27,14 +27,14 @@ enum PanelState {
 
 ///
 /// Settings for gallery panel
-///
+@immutable
 class PanelSetting {
   ///
   const PanelSetting({
+    this.maxHeight,
+    this.minHeight,
     this.headerHeight = kToolbarHeight,
     this.thumbHandlerHeight = 25.0,
-    this.minHeight,
-    this.maxHeight,
     this.snapingPoint = 0.4,
     this.headerBackground = Colors.black,
     this.foregroundColor = Colors.black,
@@ -97,25 +97,72 @@ class PanelSetting {
 
   /// Helper function
   PanelSetting copyWith({
+    double? maxHeight,
+    double? minHeight,
     double? headerHeight,
     double? thumbHandlerHeight,
-    double? minHeight,
-    double? maxHeight,
     double? snapingPoint,
     Color? headerBackground,
     Color? foregroundColor,
     Color? backgroundColor,
+    SystemUiOverlayStyle? overlayStyle,
   }) {
     return PanelSetting(
+      maxHeight: maxHeight ?? this.maxHeight,
+      minHeight: minHeight ?? this.minHeight,
       headerHeight: headerHeight ?? this.headerHeight,
       thumbHandlerHeight: thumbHandlerHeight ?? this.thumbHandlerHeight,
-      minHeight: minHeight ?? this.minHeight,
-      maxHeight: maxHeight ?? this.maxHeight,
       snapingPoint: snapingPoint ?? this.snapingPoint,
       headerBackground: headerBackground ?? this.headerBackground,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      overlayStyle: overlayStyle ?? this.overlayStyle,
     );
+  }
+
+  @override
+  String toString() {
+    return '''
+    PanelSetting(
+      maxHeight: $maxHeight, 
+      minHeight: $minHeight, 
+      headerHeight: $headerHeight, 
+      thumbHandlerHeight: $thumbHandlerHeight, 
+      snapingPoint: $snapingPoint, 
+      headerBackground: $headerBackground, 
+      foregroundColor: $foregroundColor, 
+      backgroundColor: $backgroundColor, 
+      overlayStyle: $overlayStyle
+    )''';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is PanelSetting &&
+        other.maxHeight == maxHeight &&
+        other.minHeight == minHeight &&
+        other.headerHeight == headerHeight &&
+        other.thumbHandlerHeight == thumbHandlerHeight &&
+        other.snapingPoint == snapingPoint &&
+        other.headerBackground == headerBackground &&
+        other.foregroundColor == foregroundColor &&
+        other.backgroundColor == backgroundColor &&
+        other.overlayStyle == overlayStyle;
+  }
+
+  @override
+  int get hashCode {
+    return maxHeight.hashCode ^
+        minHeight.hashCode ^
+        headerHeight.hashCode ^
+        thumbHandlerHeight.hashCode ^
+        snapingPoint.hashCode ^
+        headerBackground.hashCode ^
+        foregroundColor.hashCode ^
+        backgroundColor.hashCode ^
+        overlayStyle.hashCode;
   }
 }
 
@@ -387,7 +434,7 @@ class PanelController extends ValueNotifier<PanelValue> {
     ScrollController? scrollController,
   })  : _scrollController = scrollController ?? ScrollController(),
         _panelVisibility = ValueNotifier(false),
-        super(PanelValue());
+        super(const PanelValue());
 
   final ScrollController _scrollController;
   final ValueNotifier<bool> _panelVisibility;
@@ -511,9 +558,10 @@ class PanelController extends ValueNotifier<PanelValue> {
 }
 
 ///
+@immutable
 class PanelValue {
   ///
-  PanelValue({
+  const PanelValue({
     this.state = PanelState.close,
     this.factor = 0.0,
     this.offset = 0.0,
@@ -545,5 +593,35 @@ class PanelValue {
       offset: offset ?? this.offset,
       position: position ?? this.position,
     );
+  }
+
+  @override
+  String toString() {
+    return '''
+    PanelValue(
+      state: $state, 
+      factor: $factor, 
+      offset: $offset, 
+      position: $position
+    )''';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is PanelValue &&
+        other.state == state &&
+        other.factor == factor &&
+        other.offset == offset &&
+        other.position == position;
+  }
+
+  @override
+  int get hashCode {
+    return state.hashCode ^
+        factor.hashCode ^
+        offset.hashCode ^
+        position.hashCode;
   }
 }

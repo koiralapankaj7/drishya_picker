@@ -6,7 +6,9 @@ import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_overlay.dart';
 import 'package:drishya_picker/src/camera/src/widgets/raw_camera_view.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -72,7 +74,6 @@ class CameraView extends StatefulWidget {
         ),
         setting: routeSetting ??
             const CustomRouteSetting(
-              curve: Curves.easeIn,
               transitionDuration: _kRouteDuration,
               reverseTransitionDuration: _kRouteDuration,
               settings: RouteSettings(name: name),
@@ -118,9 +119,17 @@ class _CameraViewState extends State<CameraView>
   @override
   void didUpdateWidget(covariant CameraView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
+    if (oldWidget.controller != widget.controller &&
+        oldWidget.setting != widget.setting &&
+        oldWidget.editorSetting != widget.editorSetting &&
+        oldWidget.photoEditorSetting != widget.photoEditorSetting) {
       UIHandler.hideStatusBar();
-      _camController = widget.controller ?? CamController();
+      _camController = (widget.controller ?? CamController())
+        ..init(
+          setting: widget.setting,
+          editorSetting: widget.editorSetting,
+          photoEditorSetting: widget.photoEditorSetting,
+        );
       _photoEditingController = _camController.drishyaEditingController
         ..addListener(_photoEditingListener);
       _camController.createCamera();
@@ -138,7 +147,7 @@ class _CameraViewState extends State<CameraView>
     }
 
     if (state == AppLifecycleState.inactive) {
-      UIHandler.showStatusBar();
+      // UIHandler.showStatusBar();
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
       UIHandler.hideStatusBar();
@@ -154,7 +163,7 @@ class _CameraViewState extends State<CameraView>
 
   @override
   void dispose() {
-    UIHandler.showStatusBar();
+    // UIHandler.showStatusBar();
     WidgetsBinding.instance?.removeObserver(this);
     _photoEditingController.removeListener(_photoEditingListener);
     if (widget.controller == null) {
@@ -164,13 +173,18 @@ class _CameraViewState extends State<CameraView>
   }
 
   Future<bool> _onWillPop() async {
+    if (_camController.pageController.page == 0.0) {
+      _camController.openCamera();
+      return false;
+    }
+
     /// [CameraShutterButton] is also using [WillPopScope] to handle
     /// video recording stuff. So always return true from here so that
     /// it will also get this callback. Returning false from here will
     /// never trigger onWillPop callback in [CameraShutterButton]
-    if (!_camController.value.isRecordingVideo) {
-      await UIHandler.showStatusBar();
-    }
+    // if (!_camController.value.isRecordingVideo) {
+    //   await UIHandler.showStatusBar();
+    // }
     return true;
   }
 
@@ -184,9 +198,7 @@ class _CameraViewState extends State<CameraView>
           valueListenable: _camController,
           builder: (context, value, child) {
             // Camera
-            if (_camController.initialized) {
-              return child!;
-            }
+            if (_camController.initialized) return child!;
 
             // Camera permission
             if (value.error != null &&
@@ -204,32 +216,100 @@ class _CameraViewState extends State<CameraView>
           },
           child: CamControllerProvider(
             action: _camController,
-            child: Stack(
-              children: [
-                // Camera type specific view
-                CameraBuilder(
-                  controller: _camController,
-                  builder: (value, child) {
-                    if (value.cameraType == CameraType.text) {
-                      return DrishyaEditor(
-                        controller: _photoEditingController,
-                        setting: _camController.editorSetting,
-                        hideOverlay: true,
-                      );
-                    }
-                    return RawCameraView(controller: _camController);
-                  },
-                ),
-
-                // Camera control overlay
-                CameraOverlay(controller: _camController),
-
-                //
-              ],
+            child: PageView(
+              controller: _camController.pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: const [_GalleryView(), _CameraView()],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+///
+class _GalleryView extends StatelessWidget {
+  const _GalleryView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.camController!;
+
+    if (!controller.setting.enableGallery) {
+      return const SizedBox();
+    }
+
+    return Stack(
+      children: [
+        GalleryView(
+          controller: controller.galleryController,
+          setting: const GallerySetting(
+            selectionMode: SelectionMode.actionBased,
+            albumTitle: 'Gallery',
+            enableCamera: false,
+            panelSetting: PanelSetting(thumbHandlerHeight: 0),
+          ),
+        ),
+
+        // Camera switch button
+        GalleryBuilder(
+          controller: controller.galleryController,
+          builder: (value, child) {
+            if (value.selectedEntities.isNotEmpty) {
+              return const SizedBox();
+            }
+            return child!;
+          },
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: InkWell(
+              onTap: controller.openCamera,
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(
+                  CupertinoIcons.camera_circle_fill,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CameraView extends StatelessWidget {
+  const _CameraView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.camController!;
+
+    return Stack(
+      children: [
+        // Camera type specific view
+        CameraBuilder(
+          controller: controller,
+          builder: (value, child) {
+            if (value.cameraType == CameraType.text) {
+              return DrishyaEditor(
+                controller: controller.drishyaEditingController,
+                setting: controller.editorSetting,
+                hideOverlay: true,
+              );
+            }
+            return RawCameraView(controller: controller);
+          },
+        ),
+
+        // Camera control overlay
+        CameraOverlay(controller: controller),
+
+        //
+      ],
     );
   }
 }

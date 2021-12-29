@@ -39,16 +39,18 @@ class EditorShutterButton extends StatelessWidget {
                   controller.updateValue(isColorPickerOpen: false);
                   return;
                 }
-                final navigator = Navigator.of(context);
+                final uiHandler = UIHandler.of(context);
 
                 final entity = await controller.completeEditing();
                 if (entity != null) {
-                  if (!navigator.mounted) return;
-                  UIHandler.showStatusBarOnPop = true;
-                  UIHandler.of(context).pop(entity);
+                  // UIHandler.showStatusBarOnPop = true;
+                  UIHandler.transformFrom = TransitionFrom.topToBottom;
+                  uiHandler.pop(entity);
+                  Future.delayed(const Duration(milliseconds: 400), () {
+                    UIHandler.transformFrom = null;
+                  });
                 } else {
-                  if (!navigator.mounted) return;
-                  UIHandler.of(context).showSnackBar(
+                  uiHandler.showSnackBar(
                     'Something went wront! Please try again.',
                   );
                 }

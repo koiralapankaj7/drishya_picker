@@ -1,5 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -62,6 +63,7 @@ class CameraViewField extends StatelessWidget {
           if (entities?.isNotEmpty ?? false) {
             onCapture?.call(entities!);
           }
+          UIHandler.showStatusBar();
         });
       },
       child: child,

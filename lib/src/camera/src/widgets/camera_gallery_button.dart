@@ -1,7 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
-import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -20,9 +19,10 @@ class CameraGalleryButton extends StatelessWidget {
     return CameraBuilder(
       controller: controller,
       builder: (value, child) {
-        final state = value.hideCameraGalleryButton
-            ? CrossFadeState.showFirst
-            : CrossFadeState.showSecond;
+        final state =
+            value.hideCameraGalleryButton || !controller.setting.enableGallery
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond;
 
         return Padding(
           padding: const EdgeInsets.all(4),
@@ -31,7 +31,7 @@ class CameraGalleryButton extends StatelessWidget {
             height: 44,
             child: AppAnimatedCrossFade(
               firstChild: const SizedBox(),
-              secondChild: const _GalleyView(),
+              secondChild: _GalleyView(controller: controller),
               crossFadeState: state,
             ),
           ),
@@ -42,48 +42,30 @@ class CameraGalleryButton extends StatelessWidget {
 }
 
 class _GalleyView extends StatefulWidget {
-  const _GalleyView({Key? key}) : super(key: key);
+  const _GalleyView({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final CamController controller;
 
   @override
   _GalleyViewState createState() => _GalleyViewState();
 }
 
 class _GalleyViewState extends State<_GalleyView> {
-  late final GalleryController _controller;
   late final Future<List<DrishyaEntity>> _recent;
 
   @override
   void initState() {
     super.initState();
-    _controller = GalleryController();
-    _recent = _controller.recentEntities(count: 1);
+    _recent = widget.controller.galleryController.recentEntities(count: 1);
   }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        _controller
-            .pick(
-          context,
-          setting: const GallerySetting(
-            showCameraInsideGrid: false,
-            showMultiSelectionButton: true,
-            albumTitle: 'Gallery',
-            panelSetting: PanelSetting(thumbHandlerHeight: 0),
-          ),
-          routeSetting: const CustomRouteSetting(
-            curve: Curves.easeIn,
-            start: TransitionFrom.leftToRight,
-            reverse: TransitionFrom.rightToLeft,
-          ),
-        )
-            .then((entities) {
-          if (entities.isNotEmpty) {
-            UIHandler.of(context).pop();
-          }
-        });
-      },
+      onTap: widget.controller.openGallery,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(

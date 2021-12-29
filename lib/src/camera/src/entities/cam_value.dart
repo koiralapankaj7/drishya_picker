@@ -1,14 +1,17 @@
 import 'package:camera/camera.dart';
+import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:flutter/material.dart';
 
 /// Camera controller value
+@immutable
 class CamValue {
   ///
-  CamValue({
+  const CamValue({
     this.cameraDescription,
     this.cameras = const [],
-    this.enableAudio = true,
     this.cameraType = CameraType.normal,
+    this.enableAudio = true,
     this.flashMode = FlashMode.off,
     this.isTakingPicture = false,
     this.isRecordingVideo = false,
@@ -70,7 +73,7 @@ class CamValue {
       isRecordingVideo: isRecordingVideo ?? this.isRecordingVideo,
       isRecordingPaused: isRecordingPaused ?? this.isRecordingPaused,
       isPlaygroundActive: isPlaygroundActive ?? this.isPlaygroundActive,
-      error: error,
+      error: error ?? this.error,
     );
   }
 
@@ -143,4 +146,53 @@ class CamValue {
   ///
   bool get hideCameraRotationButton =>
       cameraType == CameraType.text || isRecordingVideo;
+
+  @override
+  String toString() {
+    return '''
+    CamValue(
+      cameraDescription: $cameraDescription, 
+      cameras: $cameras, 
+      cameraType: $cameraType, 
+      enableAudio: $enableAudio, 
+      flashMode: $flashMode, 
+      isTakingPicture: $isTakingPicture, 
+      isRecordingVideo: $isRecordingVideo, 
+      isRecordingPaused: $isRecordingPaused, 
+      isPlaygroundActive: $isPlaygroundActive, 
+      error: $error
+    )''';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
+
+    return other is CamValue &&
+        other.cameraDescription == cameraDescription &&
+        listEquals(other.cameras, cameras) &&
+        other.cameraType == cameraType &&
+        other.enableAudio == enableAudio &&
+        other.flashMode == flashMode &&
+        other.isTakingPicture == isTakingPicture &&
+        other.isRecordingVideo == isRecordingVideo &&
+        other.isRecordingPaused == isRecordingPaused &&
+        other.isPlaygroundActive == isPlaygroundActive &&
+        other.error == error;
+  }
+
+  @override
+  int get hashCode {
+    return cameraDescription.hashCode ^
+        cameras.hashCode ^
+        cameraType.hashCode ^
+        enableAudio.hashCode ^
+        flashMode.hashCode ^
+        isTakingPicture.hashCode ^
+        isRecordingVideo.hashCode ^
+        isRecordingPaused.hashCode ^
+        isPlaygroundActive.hashCode ^
+        error.hashCode;
+  }
 }

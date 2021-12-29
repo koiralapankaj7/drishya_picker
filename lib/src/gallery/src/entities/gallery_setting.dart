@@ -1,15 +1,29 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:flutter/material.dart';
+
+/// Available multiselection mode for gallery
+enum SelectionMode {
+  /// maximumCount provided in [GallerySetting] will be use to determine
+  /// selection mode.
+  countBased,
+
+  /// Multiselection toogler widget will be used to determine selection mode.
+  /// maximumCount provided in [GallerySetting] will be preserved
+  actionBased,
+}
 
 ///
 /// Setting for drishya picker
+@immutable
 class GallerySetting {
   ///
   /// Gallery setting
   const GallerySetting({
     this.requestType = RequestType.all,
-    this.maximum = 20,
-    this.albumSubtitle = 'Select Media',
+    this.maximumCount = 20,
+    this.selectionMode = SelectionMode.countBased,
     this.albumTitle = 'All Photos',
+    this.albumSubtitle = 'Select Media',
     this.enableCamera = true,
     this.crossAxisCount,
     this.panelSetting,
@@ -17,8 +31,6 @@ class GallerySetting {
     this.cameraSetting,
     this.cameraTextEditorSetting,
     this.cameraPhotoEditorSetting,
-    this.showCameraInsideGrid = true,
-    this.showMultiSelectionButton = false,
   });
 
   ///
@@ -28,7 +40,11 @@ class GallerySetting {
 
   ///
   /// Total media allowed to select. Default is 20
-  final int maximum;
+  final int maximumCount;
+
+  ///
+  /// Multiselection mode, default is [SelectionMode.countBased]
+  final SelectionMode selectionMode;
 
   ///
   /// Album name for all photos, default is set to "All Photos"
@@ -41,13 +57,6 @@ class GallerySetting {
   ///
   /// Set false to hide camera from gallery view
   final bool enableCamera;
-
-  ///
-  /// If true, camera button will be shown inside grid view, else
-  /// it will be shown as floating button,
-  ///
-  /// Default value is true.
-  final bool showCameraInsideGrid;
 
   ///
   /// Gallery grid cross axis count. Default is 3
@@ -74,34 +83,28 @@ class GallerySetting {
   final EditorSetting? cameraPhotoEditorSetting;
 
   ///
-  /// If true, this flag will be used to determine
-  /// single-selection/multi-selection
-  final bool showMultiSelectionButton;
-
-  ///
   /// Helper function to copy its properties
   GallerySetting copyWith({
     RequestType? requestType,
-    int? maximum,
-    String? albumSubtitle,
+    int? maximumCount,
+    SelectionMode? selectionMode,
     String? albumTitle,
+    String? albumSubtitle,
     bool? enableCamera,
-    bool? showCameraInsideGrid,
     int? crossAxisCount,
     PanelSetting? panelSetting,
     EditorSetting? editorSetting,
     CameraSetting? cameraSetting,
     EditorSetting? cameraTextEditorSetting,
     EditorSetting? cameraPhotoEditorSetting,
-    bool? showMultiSelectionButton,
   }) {
     return GallerySetting(
       requestType: requestType ?? this.requestType,
-      maximum: maximum ?? this.maximum,
-      albumSubtitle: albumSubtitle ?? this.albumSubtitle,
+      maximumCount: maximumCount ?? this.maximumCount,
+      selectionMode: selectionMode ?? this.selectionMode,
       albumTitle: albumTitle ?? this.albumTitle,
+      albumSubtitle: albumSubtitle ?? this.albumSubtitle,
       enableCamera: enableCamera ?? this.enableCamera,
-      showCameraInsideGrid: showCameraInsideGrid ?? this.showCameraInsideGrid,
       crossAxisCount: crossAxisCount ?? this.crossAxisCount,
       panelSetting: panelSetting ?? this.panelSetting,
       editorSetting: editorSetting ?? this.editorSetting,
@@ -110,8 +113,60 @@ class GallerySetting {
           cameraTextEditorSetting ?? this.cameraTextEditorSetting,
       cameraPhotoEditorSetting:
           cameraPhotoEditorSetting ?? this.cameraPhotoEditorSetting,
-      showMultiSelectionButton:
-          showMultiSelectionButton ?? this.showMultiSelectionButton,
     );
+  }
+
+  @override
+  String toString() {
+    return '''
+    GallerySetting(
+      requestType: $requestType, 
+      maximumCount: $maximumCount, 
+      selectionMode: $selectionMode, 
+      albumTitle: $albumTitle, 
+      albumSubtitle: $albumSubtitle, 
+      enableCamera: $enableCamera, 
+      crossAxisCount: $crossAxisCount, 
+      panelSetting: $panelSetting, 
+      editorSetting: $editorSetting, 
+      cameraSetting: $cameraSetting, 
+      cameraTextEditorSetting: $cameraTextEditorSetting, 
+      cameraPhotoEditorSetting: $cameraPhotoEditorSetting
+    )''';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is GallerySetting &&
+        other.requestType == requestType &&
+        other.maximumCount == maximumCount &&
+        other.selectionMode == selectionMode &&
+        other.albumTitle == albumTitle &&
+        other.albumSubtitle == albumSubtitle &&
+        other.enableCamera == enableCamera &&
+        other.crossAxisCount == crossAxisCount &&
+        other.panelSetting == panelSetting &&
+        other.editorSetting == editorSetting &&
+        other.cameraSetting == cameraSetting &&
+        other.cameraTextEditorSetting == cameraTextEditorSetting &&
+        other.cameraPhotoEditorSetting == cameraPhotoEditorSetting;
+  }
+
+  @override
+  int get hashCode {
+    return requestType.hashCode ^
+        maximumCount.hashCode ^
+        selectionMode.hashCode ^
+        albumTitle.hashCode ^
+        albumSubtitle.hashCode ^
+        enableCamera.hashCode ^
+        crossAxisCount.hashCode ^
+        panelSetting.hashCode ^
+        editorSetting.hashCode ^
+        cameraSetting.hashCode ^
+        cameraTextEditorSetting.hashCode ^
+        cameraPhotoEditorSetting.hashCode;
   }
 }

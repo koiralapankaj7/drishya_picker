@@ -49,7 +49,6 @@ class GalleryView extends StatefulWidget {
         builder: GalleryView(controller: controller, setting: setting),
         setting: routeSetting ??
             const CustomRouteSetting(
-              curve: Curves.easeIn,
               settings: RouteSettings(name: name),
             ),
       ),
@@ -126,16 +125,9 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
     _controller = widget.controller..init(setting: widget.setting);
-    _albums = Albums();
-    if (_controller.panelKey.currentState == null) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        _albums.fetchAlbums(_controller.setting.requestType);
-      });
-    } else {
-      _albums.fetchAlbums(_controller.setting.requestType);
-    }
+    _albums = Albums()..fetchAlbums(_controller.setting.requestType);
+
     _panelController = _controller.panelController;
     _animationController = AnimationController(
       vsync: this,
@@ -265,6 +257,8 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final panelSetting = widget.setting.panelSetting!;
+    final actionMode =
+        _controller.setting.selectionMode == SelectionMode.actionBased;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: panelSetting.overlayStyle,
@@ -336,11 +330,10 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               ),
 
               // Send and edit button
-              if (!_controller.setting.showMultiSelectionButton)
-                GalleryAssetSelector(controller: _controller),
+              if (!actionMode) GalleryAssetSelector(controller: _controller),
 
               // Send button
-              if (_controller.setting.showMultiSelectionButton)
+              if (actionMode)
                 Positioned(
                   bottom: 0,
                   right: 0,

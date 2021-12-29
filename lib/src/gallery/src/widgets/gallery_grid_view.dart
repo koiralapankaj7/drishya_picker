@@ -79,8 +79,7 @@ class GalleryGridView extends StatelessWidget {
               }
 
               final entities = value.entities;
-              final enableCamera = controller.setting.enableCamera &&
-                  controller.setting.showCameraInsideGrid;
+              final enableCamera = controller.setting.enableCamera;
 
               final itemCount = albums.value.state == BaseState.fetching
                   ? 20
@@ -88,68 +87,44 @@ class GalleryGridView extends StatelessWidget {
                       ? entities.length + 1
                       : entities.length;
 
-              return Stack(
-                children: [
-                  // Assets grid
-                  LazyLoadScrollView(
-                    onEndOfPage: album.fetchAssets,
-                    scrollOffset: MediaQuery.of(context).size.height * 0.4,
-                    child: GridView.builder(
-                      controller: controller.panelController.scrollController,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: controller.setting.crossAxisCount ?? 3,
-                        crossAxisSpacing: 1.5,
-                        mainAxisSpacing: 1.5,
-                      ),
-                      itemCount: itemCount,
-                      padding: EdgeInsets.zero,
-                      itemBuilder: (context, index) {
-                        if (enableCamera && index == 0) {
-                          return InkWell(
-                            onTap: () => controller.openCamera(context),
-                            child: Icon(
-                              CupertinoIcons.camera,
-                              color: Colors.lightBlue.shade300,
-                              size: 26,
-                            ),
-                          );
-                        }
-
-                        final ind = enableCamera ? index - 1 : index;
-
-                        final entity = albums.value.state == BaseState.fetching
-                            ? null
-                            : entities[ind];
-
-                        if (entity == null) return const SizedBox();
-
-                        return _MediaTile(
-                          controller: controller,
-                          entity: entity,
-                        );
-                      },
-                    ),
+              return LazyLoadScrollView(
+                onEndOfPage: album.fetchAssets,
+                scrollOffset: MediaQuery.of(context).size.height * 0.4,
+                child: GridView.builder(
+                  controller: controller.panelController.scrollController,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: controller.setting.crossAxisCount ?? 3,
+                    crossAxisSpacing: 1.5,
+                    mainAxisSpacing: 1.5,
                   ),
-
-                  // Camera switch button
-                  if (controller.setting.showMultiSelectionButton)
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: InkWell(
-                        onTap: onClosePressed,
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            CupertinoIcons.camera_circle_fill,
-                            color: Colors.white,
-                            size: 40,
-                          ),
+                  itemCount: itemCount,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    if (enableCamera && index == 0) {
+                      return InkWell(
+                        onTap: () => controller.openCamera(context),
+                        child: Icon(
+                          CupertinoIcons.camera,
+                          color: Colors.lightBlue.shade300,
+                          size: 26,
                         ),
-                      ),
-                    ),
+                      );
+                    }
 
-                  //
-                ],
+                    final ind = enableCamera ? index - 1 : index;
+
+                    final entity = albums.value.state == BaseState.fetching
+                        ? null
+                        : entities[ind];
+
+                    if (entity == null) return const SizedBox();
+
+                    return _MediaTile(
+                      controller: controller,
+                      entity: entity,
+                    );
+                  },
+                ),
               );
             },
           );
@@ -225,11 +200,11 @@ class _SelectionCount extends StatelessWidget {
     return GalleryBuilder(
       controller: controller,
       builder: (value, child) {
-        final hasMultiSelectionButton =
-            controller.setting.showMultiSelectionButton;
+        final actionBased =
+            controller.setting.selectionMode == SelectionMode.actionBased;
 
-        final singleSelection = hasMultiSelectionButton
-            ? !value.forceMultiSelection
+        final singleSelection = actionBased
+            ? !value.enableMultiSelection
             : controller.singleSelection;
 
         final isSelected = value.selectedEntities.contains(entity);
@@ -250,7 +225,7 @@ class _SelectionCount extends StatelessWidget {
           );
         }
 
-        if (hasMultiSelectionButton && !singleSelection) {
+        if (actionBased && !singleSelection) {
           counter = Container(
             height: 30,
             width: 30,
@@ -266,8 +241,7 @@ class _SelectionCount extends StatelessWidget {
           color: isSelected ? Colors.white38 : Colors.transparent,
           padding: const EdgeInsets.all(6),
           child: Align(
-            alignment:
-                hasMultiSelectionButton ? Alignment.topRight : Alignment.center,
+            alignment: actionBased ? Alignment.topRight : Alignment.center,
             child: counter,
           ),
         );

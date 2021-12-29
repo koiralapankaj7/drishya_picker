@@ -42,6 +42,23 @@ class EditorSetting {
     );
   }
 
+  /// Default backgrounds
+  List<GradientBackground> get defaultBackgrounds => _defaultBackgrounds;
+
+  /// Default colors
+  List<Color> get defaultColors => _colors;
+
+  @override
+  String toString() {
+    return '''
+    EditorSetting(
+      stickers: $stickers, 
+      backgrounds: $backgrounds, 
+      fixedTabSize: $fixedTabSize, 
+      colors: $colors
+    )''';
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -61,12 +78,6 @@ class EditorSetting {
         fixedTabSize.hashCode ^
         colors.hashCode;
   }
-
-  /// Default backgrounds
-  List<GradientBackground> get defaultBackgrounds => _defaultBackgrounds;
-
-  /// Default colors
-  List<Color> get defaultColors => _colors;
 }
 
 ///

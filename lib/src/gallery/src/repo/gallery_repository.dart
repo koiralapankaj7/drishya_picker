@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 /// State for the fetching process
 enum BaseState {
@@ -97,6 +96,14 @@ class Albums extends ValueNotifier<AlbumsValue> {
 
   ///
   final ValueNotifier<Album> currentAlbum;
+
+  // void _text() async {
+  //   final so = compute(_another, '');
+  // }
+
+  // String _another(String args) {
+  //   return '';
+  // }
 
   /// Fetch recent entities
   Future<List<DrishyaEntity>> recentEntities({

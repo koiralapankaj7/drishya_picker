@@ -21,9 +21,10 @@ class EditorCloseButton extends StatelessWidget {
     if (!controller.value.hasStickers) {
       if (pop) {
         UIHandler.of(context).pop();
-      } else {
-        await UIHandler.showStatusBar();
       }
+      //  else {
+      //   await UIHandler.showStatusBar();
+      // }
       return true;
     } else {
       await showDialog<bool>(

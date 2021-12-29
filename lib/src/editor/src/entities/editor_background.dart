@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -18,23 +19,49 @@ abstract class EditorBackground {
 }
 
 ///
+@immutable
 class DrishyaBackground implements EditorBackground {
   ///
   /// Drishya background only support image background
-  const DrishyaBackground({required this.entity});
+  const DrishyaBackground({
+    required this.entity,
+  });
 
   /// Drishya entity
   final DrishyaEntity entity;
 
   @override
   Widget build(BuildContext context) => _EntityBGView(entity: entity);
+
+  ///
+  DrishyaBackground copyWith({
+    DrishyaEntity? entity,
+  }) {
+    return DrishyaBackground(
+      entity: entity ?? this.entity,
+    );
+  }
+
+  @override
+  String toString() => 'DrishyaBackground(entity: $entity)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is DrishyaBackground && other.entity == entity;
+  }
+
+  @override
+  int get hashCode => entity.hashCode;
 }
 
 ///
+@immutable
 class MemoryAssetBackground implements EditorBackground {
   ///
   /// Background for memory asset
-  MemoryAssetBackground({required this.bytes});
+  const MemoryAssetBackground({required this.bytes});
 
   /// Asset bytes
   final Uint8List bytes;
@@ -48,9 +75,32 @@ class MemoryAssetBackground implements EditorBackground {
           ),
         ),
       );
+
+  ///
+  MemoryAssetBackground copyWith({
+    Uint8List? bytes,
+  }) {
+    return MemoryAssetBackground(
+      bytes: bytes ?? this.bytes,
+    );
+  }
+
+  @override
+  String toString() => 'MemoryAssetBackground(bytes: $bytes)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is MemoryAssetBackground && other.bytes == bytes;
+  }
+
+  @override
+  int get hashCode => bytes.hashCode;
 }
 
 ///
+@immutable
 class GradientBackground implements EditorBackground {
   ///
   const GradientBackground({
@@ -84,6 +134,37 @@ class GradientBackground implements EditorBackground {
               ),
         ),
       );
+
+  /// Helper function to copy object data
+  GradientBackground copyWith({
+    List<Color>? colors,
+    Gradient? gradient,
+  }) {
+    return GradientBackground(
+      colors: colors ?? this.colors,
+      gradient: gradient ?? this.gradient,
+    );
+  }
+
+  @override
+  String toString() => '''
+      GradientBackground(
+        colors: $colors, 
+        gradient: $gradient
+      )''';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
+
+    return other is GradientBackground &&
+        listEquals(other.colors, colors) &&
+        other.gradient == gradient;
+  }
+
+  @override
+  int get hashCode => colors.hashCode ^ gradient.hashCode;
 }
 
 /// For better performance, this approact prevent unnecessary build

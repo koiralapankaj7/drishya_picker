@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,8 +19,8 @@ class UIHandler {
   /// Navigator state for the [_context]
   NavigatorState get _state => Navigator.of(_context);
 
-  /// If true, status bar will be visible other invisible on pop event.
-  static bool showStatusBarOnPop = true;
+  /// Internal navigation translation handlation
+  static TransitionFrom? transformFrom;
 
   /// Hide status bar
   static Future<void> hideStatusBar() async {
@@ -31,7 +32,6 @@ class UIHandler {
 
   /// Show status bar
   static Future<void> showStatusBar() async {
-    if (!showStatusBarOnPop) return;
     await SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -56,17 +56,13 @@ class UIHandler {
 
   /// Pop widget
   void pop<T extends Object?>([T? result]) {
-    (showStatusBarOnPop ? showStatusBar() : Future<void>.value()).then((value) {
-      if (!_state.mounted) return;
-      _state.pop<T?>(result);
-    });
+    if (!_state.mounted) return;
+    _state.pop<T?>(result);
   }
 
-  /// Pop widget and hide status bar
-  void popAndHideStatusBar<T extends Object?>([T? result]) {
-    hideStatusBar().then((value) {
-      if (!_state.mounted) return;
-      _state.pop<T?>(result);
-    });
+  /// Push widget
+  Future<T?> push<T extends Object?>(Route<T> route) async {
+    if (!_state.mounted) return null;
+    return _state.push(route);
   }
 }

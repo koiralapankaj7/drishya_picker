@@ -90,7 +90,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                     return GalleryViewField(
                       selectedEntities: data.entities,
                       setting: GallerySetting(
-                        maximum: data.maxLimit,
+                        maximumCount: data.maxLimit,
                         albumSubtitle: 'Image only',
                         requestType: data.requestType,
                       ),
