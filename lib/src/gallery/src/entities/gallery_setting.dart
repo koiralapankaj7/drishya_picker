@@ -20,7 +20,7 @@ class GallerySetting {
   /// Gallery setting
   const GallerySetting({
     this.requestType = RequestType.all,
-    this.maximumCount = 20,
+    this.maximumCount = 50,
     this.selectionMode = SelectionMode.countBased,
     this.albumTitle = 'All Photos',
     this.albumSubtitle = 'Select Media',
@@ -39,7 +39,7 @@ class GallerySetting {
   final RequestType requestType;
 
   ///
-  /// Total media allowed to select. Default is 20
+  /// Total media allowed to select. Default is 50
   final int maximumCount;
 
   ///

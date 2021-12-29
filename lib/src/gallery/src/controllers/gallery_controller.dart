@@ -117,16 +117,11 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         _onChanged?.call(entity, true);
       } else {
         if (reachedMaximumLimit) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Maximum selection limit of '
-                  '${setting.maximumCount} has been reached!',
-                ),
-              ),
-            );
+          UIHandler.of(context).showSnackBar(
+            'Maximum selection limit of '
+            '${setting.maximumCount} has been reached!',
+          );
+
           return;
         }
         selectedList.add(entity);
@@ -177,34 +172,40 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   Future<void> openCamera(BuildContext context) async {
     _accessCamera = true;
 
-    final route = SlideTransitionPageRoute<DrishyaEntity>(
+    final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
       builder: CameraView(
         setting: _cameraSetting.copyWith(enableGallery: false),
         editorSetting: _cameraTextEditorSetting,
         photoEditorSetting: _cameraPhotoEditorSetting,
       ),
-      setting: const CustomRouteSetting(
+      setting: CustomRouteSetting(
         start: TransitionFrom.rightToLeft,
-        transitionDuration: Duration(milliseconds: 300),
+        reverse: fullScreenMode
+            ? TransitionFrom.topToBottom
+            : TransitionFrom.leftToRight,
       ),
     );
 
     final entities = [...value.selectedEntities];
 
     if (fullScreenMode) {
-      final entity = await Navigator.of(context).pushReplacement(route);
-      if (entity != null) {
-        entities.add(entity);
-        _onChanged?.call(entity, false);
+      final list = await Navigator.of(context).pushReplacement(route);
+      await UIHandler.showStatusBar();
+      if (list?.isNotEmpty ?? false) {
+        final ety = list!.first;
+        entities.add(ety);
+        _onChanged?.call(ety, false);
       }
       completeTask(entities: entities);
       _accessCamera = false;
     } else {
       _panelController.minimizePanel();
-      final entity = await Navigator.of(context).push(route);
-      if (entity != null) {
-        entities.add(entity);
-        _onChanged?.call(entity, false);
+      final list = await Navigator.of(context).push(route);
+      await UIHandler.showStatusBar();
+      if (list?.isNotEmpty ?? false) {
+        final ety = list!.first;
+        entities.add(ety);
+        _onChanged?.call(ety, false);
       }
       _accessCamera = false;
     }
@@ -238,20 +239,20 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     );
 
     if (fullScreenMode) {
-      final entity = await uiHandler.push(route);
-      if (entity != null) {
-        _onChanged?.call(entity, false);
-        final entities = [entity];
-        completeTask(entities: entities);
-        uiHandler.pop(entities);
+      final ety = await uiHandler.push(route);
+      if (ety != null) {
+        _onChanged?.call(ety, false);
+        completeTask(entities: [ety]);
+        uiHandler.pop([ety]);
       }
     } else {
       _panelController.minimizePanel();
-      final entity = await uiHandler.push(route);
+      final ety = await uiHandler.push(route);
+      await UIHandler.showStatusBar();
       final entities = [...value.selectedEntities];
-      if (entity != null) {
-        entities.add(entity);
-        _onChanged?.call(entity, false);
+      if (ety != null) {
+        entities.add(ety);
+        _onChanged?.call(ety, false);
       }
     }
   }
@@ -275,8 +276,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       setting: setting,
       routeSetting: routeSetting,
     ).then((value) {
-      _onChanged = null;
-      _onSubmitted = null;
       if (panelKey.currentState == null) {
         Future.delayed(const Duration(milliseconds: 500), dispose);
       }

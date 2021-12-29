@@ -29,7 +29,6 @@ class EditorShutterButton extends StatelessWidget {
                 : CrossFadeState.showSecond;
         return AppAnimatedCrossFade(
           crossFadeState: crossFadeState,
-          duration: const Duration(milliseconds: 300),
           firstChild: const SizedBox(),
           secondChild: IgnorePointer(
             ignoring: crossFadeState == CrossFadeState.showFirst,
@@ -44,7 +43,7 @@ class EditorShutterButton extends StatelessWidget {
                 final entity = await controller.completeEditing();
                 if (entity != null) {
                   UIHandler.transformFrom = TransitionFrom.topToBottom;
-                  uiHandler.pop([entity]);
+                  uiHandler.pop(entity);
                 } else {
                   uiHandler.showSnackBar(
                     'Something went wront! Please try again.',
