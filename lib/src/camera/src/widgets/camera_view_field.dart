@@ -39,7 +39,7 @@ class CameraViewField extends StatelessWidget {
 
   ///
   /// Triggered when picker capture media
-  final void Function(DrishyaEntity entity)? onCapture;
+  final void Function(List<DrishyaEntity> entities)? onCapture;
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +51,9 @@ class CameraViewField extends StatelessWidget {
           setting: setting,
           editorSetting: editorSetting,
           photoEditorSetting: photoEditorSetting,
-        ).then((value) {
-          if (value != null) {
-            onCapture?.call(value);
+        ).then((entities) {
+          if (entities?.isNotEmpty ?? false) {
+            onCapture?.call(entities!);
           }
         });
       },

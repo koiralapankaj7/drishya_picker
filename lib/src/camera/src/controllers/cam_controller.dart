@@ -226,12 +226,11 @@ class CamController extends ValueNotifier<CamValue> {
               backgrounds: [MemoryAssetBackground(bytes: bytes)],
             ),
           ),
-          begainHorizontal: true,
-          endHorizontal: true,
+          setting: const CustomRouteSetting(start: TransitionFrom.rightToLeft),
         );
         final de = await navigator.push(route);
         if (de != null && navigator.mounted) {
-          navigator.pop(de);
+          navigator.pop([de]);
           return de;
         }
         await controller.resumePreview();
@@ -256,7 +255,7 @@ class CamController extends ValueNotifier<CamValue> {
             pickedFile: file,
           );
           if (navigator.mounted) {
-            navigator.pop(drishyaEntity);
+            navigator.pop([drishyaEntity]);
           }
           return drishyaEntity;
         } else {
@@ -373,7 +372,7 @@ class CamController extends ValueNotifier<CamValue> {
               pickedFile: file,
             );
             if (navigator.mounted) {
-              navigator.pop(drishyaEntity);
+              navigator.pop([drishyaEntity]);
             }
             return drishyaEntity;
           } else {

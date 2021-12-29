@@ -41,7 +41,7 @@ class CameraView extends StatefulWidget {
   static const String name = 'CameraView';
 
   /// Open camera view for picking.
-  static Future<DrishyaEntity?> pick(
+  static Future<List<DrishyaEntity>?> pick(
     BuildContext context, {
 
     /// Camera controller
@@ -57,8 +57,12 @@ class CameraView extends StatefulWidget {
     /// Setting for photo editing after taking picture,
     /// If this setting is null [editorSetting] will be used
     EditorSetting? photoEditorSetting,
+
+    ///
+    /// Route setting
+    CustomRouteSetting? routeSetting,
   }) async {
-    return Navigator.of(context).push<DrishyaEntity>(
+    return Navigator.of(context).push<List<DrishyaEntity>>(
       SlideTransitionPageRoute(
         builder: CameraView(
           controller: controller,
@@ -66,10 +70,13 @@ class CameraView extends StatefulWidget {
           editorSetting: editorSetting,
           photoEditorSetting: photoEditorSetting,
         ),
-        transitionCurve: Curves.easeIn,
-        transitionDuration: _kRouteDuration,
-        reverseTransitionDuration: _kRouteDuration,
-        settings: const RouteSettings(name: name),
+        setting: routeSetting ??
+            const CustomRouteSetting(
+              curve: Curves.easeIn,
+              transitionDuration: _kRouteDuration,
+              reverseTransitionDuration: _kRouteDuration,
+              settings: RouteSettings(name: name),
+            ),
       ),
     );
   }

@@ -1,9 +1,8 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/grid_view_widget.dart';
 import 'package:example/recent_entities.dart';
 import 'package:example/text_field_view.dart';
 import 'package:flutter/material.dart';
-
-import 'grid_view_widget.dart';
 
 ///
 class FullscreenGallery extends StatefulWidget {
@@ -75,9 +74,9 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CameraViewField(
-                    onCapture: (entity) {
+                    onCapture: (entities) {
                       _notifier.value = _notifier.value.copyWith(
-                        entities: [..._notifier.value.entities, entity],
+                        entities: [..._notifier.value.entities, ...entities],
                       );
                     },
                     child: const Icon(Icons.camera),

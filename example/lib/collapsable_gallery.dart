@@ -115,9 +115,9 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                         colors: _colors.skip(4).toList(),
                         stickers: _stickers3,
                       ),
-                      onCapture: (entity) {
+                      onCapture: (entities) {
                         _notifier.value = _notifier.value.copyWith(
-                          entities: [..._notifier.value.entities, entity],
+                          entities: [..._notifier.value.entities, ...entities],
                         );
                       },
                       child: const Icon(Icons.camera),

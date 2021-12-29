@@ -4,7 +4,6 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 ///
@@ -29,6 +28,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Recent entities notifier
   final ValueNotifier<bool> _albumVisibility;
 
+  /// Panel setting
   late PanelSetting _panelSetting;
 
   /// Panel setting
@@ -72,6 +72,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   //
   var _accessCamera = false;
 
+  ///
   /// Initialize controller setting
   @internal
   void init({GallerySetting? setting}) {
@@ -87,7 +88,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Update album visibility
-  ///
   @internal
   void setAlbumVisibility({required bool visible}) {
     _panelController.isGestureEnabled = !visible;
@@ -98,14 +98,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Selecting and unselecting entities
-  ///
   @internal
-  void select(DrishyaEntity entity, BuildContext context) {
+  void select(BuildContext context, DrishyaEntity entity) {
     if (singleSelection) {
       _onChanged?.call(entity, false);
-      if (fullScreenMode) {
-        Navigator.of(context).pop([entity]);
-      }
+      // if (fullScreenMode) {
+      //   Navigator.of(context).pop([entity]);
+      // }
       completeTask(entities: [entity]);
     } else {
       _clearedSelection = false;
@@ -138,6 +137,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     }
   }
 
+  ///
   /// Toogle force multi selection button
   @internal
   void forceMultiSelect() {
@@ -150,7 +150,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Complete selection process
   @internal
-  void completeTask({List<DrishyaEntity>? entities}) {
+  List<DrishyaEntity> completeTask({List<DrishyaEntity>? entities}) {
     final selectedEntities = entities ??
         (_clearedSelection || value.selectedEntities.isEmpty
             ? <DrishyaEntity>[]
@@ -165,6 +165,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _fullScreenMode = false;
     _internal = true;
     value = const GalleryValue();
+    return selectedEntities;
   }
 
   ///
@@ -179,8 +180,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         editorSetting: _cameraTextEditorSetting,
         photoEditorSetting: _cameraPhotoEditorSetting,
       ),
-      begainHorizontal: true,
-      transitionDuration: const Duration(milliseconds: 300),
+      setting: const CustomRouteSetting(
+        start: TransitionFrom.rightToLeft,
+        transitionDuration: Duration(milliseconds: 300),
+      ),
     );
 
     final entities = [...value.selectedEntities];
@@ -206,15 +209,16 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Edit provided entity
-  ///
   @internal
   Future<void> editEntity(
     BuildContext context,
     DrishyaEntity entity,
   ) async {
-    select(entity, context);
+    if (!singleSelection) {
+      select(context, entity);
+    }
+
     _accessCamera = true;
-    drishyaUIMode = SystemUiMode.manual;
     final navigator = Navigator.of(context);
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
@@ -223,20 +227,19 @@ class GalleryController extends ValueNotifier<GalleryValue> {
           backgrounds: [DrishyaBackground(entity: entity)],
         ),
       ),
-      begainHorizontal: true,
-      // transitionDuration: const Duration(seconds: 1),
-      // reverseTransitionDuration: const Duration(seconds: 1),
+      setting: const CustomRouteSetting(start: TransitionFrom.rightToLeft),
     );
 
     if (!navigator.mounted) return;
 
     if (fullScreenMode) {
-      final entity = await navigator.pushReplacement(route);
+      final entity = await navigator.push(route);
       if (entity != null) {
         _onChanged?.call(entity, false);
+        final entities = [entity];
+        completeTask(entities: entities);
+        navigator.pop(entities);
       }
-      completeTask(entities: entity != null ? [entity] : null);
-      return;
     } else {
       _panelController.minimizePanel();
       final entity = await navigator.push(route);
@@ -250,7 +253,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// Open gallery using [GalleryViewField]
-  ///
   @internal
   void onGalleryFieldPressed(
     BuildContext context, {
@@ -274,8 +276,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     });
   }
 
-  //
-
   // ===================== PUBLIC ==========================
 
   ///
@@ -293,6 +293,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     BuildContext context, {
     List<DrishyaEntity>? selectedEntities,
     GallerySetting? setting,
+    CustomRouteSetting? routeSetting,
   }) async {
     _completer = Completer<List<DrishyaEntity>>();
 
@@ -311,7 +312,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     if (panelKey.currentState == null) {
       _fullScreenMode = true;
-      await GalleryView.pick(context, controller: this, setting: setting);
+      await GalleryView.pick(
+        context,
+        controller: this,
+        setting: setting,
+        routeSetting: routeSetting,
+      );
       // User did't open the camera and also didn't pick any assets
       if (!_accessCamera) {
         completeTask();
@@ -322,6 +328,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       FocusScope.of(context).unfocus();
     }
 
+    // TODO(koiralapankaj007): move completer to completeTask Functon
     return _completer.future;
   }
 
@@ -354,7 +361,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
   ///
   /// return true is gallery is in single selection mode
-  bool get singleSelection => setting.maximum == 1;
+  bool get singleSelection => _setting.showMultiSelectionButton
+      ? !value.forceMultiSelection
+      : setting.maximum == 1;
 
   ///
   /// Gallery view pannel controller

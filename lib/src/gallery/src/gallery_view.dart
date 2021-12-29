@@ -10,11 +10,6 @@ import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/send_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-
-/// Ui mode, for internal purpose, => [handle differently later]
-@internal
-SystemUiMode drishyaUIMode = SystemUiMode.immersiveSticky;
 
 ///
 ///
@@ -45,12 +40,18 @@ class GalleryView extends StatefulWidget {
 
     /// Gallery setting
     GallerySetting? setting,
+
+    /// Route setting
+    CustomRouteSetting? routeSetting,
   }) {
     return Navigator.of(context).push<List<DrishyaEntity>>(
       SlideTransitionPageRoute(
         builder: GalleryView(controller: controller, setting: setting),
-        transitionCurve: Curves.easeIn,
-        settings: const RouteSettings(name: name),
+        setting: routeSetting ??
+            const CustomRouteSetting(
+              curve: Curves.easeIn,
+              settings: RouteSettings(name: name),
+            ),
       ),
     );
   }

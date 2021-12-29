@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -63,8 +62,9 @@ class _GalleyViewState extends State<_GalleyView> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () async {
-        final entities = await _controller.pick(
+      onTap: () {
+        _controller
+            .pick(
           context,
           setting: const GallerySetting(
             showCameraInsideGrid: false,
@@ -72,8 +72,17 @@ class _GalleyViewState extends State<_GalleyView> {
             albumTitle: 'Gallery',
             panelSetting: PanelSetting(thumbHandlerHeight: 0),
           ),
-        );
-        log('$entities');
+          routeSetting: const CustomRouteSetting(
+            curve: Curves.easeIn,
+            start: TransitionFrom.leftToRight,
+            reverse: TransitionFrom.rightToLeft,
+          ),
+        )
+            .then((entities) {
+          if (entities.isNotEmpty) {
+            UIHandler.of(context).pop();
+          }
+        });
       },
       child: Container(
         alignment: Alignment.center,

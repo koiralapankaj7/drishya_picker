@@ -28,25 +28,30 @@ class SendButton extends StatelessWidget {
           return AppAnimatedCrossFade(
             crossFadeState: crossFadeState,
             firstChild: const SizedBox(),
-            secondChild: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                child!,
-                Positioned(
-                  top: -6,
-                  right: 0,
-                  child: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    radius: 12,
-                    child: Text(
-                      '${value.selectedEntities.length}',
-                      style: Theme.of(context).textTheme.caption?.copyWith(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+            secondChild: InkWell(
+              onTap: () {
+                Navigator.of(context).pop(value.selectedEntities);
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  child!,
+                  Positioned(
+                    top: -6,
+                    right: 0,
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      radius: 12,
+                      child: Text(
+                        '${value.selectedEntities.length}',
+                        style: Theme.of(context).textTheme.caption?.copyWith(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

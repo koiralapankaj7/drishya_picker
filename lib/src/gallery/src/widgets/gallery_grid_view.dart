@@ -124,7 +124,9 @@ class GalleryGridView extends StatelessWidget {
                         if (entity == null) return const SizedBox();
 
                         return _MediaTile(
-                            controller: controller, entity: entity);
+                          controller: controller,
+                          entity: entity,
+                        );
                       },
                     ),
                   ),
@@ -184,7 +186,12 @@ class _MediaTile extends StatelessWidget {
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
-          controller.select(drishya.copyWith(pickedThumbData: bytes), context);
+          final entity = drishya.copyWith(pickedThumbData: bytes);
+          if (controller.singleSelection) {
+            controller.editEntity(context, entity);
+          } else {
+            controller.select(context, entity);
+          }
         },
         child: Stack(
           fit: StackFit.expand,
