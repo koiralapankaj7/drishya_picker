@@ -43,12 +43,8 @@ class EditorShutterButton extends StatelessWidget {
 
                 final entity = await controller.completeEditing();
                 if (entity != null) {
-                  // UIHandler.showStatusBarOnPop = true;
                   UIHandler.transformFrom = TransitionFrom.topToBottom;
-                  uiHandler.pop(entity);
-                  Future.delayed(const Duration(milliseconds: 400), () {
-                    UIHandler.transformFrom = null;
-                  });
+                  uiHandler.pop([entity]);
                 } else {
                   uiHandler.showSnackBar(
                     'Something went wront! Please try again.',

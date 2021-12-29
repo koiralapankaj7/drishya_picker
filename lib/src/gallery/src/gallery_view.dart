@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/albums_page.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_asset_selector.dart';
@@ -227,7 +228,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
     }
 
     if (_controller.fullScreenMode) {
-      Navigator.of(context).pop();
+      UIHandler.of(context).pop();
       return true;
     }
 

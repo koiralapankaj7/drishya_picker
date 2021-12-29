@@ -43,7 +43,12 @@ class UIHandler {
     ScaffoldMessenger.of(_context)
       ..clearSnackBars()
       ..showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(e.toString()),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+          dismissDirection: DismissDirection.horizontal,
+        ),
       );
   }
 
@@ -51,7 +56,14 @@ class UIHandler {
   void showSnackBar(String message) {
     ScaffoldMessenger.of(_context)
       ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
   }
 
   /// Pop widget

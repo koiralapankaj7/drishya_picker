@@ -1,4 +1,5 @@
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
@@ -54,11 +55,7 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
     final setting = controller.setting;
 
     if (setting.stickers?.isEmpty ?? true) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('Stickers not available!')),
-        );
+      UIHandler.of(context).showSnackBar('Stickers not available!');
       return;
     }
 

@@ -19,34 +19,37 @@ class BackgroundSwitcher extends StatelessWidget {
       'Backgrounds cannot be empty',
     );
 
-    return ValueListenableBuilder<EditorBackground>(
-      valueListenable: controller.backgroundNotifier,
-      builder: (context, background, child) {
-        final value = controller.value;
+    return EditorBuilder(
+      controller: controller,
+      builder: (context, value, child) {
+        return ValueListenableBuilder<EditorBackground>(
+          valueListenable: controller.backgroundNotifier,
+          builder: (context, background, child) {
+            if (background is! GradientBackground ||
+                value.keyboardVisible ||
+                value.isEditing) {
+              return const SizedBox();
+            }
 
-        if (value.isEditing ||
-            background is! GradientBackground ||
-            controller.value.keyboardVisible) {
-          return const SizedBox();
-        }
-
-        return GestureDetector(
-          onTap: controller.changeBackground,
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 2,
+            return GestureDetector(
+              onTap: controller.changeBackground,
+              child: Material(
+                color: Colors.transparent,
+                shape: const CircleBorder(
+                  side: BorderSide(
+                    color: Colors.white,
+                    width: 2,
+                  ),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: background.build(context),
+                ),
               ),
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: SizedBox(
-              width: 54,
-              height: 54,
-              child: controller.backgroundNotifier.value.build(context),
-            ),
-          ),
+            );
+          },
         );
       },
     );

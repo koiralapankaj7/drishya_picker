@@ -238,7 +238,6 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     );
 
     if (fullScreenMode) {
-      // UIHandler.showStatusBarOnPop = false;
       final entity = await uiHandler.push(route);
       if (entity != null) {
         _onChanged?.call(entity, false);

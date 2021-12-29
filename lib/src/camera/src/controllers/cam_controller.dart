@@ -245,7 +245,6 @@ class CamController extends ValueNotifier<CamValue> {
       final bytes = await file.readAsBytes();
 
       if (_setting.editAfterCapture) {
-        // UIHandler.showStatusBarOnPop = false;
         await controller.pausePreview();
         final route = SlideTransitionPageRoute<DrishyaEntity?>(
           builder: DrishyaEditor(
@@ -253,7 +252,10 @@ class CamController extends ValueNotifier<CamValue> {
               backgrounds: [MemoryAssetBackground(bytes: bytes)],
             ),
           ),
-          setting: const CustomRouteSetting(start: TransitionFrom.rightToLeft),
+          setting: const CustomRouteSetting(
+            start: TransitionFrom.rightToLeft,
+            reverse: TransitionFrom.leftToRight,
+          ),
         );
         final de = await navigator.push(route);
         if (de != null && navigator.mounted) {

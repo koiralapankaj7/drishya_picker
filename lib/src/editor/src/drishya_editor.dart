@@ -60,8 +60,7 @@ class _DrishyaEditorState extends State<DrishyaEditor> {
 
   @override
   void dispose() {
-    // UIHandler.showStatusBar();
-    // UIHandler.showStatusBarOnPop = false;
+    UIHandler.transformFrom = null;
     if (widget.controller == null) {
       _controller.dispose();
     }

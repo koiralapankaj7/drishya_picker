@@ -115,128 +115,128 @@ class _EditorTextfieldState extends State<EditorTextfield>
       builder: (context, value, child) {
         if (!value.hasFocus) return const SizedBox();
 
-        return child!;
-      },
-      child: KeyboardVisibility(
-        listener: (visible) {
-          if (visible) {
-            _animationController.forward();
-          } else {
-            final box =
-                _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
-            if (box != null) {
-              _tfSize = box.size;
+        return KeyboardVisibility(
+          listener: (visible) {
+            if (visible) {
+              _animationController.forward();
+            } else {
+              final box =
+                  _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
+              if (box != null) {
+                _tfSize = box.size;
+              }
+              _animationController.reverse();
             }
-            _animationController.reverse();
-          }
-          _controller.updateValue(
-            keyboardVisible: visible,
-            isColorPickerOpen: false,
-          );
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _controller.focusNode.unfocus,
-          child: ColoredBox(
-            color: _controller.value.keyboardVisible
-                ? Colors.black38
-                : Colors.transparent,
-            child: ValueListenableBuilder<StickerAsset?>(
-              valueListenable: _controller.currentAsset,
-              builder: (context, asset, child) {
-                final deviceSize = MediaQuery.of(context).size;
+            _controller.updateValue(
+              keyboardVisible: visible,
+              isColorPickerOpen: false,
+            );
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _controller.focusNode.unfocus,
+            child: ColoredBox(
+              color: _controller.value.keyboardVisible
+                  ? Colors.black38
+                  : Colors.transparent,
+              child: ValueListenableBuilder<StickerAsset?>(
+                valueListenable: _controller.currentAsset,
+                builder: (context, asset, child) {
+                  final deviceSize = MediaQuery.of(context).size;
 
-                // Center X position of the screen
-                final centerX = deviceSize.width / 2;
+                  // Center X position of the screen
+                  final centerX = deviceSize.width / 2;
 
-                // Center Y position of the screen
-                final centerY = deviceSize.height / 2;
+                  // Center Y position of the screen
+                  final centerY = deviceSize.height / 2;
 
-                // Smallest width of the editing sticker or new text field
-                final smallestWidth = asset != null
-                    ? asset.size.width / asset.scale
-                    : _tfSize.width;
+                  // Smallest width of the editing sticker or new text field
+                  final smallestWidth = asset != null
+                      ? asset.size.width / asset.scale
+                      : _tfSize.width;
 
-                // Smallest height of the editing sticker or new text field
-                final smallestHeight = asset != null
-                    ? asset.size.height / asset.scale
-                    : _tfSize.height;
+                  // Smallest height of the editing sticker or new text field
+                  final smallestHeight = asset != null
+                      ? asset.size.height / asset.scale
+                      : _tfSize.height;
 
-                // Center position from the top excluding keyboard
-                // height (Assuming keyboard as 50% of device height)
-                final centerTop =
-                    ((deviceSize.height * 0.5) - smallestHeight) / 2;
+                  // Center position from the top excluding keyboard
+                  // height (Assuming keyboard as 50% of device height)
+                  final centerTop =
+                      ((deviceSize.height * 0.5) - smallestHeight) / 2;
 
-                // Center position from the left
-                final centerLeft = (deviceSize.width - smallestWidth) / 2;
+                  // Center position from the left
+                  final centerLeft = (deviceSize.width - smallestWidth) / 2;
 
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, child) {
-                        final animValue = _animation.value;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          final animValue = _animation.value;
 
-                        final left = lerpDouble(
-                          centerLeft,
-                          asset?.position.dx ?? centerX - (_tfSize.width / 2),
-                          animValue,
-                        );
-
-                        final top = lerpDouble(
-                          centerTop,
-                          asset?.position.dy ?? centerY - (_tfSize.height / 2),
-                          animValue,
-                        );
-
-                        final scale = asset == null
-                            ? 1.0
-                            : lerpDouble(1, asset.scale, animValue) ?? 1.0;
-
-                        final angle =
-                            asset == null ? 0.0 : asset.angle * animValue;
-
-                        final textField = IntrinsicWidth(
-                          key: _tfSizeKey,
-                          child: _StickerTextField(
-                            controller: _controller,
-                            textController: _textController,
-                            focusNode: _controller.focusNode,
-                            scale: scale,
-                          ),
-                        );
-
-                        if (_animationController.status ==
-                            AnimationStatus.completed) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 60,
-                              vertical: 30,
-                            ),
-                            child: textField,
+                          final left = lerpDouble(
+                            centerLeft,
+                            asset?.position.dx ?? centerX - (_tfSize.width / 2),
+                            animValue,
                           );
-                        }
 
-                        return Positioned(
-                          left: left,
-                          top: top,
-                          child: Transform.rotate(
-                            angle: angle,
-                            child: textField,
-                          ),
-                        );
+                          final top = lerpDouble(
+                            centerTop,
+                            asset?.position.dy ??
+                                centerY - (_tfSize.height / 2),
+                            animValue,
+                          );
 
-                        //
-                      },
-                    ),
-                  ],
-                );
-              },
+                          final scale = asset == null
+                              ? 1.0
+                              : lerpDouble(1, asset.scale, animValue) ?? 1.0;
+
+                          final angle =
+                              asset == null ? 0.0 : asset.angle * animValue;
+
+                          final textField = IntrinsicWidth(
+                            key: _tfSizeKey,
+                            child: _StickerTextField(
+                              controller: _controller,
+                              textController: _textController,
+                              focusNode: _controller.focusNode,
+                              scale: scale,
+                            ),
+                          );
+
+                          if (_animationController.status ==
+                              AnimationStatus.completed) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 60,
+                                vertical: 30,
+                              ),
+                              child: textField,
+                            );
+                          }
+
+                          return Positioned(
+                            left: left,
+                            top: top,
+                            child: Transform.rotate(
+                              angle: angle,
+                              child: textField,
+                            ),
+                          );
+
+                          //
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
