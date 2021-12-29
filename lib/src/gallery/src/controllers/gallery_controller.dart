@@ -260,6 +260,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     final void Function(List<DrishyaEntity> entities)? onSubmitted,
     List<DrishyaEntity>? selectedEntities,
     GallerySetting? setting,
+    CustomRouteSetting? routeSetting,
   }) {
     _onChanged = onChanged;
     _onSubmitted = onSubmitted;
@@ -267,6 +268,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       context,
       selectedEntities: selectedEntities,
       setting: setting,
+      routeSetting: routeSetting,
     ).then((value) {
       _onChanged = null;
       _onSubmitted = null;

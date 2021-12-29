@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -12,6 +13,7 @@ class CameraViewField extends StatelessWidget {
     this.setting,
     this.editorSetting,
     this.photoEditorSetting,
+    this.routeSetting,
     this.onCapture,
   }) : super(key: key);
 
@@ -38,6 +40,10 @@ class CameraViewField extends StatelessWidget {
   final EditorSetting? photoEditorSetting;
 
   ///
+  /// Route setting
+  final CustomRouteSetting? routeSetting;
+
+  ///
   /// Triggered when picker capture media
   final void Function(List<DrishyaEntity> entities)? onCapture;
 
@@ -51,6 +57,7 @@ class CameraViewField extends StatelessWidget {
           setting: setting,
           editorSetting: editorSetting,
           photoEditorSetting: photoEditorSetting,
+          routeSetting: routeSetting,
         ).then((entities) {
           if (entities?.isNotEmpty ?? false) {
             onCapture?.call(entities!);

@@ -1,6 +1,7 @@
 // ignore_for_file: always_use_package_imports, use_build_context_synchronously
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -17,6 +18,7 @@ class GalleryViewField extends StatelessWidget {
     this.onSubmitted,
     this.selectedEntities,
     this.setting,
+    this.routeSetting,
     this.child,
   }) : super(key: key);
 
@@ -43,6 +45,10 @@ class GalleryViewField extends StatelessWidget {
   /// [GallerySetting] passed to the [SlidableGalleryView] will be applicable..
   ///
   final GallerySetting? setting;
+
+  ///
+  /// Route setting for gallery in fullscreen mode.
+  final CustomRouteSetting? routeSetting;
 
   ///
   final Widget? child;
