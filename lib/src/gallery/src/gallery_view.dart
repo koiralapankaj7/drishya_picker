@@ -79,16 +79,17 @@ class _GalleryViewState extends State<GalleryView> {
 
   @override
   Widget build(BuildContext context) {
-    // If [SlidableGalleryView] is used no need to build panel setting again
-    if (_controller.panelKey.currentContext != null) {
+    // If [SlidableGallery] is used no need to build panel setting again
+    if (!_controller.fullScreenMode) {
       return _View(controller: _controller, setting: widget.setting!);
     }
 
+    // Full screen mode
     return PanelSettingBuilder(
       setting: widget.setting?.panelSetting,
       builder: (panelSetting) => _View(
         controller: _controller,
-        setting: (widget.setting ?? const GallerySetting())
+        setting: (widget.setting ?? _controller.setting)
             .copyWith(panelSetting: panelSetting),
       ),
     );
@@ -331,7 +332,11 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               ),
 
               // Send and edit button
-              if (!actionMode) GalleryAssetSelector(controller: _controller),
+              if (!actionMode)
+                GalleryAssetSelector(
+                  controller: _controller,
+                  albums: _albums,
+                ),
 
               // Send button
               if (actionMode)

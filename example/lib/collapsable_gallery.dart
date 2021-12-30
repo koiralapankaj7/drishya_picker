@@ -38,30 +38,8 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return SlidableGalleryView(
+    return SlidableGallery(
       controller: _controller,
-      setting: GallerySetting(
-        albumSubtitle: 'Collapsable',
-        enableCamera: true,
-        maximumCount: 10,
-        requestType: RequestType.all,
-        editorSetting: EditorSetting(
-          colors: _colors,
-          stickers: _stickers1,
-        ),
-        cameraSetting: const CameraSetting(
-          videoDuration: Duration(seconds: 15),
-        ),
-        cameraTextEditorSetting: EditorSetting(
-          backgrounds: _defaultBackgrounds,
-          colors: _colors.take(4).toList(),
-          stickers: _stickers2,
-        ),
-        cameraPhotoEditorSetting: EditorSetting(
-          colors: _colors.skip(4).toList(),
-          stickers: _stickers3,
-        ),
-      ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Slidable Gallery'),
@@ -71,8 +49,9 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
             // Grid view
             Expanded(
               child: GridViewWidget(
-                notifier: _notifier,
                 controller: _controller,
+                setting: gallerySetting,
+                notifier: _notifier,
               ),
             ),
 
@@ -129,7 +108,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                     valueListenable: _notifier,
                     builder: (context, data, child) {
                       return GalleryViewField(
-                        setting: GallerySetting(
+                        setting: gallerySetting.copyWith(
                           maximumCount: data.maxLimit,
                           albumSubtitle: 'Image only',
                           requestType: data.requestType,
@@ -165,6 +144,24 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
     );
   }
 }
+
+///
+GallerySetting get gallerySetting => GallerySetting(
+      enableCamera: true,
+      maximumCount: 10,
+      requestType: RequestType.all,
+      editorSetting: EditorSetting(colors: _colors, stickers: _stickers1),
+      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
+      cameraTextEditorSetting: EditorSetting(
+        backgrounds: _defaultBackgrounds,
+        colors: _colors.take(4).toList(),
+        stickers: _stickers2,
+      ),
+      cameraPhotoEditorSetting: EditorSetting(
+        colors: _colors.skip(4).toList(),
+        stickers: _stickers3,
+      ),
+    );
 
 const _defaultBackgrounds = [
   GradientBackground(colors: [Color(0xFF00C6FF), Color(0xFF0078FF)]),

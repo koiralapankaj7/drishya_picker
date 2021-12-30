@@ -9,8 +9,8 @@ class GalleryViewField extends StatelessWidget {
   ///
   /// Widget which pick media from gallery
   ///
-  /// If used [GalleryViewField] with [SlidableGalleryView], [PanelSetting]
-  /// and [GallerySetting] will be override by the [SlidableGalleryView]
+  /// If used [GalleryViewField] with [SlidableGallery], [PanelSetting]
+  /// and [GallerySetting] will be override by the [SlidableGallery]
   ///
   const GalleryViewField({
     Key? key,
@@ -32,10 +32,10 @@ class GalleryViewField extends StatelessWidget {
   final ValueSetter<List<DrishyaEntity>>? onSubmitted;
 
   ///
-  /// If used [GalleryViewField] with [SlidableGalleryView]
+  /// If used [GalleryViewField] with [SlidableGallery]
   /// this setting will be ignored.
   ///
-  /// [GallerySetting] passed to the [SlidableGalleryView] will be applicable..
+  /// [GallerySetting] passed to the [SlidableGallery] will be applicable..
   ///
   final GallerySetting? setting;
 
@@ -53,6 +53,7 @@ class GalleryViewField extends StatelessWidget {
         // Controller created here will be disposed by controller itself after
         // finishing its task.
         late GalleryController controller;
+
         if (context.galleryController == null) {
           controller = GalleryController();
         } else {

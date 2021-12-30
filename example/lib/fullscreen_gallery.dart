@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/collapsable_gallery.dart';
 import 'package:example/grid_view_widget.dart';
 import 'package:example/recent_entities.dart';
 import 'package:example/text_field_view.dart';
@@ -43,7 +44,11 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
         children: [
           // Grid view
           Expanded(
-            child: GridViewWidget(notifier: _notifier, controller: _controller),
+            child: GridViewWidget(
+              controller: _controller,
+              setting: gallerySetting,
+              notifier: _notifier,
+            ),
           ),
 
           const SizedBox(height: 8.0),
@@ -88,7 +93,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                   valueListenable: _notifier,
                   builder: (context, data, child) {
                     return GalleryViewField(
-                      setting: GallerySetting(
+                      setting: gallerySetting.copyWith(
                         maximumCount: data.maxLimit,
                         albumSubtitle: 'Image only',
                         requestType: data.requestType,

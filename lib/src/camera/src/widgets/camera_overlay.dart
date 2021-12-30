@@ -1,16 +1,12 @@
-// ignore_for_file: always_use_package_imports
-
-import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_close_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_flash_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_footer.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_shutter_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../controllers/cam_controller.dart';
-import '../entities/camera_type.dart';
-import 'camera_builder.dart';
-import 'camera_close_button.dart';
-import 'camera_flash_button.dart';
-import 'camera_footer.dart';
-import 'camera_shutter_button.dart';
 
 ///
 const _top = 16.0;
@@ -120,6 +116,9 @@ class _PlaygroundOverlay extends StatelessWidget {
                 bottom: 16,
                 child: EditorShutterButton(
                   controller: deController,
+                  onSuccess: (entity) {
+                    UIHandler.of(context).pop([entity]);
+                  },
                 ),
               ),
 

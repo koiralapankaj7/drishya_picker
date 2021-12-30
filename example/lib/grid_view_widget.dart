@@ -8,11 +8,15 @@ class GridViewWidget extends StatelessWidget {
   const GridViewWidget({
     Key? key,
     required this.controller,
+    required this.setting,
     required this.notifier,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  ///
+  final GallerySetting setting;
 
   ///
   final ValueNotifier<Data> notifier;
@@ -50,7 +54,7 @@ class GridViewWidget extends StatelessWidget {
                   onTap: () async {
                     final entities = await controller.pick(
                       context,
-                      setting: GallerySetting(
+                      setting: setting.copyWith(
                         maximumCount: notifier.value.maxLimit,
                         albumSubtitle: 'All',
                         requestType: notifier.value.requestType,

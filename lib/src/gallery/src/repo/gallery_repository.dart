@@ -215,4 +215,10 @@ class Album extends ValueNotifier<AlbumValue> {
     }
     return value.entities;
   }
+
+  /// Insert entity into album
+  void insert(AssetEntity entity) {
+    if (value.entities.isEmpty) return;
+    value = value.copyWith(entities: [entity, ...value.entities]);
+  }
 }

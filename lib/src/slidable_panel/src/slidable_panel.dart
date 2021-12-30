@@ -383,9 +383,6 @@ class _SlidablePanelState extends State<SlidablePanel>
             builder: (context) {
               return Column(
                 children: [
-                  // Status bar space
-                  // SizedBox(height: _mediaQuery.padding.top),
-
                   // Space between sliding panel and status bar
                   const Spacer(),
 

@@ -10,10 +10,14 @@ class EditorShutterButton extends StatelessWidget {
   const EditorShutterButton({
     Key? key,
     required this.controller,
+    this.onSuccess,
   }) : super(key: key);
 
   ///
   final DrishyaEditingController controller;
+
+  ///
+  final ValueSetter<DrishyaEntity>? onSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,11 @@ class EditorShutterButton extends StatelessWidget {
                 final entity = await controller.completeEditing();
                 if (entity != null) {
                   UIHandler.transformFrom = TransitionFrom.topToBottom;
-                  uiHandler.pop(entity);
+                  if (onSuccess != null) {
+                    onSuccess!(entity);
+                  } else {
+                    uiHandler.pop(entity);
+                  }
                 } else {
                   uiHandler.showSnackBar(
                     'Something went wront! Please try again.',

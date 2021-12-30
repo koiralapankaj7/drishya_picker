@@ -102,7 +102,13 @@ class GalleryGridView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     if (enableCamera && index == 0) {
                       return InkWell(
-                        onTap: () => controller.openCamera(context),
+                        onTap: () {
+                          controller.openCamera(context).then((value) {
+                            if (value != null) {
+                              album.insert(value);
+                            }
+                          });
+                        },
                         child: Icon(
                           CupertinoIcons.camera,
                           color: Colors.lightBlue.shade300,

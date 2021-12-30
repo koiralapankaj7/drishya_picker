@@ -2,9 +2,9 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 ///
-class SlidableGalleryView extends StatefulWidget {
+class SlidableGallery extends StatefulWidget {
   ///
-  const SlidableGalleryView({
+  const SlidableGallery({
     Key? key,
     required this.child,
     this.controller,
@@ -17,14 +17,14 @@ class SlidableGalleryView extends StatefulWidget {
   /// Gallery controller
   final GalleryController? controller;
 
-  /// Gallery setting
-  final GallerySetting? setting;
+  /// Panel setting
+  final PanelSetting? setting;
 
   @override
-  State<SlidableGalleryView> createState() => _SlidableGalleryViewState();
+  State<SlidableGallery> createState() => _SlidableGalleryState();
 }
 
-class _SlidableGalleryViewState extends State<SlidableGalleryView> {
+class _SlidableGalleryState extends State<SlidableGallery> {
   late final GalleryController _controller;
   late final PanelController _panelController;
 
@@ -51,7 +51,7 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
       child: GalleryControllerProvider(
         controller: _controller,
         child: PanelSettingBuilder(
-          setting: widget.setting?.panelSetting,
+          setting: widget.setting,
           builder: (panelSetting) {
             final showPanel = MediaQuery.of(context).viewInsets.bottom == 0.0;
             return Stack(
@@ -98,6 +98,8 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
                   setting: panelSetting,
                   controller: _panelController,
                   child: Builder(
+                    // Builder is used here to pass accurate settings down
+                    // the tree
                     builder: (_) => GalleryView(
                       controller: _controller,
                       setting: _controller.setting

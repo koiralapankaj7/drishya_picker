@@ -116,41 +116,62 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   void select(
     BuildContext context,
     DrishyaEntity entity, {
-    bool fromCamOrEditor = false,
+    bool edited = false,
   }) {
-    if (singleSelection) {
-      if (_setting.selectionMode == SelectionMode.actionBased) {
-        editEntity(context, entity);
-        return;
-      }
-      completeTask(context, items: [entity]);
+    // Check limit
+    if (reachedMaximumLimit) {
+      UIHandler.of(context).showSnackBar(
+        'Maximum selection limit of '
+        '${setting.maximumCount} has been reached!',
+      );
       return;
     }
 
-    final selectedList = List<DrishyaEntity>.from(value.selectedEntities);
-
-    if (selectedList.contains(entity)) {
-      selectedList.remove(entity);
-      _onChanged?.call(entity, true);
-    } else {
-      if (reachedMaximumLimit) {
-        UIHandler.of(context).showSnackBar(
-          'Maximum selection limit of '
-          '${setting.maximumCount} has been reached!',
-        );
-        return;
+    // Handle single selection mode
+    if (singleSelection) {
+      if (_setting.selectionMode == SelectionMode.actionBased) {
+        editEntity(context, entity).then((ety) {
+          if (ety != null) {
+            _onChanged?.call(ety, false);
+            completeTask(context, items: [ety]);
+          }
+        });
+      } else {
+        _onChanged?.call(entity, false);
+        completeTask(context, items: [entity]);
       }
-      selectedList.add(entity);
-      _onChanged?.call(entity, false);
+      return;
     }
+
+    final entities = value.selectedEntities.toList();
+    final isSelected = entities.contains(entity);
+
+    // Unselect item if selected previously
+    if (isSelected) {
+      _onChanged?.call(entity, true);
+      entities.remove(entity);
+      _internal = true;
+      value = value.copyWith(selectedEntities: entities);
+      return;
+    }
+
+    // Unselect previous item and continue if it was edited
+    if (edited && entities.isNotEmpty) {
+      final item = entities.last;
+      _onChanged?.call(item, true);
+      entities.remove(item);
+    }
+
+    entities.add(entity);
+    _onChanged?.call(entity, false);
     _internal = true;
-    value = value.copyWith(selectedEntities: selectedList);
+    value = value.copyWith(selectedEntities: entities);
   }
 
   ///
   /// Open camera from [GalleryView]
   @internal
-  Future<void> openCamera(BuildContext context) async {
+  Future<DrishyaEntity?> openCamera(BuildContext context) async {
     final uiHandler = UIHandler.of(context);
 
     final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
@@ -171,8 +192,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       if (list?.isNotEmpty ?? false) {
         final ety = list!.first;
         _onChanged?.call(ety, false);
-        if (!uiHandler.mounted) return;
-        completeTask(context, items: value.selectedEntities..add(ety));
+        if (!uiHandler.mounted) return null;
+        completeTask(context, items: [...value.selectedEntities, ety]);
+        return ety;
       }
     } else {
       _panelController.minimizePanel();
@@ -183,12 +205,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         // Camera was open on selection mode? then complete task
         // else select item
         if (singleSelection) {
-          if (!uiHandler.mounted) return;
+          if (!uiHandler.mounted) return null;
           completeTask(context, items: [ety]);
         } else {
-          if (!uiHandler.mounted) return;
+          if (!uiHandler.mounted) return null;
           select(context, ety);
         }
+        return ety;
       }
     }
   }
@@ -196,7 +219,11 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Edit provided entity
   @internal
-  Future<void> editEntity(BuildContext context, DrishyaEntity entity) async {
+  Future<DrishyaEntity?> editEntity(
+    BuildContext context,
+    DrishyaEntity entity,
+  ) async {
+    //
     final uiHandler = UIHandler.of(context);
 
     final route = SlideTransitionPageRoute<DrishyaEntity>(
@@ -211,30 +238,13 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       ),
     );
 
-    if (fullScreenMode) {
-      final ety = await uiHandler.push(route);
-      await UIHandler.showStatusBar();
-      if (ety != null) {
-        _onChanged?.call(ety, false);
-        if (!uiHandler.mounted) return;
-        completeTask(context, items: value.selectedEntities..add(ety));
-      }
-    } else {
+    if (!fullScreenMode) {
       _panelController.minimizePanel();
-      final ety = await uiHandler.push(route);
-      await UIHandler.showStatusBar();
-      if (ety != null) {
-        // Item was edited on single selection mode? then complete task
-        // else select item
-        if (singleSelection) {
-          if (!uiHandler.mounted) return;
-          completeTask(context, items: [ety]);
-        } else {
-          if (!uiHandler.mounted) return;
-          select(context, ety);
-        }
-      }
     }
+
+    final ety = await uiHandler.push(route);
+    await UIHandler.showStatusBar();
+    return ety;
   }
 
   ///
@@ -252,9 +262,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     _autoDispose = fullScreenMode;
     final entities =
         await pick(context, setting: setting, routeSetting: routeSetting);
-    if (fullScreenMode) {
-      _onChanged = null;
-    }
+    _onChanged = null;
     return entities;
   }
 
@@ -316,6 +324,9 @@ class GalleryController extends ValueNotifier<GalleryValue> {
       return entities ?? [];
     }
 
+    if (setting != null) {
+      init(setting: setting);
+    }
     return _collapsableGallery(context);
   }
 
