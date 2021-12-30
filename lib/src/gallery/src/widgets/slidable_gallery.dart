@@ -70,7 +70,7 @@ class _SlidableGalleryViewState extends State<SlidableGalleryView> {
                             focusNode.unfocus();
                           }
                           if (_panelController.isVisible) {
-                            _controller.completeTask();
+                            _controller.completeTask(context);
                           }
                         },
                         child: widget.child,

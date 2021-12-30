@@ -138,7 +138,8 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         child: SizedBox(
                           width: buttonWidth,
                           child: _TextButton(
-                            onPressed: () => widget.controller.editEntity(
+                            onPressed: (context) =>
+                                widget.controller.editEntity(
                               context,
                               value.selectedEntities.first,
                             ),
@@ -182,13 +183,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                           );
                         },
                         child: _TextButton(
-                          onPressed: () {
-                            if (widget.controller.fullScreenMode) {
-                              Navigator.of(context).pop(value.selectedEntities);
-                            } else {
-                              widget.controller.completeTask();
-                            }
-                          },
+                          onPressed: widget.controller.completeTask,
                           label: 'SELECT',
                         ),
                       ),
@@ -218,12 +213,12 @@ class _TextButton extends StatelessWidget {
   final String? label;
   final Color? background;
   final Color? labelColor;
-  final void Function()? onPressed;
+  final ValueChanged<BuildContext>? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed,
+      onPressed: () => onPressed?.call(context),
       style: TextButton.styleFrom(
         backgroundColor: background ?? Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(

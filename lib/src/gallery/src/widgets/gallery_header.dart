@@ -107,7 +107,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                                 if (_controller.value.isAlbumVisible) {
                                   widget.onAlbumToggle(true);
                                 } else {
-                                  _controller.forceMultiSelect();
+                                  _controller.toogleMultiSelection();
                                 }
                               },
                               child: Icon(

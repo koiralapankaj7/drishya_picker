@@ -19,6 +19,9 @@ class UIHandler {
   /// Navigator state for the [_context]
   NavigatorState get _state => Navigator.of(_context);
 
+  /// Whether this [State] object is currently in a tree.
+  bool get mounted => _state.mounted;
+
   /// Internal navigation translation handlation
   static TransitionFrom? transformFrom;
 

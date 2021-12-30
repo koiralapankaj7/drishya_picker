@@ -7,7 +7,7 @@ class CustomRouteSetting {
   ///
   /// Settings for route
   const CustomRouteSetting({
-    this.curve = Curves.easeIn,
+    this.curve = Curves.easeInOut,
     this.start = TransitionFrom.bottomToTop,
     this.reverse = TransitionFrom.topToBottom,
     this.transitionDuration = const Duration(milliseconds: 400),

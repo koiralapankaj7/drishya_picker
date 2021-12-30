@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ class GallerySetting {
   ///
   /// Gallery setting
   const GallerySetting({
+    this.selectedEntities = const [],
     this.requestType = RequestType.all,
     this.maximumCount = 50,
     this.selectionMode = SelectionMode.countBased,
@@ -32,6 +34,10 @@ class GallerySetting {
     this.cameraTextEditorSetting,
     this.cameraPhotoEditorSetting,
   });
+
+  ///
+  /// Previously selected entities
+  final List<DrishyaEntity> selectedEntities;
 
   ///
   /// Type of media e.g, image, video, audio, other
@@ -85,6 +91,7 @@ class GallerySetting {
   ///
   /// Helper function to copy its properties
   GallerySetting copyWith({
+    List<DrishyaEntity>? selectedEntities,
     RequestType? requestType,
     int? maximumCount,
     SelectionMode? selectionMode,
@@ -99,6 +106,7 @@ class GallerySetting {
     EditorSetting? cameraPhotoEditorSetting,
   }) {
     return GallerySetting(
+      selectedEntities: selectedEntities ?? this.selectedEntities,
       requestType: requestType ?? this.requestType,
       maximumCount: maximumCount ?? this.maximumCount,
       selectionMode: selectionMode ?? this.selectionMode,
@@ -120,6 +128,7 @@ class GallerySetting {
   String toString() {
     return '''
     GallerySetting(
+      selectedEntities: $selectedEntities, 
       requestType: $requestType, 
       maximumCount: $maximumCount, 
       selectionMode: $selectionMode, 
@@ -138,8 +147,10 @@ class GallerySetting {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
 
     return other is GallerySetting &&
+        listEquals(other.selectedEntities, selectedEntities) &&
         other.requestType == requestType &&
         other.maximumCount == maximumCount &&
         other.selectionMode == selectionMode &&
@@ -156,7 +167,8 @@ class GallerySetting {
 
   @override
   int get hashCode {
-    return requestType.hashCode ^
+    return selectedEntities.hashCode ^
+        requestType.hashCode ^
         maximumCount.hashCode ^
         selectionMode.hashCode ^
         albumTitle.hashCode ^

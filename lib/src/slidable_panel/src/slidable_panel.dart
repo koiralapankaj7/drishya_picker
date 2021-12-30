@@ -505,8 +505,8 @@ class PanelController extends ValueNotifier<PanelValue> {
   /// Close Panel from viewport
   ///
   void closePanel() {
+    if (!isVisible || value.state == PanelState.close) return;
     _internal = true;
-    if (value.state == PanelState.close) return;
     value = value.copyWith(
       state: PanelState.close,
       factor: 0,

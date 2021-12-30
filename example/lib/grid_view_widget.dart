@@ -50,11 +50,11 @@ class GridViewWidget extends StatelessWidget {
                   onTap: () async {
                     final entities = await controller.pick(
                       context,
-                      selectedEntities: notifier.value.entities,
                       setting: GallerySetting(
                         maximumCount: notifier.value.maxLimit,
                         albumSubtitle: 'All',
                         requestType: notifier.value.requestType,
+                        selectedEntities: notifier.value.entities,
                       ),
                     );
                     notifier.value =

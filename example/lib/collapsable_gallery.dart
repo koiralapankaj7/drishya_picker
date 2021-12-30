@@ -129,11 +129,11 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
                     valueListenable: _notifier,
                     builder: (context, data, child) {
                       return GalleryViewField(
-                        selectedEntities: data.entities,
                         setting: GallerySetting(
                           maximumCount: data.maxLimit,
                           albumSubtitle: 'Image only',
                           requestType: data.requestType,
+                          selectedEntities: data.entities,
                         ),
                         onChanged: (entity, remove) {
                           final entities = _notifier.value.entities.toList();

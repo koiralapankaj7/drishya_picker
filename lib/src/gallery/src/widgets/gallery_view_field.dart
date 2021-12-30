@@ -16,7 +16,6 @@ class GalleryViewField extends StatelessWidget {
     Key? key,
     this.onChanged,
     this.onSubmitted,
-    this.selectedEntities,
     this.setting,
     this.routeSetting,
     this.child,
@@ -30,13 +29,7 @@ class GalleryViewField extends StatelessWidget {
 
   ///
   /// Triggered when picker complet its task.
-  ///
-  final void Function(List<DrishyaEntity> entities)? onSubmitted;
-
-  ///
-  /// Previously selected entities
-  ///
-  final List<DrishyaEntity>? selectedEntities;
+  final ValueSetter<List<DrishyaEntity>>? onSubmitted;
 
   ///
   /// If used [GalleryViewField] with [SlidableGalleryView]
@@ -57,19 +50,23 @@ class GalleryViewField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        // Controller created here will be disposed by controller itself after
+        // finishing its task.
         late GalleryController controller;
         if (context.galleryController == null) {
           controller = GalleryController();
         } else {
           controller = context.galleryController!;
         }
-        controller.onGalleryFieldPressed(
+        controller
+            .onGalleryFieldPressed(
           context,
           onChanged: onChanged,
-          onSubmitted: onSubmitted,
-          selectedEntities: selectedEntities,
           setting: setting,
-        );
+        )
+            .then((entities) {
+          onSubmitted?.call(entities);
+        });
       },
       child: child ?? const Icon(Icons.image),
     );

@@ -8,16 +8,12 @@ class GalleryValue {
   ///
   const GalleryValue({
     this.selectedEntities = const <DrishyaEntity>[],
-    this.previousSelection = true,
     this.isAlbumVisible = false,
     this.enableMultiSelection = false,
   });
 
   ///
   final List<DrishyaEntity> selectedEntities;
-
-  ///
-  final bool previousSelection;
 
   ///
   final bool isAlbumVisible;
@@ -28,13 +24,11 @@ class GalleryValue {
   ///
   GalleryValue copyWith({
     List<DrishyaEntity>? selectedEntities,
-    bool? previousSelection,
     bool? isAlbumVisible,
     bool? enableMultiSelection,
   }) {
     return GalleryValue(
       selectedEntities: selectedEntities ?? this.selectedEntities,
-      previousSelection: previousSelection ?? this.previousSelection,
       isAlbumVisible: isAlbumVisible ?? this.isAlbumVisible,
       enableMultiSelection: enableMultiSelection ?? this.enableMultiSelection,
     );
@@ -45,7 +39,6 @@ class GalleryValue {
     return '''
     GalleryValue(
       selectedEntities: $selectedEntities, 
-      previousSelection: $previousSelection, 
       isAlbumVisible: $isAlbumVisible, 
       enableMultiSelection: $enableMultiSelection
     )''';
@@ -58,7 +51,6 @@ class GalleryValue {
 
     return other is GalleryValue &&
         listEquals(other.selectedEntities, selectedEntities) &&
-        other.previousSelection == previousSelection &&
         other.isAlbumVisible == isAlbumVisible &&
         other.enableMultiSelection == enableMultiSelection;
   }
@@ -66,7 +58,6 @@ class GalleryValue {
   @override
   int get hashCode {
     return selectedEntities.hashCode ^
-        previousSelection.hashCode ^
         isAlbumVisible.hashCode ^
         enableMultiSelection.hashCode;
   }

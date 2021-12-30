@@ -71,7 +71,7 @@ class _GalleryViewState extends State<GalleryView> {
 
   @override
   void dispose() {
-    if (widget.controller == null) {
+    if (widget.controller == null || _controller.autoDispose) {
       _controller.dispose();
     }
     super.dispose();

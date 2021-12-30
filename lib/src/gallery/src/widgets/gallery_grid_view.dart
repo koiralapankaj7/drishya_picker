@@ -119,10 +119,7 @@ class GalleryGridView extends StatelessWidget {
 
                     if (entity == null) return const SizedBox();
 
-                    return _MediaTile(
-                      controller: controller,
-                      entity: entity,
-                    );
+                    return _MediaTile(controller: controller, entity: entity);
                   },
                 ),
               );
@@ -162,11 +159,7 @@ class _MediaTile extends StatelessWidget {
       child: InkWell(
         onTap: () {
           final entity = drishya.copyWith(pickedThumbData: bytes);
-          if (controller.singleSelection) {
-            controller.editEntity(context, entity);
-          } else {
-            controller.select(context, entity);
-          }
+          controller.select(context, entity);
         },
         child: Stack(
           fit: StackFit.expand,
