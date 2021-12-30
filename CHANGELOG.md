@@ -48,7 +48,7 @@ DrishyaPicker is on the verge of being a fully customizable package
 - **Breaking**: `GalleryViewWrapper` has been replaced by `SlidableGallery`
 - **Breaking**: `GalleryController` will not take parameters anymore. Now, you can pass settings while picking the assets.
 - **Added**: Default stickers for the editor section have been removed. Now you have to provide your own stickers which makes the editor more customizable and unique. You can implement `Sticker` class to make your own sticker or just use already available stickers. E.g, `IconSticker`, `ImageSticker` and `TextSticker`. 
-- **Added**: Same as stickers now you can provide your own background and color settings for the editor. You can also make your own background. Implement `EditorBackground` to make your own background or use the default one provided by the package. E.g, `GradientBackground`, `MemoryAssetBackground, and 
+- **Added**: Same as stickers now you can provide your own background and color settings for the editor. You can also make your own background. Implement `EditorBackground` to make your own background or use the default one provided by the package. E.g, `GradientBackground`, `MemoryAssetBackground`, and 
 `DrishyaBackground`.
 - **Added**: Now you can use `GalleryView`, `CameraView`, and `DrishyaEditor` independently with full customization support.
 

@@ -255,11 +255,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     void Function(DrishyaEntity entity, bool removed)? onChanged,
     GallerySetting? setting,
     CustomRouteSetting? routeSetting,
+    bool disposeOnFinish = false,
   }) async {
     _onChanged = onChanged;
-    // In full screen mode controller will be created inside [GalleryViewField]
+    // Dispose controller created inside [GalleryViewField]
     // onPressed which need to be disposed.
-    _autoDispose = fullScreenMode;
+    _autoDispose = disposeOnFinish;
     final entities =
         await pick(context, setting: setting, routeSetting: routeSetting);
     _onChanged = null;
