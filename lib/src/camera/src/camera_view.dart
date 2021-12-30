@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
@@ -198,9 +197,6 @@ class _CameraViewState extends State<CameraView>
         body: ValueListenableBuilder<CamValue>(
           valueListenable: _camController,
           builder: (context, value, child) {
-            final padding = MediaQuery.of(context).padding;
-            log('$padding');
-
             // Camera
             if (_camController.initialized) {
               return CamControllerProvider(

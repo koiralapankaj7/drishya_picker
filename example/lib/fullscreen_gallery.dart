@@ -79,6 +79,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CameraViewField(
+                    editorSetting: gallerySetting.editorSetting,
                     onCapture: (entities) {
                       _notifier.value = _notifier.value.copyWith(
                         entities: [..._notifier.value.entities, ...entities],

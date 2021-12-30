@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +62,6 @@ class GalleryViewField extends StatelessWidget {
         } else {
           ctrl = context.galleryController!;
         }
-        log('$dispose');
         ctrl
             .onGalleryFieldPressed(
           context,
