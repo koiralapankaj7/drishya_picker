@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports, use_build_context_synchronously
-
 import 'dart:developer';
 
 import 'package:drishya_picker/drishya_picker.dart';
