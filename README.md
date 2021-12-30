@@ -167,7 +167,7 @@ Add following content to `info.plist`.
 </div>
 
 
- 1. Use `GalleryViewWrapper` to make gallery view collapsible otherwise ignore it.
+ 1. Use `SlidableGallery` to make gallery view slidable otherwise ignore it.
 
  ```dart
 class PickerDemo extends StatelessWidget {
@@ -177,7 +177,7 @@ class PickerDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GalleryViewWrapper(
+    return SlidableGallery(
       controller: controller,
       child: Scaffold(
         body: ...
@@ -186,7 +186,7 @@ class PickerDemo extends StatelessWidget {
   }
 }
 ``` 
- 2. `GalleryController` can be used for extra setting and 
+ 2. `GallerySetting` can be used for extra setting while 
     picking media.
 
 - Using `pick()` function on controller to pick media.
@@ -198,28 +198,38 @@ class PickerDemo extends StatelessWidget {
   @override
   void initState() {
     super.initState();
-    controller = GalleryController(
-      gallerySetting: const GallerySetting(
-        albumSubtitle: 'Collapsable',
-        enableCamera: true,
-        maximum: 10,
-        requestType: RequestType.all,
-      ),
-      panelSetting: const PanelSetting(topMargin: 24.0),
-    );
+    controller = GalleryController();
   }
+
+    
+  final _gallerySetting = GallerySetting(
+      enableCamera: true,
+      maximumCount: 10,
+      requestType: RequestType.all,
+      editorSetting: EditorSetting(colors: _colors, stickers: _stickers1),
+      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
+      cameraTextEditorSetting: EditorSetting(
+        backgrounds: _defaultBackgrounds,
+        colors: _colors.take(4).toList(),
+        stickers: _stickers2,
+      ),
+      cameraPhotoEditorSetting: EditorSetting(
+        colors: _colors.skip(4).toList(),
+        stickers: _stickers3,
+      ),
+    );
 
   ...
 
   onPressed : () async {
-    final entities = await controller.pick();
+    final entities = await controller.pick(context,setting:setting);
   }
 
   ...
 }
 ```
 
- 3. Using `GalleryViewField` similarly as flutter `TextField` to pick media.
+ 3. Using `GalleryViewField` similarly as flutter `TextField` to pick media. (Recommended approach, as creating and disposing of the controller has been already cared-of ) 
 
 - `onChanged` – triggered every time user select/unselect media
 
@@ -229,7 +239,7 @@ class PickerDemo extends StatelessWidget {
 ```dart
 GalleryViewField(
   selectedEntities: [],
-  onChanged: (entity, isRemoved) {
+  onChanged: (entity, removed) {
      ...
   },
   onSubmitted: (list) {
@@ -240,6 +250,8 @@ GalleryViewField(
 ```
 
 4. You can also use `GalleryView` as a `Widget`.
+
+5. Browse the example app for more in-depth implementation and customization. 
 
 ---
 
