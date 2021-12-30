@@ -1,11 +1,8 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import '../controllers/cam_controller.dart';
-import 'camera_builder.dart';
 
 ///
 class CameraCloseButton extends StatelessWidget {
@@ -29,13 +26,7 @@ class CameraCloseButton extends StatelessWidget {
         return child!;
       },
       child: InkWell(
-        onTap: () {
-          SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.manual,
-            overlays: SystemUiOverlay.values,
-          );
-          Navigator.of(context).pop();
-        },
+        onTap: UIHandler.of(context).pop,
         child: Container(
           height: 36,
           width: 36,

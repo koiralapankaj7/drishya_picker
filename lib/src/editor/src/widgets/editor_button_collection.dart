@@ -1,4 +1,5 @@
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
@@ -6,7 +7,7 @@ final PageStorageBucket _bucket = PageStorageBucket();
 var _initialIndex = 0;
 
 ///
-class EditorButtonCollection extends StatelessWidget {
+class EditorButtonCollection extends StatefulWidget {
   ///
   const EditorButtonCollection({
     Key? key,
@@ -20,24 +21,58 @@ class EditorButtonCollection extends StatelessWidget {
   ///
   final Color? stickerViewBackground;
 
+  @override
+  State<EditorButtonCollection> createState() => _EditorButtonCollectionState();
+}
+
+class _EditorButtonCollectionState extends State<EditorButtonCollection> {
+  _EditingOption? _currentOption;
+
+  void _onTextAlignButtonPressed(BuildContext context) {
+    late TextAlign textAlign;
+    switch (widget.controller.value.textAlign) {
+      case TextAlign.center:
+        textAlign = TextAlign.end;
+        break;
+      case TextAlign.end:
+        textAlign = TextAlign.start;
+        break;
+      // ignore: no_default_cases
+      default:
+        textAlign = TextAlign.center;
+    }
+    widget.controller.updateValue(textAlign: textAlign);
+  }
+
+  void _onTextColorChangerPressed(BuildContext context) {
+    widget.controller.updateValue(
+      fillTextfield: !widget.controller.value.fillTextfield,
+    );
+  }
+
   void _onStickerIconPressed(BuildContext context) {
-    if (controller.setting.stickers?.isEmpty ?? true) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('Stickers not available!')),
-        );
+    final controller = widget.controller;
+    final setting = controller.setting;
+
+    if (setting.stickers?.isEmpty ?? true) {
+      UIHandler.of(context).showSnackBar('Stickers not available!');
       return;
     }
+
+    assert(
+      setting.backgrounds.isNotEmpty,
+      'Backgrounds and Colors cannot be empty',
+    );
+
     controller.updateValue(isEditing: true, isStickerPickerOpen: true);
     Navigator.of(context)
         .push<Sticker>(
       SwipeablePageRoute(
         notificationDepth: 1,
         builder: (context) {
-          final background = controller.value.background is GradientBackground
-              ? (controller.value.background as GradientBackground).lastColor
-              : Colors.black54;
+          final background = controller.currentBackground is GradientBackground
+              ? (controller.currentBackground as GradientBackground).lastColor
+              : Colors.black.withOpacity(0.7);
 
           return StickerPicker(
             controller: controller,
@@ -52,7 +87,7 @@ class EditorButtonCollection extends StatelessWidget {
               Navigator.of(context).pop();
             },
             background: background,
-            onBackground: controller.value.generateForegroundColor(background),
+            onBackground: controller.generateForegroundColor(background),
           );
         },
       ),
@@ -64,123 +99,185 @@ class EditorButtonCollection extends StatelessWidget {
     });
   }
 
+  ///
+  List<_EditingOption> get _options {
+    return [
+      _EditingOption(
+        id: 'text-setting',
+        label: 'Aa',
+        onPressed: (_) {
+          if (widget.controller.value.hasFocus) {
+            widget.controller.focusNode.unfocus();
+          } else {
+            widget.controller.updateValue(hasFocus: true);
+          }
+        },
+        items: [
+          _EditingOption(
+            id: 'text-align-setting',
+            onPressed: _onTextAlignButtonPressed,
+            disableOnpressed: true,
+            child: _TextAlignmentIcon(align: widget.controller.value.textAlign),
+          ),
+          _EditingOption(
+            id: 'text-color-setting',
+            onPressed: _onTextColorChangerPressed,
+            disableOnpressed: true,
+            child: _TextBackgroundIcon(
+              isSelected: widget.controller.value.fillTextfield,
+            ),
+          ),
+        ],
+      ),
+      _EditingOption(
+        id: 'sticker-picker',
+        icon: Icons.emoji_emotions,
+        onPressed: _onStickerIconPressed,
+        disableOnpressed: true,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return EditorBuilder(
-      controller: controller,
+      controller: widget.controller,
       builder: (context, value, child) {
-        final firstChild = value.isStickerPickerOpen
-            ? Container(
-                height: 70,
-                alignment: Alignment.centerRight,
-                child: const _DoneButton(
-                  isVisible: true,
-                  padding: EdgeInsets.zero,
+        // Done button while sticker picker is open
+        if (value.isStickerPickerOpen) {
+          return Container(
+            height: 70,
+            alignment: Alignment.centerRight,
+            child: const _DoneButton(padding: EdgeInsets.zero),
+          );
+        }
+
+        if (value.isEditing) return const SizedBox();
+
+        _currentOption = value.keyboardVisible ? _options[0] : null;
+
+        // Button list
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ...List.generate(_options.length, (index) {
+              final option = _options[index];
+              final isSelected = _currentOption?.id == option.id;
+              final visible =
+                  _currentOption == null || _currentOption?.id == option.id;
+
+              return Padding(
+                padding: index != 0
+                    ? const EdgeInsets.only(top: 8)
+                    : EdgeInsets.zero,
+                child: _OptionView(
+                  option: option,
+                  isSelected: isSelected,
+                  visible: visible,
+                  onPressed: () {
+                    setState(() {
+                      _currentOption =
+                          _currentOption?.id == option.id ? null : option;
+                    });
+                  },
+                  onDonePressed: widget.controller.focusNode.unfocus,
                 ),
-              )
-            : const SizedBox();
+              );
+            })
 
-        final crossFadeState = value.isStickerPickerOpen || value.isEditing
-            ? CrossFadeState.showFirst
-            : CrossFadeState.showSecond;
-
-        return AppAnimatedCrossFade(
-          firstChild: firstChild,
-          secondChild: _ButtonList(
-            controller: controller,
-            onStickerIconPressed: _onStickerIconPressed,
-          ),
-          crossFadeState: crossFadeState,
-          alignment: Alignment.topCenter,
-          duration: const Duration(milliseconds: 200),
+            //
+          ],
         );
       },
     );
   }
 }
 
-class _ButtonList extends StatelessWidget {
-  const _ButtonList({
+class _OptionView extends StatefulWidget {
+  const _OptionView({
     Key? key,
-    required this.controller,
-    required this.onStickerIconPressed,
+    required this.option,
+    required this.onPressed,
+    this.onDonePressed,
+    this.isSelected = false,
+    this.visible = true,
   }) : super(key: key);
 
-  ///
-  final DrishyaEditingController controller;
+  final _EditingOption option;
+  final VoidCallback onPressed;
+  final VoidCallback? onDonePressed;
+  final bool isSelected;
+  final bool visible;
 
-  ///
-  final ValueSetter<BuildContext> onStickerIconPressed;
+  @override
+  _OptionViewState createState() => _OptionViewState();
+}
 
-  void _textAlignButtonPressed() {
-    late TextAlign textAlign;
-    switch (controller.value.textAlign) {
-      case TextAlign.center:
-        textAlign = TextAlign.end;
-        break;
-      case TextAlign.end:
-        textAlign = TextAlign.start;
-        break;
-      // ignore: no_default_cases
-      default:
-        textAlign = TextAlign.center;
-    }
-    controller.updateValue(textAlign: textAlign);
-  }
+class _OptionViewState extends State<_OptionView> {
+  _EditingOption? _currentOption;
 
   @override
   Widget build(BuildContext context) {
-    final hasFocus = controller.value.hasFocus;
+    if (!widget.visible) return const SizedBox();
+
+    final option = widget.option;
+    final selected = widget.isSelected;
+    final background = selected ? Colors.white : Colors.black38;
+    final labelColor = selected ? Colors.black : Colors.white;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        // Done button
         _DoneButton(
+          padding: const EdgeInsets.only(bottom: 12, top: 4),
           onPressed: () {
-            controller.updateValue(
-              hasFocus: false,
-              isColorPickerOpen: false,
-              keyboardVisible: false,
-            );
+            widget.onDonePressed?.call();
+            widget.onPressed();
           },
-          isVisible: hasFocus,
+          isVisible: selected,
         ),
+
+        // Main item
         _Button(
-          label: 'Aa',
-          size: hasFocus ? 48.0 : 44.0,
-          fontSize: hasFocus ? 24.0 : 20.0,
-          background: hasFocus ? Colors.white : Colors.black38,
-          labelColor: hasFocus ? Colors.black : Colors.white,
+          iconData: option.icon,
+          label: option.label,
+          background: background,
+          labelColor: labelColor,
           onPressed: () {
-            controller.updateValue(
-              hasFocus: !hasFocus,
-              isColorPickerOpen: !hasFocus,
-              keyboardVisible: !hasFocus,
-            );
+            option.onPressed?.call(context);
+            if (!option.disableOnpressed) {
+              widget.onPressed();
+            }
           },
+          child: option.child,
         ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: _textAlignButtonPressed,
-          child: _TextAlignmentIcon(align: controller.value.textAlign),
-        ),
-        _Button(
-          isVisible: hasFocus,
-          onPressed: () {
-            controller.updateValue(
-              fillTextfield: !controller.value.fillTextfield,
-              isColorPickerOpen: !controller.value.fillTextfield &&
-                  controller.value.background is PhotoBackground,
-            );
-          },
-          child: _TextBackgroundIcon(
-            isSelected: controller.value.fillTextfield,
+
+        // Sub items
+        if (option.items.isNotEmpty && selected)
+          Column(
+            children: List.generate(option.items.length, (index) {
+              final subOption = option.items[index];
+              return Padding(
+                padding: const EdgeInsets.only(top: 8, right: 8),
+                child: _OptionView(
+                  option: subOption,
+                  isSelected: _currentOption?.id == subOption.id,
+                  visible: _currentOption == null ||
+                      _currentOption?.id == subOption.id ||
+                      (_currentOption?.items.isEmpty ?? true),
+                  onPressed: () {
+                    setState(() {
+                      _currentOption =
+                          _currentOption?.id == subOption.id ? null : subOption;
+                    });
+                  },
+                ),
+              );
+            }),
           ),
-        ),
-        _Button(
-          isVisible: !hasFocus,
-          iconData: Icons.emoji_emotions,
-          onPressed: () => onStickerIconPressed(context),
-        ),
+
+        //
       ],
     );
   }
@@ -189,7 +286,7 @@ class _ButtonList extends StatelessWidget {
 class _DoneButton extends StatelessWidget {
   const _DoneButton({
     Key? key,
-    this.isVisible = false,
+    this.isVisible = true,
     this.onPressed,
     this.padding,
   }) : super(key: key);
@@ -205,9 +302,9 @@ class _DoneButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Padding(
-        padding: padding ?? const EdgeInsets.symmetric(vertical: 16),
+        padding: padding ?? EdgeInsets.zero,
         child: const Text(
-          'DONE',
+          'Done',
           style: TextStyle(
             color: Colors.white,
             fontSize: 17,
@@ -222,11 +319,9 @@ class _DoneButton extends StatelessWidget {
 class _Button extends StatelessWidget {
   const _Button({
     Key? key,
-    this.isVisible = true,
     this.iconData,
     this.child,
     this.background,
-    this.margin = 10.0,
     this.label,
     this.labelColor,
     this.onPressed,
@@ -234,22 +329,17 @@ class _Button extends StatelessWidget {
     this.fontSize,
   }) : super(key: key);
 
-  final bool isVisible;
   final IconData? iconData;
   final String? label;
   final Widget? child;
   final Color? labelColor;
   final Color? background;
-  final double margin;
   final void Function()? onPressed;
   final double? size;
   final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
-    if (!isVisible) {
-      return const SizedBox();
-    }
     var widget = child ?? const SizedBox();
 
     if (label?.isNotEmpty ?? false) {
@@ -273,12 +363,10 @@ class _Button extends StatelessWidget {
 
     return InkWell(
       onTap: onPressed,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        height: size ?? 44.0,
-        width: size ?? 44.0,
+      child: Container(
+        height: size ?? 40.0,
+        width: size ?? 40.0,
         alignment: Alignment.center,
-        margin: EdgeInsets.only(bottom: margin),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: background ?? Colors.black38,
@@ -343,9 +431,8 @@ class _TextBackgroundIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints.expand(),
-      margin: const EdgeInsets.all(10),
-      alignment: Alignment.center,
+      margin: const EdgeInsets.all(4),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: isSelected ? Colors.white : Colors.transparent,
         border: isSelected ? null : Border.all(color: Colors.white, width: 2),
@@ -353,12 +440,38 @@ class _TextBackgroundIcon extends StatelessWidget {
       ),
       child: Text(
         'A',
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: isSelected ? Colors.black : Colors.white,
           fontWeight: FontWeight.w600,
-          fontSize: 20,
+          fontSize: 16,
+          decoration: TextDecoration.none,
         ),
       ),
     );
   }
+}
+
+class _EditingOption {
+  _EditingOption({
+    required this.id,
+    this.onPressed,
+    this.disableOnpressed = false,
+    this.icon,
+    this.label,
+    this.child,
+    this.background,
+    this.foreground,
+    this.items = const [],
+  });
+
+  final String id;
+  final ValueSetter<BuildContext>? onPressed;
+  final bool disableOnpressed;
+  final IconData? icon;
+  final String? label;
+  final Widget? child;
+  final Color? background;
+  final Color? foreground;
+  final List<_EditingOption> items;
 }

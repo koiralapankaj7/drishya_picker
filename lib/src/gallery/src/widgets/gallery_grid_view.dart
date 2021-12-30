@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
-import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,6 +16,7 @@ class GalleryGridView extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.albums,
+    required this.onClosePressed,
   }) : super(key: key);
 
   ///
@@ -23,6 +24,9 @@ class GalleryGridView extends StatelessWidget {
 
   ///
   final Albums albums;
+
+  ///
+  final VoidCallback? onClosePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +79,11 @@ class GalleryGridView extends StatelessWidget {
               }
 
               final entities = value.entities;
+              final enableCamera = controller.setting.enableCamera;
 
               final itemCount = albums.value.state == BaseState.fetching
                   ? 20
-                  : controller.setting.enableCamera
+                  : enableCamera
                       ? entities.length + 1
                       : entities.length;
 
@@ -95,9 +100,15 @@ class GalleryGridView extends StatelessWidget {
                   itemCount: itemCount,
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
-                    if (controller.setting.enableCamera && index == 0) {
+                    if (enableCamera && index == 0) {
                       return InkWell(
-                        onTap: () => controller.openCamera(context),
+                        onTap: () {
+                          controller.openCamera(context).then((value) {
+                            if (value != null) {
+                              album.insert(value);
+                            }
+                          });
+                        },
                         child: Icon(
                           CupertinoIcons.camera,
                           color: Colors.lightBlue.shade300,
@@ -106,8 +117,7 @@ class GalleryGridView extends StatelessWidget {
                       );
                     }
 
-                    final ind =
-                        controller.setting.enableCamera ? index - 1 : index;
+                    final ind = enableCamera ? index - 1 : index;
 
                     final entity = albums.value.state == BaseState.fetching
                         ? null
@@ -154,7 +164,8 @@ class _MediaTile extends StatelessWidget {
       color: Colors.grey.shade800,
       child: InkWell(
         onTap: () {
-          controller.select(drishya.copyWith(pickedThumbData: bytes), context);
+          final entity = drishya.copyWith(pickedThumbData: bytes);
+          controller.select(context, entity);
         },
         child: Stack(
           fit: StackFit.expand,
@@ -165,8 +176,7 @@ class _MediaTile extends StatelessWidget {
                 bytes = b;
               },
             ),
-            if (!controller.singleSelection)
-              _SelectionCount(controller: controller, entity: entity),
+            _SelectionCount(controller: controller, entity: entity),
           ],
         ),
       ),
@@ -186,35 +196,53 @@ class _SelectionCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<GalleryValue>(
-      valueListenable: controller,
-      builder: (context, value, child) {
+    return GalleryBuilder(
+      controller: controller,
+      builder: (value, child) {
+        final actionBased =
+            controller.setting.selectionMode == SelectionMode.actionBased;
+
+        final singleSelection = actionBased
+            ? !value.enableMultiSelection
+            : controller.singleSelection;
+
         final isSelected = value.selectedEntities.contains(entity);
-        // if (!isSelected) return const SizedBox();
         final index = value.selectedEntities.indexOf(entity.toDrishya);
 
-        final crossFadeState =
-            isSelected ? CrossFadeState.showFirst : CrossFadeState.showSecond;
-        final firstChild = ColoredBox(
-          color: Theme.of(context).primaryColor.withOpacity(0.3),
-          child: Center(
-            child: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
-              radius: 14,
-              child: Text(
-                '${index + 1}',
-                style: Theme.of(context).textTheme.button?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-              ),
+        Widget counter = const SizedBox();
+
+        if (isSelected) {
+          counter = CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor,
+            radius: 14,
+            child: Text(
+              '${index + 1}',
+              style: Theme.of(context).textTheme.button?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ),
+          );
+        }
+
+        if (actionBased && !singleSelection) {
+          counter = Container(
+            height: 30,
+            width: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: isSelected ? counter : const SizedBox(),
+          );
+        }
+
+        return Container(
+          color: isSelected ? Colors.white38 : Colors.transparent,
+          padding: const EdgeInsets.all(6),
+          child: Align(
+            alignment: actionBased ? Alignment.topRight : Alignment.center,
+            child: counter,
           ),
-        );
-        return AppAnimatedCrossFade(
-          firstChild: firstChild,
-          secondChild: const SizedBox(),
-          crossFadeState: crossFadeState,
-          duration: const Duration(milliseconds: 300),
         );
       },
     );

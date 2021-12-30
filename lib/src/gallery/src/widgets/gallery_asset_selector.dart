@@ -1,6 +1,5 @@
-// ignore_for_file: always_use_package_imports
-
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -9,10 +8,14 @@ class GalleryAssetSelector extends StatefulWidget {
   const GalleryAssetSelector({
     Key? key,
     required this.controller,
+    required this.albums,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
+
+  ///
+  final Albums albums;
 
   @override
   GalleryAssetSelectorState createState() => GalleryAssetSelectorState();
@@ -138,10 +141,20 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         child: SizedBox(
                           width: buttonWidth,
                           child: _TextButton(
-                            onPressed: () => widget.controller.editEntity(
-                              context,
-                              value.selectedEntities.first,
-                            ),
+                            onPressed: (context) {
+                              final entity = value.selectedEntities.first;
+                              widget.controller
+                                  // ..select(context, entity)
+                                  .editEntity(context, entity)
+                                  .then((entity) {
+                                if (entity != null) {
+                                  widget.albums.currentAlbum.value
+                                      .insert(entity);
+                                  widget.controller
+                                      .select(context, entity, edited: true);
+                                }
+                              });
+                            },
                             label: 'EDIT',
                             background: Colors.white,
                             labelColor: Colors.black,
@@ -182,8 +195,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                           );
                         },
                         child: _TextButton(
-                          onPressed: () => widget.controller
-                              .completeTask(context, value.selectedEntities),
+                          onPressed: widget.controller.completeTask,
                           label: 'SELECT',
                         ),
                       ),
@@ -213,12 +225,12 @@ class _TextButton extends StatelessWidget {
   final String? label;
   final Color? background;
   final Color? labelColor;
-  final void Function()? onPressed;
+  final ValueChanged<BuildContext>? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed,
+      onPressed: () => onPressed?.call(context),
       style: TextButton.styleFrom(
         backgroundColor: background ?? Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(

@@ -1,16 +1,12 @@
-// ignore_for_file: always_use_package_imports
-
-import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_close_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_flash_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_footer.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_shutter_button.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../controllers/cam_controller.dart';
-import '../entities/camera_type.dart';
-import 'camera_builder.dart';
-import 'camera_close_button.dart';
-import 'camera_flash_button.dart';
-import 'camera_footer.dart';
-import 'camera_shutter_button.dart';
 
 ///
 const _top = 16.0;
@@ -41,14 +37,14 @@ class CameraOverlay extends StatelessWidget {
 
         // Close button
         Positioned(
-          left: 8,
+          left: 16,
           top: _top,
           child: CameraCloseButton(controller: controller),
         ),
 
         // Flash Light
         Positioned(
-          right: 8,
+          right: 16,
           top: _top,
           child: CameraFlashButton(controller: controller),
         ),
@@ -80,64 +76,66 @@ class _PlaygroundOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deController = controller.drishyaEditingController;
+
     return CameraBuilder(
       controller: controller,
       builder: (value, child) {
         if (value.cameraType != CameraType.text) {
           return const SizedBox();
         }
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // Add text button
-            Align(
-              child: EditorTextfieldButton(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
-
-            // Close button
-            Positioned(
-              left: 8,
-              top: _top,
-              child: EditorCloseButton(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
-
-            // Background changer
-            Positioned(
-              left: 16,
-              bottom: 16,
-              child: BackgroundSwitcher(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
-
-            // Screenshot capture button
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: EditorShutterButton(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
-
-            // Sticker buttons
-            Positioned(
-              right: 16,
-              top: controller.drishyaEditingController.value.isStickerPickerOpen
-                  ? 0.0
-                  : _top,
-              child: EditorButtonCollection(
-                controller: controller.drishyaEditingController,
-              ),
-            ),
-
-            //
-          ],
-        );
+        return child!;
       },
+      child: EditorBuilder(
+        controller: deController,
+        builder: (context, value, child) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              // Close button
+              Positioned(
+                left: 16,
+                top: _top,
+                child: EditorCloseButton(
+                  controller: deController,
+                ),
+              ),
+
+              // Background changer
+              Positioned(
+                left: 16,
+                bottom: 16,
+                child: BackgroundSwitcher(
+                  controller: deController,
+                ),
+              ),
+
+              // Screenshot capture button
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: EditorShutterButton(
+                  controller: deController,
+                  onSuccess: (entity) {
+                    UIHandler.of(context).pop([entity]);
+                  },
+                ),
+              ),
+
+              // Sticker buttons
+              Positioned(
+                right: 16,
+                top: _top,
+                child: EditorButtonCollection(
+                  controller: deController,
+                ),
+              ),
+
+              //
+            ],
+          );
+        },
+      ),
     );
   }
 }

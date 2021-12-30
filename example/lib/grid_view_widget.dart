@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -7,18 +8,18 @@ class GridViewWidget extends StatelessWidget {
   const GridViewWidget({
     Key? key,
     required this.controller,
+    required this.setting,
     required this.notifier,
-    required this.onAddButtonPressed,
   }) : super(key: key);
 
   ///
   final GalleryController controller;
 
   ///
-  final ValueNotifier<List<DrishyaEntity>> notifier;
+  final GallerySetting setting;
 
   ///
-  final VoidCallback onAddButtonPressed;
+  final ValueNotifier<Data> notifier;
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +37,11 @@ class GridViewWidget extends StatelessWidget {
           ),
         ],
       ),
-      child: ValueListenableBuilder<List<DrishyaEntity>>(
+      child: ValueListenableBuilder<Data>(
         valueListenable: notifier,
-        builder: (context, list, child) {
-          if (list.isEmpty) {
-            return ValueListenableBuilder<PnaelValue>(
+        builder: (context, data, child) {
+          if (data.entities.isEmpty) {
+            return ValueListenableBuilder<PanelValue>(
               valueListenable: controller.panelController,
               builder: (context, value, child) {
                 if (value.state == PanelState.close) {
@@ -50,7 +51,19 @@ class GridViewWidget extends StatelessWidget {
               },
               child: Center(
                 child: InkWell(
-                  onTap: onAddButtonPressed,
+                  onTap: () async {
+                    final entities = await controller.pick(
+                      context,
+                      setting: setting.copyWith(
+                        maximumCount: notifier.value.maxLimit,
+                        albumSubtitle: 'All',
+                        requestType: notifier.value.requestType,
+                        selectedEntities: notifier.value.entities,
+                      ),
+                    );
+                    notifier.value =
+                        notifier.value.copyWith(entities: entities);
+                  },
                   child: const CircleAvatar(
                     child: Icon(Icons.add),
                   ),
@@ -66,9 +79,9 @@ class GridViewWidget extends StatelessWidget {
               crossAxisSpacing: 1.0,
               mainAxisSpacing: 1.0,
             ),
-            itemCount: list.length,
+            itemCount: data.entities.length,
             itemBuilder: (context, index) {
-              final entity = list[index];
+              final entity = data.entities[index];
               return EntityThumbnail(entity: entity);
             },
           );

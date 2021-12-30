@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/albums_page.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_asset_selector.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/send_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-const _defaultMin = 0.37;
 
 ///
 ///
@@ -19,24 +19,39 @@ class GalleryView extends StatefulWidget {
   const GalleryView({
     Key? key,
     this.controller,
+    this.setting,
   }) : super(key: key);
 
-  ///
+  /// Gallery controller
   final GalleryController? controller;
+
+  /// Gallery setting
+  final GallerySetting? setting;
 
   ///
   static const String name = 'GalleryView';
 
   ///
+  /// Pick media
   static Future<List<DrishyaEntity>?> pick(
     BuildContext context, {
+
+    /// Gallery controller
     GalleryController? controller,
+
+    /// Gallery setting
+    GallerySetting? setting,
+
+    /// Route setting
+    CustomRouteSetting? routeSetting,
   }) {
     return Navigator.of(context).push<List<DrishyaEntity>>(
       SlideTransitionPageRoute(
-        builder: GalleryView(controller: controller),
-        transitionCurve: Curves.easeIn,
-        settings: const RouteSettings(name: name),
+        builder: GalleryView(controller: controller, setting: setting),
+        setting: routeSetting ??
+            const CustomRouteSetting(
+              settings: RouteSettings(name: name),
+            ),
       ),
     );
   }
@@ -45,8 +60,61 @@ class GalleryView extends StatefulWidget {
   State<GalleryView> createState() => _GalleryViewState();
 }
 
-class _GalleryViewState extends State<GalleryView>
-    with SingleTickerProviderStateMixin {
+class _GalleryViewState extends State<GalleryView> {
+  late final GalleryController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? GalleryController();
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null || _controller.autoDispose) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If [SlidableGallery] is used no need to build panel setting again
+    if (!_controller.fullScreenMode) {
+      return _View(controller: _controller, setting: widget.setting!);
+    }
+
+    // Full screen mode
+    return PanelSettingBuilder(
+      setting: widget.setting?.panelSetting,
+      builder: (panelSetting) => _View(
+        controller: _controller,
+        setting: (widget.setting ?? _controller.setting)
+            .copyWith(panelSetting: panelSetting),
+      ),
+    );
+
+    //
+  }
+}
+
+///
+class _View extends StatefulWidget {
+  ///
+  const _View({
+    Key? key,
+    required this.controller,
+    required this.setting,
+  }) : super(key: key);
+
+  final GalleryController controller;
+  final GallerySetting setting;
+
+  @override
+  State<_View> createState() => _ViewState();
+}
+
+class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
   late final GalleryController _controller;
   late final PanelController _panelController;
 
@@ -59,13 +127,10 @@ class _GalleryViewState extends State<GalleryView>
   @override
   void initState() {
     super.initState();
-
-    _controller = widget.controller ?? GalleryController();
-
+    _controller = widget.controller..init(setting: widget.setting);
     _albums = Albums()..fetchAlbums(_controller.setting.requestType);
 
     _panelController = _controller.panelController;
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -85,9 +150,6 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   void dispose() {
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
     _albums.dispose();
     _animationController.dispose();
     super.dispose();
@@ -167,14 +229,16 @@ class _GalleryViewState extends State<GalleryView>
     }
 
     if (_controller.fullScreenMode) {
-      Navigator.of(context).pop();
+      UIHandler.of(context).pop();
       return true;
     }
 
-    final isPanelMax = _panelController.value.state == PanelState.max;
-
-    if (!_controller.fullScreenMode && isPanelMax) {
-      _panelController.minimizePanel();
+    if (_panelController.isVisible) {
+      if (_panelController.value.state == PanelState.max) {
+        _panelController.minimizePanel();
+      } else {
+        _panelController.closePanel();
+      }
       return false;
     }
 
@@ -194,24 +258,18 @@ class _GalleryViewState extends State<GalleryView>
 
   @override
   Widget build(BuildContext context) {
-    final ps = _controller.panelSetting;
-    final _panelMaxHeight = ps.maxHeight ??
-        MediaQuery.of(context).size.height - (ps.topMargin ?? 0.0);
-    final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
-    final _setting =
-        ps.copyWith(maxHeight: _panelMaxHeight, minHeight: _panelMinHeight);
-
-    final albumListHeight = _panelMaxHeight - ps.headerMaxHeight;
-    albumHeight = albumListHeight;
+    final panelSetting = widget.setting.panelSetting!;
+    final actionMode =
+        _controller.setting.selectionMode == SelectionMode.actionBased;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _setting.overlayStyle,
+      value: panelSetting.overlayStyle,
       child: WillPopScope(
         onWillPop: _onClosePressed,
         child: Scaffold(
           backgroundColor: Colors.black,
           body: Stack(
-            // fit: StackFit.expand,
+            fit: StackFit.expand,
             children: [
               // Header
               Align(
@@ -230,21 +288,21 @@ class _GalleryViewState extends State<GalleryView>
                   // Header space
                   Builder(
                     builder: (context) {
+                      // Header space for full screen mode
                       if (_controller.fullScreenMode) {
-                        return SizedBox(height: _setting.headerMaxHeight);
+                        return SizedBox(height: panelSetting.headerMaxHeight);
                       }
 
-                      return ValueListenableBuilder<PnaelValue>(
+                      // Toogling size for header hiding animation
+                      return ValueListenableBuilder<PanelValue>(
                         valueListenable: _panelController,
-                        builder: (context, PnaelValue value, child) {
-                          final height = (_setting.headerMinHeight +
-                                  (_setting.headerMaxHeight -
-                                          _setting.headerMinHeight) *
-                                      value.factor *
-                                      1.2)
+                        builder: (context, value, child) {
+                          final height = (panelSetting.headerMaxHeight *
+                                  value.factor *
+                                  1.2)
                               .clamp(
-                            _setting.headerMinHeight,
-                            _setting.headerMaxHeight,
+                            panelSetting.thumbHandlerHeight,
+                            panelSetting.headerMaxHeight,
                           );
                           return SizedBox(height: height);
                         },
@@ -256,8 +314,10 @@ class _GalleryViewState extends State<GalleryView>
                   // Divider
                   Divider(
                     color: Colors.lightBlue.shade300,
-                    thickness: 0.3,
-                    height: 2,
+                    thickness: 0.5,
+                    height: 0.5,
+                    indent: 0,
+                    endIndent: 0,
                   ),
 
                   // Gallery grid
@@ -265,20 +325,33 @@ class _GalleryViewState extends State<GalleryView>
                     child: GalleryGridView(
                       controller: _controller,
                       albums: _albums,
+                      onClosePressed: _onClosePressed,
                     ),
                   ),
                 ],
               ),
 
               // Send and edit button
-              GalleryAssetSelector(controller: _controller),
+              if (!actionMode)
+                GalleryAssetSelector(
+                  controller: _controller,
+                  albums: _albums,
+                ),
+
+              // Send button
+              if (actionMode)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: SendButton(controller: _controller),
+                ),
 
               // Album list
               AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
-                  final offsetY = _setting.headerMaxHeight +
-                      (_panelMaxHeight - ps.headerMaxHeight) *
+                  final offsetY = panelSetting.headerMaxHeight +
+                      (panelSetting.maxHeight! - panelSetting.headerMaxHeight) *
                           (1 - _animation.value);
                   return Visibility(
                     visible: _animation.value > 0.0,
@@ -301,5 +374,7 @@ class _GalleryViewState extends State<GalleryView>
         ),
       ),
     );
+
+    //
   }
 }

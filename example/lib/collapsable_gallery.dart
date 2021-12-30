@@ -1,6 +1,8 @@
 import 'package:drishya_picker/assets/icons/shape_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/fullscreen_gallery.dart';
 import 'package:example/recent_entities.dart';
+import 'package:example/text_field_view.dart';
 import 'package:flutter/material.dart';
 
 import 'grid_view_widget.dart';
@@ -17,50 +19,27 @@ class CollapsableGallery extends StatefulWidget {
 }
 
 class _CollapsableGalleryState extends State<CollapsableGallery> {
-  late final GalleryController controller;
-  late final ValueNotifier<List<DrishyaEntity>> notifier;
+  late final GalleryController _controller;
+  late final ValueNotifier<Data> _notifier;
 
   @override
   void initState() {
     super.initState();
-
-    notifier = ValueNotifier(<DrishyaEntity>[]);
-    controller = GalleryController(
-      setting: const GallerySetting(
-        albumSubtitle: 'Collapsable',
-        enableCamera: true,
-        maximum: 10,
-        requestType: RequestType.all,
-      ),
-      panelSetting: const PanelSetting(topMargin: 24.0),
-      galleryPhotoEditorSetting: EditorSetting(
-        colors: _colors,
-        stickers: _stickers1,
-      ),
-      cameraTextEditorSetting: EditorSetting(
-        backgrounds: _defaultBackgrounds,
-        colors: _colors.take(4).toList(),
-        stickers: _stickers2,
-      ),
-      cameraPhotoEditorSetting: EditorSetting(
-        colors: _colors.skip(4).toList(),
-        stickers: _stickers3,
-      ),
-      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
-    );
+    _notifier = ValueNotifier(Data());
+    _controller = GalleryController();
   }
 
   @override
   void dispose() {
-    controller.dispose();
-    notifier.dispose();
+    _controller.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SlidableGalleryView(
-      controller: controller,
+    return SlidableGallery(
+      controller: _controller,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Slidable Gallery'),
@@ -70,21 +49,15 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
             // Grid view
             Expanded(
               child: GridViewWidget(
-                notifier: notifier,
-                controller: controller,
-                onAddButtonPressed: () async {
-                  final entities = await controller.pick(
-                    context,
-                    selectedEntities: notifier.value,
-                  );
-                  notifier.value = entities;
-                },
+                controller: _controller,
+                setting: gallerySetting,
+                notifier: _notifier,
               ),
             ),
 
             const SizedBox(height: 8.0),
 
-            RecentEntities(controller: controller, notifier: notifier),
+            RecentEntities(controller: _controller, notifier: _notifier),
 
             const SizedBox(height: 8.0),
 
@@ -104,50 +77,54 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
               child: Row(
                 children: [
                   // Textfield
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Test field',
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: TextFieldView(notifier: _notifier)),
 
                   // Camera field..
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CameraViewField(
-                      onCapture: (entity) {
-                        notifier.value = [...notifier.value, entity];
+                      editorSetting: EditorSetting(
+                        colors: _defaultBackgrounds
+                            .map((e) => e.colors!)
+                            .expand((e) => e)
+                            .toList(),
+                        stickers: _stickers1,
+                      ),
+                      photoEditorSetting: EditorSetting(
+                        colors: _colors.skip(4).toList(),
+                        stickers: _stickers3,
+                      ),
+                      onCapture: (entities) {
+                        _notifier.value = _notifier.value.copyWith(
+                          entities: [..._notifier.value.entities, ...entities],
+                        );
                       },
                       child: const Icon(Icons.camera),
                     ),
                   ),
 
                   // Gallery field
-                  ValueListenableBuilder<List<DrishyaEntity>>(
-                    valueListenable: notifier,
-                    builder: (context, list, child) {
+                  ValueListenableBuilder<Data>(
+                    valueListenable: _notifier,
+                    builder: (context, data, child) {
                       return GalleryViewField(
-                        selectedEntities: list,
-                        onChanged: (entity, isRemoved) {
-                          final value = notifier.value.toList();
-                          if (isRemoved) {
-                            value.remove(entity);
-                          } else {
-                            value.add(entity);
-                          }
-                          notifier.value = value;
+                        setting: gallerySetting.copyWith(
+                          maximumCount: data.maxLimit,
+                          albumSubtitle: 'Image only',
+                          requestType: data.requestType,
+                          selectedEntities: data.entities,
+                        ),
+                        onChanged: (entity, remove) {
+                          final entities = _notifier.value.entities.toList();
+                          remove
+                              ? entities.remove(entity)
+                              : entities.add(entity);
+                          _notifier.value =
+                              _notifier.value.copyWith(entities: entities);
                         },
                         onSubmitted: (list) {
-                          notifier.value = list;
+                          _notifier.value =
+                              _notifier.value.copyWith(entities: list);
                         },
                         child: child,
                       );
@@ -167,6 +144,24 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
     );
   }
 }
+
+///
+GallerySetting get gallerySetting => GallerySetting(
+      enableCamera: true,
+      maximumCount: 10,
+      requestType: RequestType.all,
+      editorSetting: EditorSetting(colors: _colors, stickers: _stickers1),
+      cameraSetting: const CameraSetting(videoDuration: Duration(seconds: 15)),
+      cameraTextEditorSetting: EditorSetting(
+        backgrounds: _defaultBackgrounds,
+        colors: _colors.take(4).toList(),
+        stickers: _stickers2,
+      ),
+      cameraPhotoEditorSetting: EditorSetting(
+        colors: _colors.skip(4).toList(),
+        stickers: _stickers3,
+      ),
+    );
 
 const _defaultBackgrounds = [
   GradientBackground(colors: [Color(0xFF00C6FF), Color(0xFF0078FF)]),

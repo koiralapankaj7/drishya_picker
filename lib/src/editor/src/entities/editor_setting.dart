@@ -24,9 +24,7 @@ class EditorSetting {
   final int fixedTabSize;
 
   ///
-  /// [PhotoBackground] => Colors will be used to change text/icon colors
-  /// [GradientBackground] => Colors will be used to change icon colors
-  ///
+  ///  Colors will be used to change icon/text colors
   final List<Color> colors;
 
   /// Helper function to copy object
@@ -42,6 +40,23 @@ class EditorSetting {
       fixedTabSize: fixedTabSize ?? this.fixedTabSize,
       colors: colors ?? this.colors,
     );
+  }
+
+  /// Default backgrounds
+  List<GradientBackground> get defaultBackgrounds => _defaultBackgrounds;
+
+  /// Default colors
+  List<Color> get defaultColors => _colors;
+
+  @override
+  String toString() {
+    return '''
+    EditorSetting(
+      stickers: $stickers, 
+      backgrounds: $backgrounds, 
+      fixedTabSize: $fixedTabSize, 
+      colors: $colors
+    )''';
   }
 
   @override
@@ -63,12 +78,6 @@ class EditorSetting {
         fixedTabSize.hashCode ^
         colors.hashCode;
   }
-
-  /// Default backgrounds
-  List<GradientBackground> get defaultBackgrounds => _defaultBackgrounds;
-
-  /// Default colors
-  List<Color> get defaultColors => _colors;
 }
 
 ///

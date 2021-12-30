@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+// ignore_for_file: unused_field
 import 'package:flutter/material.dart';
 
 /// {@template drag_update}
@@ -50,7 +49,6 @@ class DraggableResizable extends StatefulWidget {
     this.onStart,
     this.onEnd,
     this.canTransform = false,
-    this.controller,
   })  : constraints = constraints ?? BoxConstraints.loose(Size.infinite),
         super(key: key);
 
@@ -58,7 +56,7 @@ class DraggableResizable extends StatefulWidget {
   final Widget child;
 
   /// Drag/Resize end callback
-  final VoidCallback? onTap;
+  final ValueSetter<DraggableResizableState>? onTap;
 
   /// Drag/Resize start callback
   final VoidCallback? onStart;
@@ -92,129 +90,62 @@ class DraggableResizable extends StatefulWidget {
   /// Defaults to [BoxConstraints.loose(Size.infinite)].
   final BoxConstraints constraints;
 
-  ///
-  final DraggableResizableController? controller;
-
   @override
-  State<DraggableResizable> createState() => _DraggableResizableState();
+  State<DraggableResizable> createState() => DraggableResizableState();
 }
 
-class _DraggableResizableState extends State<DraggableResizable>
+///
+class DraggableResizableState extends State<DraggableResizable>
     with SingleTickerProviderStateMixin {
-  late Size size;
-  late BoxConstraints constraints;
-  late double angle;
-  late double scale;
-  late double angleDelta;
-  late double baseAngle;
+  late Size _size;
+  late BoxConstraints _constraints;
+  late double _angle;
+  late double _scale;
+  late double _angleDelta;
+  late double _baseAngle;
   double? _aspectRatio;
-
-  bool get isTouchInputSupported => true;
-
-  late Offset position;
-
-  final key = GlobalKey();
-  late final AnimationController _animationController;
-
+  // bool get _isTouchInputSupported => true;
+  late Offset _position;
+  final _key = GlobalKey();
   var _centerDX = 0.0;
   var _centerDY = 0.0;
-  VoidCallback? _onCompleteMovingToCenter;
-
   var _initialSize = Size.zero;
 
   @override
   void initState() {
     super.initState();
-    widget.controller?._init(this);
-    _initAnim();
-    position = widget.initialPosition ?? Offset.zero;
-    size = widget.size != Size.zero
-        ? Size(
-            widget.size.width * (widget.initialScale ?? 1),
-            widget.size.height * (widget.initialScale ?? 1),
-          )
-        : widget.size;
+    _position = widget.initialPosition ?? Offset.zero;
     if (widget.size != Size.zero) {
-      _aspectRatio = size.width / size.height;
+      _size = Size(
+        widget.size.width * (widget.initialScale ?? 1),
+        widget.size.height * (widget.initialScale ?? 1),
+      );
+      _aspectRatio = _size.width / _size.height;
+    } else {
+      _size = widget.size;
     }
-    constraints = widget.constraints;
-    angle = widget.initialAngle ?? 0;
-    scale = widget.initialScale ?? 1;
-    baseAngle = 0;
-    angleDelta = 0;
-    _initialSize = size;
+    _constraints = widget.constraints;
+    _angle = widget.initialAngle ?? 0;
+    _scale = widget.initialScale ?? 1;
+    _baseAngle = 0;
+    _angleDelta = 0;
+    _initialSize = _size;
   }
 
-  void _initAnim() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    )
-      ..addListener(() {
-        setState(() {
-          angle = lerpDouble(angle, 0, _animationController.value) ?? 0.0;
-          position = Offset(
-            lerpDouble(position.dx, _centerDX, _animationController.value) ??
-                0.0,
-            lerpDouble(position.dy, _centerDY, _animationController.value) ??
-                0.0,
-          );
-          scale = lerpDouble(scale, 1, _animationController.value) ?? 0.0;
-          if (_initialSize != Size.zero) {
-            size = Size(
-              lerpDouble(
-                    size.width,
-                    _initialSize.width,
-                    _animationController.value,
-                  ) ??
-                  0,
-              lerpDouble(
-                    size.height,
-                    _initialSize.height,
-                    _animationController.value,
-                  ) ??
-                  0,
-            );
-          }
-        });
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _animationController.reset();
-          _onCompleteMovingToCenter?.call();
-        }
-      });
-  }
-
-  void _moveToCenter({VoidCallback? onComplete}) {
-    _onCompleteMovingToCenter = onComplete;
-    _animationController
-      ..drive(
-        Tween(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeIn)),
-      )
-      ..forward();
-  }
-
-  void onUpdate(double normalizedLeft, double normalizedTop) {
+  void _onUpdate(double normalizedLeft, double normalizedTop) {
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       final normalizedPosition = Offset(normalizedLeft, normalizedTop);
       widget.onUpdate?.call(
         DragUpdate(
           position: normalizedPosition,
-          size: size,
-          constraints: Size(constraints.maxWidth, constraints.maxHeight),
-          angle: angle,
-          scale: scale,
+          size: _size,
+          constraints: Size(_constraints.maxWidth, _constraints.maxHeight),
+          angle: _angle,
+          scale: _scale,
         ),
-        key,
+        _key,
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
   }
 
   @override
@@ -226,39 +157,36 @@ class _DraggableResizableState extends State<DraggableResizable>
             _aspectRatio ?? constraints.maxWidth / constraints.maxHeight;
 
         if (widget.size == Size.zero) {
-          size = constraints.smallest;
+          _size = constraints.smallest;
         }
 
-        _centerDX = (constraints.maxWidth - size.width) / 2;
-        _centerDY = (constraints.maxHeight - size.height) / 2;
+        _centerDX = (constraints.maxWidth - _size.width) / 2;
+        _centerDY = (constraints.maxHeight - _size.height) / 2;
 
-        position =
-            position == Offset.zero ? Offset(_centerDX, _centerDY) : position;
+        _position =
+            _position == Offset.zero ? Offset(_centerDX, _centerDY) : _position;
 
-        final normalizedWidth = size.width;
+        final normalizedWidth = _size.width;
         final normalizedHeight = normalizedWidth / aspectRatio;
-        final newSize = Size(
-          normalizedWidth,
-          normalizedHeight,
-        );
+        final newSize = Size(normalizedWidth, normalizedHeight);
 
         if (widget.constraints.isSatisfiedBy(newSize)) {
-          size = newSize;
+          _size = newSize;
         }
 
-        final normalizedLeft = position.dx;
-        final normalizedTop = position.dy;
+        final normalizedLeft = _position.dx;
+        final normalizedTop = _position.dy;
 
         final decoratedChild = SizedBox(
           height: normalizedHeight,
           width: normalizedWidth,
-          key: key,
+          key: _key,
           child: widget.child,
         );
 
-        if (this.constraints != constraints) {
-          this.constraints = constraints;
-          onUpdate(normalizedLeft, normalizedTop);
+        if (_constraints != constraints) {
+          _constraints = constraints;
+          _onUpdate(normalizedLeft, normalizedTop);
         }
 
         return Stack(
@@ -270,21 +198,22 @@ class _DraggableResizableState extends State<DraggableResizable>
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
                   ..scale(1.0)
-                  ..rotateZ(angle),
+                  ..rotateZ(_angle),
                 child: _DraggablePoint(
                   key: const Key('draggableResizable_child_draggablePoint'),
                   onScaleUpdate: widget.onScaleUpdate,
                   onTap: () {
-                    widget.onTap?.call();
-                    onUpdate(normalizedLeft, normalizedTop);
+                    widget.onTap?.call(this);
+                    _onUpdate(normalizedLeft, normalizedTop);
                   },
                   onStart: widget.onStart,
                   onEnd: widget.onEnd,
                   onDrag: (d) {
                     setState(() {
-                      position = Offset(position.dx + d.dx, position.dy + d.dy);
+                      _position =
+                          Offset(_position.dx + d.dx, _position.dy + d.dy);
                     });
-                    onUpdate(normalizedLeft, normalizedTop);
+                    _onUpdate(normalizedLeft, normalizedTop);
                   },
                   onScale: (s) {
                     final updatedSize = Size(
@@ -294,23 +223,23 @@ class _DraggableResizableState extends State<DraggableResizable>
 
                     if (!widget.constraints.isSatisfiedBy(updatedSize)) return;
 
-                    final midX = position.dx + (size.width / 2);
-                    final midY = position.dy + (size.height / 2);
+                    final midX = _position.dx + (_size.width / 2);
+                    final midY = _position.dy + (_size.height / 2);
                     final updatedPosition = Offset(
                       midX - (updatedSize.width / 2),
                       midY - (updatedSize.height / 2),
                     );
 
                     setState(() {
-                      size = updatedSize;
-                      position = updatedPosition;
-                      scale = s;
+                      _size = updatedSize;
+                      _position = updatedPosition;
+                      _scale = s;
                     });
-                    onUpdate(normalizedLeft, normalizedTop);
+                    _onUpdate(normalizedLeft, normalizedTop);
                   },
                   onRotate: (a) {
-                    setState(() => angle = a);
-                    onUpdate(normalizedLeft, normalizedTop);
+                    setState(() => _angle = a);
+                    _onUpdate(normalizedLeft, normalizedTop);
                   },
                   child: decoratedChild,
                 ),
@@ -417,20 +346,4 @@ class _DraggablePointState extends State<_DraggablePoint> {
       child: widget.child,
     );
   }
-}
-
-/// Controller for [DraggableResizableController] widget
-class DraggableResizableController extends ChangeNotifier {
-  _DraggableResizableState? _state;
-
-  // ignore: use_setters_to_change_properties
-  void _init(_DraggableResizableState state) {
-    _state = state;
-  }
-
-  /// Move widget to center
-  void moveToCenter({
-    VoidCallback? onComplete,
-  }) =>
-      _state?._moveToCenter(onComplete: onComplete);
 }

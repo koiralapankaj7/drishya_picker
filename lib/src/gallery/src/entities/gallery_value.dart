@@ -1,58 +1,64 @@
+import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:flutter/material.dart';
 
 ///
+@immutable
 class GalleryValue {
   ///
   const GalleryValue({
     this.selectedEntities = const <DrishyaEntity>[],
-    this.previousSelection = true,
     this.isAlbumVisible = false,
+    this.enableMultiSelection = false,
   });
 
   ///
   final List<DrishyaEntity> selectedEntities;
 
   ///
-  final bool previousSelection;
+  final bool isAlbumVisible;
 
   ///
-  final bool isAlbumVisible;
+  final bool enableMultiSelection;
 
   ///
   GalleryValue copyWith({
     List<DrishyaEntity>? selectedEntities,
-    bool? previousSelection,
     bool? isAlbumVisible,
-  }) =>
-      GalleryValue(
-        selectedEntities: selectedEntities ?? this.selectedEntities,
-        previousSelection: previousSelection ?? this.previousSelection,
-        isAlbumVisible: isAlbumVisible ?? this.isAlbumVisible,
-      );
+    bool? enableMultiSelection,
+  }) {
+    return GalleryValue(
+      selectedEntities: selectedEntities ?? this.selectedEntities,
+      isAlbumVisible: isAlbumVisible ?? this.isAlbumVisible,
+      enableMultiSelection: enableMultiSelection ?? this.enableMultiSelection,
+    );
+  }
 
   @override
-  String toString() =>
-      'LENGTH  :  ${selectedEntities.length} \nLIST  :  $selectedEntities';
+  String toString() {
+    return '''
+    GalleryValue(
+      selectedEntities: $selectedEntities, 
+      isAlbumVisible: $isAlbumVisible, 
+      enableMultiSelection: $enableMultiSelection
+    )''';
+  }
 
-  // @override
-  // bool operator ==(Object other) {
-  //   if (identical(this, other)) return true;
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
 
-  //   if (other is GalleryValue) {
-  //     if (selectedEntities.length != other.selectedEntities.length) {
-  //       return false;
-  //     }
+    return other is GalleryValue &&
+        listEquals(other.selectedEntities, selectedEntities) &&
+        other.isAlbumVisible == isAlbumVisible &&
+        other.enableMultiSelection == enableMultiSelection;
+  }
 
-  //     var isIdentical = true;
-  //     for (var i = 0; i < selectedEntities.length; i++) {
-  //       if (!isIdentical) return false;
-  //       isIdentical = other.selectedEntities[i].id == selectedEntities[i].id;
-  //     }
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-  // @override
-  // int get hashCode => selectedEntities.hashCode;
+  @override
+  int get hashCode {
+    return selectedEntities.hashCode ^
+        isAlbumVisible.hashCode ^
+        enableMultiSelection.hashCode;
+  }
 }

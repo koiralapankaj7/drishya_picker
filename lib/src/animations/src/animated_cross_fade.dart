@@ -12,7 +12,6 @@ class AppAnimatedCrossFade extends StatelessWidget {
     required this.firstChild,
     required this.secondChild,
     required this.crossFadeState,
-    this.duration,
     this.alignment,
   }) : super(key: key);
 
@@ -26,9 +25,6 @@ class AppAnimatedCrossFade extends StatelessWidget {
   final CrossFadeState crossFadeState;
 
   ///
-  final Duration? duration;
-
-  ///
   final Alignment? alignment;
 
   @override
@@ -37,7 +33,7 @@ class AppAnimatedCrossFade extends StatelessWidget {
       firstChild: firstChild,
       secondChild: secondChild,
       crossFadeState: crossFadeState,
-      duration: duration ?? const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
       layoutBuilder: (
         Widget topChild,
         Key topChildKey,

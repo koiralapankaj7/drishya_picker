@@ -12,6 +12,7 @@ class AlbumBuilder extends StatelessWidget {
     required this.albums,
     this.builder,
     this.child,
+    this.hidePermissionView = false,
   }) : super(key: key);
 
   ///
@@ -26,13 +27,18 @@ class AlbumBuilder extends StatelessWidget {
   ///
   final Widget? child;
 
+  ///
+  final bool hidePermissionView;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AlbumsValue>(
       valueListenable: albums,
       builder: (context, value, child) {
         // Error
-        if (value.state == BaseState.unauthorised && value.albums.isEmpty) {
+        if (value.state == BaseState.unauthorised &&
+            value.albums.isEmpty &&
+            !hidePermissionView) {
           return GalleryPermissionView(
             onRefresh: () {
               albums.fetchAlbums(controller.setting.requestType);

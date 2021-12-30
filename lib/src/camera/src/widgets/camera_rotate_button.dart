@@ -22,22 +22,23 @@ class CameraRotateButton extends StatelessWidget {
     return CameraBuilder(
       controller: controller,
       builder: (value, child) {
-        return Container(
-          padding: const EdgeInsets.only(top: 10),
-          width: 54,
-          alignment: Alignment.center,
-          child: value.hideCameraRotationButton
-              ? const SizedBox()
-              : GestureDetector(
-                  onTap: () {
-                    controller
-                        .switchCameraDirection(value.oppositeLensDirection);
-                  },
-                  child: const Icon(
+        return InkWell(
+          onTap: () {
+            if (!value.hideCameraRotationButton) {
+              controller.switchCameraDirection(value.oppositeLensDirection);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.only(top: 10),
+            width: 54,
+            alignment: Alignment.center,
+            child: value.hideCameraRotationButton
+                ? const SizedBox()
+                : const Icon(
                     CustomIcons.cameraRotate,
                     color: Colors.white,
                   ),
-                ),
+          ),
         );
       },
     );

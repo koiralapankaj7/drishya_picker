@@ -1,23 +1,23 @@
 // ignore_for_file: always_use_package_imports, use_build_context_synchronously
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
 
 ///
-class GalleryViewField extends StatefulWidget {
+class GalleryViewField extends StatelessWidget {
   ///
   /// Widget which pick media from gallery
   ///
-  /// If used [GalleryViewField] with [SlidableGalleryView], [PanelSetting]
-  /// and [GallerySetting] will be override by the [SlidableGalleryView]
+  /// If used [GalleryViewField] with [SlidableGallery], [PanelSetting]
+  /// and [GallerySetting] will be override by the [SlidableGallery]
   ///
   const GalleryViewField({
     Key? key,
     this.onChanged,
     this.onSubmitted,
-    this.selectedEntities,
-    this.panelSetting,
-    this.gallerySetting,
+    this.setting,
+    this.routeSetting,
     this.child,
   }) : super(key: key);
 
@@ -29,79 +29,47 @@ class GalleryViewField extends StatefulWidget {
 
   ///
   /// Triggered when picker complet its task.
-  ///
-  final void Function(List<DrishyaEntity> entities)? onSubmitted;
+  final ValueSetter<List<DrishyaEntity>>? onSubmitted;
 
   ///
-  /// Previously selected entities
-  ///
-  final List<DrishyaEntity>? selectedEntities;
-
-  ///
-  /// If used [GalleryViewField] with [SlidableGalleryView]
+  /// If used [GalleryViewField] with [SlidableGallery]
   /// this setting will be ignored.
   ///
-  /// [PanelSetting] passed to the [SlidableGalleryView] will be applicable..
+  /// [GallerySetting] passed to the [SlidableGallery] will be applicable..
   ///
-  final PanelSetting? panelSetting;
+  final GallerySetting? setting;
 
   ///
-  /// If used [GalleryViewField] with [SlidableGalleryView]
-  /// this setting will be ignored.
-  ///
-  /// [GallerySetting] passed to the [SlidableGalleryView] will be applicable..
-  ///
-  final GallerySetting? gallerySetting;
+  /// Route setting for gallery in fullscreen mode.
+  final CustomRouteSetting? routeSetting;
 
   ///
   final Widget? child;
 
   @override
-  State<GalleryViewField> createState() => _GalleryViewFieldState();
-}
-
-class _GalleryViewFieldState extends State<GalleryViewField> {
-  late GalleryController _controller;
-  var _dispose = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback(_init);
-  }
-
-  void _init(Duration timeStamp) {
-    if (context.galleryController == null) {
-      _controller = GalleryController(
-        panelSetting: widget.panelSetting,
-        setting: widget.gallerySetting,
-      );
-      _dispose = true;
-    } else {
-      _controller = context.galleryController!;
-    }
-  }
-
-  @override
-  void dispose() {
-    if (_dispose) {
-      _controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
-        _controller.onGalleryFieldPressed(
-          widget.onChanged,
-          widget.onSubmitted,
-          widget.selectedEntities,
+        // Controller created here will be disposed by controller itself after
+        // finishing its task.
+        late GalleryController controller;
+
+        if (context.galleryController == null) {
+          controller = GalleryController();
+        } else {
+          controller = context.galleryController!;
+        }
+        controller
+            .onGalleryFieldPressed(
           context,
-        );
+          onChanged: onChanged,
+          setting: setting,
+        )
+            .then((entities) {
+          onSubmitted?.call(entities);
+        });
       },
-      child: widget.child ?? const Icon(Icons.image),
+      child: child ?? const Icon(Icons.image),
     );
   }
 }

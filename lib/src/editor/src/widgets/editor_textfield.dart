@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:drishya_picker/src/editor/editor.dart';
@@ -25,11 +24,9 @@ class _EditorTextfieldState extends State<EditorTextfield>
   late final GlobalKey _tfSizeKey;
   late final DrishyaEditingController _controller;
   late final TextEditingController _textController;
-
   late final AnimationController _animationController;
   late final Animation<double> _animation;
-
-  var _tfSize = const Size(20, 40);
+  var _tfSize = const Size(24, 48);
 
   @override
   void initState() {
@@ -40,71 +37,69 @@ class _EditorTextfieldState extends State<EditorTextfield>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    )
-      ..addStatusListener((status) {
+    )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           _finishTask();
+        } else if (status == AnimationStatus.completed) {
+          _controller.updateValue(isColorPickerOpen: true);
         }
-      })
-      ..forward();
+      });
     // ignore: prefer_int_literals
     _animation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        // curve: Curves.linear,
         curve: Curves.easeOutBack,
-        reverseCurve: Curves.easeInBack,
       ),
     );
   }
 
   void _finishTask() {
+    if (_textController.text.isNotEmpty) {
+      _addSticker();
+    }
+    _textController.clear();
+    _tfSize = const Size(20, 40);
+    _controller.currentAsset.value = null;
+    _controller.currentAssetState.value = null;
     _controller.updateValue(
       hasFocus: false,
       hasStickers: _controller.stickerController.value.assets.isNotEmpty,
     );
-    _textController.clear();
-    _controller.currentAsset.value = null;
-    _tfSize = const Size(20, 40);
   }
 
+  // TODO(koiralapankaj007): responsive textfield for long text
   void _addSticker() {
     if (_controller.textController.text.isEmpty) return;
 
-    final box = _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null) {
-      final asset = _controller.currentAsset.value;
+    final asset = _controller.currentAsset.value;
 
-      final sticker = TextSticker(
-        size: box.size,
-        originalSize: box.size,
-        extra: {'text': _textController.text},
-        text: _textController.text,
-        style: TextStyle(
-          textBaseline: TextBaseline.ideographic,
-          color: widget.controller.value.textColor,
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
-          decoration: TextDecoration.none,
-          decorationColor: Colors.transparent,
-          decorationThickness: 0,
-        ),
-        background: widget.controller.value.fillTextfield
-            ? widget.controller.value.color
-            : Colors.transparent,
-        textAlign: _controller.value.textAlign,
-        withBackground: _controller.value.fillTextfield,
-      );
+    final sticker = TextSticker(
+      size: _tfSize,
+      // extra: {'text': _textController.text},
+      text: _textController.text,
+      style: TextStyle(
+        textBaseline: TextBaseline.ideographic,
+        color: _controller.textColor,
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        decoration: TextDecoration.none,
+        decorationColor: Colors.transparent,
+        decorationThickness: 0,
+      ),
+      background: _controller.value.fillTextfield
+          ? _controller.currentColor
+          : Colors.transparent,
+      textAlign: _controller.value.textAlign,
+    );
 
-      _controller.stickerController.addSticker(
-        sticker,
-        size: asset?.size,
-        angle: asset?.angle,
-        constraint: asset?.constraint,
-        position: asset?.position,
-        scale: asset?.scale,
-      );
-    }
+    _controller.stickerController.addSticker(
+      sticker,
+      size: asset?.size,
+      angle: asset?.angle,
+      constraint: asset?.constraint,
+      position: asset?.position,
+      scale: asset?.scale,
+    );
   }
 
   @override
@@ -115,124 +110,133 @@ class _EditorTextfieldState extends State<EditorTextfield>
 
   @override
   Widget build(BuildContext context) {
-    final value = widget.controller.value;
+    return EditorBuilder(
+      controller: _controller,
+      builder: (context, value, child) {
+        if (!value.hasFocus) return const SizedBox();
 
-    if (!value.hasFocus) return const SizedBox();
+        return KeyboardVisibility(
+          listener: (visible) {
+            if (visible) {
+              _animationController.forward();
+            } else {
+              final box =
+                  _tfSizeKey.currentContext?.findRenderObject() as RenderBox?;
+              if (box != null) {
+                _tfSize = box.size;
+              }
+              _animationController.reverse();
+            }
+            _controller.updateValue(
+              keyboardVisible: visible,
+              isColorPickerOpen: false,
+            );
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _controller.focusNode.unfocus,
+            child: ColoredBox(
+              color: _controller.value.keyboardVisible
+                  ? Colors.black38
+                  : Colors.transparent,
+              child: ValueListenableBuilder<StickerAsset?>(
+                valueListenable: _controller.currentAsset,
+                builder: (context, asset, child) {
+                  final deviceSize = MediaQuery.of(context).size;
 
-    return KeyboardVisibility(
-      listener: (visible) {
-        // TODO: Remove this
-        log('Keyboard visible > $visible');
-        _controller.updateValue(
-          keyboardVisible: visible,
-          isColorPickerOpen: visible,
-        );
-        if (visible) {
-          _animationController.forward();
-        } else {
-          if (_textController.text.isNotEmpty) {
-            _addSticker();
-          }
-          _animationController.reverse();
-        }
-      },
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _controller.focusNode.unfocus,
-        child: ColoredBox(
-          color: value.keyboardVisible ? Colors.black54 : Colors.transparent,
-          child: ValueListenableBuilder<StickerAsset?>(
-            valueListenable: _controller.currentAsset,
-            builder: (context, asset, child) {
-              final size = MediaQuery.of(context).size;
-              final originalSize =
-                  (asset?.sticker as TextSticker?)?.originalSize;
+                  // Center X position of the screen
+                  final centerX = deviceSize.width / 2;
 
-              final centerX = size.width / 2;
-              final centerY = size.height / 2;
+                  // Center Y position of the screen
+                  final centerY = deviceSize.height / 2;
 
-              final centerTop = (size.height -
-                      (originalSize?.height ?? _tfSize.height) -
-                      (centerY * 0.92)) /
-                  2;
+                  // Smallest width of the editing sticker or new text field
+                  final smallestWidth = asset != null
+                      ? asset.size.width / asset.scale
+                      : _tfSize.width;
 
-              final centerLeft =
-                  (size.width - (originalSize?.width ?? _tfSize.width)) / 2;
+                  // Smallest height of the editing sticker or new text field
+                  final smallestHeight = asset != null
+                      ? asset.size.height / asset.scale
+                      : _tfSize.height;
 
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      if (_animationController.status ==
-                          AnimationStatus.completed) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 60,
-                            vertical: 30,
-                          ),
-                          child: child,
-                        );
-                      }
+                  // Center position from the top excluding keyboard
+                  // height (Assuming keyboard as 50% of device height)
+                  final centerTop =
+                      ((deviceSize.height * 0.5) - smallestHeight) / 2;
 
-                      final animValue = _animation.value;
+                  // Center position from the left
+                  final centerLeft = (deviceSize.width - smallestWidth) / 2;
 
-                      final left = lerpDouble(
-                        centerLeft,
-                        asset?.position.dx ?? centerX - (_tfSize.width / 2),
-                        animValue,
-                      );
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          final animValue = _animation.value;
 
-                      final top = lerpDouble(
-                        centerTop,
-                        asset?.position.dy ?? centerY - (_tfSize.height / 2),
-                        animValue,
-                      );
+                          final left = lerpDouble(
+                            centerLeft,
+                            asset?.position.dx ?? centerX - (_tfSize.width / 2),
+                            animValue,
+                          );
 
-                      final scale = asset == null
-                          ? 1.0
-                          : lerpDouble(1, asset.scale, animValue) ?? 1.0;
+                          final top = lerpDouble(
+                            centerTop,
+                            asset?.position.dy ??
+                                centerY - (_tfSize.height / 2),
+                            animValue,
+                          );
 
-                      final angle =
-                          asset == null ? 0.0 : asset.angle * animValue;
+                          final scale = asset == null
+                              ? 1.0
+                              : lerpDouble(1, asset.scale, animValue) ?? 1.0;
 
-                      return Positioned(
-                        left: left,
-                        top: top,
-                        child: Transform.rotate(
-                          angle: angle,
-                          child: Transform.scale(
-                            scale: scale,
-                            child: child,
-                          ),
-                        ),
-                      );
-                    },
-                    child: IntrinsicWidth(
-                      key: _tfSizeKey,
-                      child: _StickerTextField(
-                        controller: _controller,
-                        textController: _textController,
-                        focusNode: _controller.focusNode,
-                        onChanged: (t) {
-                          final box = _tfSizeKey.currentContext
-                              ?.findRenderObject() as RenderBox?;
-                          if (box != null) {
-                            setState(() {
-                              _tfSize = box.size;
-                            });
+                          final angle =
+                              asset == null ? 0.0 : asset.angle * animValue;
+
+                          final textField = IntrinsicWidth(
+                            key: _tfSizeKey,
+                            child: _StickerTextField(
+                              controller: _controller,
+                              textController: _textController,
+                              focusNode: _controller.focusNode,
+                              scale: scale,
+                            ),
+                          );
+
+                          if (_animationController.status ==
+                              AnimationStatus.completed) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 60,
+                                vertical: 30,
+                              ),
+                              child: textField,
+                            );
                           }
+
+                          return Positioned(
+                            left: left,
+                            top: top,
+                            child: Transform.rotate(
+                              angle: angle,
+                              child: textField,
+                            ),
+                          );
+
+                          //
                         },
                       ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -248,6 +252,7 @@ class _StickerTextField extends StatefulWidget {
     this.editable = false,
     this.enabled = true,
     this.onChanged,
+    this.scale,
   }) : super(key: key);
 
   final DrishyaEditingController controller;
@@ -256,6 +261,7 @@ class _StickerTextField extends StatefulWidget {
   final bool editable;
   final bool enabled;
   final ValueSetter<String>? onChanged;
+  final double? scale;
 
   @override
   _StickerTextFieldState createState() => _StickerTextFieldState();
@@ -278,41 +284,45 @@ class _StickerTextFieldState extends State<_StickerTextField> {
   @override
   Widget build(BuildContext context) {
     final value = widget.controller.value;
-    return TextField(
-      enabled: widget.enabled,
-      controller: widget.textController,
-      focusNode: widget.focusNode,
-      autofocus: true,
-      textAlign: value.textAlign,
-      autocorrect: false,
-      minLines: 1,
-      maxLines: null,
-      keyboardType: TextInputType.multiline,
-      textInputAction: TextInputAction.newline,
-      smartDashesType: SmartDashesType.disabled,
-      style: TextStyle(
-        textBaseline: TextBaseline.ideographic,
-        color: widget.controller.value.textColor,
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
-        decoration: TextDecoration.none,
-        decorationColor: Colors.transparent,
-        decorationThickness: 0,
-        decorationStyle: TextDecorationStyle.dashed,
-      ),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 8,
-        ),
-        filled: true,
-        fillColor: value.fillTextfield ? value.color : Colors.transparent,
-      ),
-      cursorColor: value.fillTextfield ? value.textColor : value.color,
-      onChanged: widget.onChanged,
+    return ValueListenableBuilder<Color>(
+      valueListenable: widget.controller.colorNotifier,
+      builder: (context, color, child) {
+        return TextField(
+          enabled: widget.enabled,
+          controller: widget.textController,
+          focusNode: widget.focusNode,
+          autofocus: true,
+          textAlign: value.textAlign,
+          autocorrect: false,
+          minLines: 1,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          // textInputAction: TextInputAction.newline,
+          smartDashesType: SmartDashesType.disabled,
+          style: TextStyle(
+            textBaseline: TextBaseline.ideographic,
+            color: widget.controller.textColor,
+            fontSize: 28 * (widget.scale ?? 1.0),
+            fontWeight: FontWeight.w700,
+            decoration: TextDecoration.none,
+            decorationColor: Colors.transparent,
+            decorationThickness: 0,
+            decorationStyle: TextDecorationStyle.dashed,
+          ),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(8),
+            filled: true,
+            fillColor: value.fillTextfield ? color : Colors.transparent,
+          ),
+          cursorColor:
+              value.fillTextfield ? widget.controller.textColor : color,
+          onChanged: widget.onChanged,
+        );
+      },
     );
   }
 }

@@ -1,11 +1,10 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:math';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -54,8 +53,8 @@ class _GalleryHeaderState extends State<GalleryHeader> {
 
     return Container(
       constraints: BoxConstraints(
-        minHeight: panelSetting.headerMinHeight,
-        maxHeight: panelSetting.headerMaxHeight,
+        minHeight: panelSetting.thumbHandlerHeight,
+        maxHeight: panelSetting.headerHeight + panelSetting.thumbHandlerHeight,
       ),
       color: panelSetting.headerBackground,
       child: Column(
@@ -70,7 +69,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 // Close icon
                 Expanded(
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.centerLeft,
                     child: _IconButton(
                       iconData: Icons.close,
                       onPressed: widget.onClose,
@@ -79,24 +78,49 @@ class _GalleryHeaderState extends State<GalleryHeader> {
                 ),
 
                 // Album name and media receiver name
-                _AlbumDetail(
-                  subtitle: widget.headerSubtitle,
-                  controller: _controller,
-                  albums: widget.albums,
+                FittedBox(
+                  child: _AlbumDetail(
+                    subtitle: widget.headerSubtitle,
+                    controller: _controller,
+                    albums: widget.albums,
+                  ),
                 ),
 
                 // Dropdown
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: _AnimatedDropdown(
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      _AnimatedDropdown(
                         controller: _controller,
                         onPressed: widget.onAlbumToggle,
                         albumVisibility: _controller.albumVisibility,
                       ),
-                    ),
+                      const Spacer(),
+                      if (_controller.setting.selectionMode ==
+                          SelectionMode.actionBased)
+                        GalleryBuilder(
+                          controller: _controller,
+                          builder: (value, child) {
+                            return InkWell(
+                              onTap: () {
+                                if (_controller.value.isAlbumVisible) {
+                                  widget.onAlbumToggle(true);
+                                } else {
+                                  _controller.toogleMultiSelection();
+                                }
+                              },
+                              child: Icon(
+                                CupertinoIcons.rectangle_stack,
+                                color: value.enableMultiSelection
+                                    ? Colors.white
+                                    : Colors.white38,
+                              ),
+                            );
+                          },
+                        ),
+                      const SizedBox(width: 16),
+                    ],
                   ),
                 ),
 
@@ -227,8 +251,12 @@ class _AlbumDetail extends StatelessWidget {
         CurrentAlbumBuilder(
           albums: albums,
           builder: (context, album, child) {
+            final isAll = album.value.assetPathEntity?.isAll ?? true;
+
             return Text(
-              album.value.assetPathEntity?.name ?? 'Unknown',
+              isAll
+                  ? controller.setting.albumTitle
+                  : album.value.assetPathEntity?.name ?? 'Unknown',
               style: Theme.of(context).textTheme.subtitle2!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -267,7 +295,7 @@ class _Handler extends StatelessWidget {
     }
 
     return SizedBox(
-      height: controller.panelSetting.headerMinHeight,
+      height: controller.panelSetting.thumbHandlerHeight,
       child: Center(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4),

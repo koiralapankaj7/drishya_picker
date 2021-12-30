@@ -1,13 +1,9 @@
-// ignore_for_file: always_use_package_imports
-
 import 'dart:math';
 
+import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../controllers/cam_controller.dart';
-import '../entities/camera_type.dart';
-import 'camera_builder.dart';
 
 ///
 class CameraShutterButton extends StatelessWidget {
@@ -70,7 +66,7 @@ class _ShutterButtonState extends State<_ShutterButton>
     // Progress bar animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: widget.controller.value.setting.videoDuration,
+      duration: widget.controller.setting.videoDuration,
     )..addStatusListener((status) {
         if (_controller.status == AnimationStatus.completed) {
           _stopRecording();
@@ -106,8 +102,8 @@ class _ShutterButtonState extends State<_ShutterButton>
     });
   }
 
-  void _stopRecording() {
-    _camController.stopVideoRecording(context);
+  void _stopRecording({bool createEntity = true}) {
+    _camController.stopVideoRecording(context, createEntity: createEntity);
     _pulseController.reverse();
     _controller.reset();
     setState(() {
@@ -144,9 +140,10 @@ class _ShutterButtonState extends State<_ShutterButton>
     return WillPopScope(
       onWillPop: () async {
         if (_isRecording) {
-          _stopRecording();
+          _stopRecording(createEntity: false);
+          return false;
         }
-        return false;
+        return true;
       },
       child: SizedBox(
         height: widget.size,

@@ -1,4 +1,3 @@
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -6,8 +5,6 @@ import 'package:flutter/material.dart';
 class EditorValue {
   ///
   const EditorValue({
-    required this.color,
-    required this.background,
     this.textAlign = TextAlign.center,
     this.keyboardVisible = false,
     this.fillTextfield = false,
@@ -19,19 +16,13 @@ class EditorValue {
     this.isColorPickerOpen = false,
   });
 
-  /// Background of the editor
-  final EditorBackground background;
-
-  /// Color use to decorate text and icon
-  final Color color;
-
   /// Alignment of the text
   final TextAlign textAlign;
 
   /// true, if keyboard is visible
   final bool keyboardVisible;
 
-  /// if true, textfield will be filled by [color]
+  /// if true, textfield will be filled
   final bool fillTextfield;
 
   /// Consider -ve as null
@@ -55,13 +46,6 @@ class EditorValue {
   /// -ve number as null
   int? get convertedMaxLines => maxLines.isNegative ? null : maxLines;
 
-  /// Computed text color as per the background
-  Color get textColor => fillTextfield ? generateForegroundColor(color) : color;
-
-  /// Generate foreground color from background color
-  Color generateForegroundColor(Color background) =>
-      background.computeLuminance() > 0.5 ? Colors.black : Colors.white;
-
   /// true, if color picker is visible currently
   bool get isColorPickerVisible =>
       !isEditing && (isColorPickerOpen || keyboardVisible);
@@ -71,13 +55,10 @@ class EditorValue {
     TextAlign? textAlign,
     bool? keyboardVisible,
     bool? fillTextfield,
-    bool? hasFocus,
-    bool? editingMode,
     int? maxLines,
+    bool? hasFocus,
     bool? hasStickers,
     bool? isEditing,
-    EditorBackground? background,
-    Color? color,
     bool? isStickerPickerOpen,
     bool? isColorPickerOpen,
   }) {
@@ -85,47 +66,57 @@ class EditorValue {
       textAlign: textAlign ?? this.textAlign,
       keyboardVisible: keyboardVisible ?? this.keyboardVisible,
       fillTextfield: fillTextfield ?? this.fillTextfield,
-      hasFocus: hasFocus ?? this.hasFocus,
       maxLines: maxLines ?? this.maxLines,
+      hasFocus: hasFocus ?? this.hasFocus,
       hasStickers: hasStickers ?? this.hasStickers,
       isEditing: isEditing ?? this.isEditing,
-      background: background ?? this.background,
-      color: color ?? this.color,
       isStickerPickerOpen: isStickerPickerOpen ?? this.isStickerPickerOpen,
       isColorPickerOpen: isColorPickerOpen ?? this.isColorPickerOpen,
     );
   }
 
   @override
-  int get hashCode => hashValues(
-        color,
-        background,
-        textAlign,
-        keyboardVisible,
-        fillTextfield,
-        maxLines,
-        hasFocus,
-        hasStickers,
-        isEditing,
-        isStickerPickerOpen,
-        isColorPickerOpen,
-      );
+  String toString() {
+    return '''
+    EditorValue(
+      textAlign: $textAlign, 
+      keyboardVisible: $keyboardVisible, 
+      fillTextfield: $fillTextfield, 
+      maxLines: $maxLines, 
+      hasFocus: $hasFocus, 
+      hasStickers: $hasStickers, 
+      isEditing: $isEditing, 
+      isStickerPickerOpen: $isStickerPickerOpen, 
+      isColorPickerOpen: $isColorPickerOpen
+    )''';
+  }
 
   @override
   bool operator ==(Object other) {
-    if (other is! EditorValue) {
-      return false;
-    }
-    return color == other.color &&
-        background == other.background &&
-        textAlign == other.textAlign &&
-        keyboardVisible == other.keyboardVisible &&
-        fillTextfield == other.fillTextfield &&
-        maxLines == other.maxLines &&
-        hasFocus == other.hasFocus &&
-        hasStickers == other.hasStickers &&
-        isEditing == other.isEditing &&
-        isStickerPickerOpen == other.isStickerPickerOpen &&
-        isColorPickerOpen == other.isColorPickerOpen;
+    if (identical(this, other)) return true;
+
+    return other is EditorValue &&
+        other.textAlign == textAlign &&
+        other.keyboardVisible == keyboardVisible &&
+        other.fillTextfield == fillTextfield &&
+        other.maxLines == maxLines &&
+        other.hasFocus == hasFocus &&
+        other.hasStickers == hasStickers &&
+        other.isEditing == isEditing &&
+        other.isStickerPickerOpen == isStickerPickerOpen &&
+        other.isColorPickerOpen == isColorPickerOpen;
+  }
+
+  @override
+  int get hashCode {
+    return textAlign.hashCode ^
+        keyboardVisible.hashCode ^
+        fillTextfield.hashCode ^
+        maxLines.hashCode ^
+        hasFocus.hashCode ^
+        hasStickers.hashCode ^
+        isEditing.hashCode ^
+        isStickerPickerOpen.hashCode ^
+        isColorPickerOpen.hashCode;
   }
 }

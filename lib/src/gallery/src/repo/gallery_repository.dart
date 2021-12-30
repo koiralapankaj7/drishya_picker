@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 /// State for the fetching process
 enum BaseState {
@@ -97,6 +96,14 @@ class Albums extends ValueNotifier<AlbumsValue> {
 
   ///
   final ValueNotifier<Album> currentAlbum;
+
+  // void _text() async {
+  //   final so = compute(_another, '');
+  // }
+
+  // String _another(String args) {
+  //   return '';
+  // }
 
   /// Fetch recent entities
   Future<List<DrishyaEntity>> recentEntities({
@@ -207,5 +214,11 @@ class Album extends ValueNotifier<AlbumValue> {
       value = value.copyWith(state: BaseState.unauthorised);
     }
     return value.entities;
+  }
+
+  /// Insert entity into album
+  void insert(AssetEntity entity) {
+    if (value.entities.isEmpty) return;
+    value = value.copyWith(entities: [entity, ...value.entities]);
   }
 }

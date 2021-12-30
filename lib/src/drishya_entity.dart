@@ -48,6 +48,7 @@ class DrishyaEntity extends AssetEntity {
   final File? pickedFile;
 
   ///
+  ///
   DrishyaEntity copyWith({
     Uint8List? pickedThumbData,
     File? pickedFile,

@@ -24,10 +24,6 @@ class EditorOverlay extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             //
-            // Add text button
-            Align(
-              child: EditorTextfieldButton(controller: controller),
-            ),
 
             // Textfield
             EditorTextfield(controller: controller),

@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 ///
 class EditorCloseButton extends StatelessWidget {
@@ -15,15 +17,17 @@ class EditorCloseButton extends StatelessWidget {
   ///
   final DrishyaEditingController controller;
 
-  void _onPressed(BuildContext context) {
+  Future<bool> _onPressed(BuildContext context, {bool pop = true}) async {
     if (!controller.value.hasStickers) {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: SystemUiOverlay.values,
-      );
-      Navigator.of(context).pop();
+      if (pop) {
+        UIHandler.of(context).pop();
+      }
+      //  else {
+      //   await UIHandler.showStatusBar();
+      // }
+      return true;
     } else {
-      showDialog<bool>(
+      await showDialog<bool>(
         context: context,
         builder: (context) => const _AppDialog(),
       ).then((value) {
@@ -31,16 +35,14 @@ class EditorCloseButton extends StatelessWidget {
           controller.clear();
         }
       });
+      return false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        _onPressed(context);
-        return false;
-      },
+      onWillPop: () => _onPressed(context, pop: false),
       child: EditorBuilder(
         controller: controller,
         builder: (context, value, child) {
@@ -51,7 +53,6 @@ class EditorCloseButton extends StatelessWidget {
             firstChild: const SizedBox(),
             secondChild: child!,
             crossFadeState: crossFadeState,
-            duration: const Duration(milliseconds: 200),
           );
         },
         child: InkWell(

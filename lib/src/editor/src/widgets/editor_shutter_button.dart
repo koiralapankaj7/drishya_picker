@@ -1,7 +1,7 @@
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
-import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -10,10 +10,14 @@ class EditorShutterButton extends StatelessWidget {
   const EditorShutterButton({
     Key? key,
     required this.controller,
+    this.onSuccess,
   }) : super(key: key);
 
   ///
   final DrishyaEditingController controller;
+
+  ///
+  final ValueSetter<DrishyaEntity>? onSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +25,14 @@ class EditorShutterButton extends StatelessWidget {
       controller: controller,
       builder: (context, value, child) {
         final crossFadeState =
-            (value.background is! PhotoBackground && !value.hasStickers) ||
+            (controller.currentBackground is GradientBackground &&
+                        !value.hasStickers) ||
                     value.isEditing ||
                     value.hasFocus
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond;
         return AppAnimatedCrossFade(
           crossFadeState: crossFadeState,
-          duration: const Duration(milliseconds: 300),
           firstChild: const SizedBox(),
           secondChild: IgnorePointer(
             ignoring: crossFadeState == CrossFadeState.showFirst,
@@ -38,13 +42,18 @@ class EditorShutterButton extends StatelessWidget {
                   controller.updateValue(isColorPickerOpen: false);
                   return;
                 }
+                final uiHandler = UIHandler.of(context);
+
                 final entity = await controller.completeEditing();
                 if (entity != null) {
-                  // ignore: use_build_context_synchronously
-                  Navigator.of(context).pop(entity);
+                  UIHandler.transformFrom = TransitionFrom.topToBottom;
+                  if (onSuccess != null) {
+                    onSuccess!(entity);
+                  } else {
+                    uiHandler.pop(entity);
+                  }
                 } else {
-                  // ignore: use_build_context_synchronously
-                  UIHandler(context).showSnackBar(
+                  uiHandler.showSnackBar(
                     'Something went wront! Please try again.',
                   );
                 }

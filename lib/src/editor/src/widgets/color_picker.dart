@@ -17,8 +17,7 @@ class ColorPicker extends StatelessWidget {
     return ValueListenableBuilder<EditorValue>(
       valueListenable: controller,
       builder: (context, value, child) {
-        final visible = !value.isEditing &&
-            (value.isColorPickerOpen || value.keyboardVisible);
+        final visible = !value.isEditing && value.isColorPickerOpen;
 
         if (!visible) return const SizedBox();
 
@@ -26,28 +25,61 @@ class ColorPicker extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: EdgeInsets.only(
-              left: 16,
               top: 16,
-              right: 16,
               bottom: value.keyboardVisible ? 16 : 100,
             ),
             child: child,
           ),
         );
       },
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 8,
-        runSpacing: 8,
-        children: controller.setting.colors
-            .map(
-              (color) => _ColorCircle(
-                color: color,
-                controller: controller,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          var colorCount = ((constraints.maxWidth - 32) / 50).floor();
+          if (colorCount.isEven) {
+            --colorCount;
+          }
+          final itemCount =
+              (controller.setting.colors.length / colorCount).ceil();
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 50,
+                child: PageView.builder(
+                  itemCount: itemCount,
+                  physics: const BouncingScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final colors = controller.setting.colors
+                        .skip(index * colorCount)
+                        .take(colorCount);
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: colors
+                          .map(
+                            (color) => _ColorCircle(
+                              color: color,
+                              controller: controller,
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
+                ),
               ),
-            )
-            .toList(),
+              if (itemCount > 1)
+                Container(
+                  height: 6,
+                  width: 50,
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -73,11 +105,10 @@ class _ColorCircle extends StatelessWidget {
         return InkWell(
           onTap: () {
             controller.colorNotifier.value = color;
-            controller.updateValue(textColor: color);
           },
           child: SizedBox(
-            height: 40,
-            width: 40,
+            height: 50,
+            width: 50,
             child: Align(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -87,7 +118,7 @@ class _ColorCircle extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: Colors.white,
-                    width: 4,
+                    width: isSelected ? 6 : 3,
                   ),
                   borderRadius: BorderRadius.circular(size),
                 ),

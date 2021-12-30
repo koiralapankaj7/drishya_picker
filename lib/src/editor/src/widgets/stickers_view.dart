@@ -39,8 +39,9 @@ class _StickersViewState extends State<StickersView> {
   }
 
   // On sticker select
-  void _onStickerSelect(StickerAsset asset) {
+  void _onStickerSelect(StickerAsset asset, DraggableResizableState state) {
     if (asset.sticker is TextSticker) {
+      _controller.currentAssetState.value = state;
       _controller.currentAsset.value = asset;
       _controller.textController.text = (asset.sticker as TextSticker).text;
       _controller.stickerController.deleteSticker(asset);
@@ -99,7 +100,8 @@ class _StickersViewState extends State<StickersView> {
                   return DraggableResizable(
                     key: Key(asset.id),
                     canTransform: isSelected,
-                    onTap: () => _onStickerSelect(asset),
+                    onTap: (DraggableResizableState state) =>
+                        _onStickerSelect(asset, state),
                     onStart: () {
                       _controller.updateValue(isEditing: true);
                     },
@@ -122,17 +124,18 @@ class _StickersViewState extends State<StickersView> {
                       );
                     },
                     onScaleUpdate: _onScaleUpdate,
-                    size: asset.sticker.size,
                     constraints: BoxConstraints(
                       minWidth: asset.sticker.size.width * _minStickerScale,
                       minHeight: asset.sticker.size.height * _minStickerScale,
                     ),
+                    size: asset.sticker.size,
                     initialPosition: asset.position.offset,
                     initialAngle: asset.angle,
                     initialScale: asset.scale,
                     child: Opacity(
                       opacity: isSelected && _collied ? 0.3 : 1.0,
-                      child: asset.sticker.build(context, _controller, null),
+                      child: asset.sticker
+                          .build(context, _controller, null, asset),
                     ),
                   );
                 }).toList(),
