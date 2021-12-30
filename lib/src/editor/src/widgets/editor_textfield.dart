@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:drishya_picker/src/widgets/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
 

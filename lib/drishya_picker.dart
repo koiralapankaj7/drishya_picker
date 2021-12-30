@@ -6,4 +6,4 @@ export 'src/camera/camera_view.dart';
 export 'src/drishya_entity.dart';
 export 'src/editor/editor.dart';
 export 'src/gallery/gallery_view.dart';
-export 'src/slidable_panel/slidable_panel.dart';
+export 'src/slidable_panel/slidable_panel.dart' hide SlidablePanel;

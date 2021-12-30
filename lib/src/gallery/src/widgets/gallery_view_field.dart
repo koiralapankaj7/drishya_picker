@@ -1,5 +1,3 @@
-// ignore_for_file: always_use_package_imports, use_build_context_synchronously
-
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +12,7 @@ class GalleryViewField extends StatelessWidget {
   ///
   const GalleryViewField({
     Key? key,
+    this.controller,
     this.onChanged,
     this.onSubmitted,
     this.setting,
@@ -22,9 +21,12 @@ class GalleryViewField extends StatelessWidget {
   }) : super(key: key);
 
   ///
+  /// Gallery controller
+  final GalleryController? controller;
+
+  ///
   /// While picking drishya using gallery removed will be true if,
   /// previously selected drishya is unselected otherwise false.
-  ///
   final void Function(DrishyaEntity entity, bool removed)? onChanged;
 
   ///
@@ -33,10 +35,9 @@ class GalleryViewField extends StatelessWidget {
 
   ///
   /// If used [GalleryViewField] with [SlidableGallery]
-  /// this setting will be ignored.
+  /// panel setting will be ignored from this setting.
   ///
   /// [GallerySetting] passed to the [SlidableGallery] will be applicable..
-  ///
   final GallerySetting? setting;
 
   ///
@@ -52,18 +53,21 @@ class GalleryViewField extends StatelessWidget {
       onTap: () {
         // Controller created here will be disposed by controller itself after
         // finishing its task.
-        late GalleryController controller;
+        late GalleryController ctrl;
+        var dispose = false;
 
         if (context.galleryController == null) {
-          controller = GalleryController();
+          ctrl = controller ?? GalleryController();
+          dispose = controller == null;
         } else {
-          controller = context.galleryController!;
+          ctrl = context.galleryController!;
         }
-        controller
+        ctrl
             .onGalleryFieldPressed(
           context,
           onChanged: onChanged,
           setting: setting,
+          disposeOnFinish: dispose,
         )
             .then((entities) {
           onSubmitted?.call(entities);

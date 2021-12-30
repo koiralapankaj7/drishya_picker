@@ -1,7 +1,7 @@
-import 'package:drishya_picker/assets/icons/shape_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:example/fullscreen_gallery.dart';
 import 'package:example/recent_entities.dart';
+import 'package:example/shape_icons.dart';
 import 'package:example/text_field_view.dart';
 import 'package:flutter/material.dart';
 
