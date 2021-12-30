@@ -1,4 +1,5 @@
 import 'package:drishya_picker/src/editor/editor.dart';
+import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 const _minStickerScale = 1.0;

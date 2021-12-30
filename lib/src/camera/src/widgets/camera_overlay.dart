@@ -5,6 +5,7 @@ import 'package:drishya_picker/src/camera/src/widgets/camera_flash_button.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_footer.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_shutter_button.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
+import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

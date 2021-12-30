@@ -1,4 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/widgets.dart';
+import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/material.dart';
 
 ///

@@ -9,6 +9,7 @@ import 'package:drishya_picker/src/gallery/src/widgets/gallery_asset_selector.da
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_grid_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_header.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/send_button.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
