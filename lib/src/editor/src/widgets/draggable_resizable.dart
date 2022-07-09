@@ -133,7 +133,7 @@ class DraggableResizableState extends State<DraggableResizable>
   }
 
   void _onUpdate(double normalizedLeft, double normalizedTop) {
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final normalizedPosition = Offset(normalizedLeft, normalizedTop);
       widget.onUpdate?.call(
         DragUpdate(
@@ -265,6 +265,7 @@ class _DraggablePoint extends StatefulWidget {
     this.onTap,
     this.onStart,
     this.onEnd,
+    // ignore: unused_element
     this.mode = _PositionMode.global,
   }) : super(key: key);
 

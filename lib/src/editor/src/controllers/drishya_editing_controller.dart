@@ -6,6 +6,7 @@ import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
+import 'package:uuid/uuid.dart';
 
 /// Drishya editing controller
 class DrishyaEditingController extends ValueNotifier<EditorValue> {
@@ -171,7 +172,10 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
       } else if (bg is MemoryAssetBackground && !value.hasStickers) {
         // If background is memory bytes background and user has not edited the
         // image, create entity and return it
-        final entity = await PhotoManager.editor.saveImage(bg.bytes);
+        final entity = await PhotoManager.editor.saveImage(
+          bg.bytes,
+          title: const Uuid().v4(),
+        );
         return entity?.toDrishya;
       } else {
         // If user has edited the background take screenshot
@@ -181,7 +185,10 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         final image = await boundary!.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
-        final entity = await PhotoManager.editor.saveImage(data);
+        final entity = await PhotoManager.editor.saveImage(
+          data,
+          title: const Uuid().v4(),
+        );
         return entity?.toDrishya;
       }
     } catch (e) {
@@ -189,6 +196,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         Exception('Exception occured while capturing picture : $e'),
       );
     }
+    return null;
   }
 
   @override

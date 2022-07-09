@@ -34,18 +34,18 @@ class _KeyboardVisibilityState extends State<KeyboardVisibility>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeMetrics() {
-    final viewInsets = WidgetsBinding.instance!.window.viewInsets;
+    final viewInsets = WidgetsBinding.instance.window.viewInsets;
     final bottomInset = viewInsets.bottom;
 
     final visible = bottomInset > 0.0;

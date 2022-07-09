@@ -7,7 +7,7 @@ class TextStickerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       // constraints: const BoxConstraints(minWidth: 20),
       // margin: const EdgeInsets.symmetric(
       //   horizontal: 60,

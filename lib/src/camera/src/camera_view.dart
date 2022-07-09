@@ -95,7 +95,7 @@ class _CameraViewState extends State<CameraView>
   void initState() {
     super.initState();
     UIHandler.hideStatusBar();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _camController = (widget.controller ?? CamController())
       ..init(
         setting: widget.setting,
@@ -164,7 +164,7 @@ class _CameraViewState extends State<CameraView>
   @override
   void dispose() {
     // UIHandler.showStatusBar();
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _photoEditingController.removeListener(_photoEditingListener);
     if (widget.controller == null) {
       _camController.dispose();
