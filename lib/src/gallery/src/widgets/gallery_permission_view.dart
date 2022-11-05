@@ -27,7 +27,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -41,7 +41,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _setting = false;
     super.dispose();
   }

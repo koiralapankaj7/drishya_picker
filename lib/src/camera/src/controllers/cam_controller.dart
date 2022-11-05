@@ -156,7 +156,7 @@ class CamController extends ValueNotifier<CamValue> {
       if (cameras.isNotEmpty) {
         description = cameras[0];
       } else {
-        description = CameraDescription(
+        description = const CameraDescription(
           name: 'Simulator',
           lensDirection: CameraLensDirection.front,
           sensorOrientation: 0,

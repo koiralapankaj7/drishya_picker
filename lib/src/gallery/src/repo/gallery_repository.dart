@@ -120,7 +120,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
         if (albums.isEmpty) return [];
         final entities = await albums
             .singleWhere((element) => element.isAll)
-            .getAssetListPaged(0, count);
+            .getAssetListPaged(page: 0, size: count);
         final drishyaEntities = entities.map((e) => e.toDrishya).toList();
         return drishyaEntities;
       } catch (e) {
@@ -197,7 +197,7 @@ class Album extends ValueNotifier<AlbumValue> {
     if (state == PermissionState.authorized) {
       try {
         final entities = (await value.assetPathEntity
-                ?.getAssetListPaged(_currentPage, 30)) ??
+                ?.getAssetListPaged(page: _currentPage, size: 30)) ??
             [];
 
         final updatedEntities = [...value.entities, ...entities];

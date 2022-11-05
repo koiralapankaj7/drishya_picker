@@ -56,4 +56,7 @@ DrishyaPicker is on the verge of being a fully customizable package
 - **General**: All available API has been made public now.
 - **General**: To see what else this package has to offer, please visit the example app.
 
-**Warning**: The license has been updated. Now, author permission is required, if you are re-publishing this package in `pub.dev` just by renaming the packages or with minor changes.  
+**Warning**: The license has been updated. Now, author permission is required, if you are re-publishing this package in `pub.dev` just by renaming the packages or with minor changes. 
+
+## 2.0.0-dev-1
+Dependencies updated to latest version.

@@ -6,7 +6,7 @@ import 'package:drishya_picker/drishya_picker.dart';
 ///
 class DrishyaEntity extends AssetEntity {
   ///
-  DrishyaEntity({
+  const DrishyaEntity({
     required String id,
     required int height,
     required int width,
@@ -17,12 +17,13 @@ class DrishyaEntity extends AssetEntity {
     int orientation = 0,
     bool isFavorite = false,
     String? title,
-    int? createDtSecond,
+    int? createDateSecond,
     int? modifiedDateSecond,
     String? relativePath,
     double? latitude,
     double? longitude,
     String? mimeType,
+    int subtype = 0,
   }) : super(
           id: id,
           height: height,
@@ -32,12 +33,13 @@ class DrishyaEntity extends AssetEntity {
           orientation: orientation,
           isFavorite: isFavorite,
           title: title,
-          createDtSecond: createDtSecond,
+          createDateSecond: createDateSecond,
           modifiedDateSecond: modifiedDateSecond,
           relativePath: relativePath,
           latitude: latitude,
           longitude: longitude,
           mimeType: mimeType,
+          subtype: subtype,
         );
 
   /// Thumb bytes of image and video. Dont use this for other asset types.
@@ -48,28 +50,44 @@ class DrishyaEntity extends AssetEntity {
   final File? pickedFile;
 
   ///
-  ///
+  @override
   DrishyaEntity copyWith({
     Uint8List? pickedThumbData,
     File? pickedFile,
+    String? id,
+    int? typeInt,
+    int? width,
+    int? height,
+    int? duration,
+    int? orientation,
+    bool? isFavorite,
+    String? title,
+    int? createDateSecond,
+    int? modifiedDateSecond,
+    String? relativePath,
+    double? latitude,
+    double? longitude,
+    String? mimeType,
+    int? subtype,
   }) =>
       DrishyaEntity(
-        id: id,
-        width: width,
-        height: height,
-        typeInt: typeInt,
-        duration: duration,
-        orientation: orientation,
-        isFavorite: isFavorite,
-        title: title,
-        createDtSecond: createDtSecond,
-        modifiedDateSecond: modifiedDateSecond,
-        relativePath: relativePath,
-        latitude: latitude,
-        longitude: longitude,
-        mimeType: mimeType,
         pickedThumbData: pickedThumbData ?? this.pickedThumbData,
         pickedFile: pickedFile ?? this.pickedFile,
+        id: id ?? this.id,
+        typeInt: typeInt ?? this.typeInt,
+        width: width ?? this.width,
+        height: height ?? this.height,
+        duration: duration ?? this.duration,
+        orientation: orientation ?? this.orientation,
+        isFavorite: isFavorite ?? this.isFavorite,
+        title: title ?? this.title,
+        createDateSecond: createDateSecond ?? this.createDateSecond,
+        modifiedDateSecond: modifiedDateSecond ?? this.modifiedDateSecond,
+        relativePath: relativePath ?? this.relativePath,
+        latitude: latitude ?? this.latitude,
+        longitude: longitude ?? this.longitude,
+        mimeType: mimeType ?? this.mimeType,
+        subtype: subtype ?? this.subtype,
       );
 }
 
@@ -85,7 +103,7 @@ extension AssetEntityX on AssetEntity {
         orientation: orientation,
         isFavorite: isFavorite,
         title: title,
-        createDtSecond: createDtSecond,
+        createDateSecond: createDateSecond,
         modifiedDateSecond: modifiedDateSecond,
         relativePath: relativePath,
         latitude: latitude,

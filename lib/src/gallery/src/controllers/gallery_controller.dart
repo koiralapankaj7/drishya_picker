@@ -82,7 +82,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         _setting.cameraTextEditorSetting ?? _editorSetting;
     _cameraPhotoEditorSetting =
         _setting.cameraPhotoEditorSetting ?? _editorSetting;
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (_setting.selectedEntities.isNotEmpty) {
         _internal = true;
         value = value.copyWith(selectedEntities: _setting.selectedEntities);
@@ -214,6 +214,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
         return ety;
       }
     }
+    return null;
   }
 
   ///

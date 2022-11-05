@@ -229,11 +229,11 @@ class PickerDemo extends StatelessWidget {
 }
 ```
 
- 3. Using `GalleryViewField` similarly as flutter `TextField` to pick media. (Recommended approach, as creating and disposing of the controller has been already cared-of ) 
+ 3. Using `GalleryViewField` similarly to flutter `TextField` to pick media. (Recommended approach, as creating and disposing of the controller has been already cared-of ) 
 
-- `onChanged` – triggered every time user select/unselect media
+- `onChanged` – triggered whenever a user select/unselect media
 
-- `onSubmitted` – triggered when user done with selection
+- `onSubmitted` – triggered when a user is done with the selection
 
 
 ```dart
