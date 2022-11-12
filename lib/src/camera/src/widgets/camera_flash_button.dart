@@ -11,9 +11,9 @@ import 'camera_builder.dart';
 class CameraFlashButton extends StatelessWidget {
   ///
   const CameraFlashButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;

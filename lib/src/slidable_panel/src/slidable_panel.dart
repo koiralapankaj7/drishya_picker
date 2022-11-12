@@ -170,11 +170,11 @@ class PanelSetting {
 class SlidablePanel extends StatefulWidget {
   ///
   const SlidablePanel({
-    Key? key,
+    super.key,
     this.controller,
     this.setting,
     this.child,
-  }) : super(key: key);
+  });
 
   ///
   final PanelSetting? setting;

@@ -15,13 +15,13 @@ enum TriggerMode {
 class ScrollListener extends StatefulWidget {
   ///
   const ScrollListener({
-    Key? key,
+    super.key,
     required this.child,
     required this.onScrollUpdate,
     this.onScrollStart,
     this.notificationDepth,
     this.triggerMode = TriggerMode.onEdge,
-  }) : super(key: key);
+  });
 
   ///
   final Widget child;

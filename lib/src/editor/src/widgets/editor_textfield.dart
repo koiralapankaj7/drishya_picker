@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 class EditorTextfield extends StatefulWidget {
   ///
   const EditorTextfield({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -248,7 +248,7 @@ class _EditorTextfieldState extends State<EditorTextfield>
 class _StickerTextField extends StatefulWidget {
   ///
   const _StickerTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.textController,
     this.focusNode,
@@ -256,7 +256,7 @@ class _StickerTextField extends StatefulWidget {
     this.enabled = true,
     this.onChanged,
     this.scale,
-  }) : super(key: key);
+  });
 
   final DrishyaEditingController controller;
   final TextEditingController? textController;

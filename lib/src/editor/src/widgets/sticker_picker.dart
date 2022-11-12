@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class StickerPicker extends StatelessWidget {
   ///
   const StickerPicker({
-    Key? key,
+    super.key,
     required this.controller,
     required this.initialIndex,
     required this.onStickerSelected,
@@ -15,7 +15,7 @@ class StickerPicker extends StatelessWidget {
     required this.bucket,
     required this.background,
     required this.onBackground,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -76,14 +76,14 @@ class StickerPicker extends StatelessWidget {
 class StickersTabs extends StatefulWidget {
   ///
   const StickersTabs({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onStickerSelected,
     required this.onTabChanged,
     required this.background,
     required this.onBackground,
     this.initialIndex = 0,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -189,10 +189,10 @@ class _StickersTabsState extends State<StickersTabs>
 class StickersTab extends StatefulWidget {
   ///
   const StickersTab({
-    Key? key,
+    super.key,
     required this.label,
     this.active = true,
-  }) : super(key: key);
+  });
 
   ///
   final String label;
@@ -231,13 +231,13 @@ class _StickersTabState extends State<StickersTab>
 class StickersTabBarView extends StatelessWidget {
   ///
   const StickersTabBarView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.stickers,
     required this.onStickerSelected,
     required this.color,
     this.maxCrossAxisExtent = 80.0,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

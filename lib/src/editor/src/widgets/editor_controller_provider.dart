@@ -7,17 +7,16 @@ class PhotoEditingControllerProvider extends InheritedWidget {
   /// Creates a widget that associates a [DrishyaEditingController] with a
   /// subtree.
   const PhotoEditingControllerProvider({
-    Key? key,
+    super.key,
     required DrishyaEditingController this.controller,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// Creates a subtree without an associated [DrishyaEditingController].
   const PhotoEditingControllerProvider.none({
-    Key? key,
-    required Widget child,
-  })  : controller = null,
-        super(key: key, child: child);
+    super.key,
+    required super.child,
+  })  : controller = null;
 
   /// The [DrishyaEditingController] associated with the subtree.
   ///

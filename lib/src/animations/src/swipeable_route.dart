@@ -51,10 +51,10 @@ class SwipeablePageRoute<T> extends PageRoute<T>
     required this.builder,
     int? notificationDepth,
     this.title,
-    RouteSettings? settings,
+    super.settings,
     this.maintainState = true,
     // bool fullscreenDialog = false,
-  }) : super(settings: settings, fullscreenDialog: false) {
+  }) : super(fullscreenDialog: false) {
     // assert(opaque);
     SwipeableRouteTransitionMixin.notificationDepth = notificationDepth;
   }
@@ -324,7 +324,7 @@ class SwipeablePageTransition extends StatelessWidget {
   ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
   SwipeablePageTransition({
-    Key? key,
+    super.key,
     required this.child,
     required this.primaryRouteAnimation,
     required this.slidingState,
@@ -337,8 +337,7 @@ class SwipeablePageTransition extends StatelessWidget {
                     curve: Curves.linearToEaseOut,
                     reverseCurve: Curves.easeInToLinear,
                   ))
-            .drive(_kMiddleBottomTween),
-        super(key: key);
+            .drive(_kMiddleBottomTween);
 
   // When this page is becoming covered by another page.
   final Animation<Offset> _secondaryPositionAnimation;
@@ -417,12 +416,12 @@ class SwipeablePageTransition extends StatelessWidget {
 /// detector is associated.
 class _SwipeableBackGestureDetector<T> extends StatefulWidget {
   const _SwipeableBackGestureDetector({
-    Key? key,
+    super.key,
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.builder,
     this.notificationDepth,
-  }) : super(key: key);
+  });
 
   final Widget Function(SlideState slidingState) builder;
 

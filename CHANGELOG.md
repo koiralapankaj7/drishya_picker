@@ -60,3 +60,6 @@ DrishyaPicker is on the verge of being a fully customizable package
 
 ## 2.0.0-dev-1
 Dependencies updated to latest version.
+
+## 2.0.0
+Dependencies updated to latest version.

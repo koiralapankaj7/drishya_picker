@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 class AppCircularProgressIndicator extends StatelessWidget {
   /// {@macro app_circular_progress_indicator}
   const AppCircularProgressIndicator({
-    Key? key,
+    super.key,
     this.color = Colors.black26,
     this.backgroundColor = Colors.white38,
     this.strokeWidth = 4.0,
-  }) : super(key: key);
+  });
 
   /// [Color] of the progress indicator
   final Color color;

@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class KeyboardVisibility extends StatefulWidget {
   ///
   const KeyboardVisibility({
-    Key? key,
+    super.key,
     this.child,
     this.listener,
     this.builder,
-  }) : super(key: key);
+  });
 
   ///
   final Widget? child;

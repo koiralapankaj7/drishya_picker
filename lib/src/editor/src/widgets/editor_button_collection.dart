@@ -13,10 +13,10 @@ var _initialIndex = 0;
 class EditorButtonCollection extends StatefulWidget {
   ///
   const EditorButtonCollection({
-    Key? key,
+    super.key,
     required this.controller,
     this.stickerViewBackground,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -198,13 +198,13 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
 
 class _OptionView extends StatefulWidget {
   const _OptionView({
-    Key? key,
+    super.key,
     required this.option,
     required this.onPressed,
     this.onDonePressed,
     this.isSelected = false,
     this.visible = true,
-  }) : super(key: key);
+  });
 
   final _EditingOption option;
   final VoidCallback onPressed;
@@ -288,11 +288,11 @@ class _OptionViewState extends State<_OptionView> {
 
 class _DoneButton extends StatelessWidget {
   const _DoneButton({
-    Key? key,
+    super.key,
     this.isVisible = true,
     this.onPressed,
     this.padding,
-  }) : super(key: key);
+  });
 
   final bool isVisible;
   final void Function()? onPressed;
@@ -321,7 +321,7 @@ class _DoneButton extends StatelessWidget {
 
 class _Button extends StatelessWidget {
   const _Button({
-    Key? key,
+    super.key,
     this.iconData,
     this.child,
     this.background,
@@ -330,7 +330,7 @@ class _Button extends StatelessWidget {
     this.onPressed,
     this.size,
     this.fontSize,
-  }) : super(key: key);
+  });
 
   final IconData? iconData;
   final String? label;
@@ -382,9 +382,9 @@ class _Button extends StatelessWidget {
 
 class _TextAlignmentIcon extends StatelessWidget {
   const _TextAlignmentIcon({
-    Key? key,
+    super.key,
     this.align = TextAlign.center,
-  }) : super(key: key);
+  });
 
   final TextAlign align;
 
@@ -425,9 +425,9 @@ class _TextAlignmentIcon extends StatelessWidget {
 
 class _TextBackgroundIcon extends StatelessWidget {
   const _TextBackgroundIcon({
-    Key? key,
+    super.key,
     this.isSelected = false,
-  }) : super(key: key);
+  });
 
   final bool isSelected;
 

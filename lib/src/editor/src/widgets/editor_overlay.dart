@@ -9,9 +9,9 @@ const _top = 16.0;
 class EditorOverlay extends StatelessWidget {
   ///
   const EditorOverlay({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

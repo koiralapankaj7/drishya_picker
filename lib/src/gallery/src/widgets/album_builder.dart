@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 class AlbumBuilder extends StatelessWidget {
   ///
   const AlbumBuilder({
-    Key? key,
+    super.key,
     required this.controller,
     required this.albums,
     this.builder,
     this.child,
     this.hidePermissionView = false,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;
@@ -84,11 +84,11 @@ class AlbumBuilder extends StatelessWidget {
 class CurrentAlbumBuilder extends StatelessWidget {
   ///
   const CurrentAlbumBuilder({
-    Key? key,
+    super.key,
     required this.albums,
     this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
   ///
   final Albums albums;

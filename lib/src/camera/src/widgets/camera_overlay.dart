@@ -16,9 +16,9 @@ const _top = 16.0;
 class CameraOverlay extends StatelessWidget {
   ///
   const CameraOverlay({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;
@@ -69,9 +69,8 @@ class CameraOverlay extends StatelessWidget {
 
 class _PlaygroundOverlay extends StatelessWidget {
   const _PlaygroundOverlay({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final CamController controller;
 

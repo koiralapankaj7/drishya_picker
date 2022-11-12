@@ -8,9 +8,9 @@ const _minStickerScale = 1.0;
 class StickersView extends StatefulWidget {
   ///
   const StickersView({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 class GalleryAssetSelector extends StatefulWidget {
   ///
   const GalleryAssetSelector({
-    Key? key,
+    super.key,
     required this.controller,
     required this.albums,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;
@@ -215,12 +215,11 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
 
 class _TextButton extends StatelessWidget {
   const _TextButton({
-    Key? key,
     this.label,
     this.background,
     this.labelColor,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String? label;
   final Color? background;

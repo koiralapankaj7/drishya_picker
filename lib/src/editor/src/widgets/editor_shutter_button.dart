@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 class EditorShutterButton extends StatelessWidget {
   ///
   const EditorShutterButton({
-    Key? key,
+    super.key,
     required this.controller,
     this.onSuccess,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

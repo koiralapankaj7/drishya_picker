@@ -8,64 +8,64 @@ import 'package:flutter/material.dart';
 class SendButton extends StatelessWidget {
   ///
   const SendButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: GalleryBuilder(
         controller: controller,
         builder: (value, child) {
-          final crossFadeState = value.selectedEntities.isEmpty
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond;
+          final crossFadeState = value.selectedEntities.isEmpty ? CrossFadeState.showFirst : CrossFadeState.showSecond;
           return AppAnimatedCrossFade(
             crossFadeState: crossFadeState,
             firstChild: const SizedBox(),
-            secondChild: InkWell(
-              onTap: () {
-                Navigator.of(context).pop(value.selectedEntities);
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  child!,
-                  Positioned(
-                    top: -6,
-                    right: 0,
-                    child: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      radius: 12,
-                      child: Text(
-                        '${value.selectedEntities.length}',
-                        style: Theme.of(context).textTheme.caption?.copyWith(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                            ),
+            secondChild: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                child!,
+                Positioned(
+                  top: -6,
+                  right: 0,
+                  child: CircleAvatar(
+                    backgroundColor: scheme.secondary,
+                    radius: 12,
+                    child: Text(
+                      '${value.selectedEntities.length}',
+                      style: theme.textTheme.caption?.copyWith(
+                        color: scheme.onSecondary,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
-        child: Container(
-          width: 56,
-          height: 56,
-          padding: const EdgeInsets.only(left: 4),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-          ),
-          child: const Icon(
-            CustomIcons.send,
-            color: Colors.blue,
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).pop(controller.value.selectedEntities);
+          },
+          child: Container(
+            width: 56,
+            height: 56,
+            padding: const EdgeInsets.only(left: 4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.onPrimary,
+            ),
+            child: Icon(
+              CustomIcons.send,
+              color: scheme.primary,
+            ),
           ),
         ),
       ),

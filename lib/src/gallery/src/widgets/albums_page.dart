@@ -9,11 +9,11 @@ const _imageSize = 48;
 class AlbumsPage extends StatelessWidget {
   ///
   const AlbumsPage({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onAlbumChange,
     required this.albums,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;
@@ -68,20 +68,17 @@ class AlbumsPage extends StatelessWidget {
 
 class _AlbumTile extends StatelessWidget {
   const _AlbumTile({
-    Key? key,
     required this.controller,
     required this.album,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final GalleryController controller;
   final Album album;
   final ValueChanged<Album>? onPressed;
 
   Future<AssetEntity?> _entity() async {
-    final assets = (await album.value.assetPathEntity
-            ?.getAssetListPaged(page: 0, size: 1)) ??
-        [];
+    final assets = (await album.value.assetPathEntity?.getAssetListPaged(page: 0, size: 1)) ?? [];
     if (assets.isEmpty) return null;
     return assets.first;
   }
@@ -107,8 +104,7 @@ class _AlbumTile extends StatelessWidget {
               child: FutureBuilder<AssetEntity?>(
                 future: _entity(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done ||
-                      snapshot.data == null) {
+                  if (snapshot.connectionState != ConnectionState.done || snapshot.data == null) {
                     return const SizedBox();
                   }
                   return ColoredBox(
@@ -128,9 +124,7 @@ class _AlbumTile extends StatelessWidget {
                 children: [
                   // Album name
                   Text(
-                    isAll
-                        ? 'All Photos'
-                        : album.value.assetPathEntity?.name ?? '',
+                    isAll ? 'All Photos' : album.value.assetPathEntity?.name ?? '',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -138,12 +132,21 @@ class _AlbumTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   // Total photos
-                  Text(
-                    album.value.assetPathEntity?.assetCount.toString() ?? '',
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 13,
-                    ),
+                  FutureBuilder<int>(
+                    future: album.value.assetPathEntity?.assetCountAsync,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Text(
+                          '${snapshot.data}',
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 13,
+                          ),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
                   ),
                 ],
               ),

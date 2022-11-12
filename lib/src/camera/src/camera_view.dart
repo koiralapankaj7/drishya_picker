@@ -18,12 +18,12 @@ const Duration _kRouteDuration = Duration(milliseconds: 300);
 class CameraView extends StatefulWidget {
   ///
   const CameraView({
-    Key? key,
+    super.key,
     this.controller,
     this.setting,
     this.editorSetting,
     this.photoEditorSetting,
-  }) : super(key: key);
+  });
 
   /// Camera controller
   final CamController? controller;
@@ -86,8 +86,7 @@ class CameraView extends StatefulWidget {
   State<CameraView> createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<CameraView>
-    with WidgetsBindingObserver, TickerProviderStateMixin {
+class _CameraViewState extends State<CameraView> with WidgetsBindingObserver, TickerProviderStateMixin {
   late DrishyaEditingController _photoEditingController;
   late CamController _camController;
 
@@ -102,8 +101,7 @@ class _CameraViewState extends State<CameraView>
         editorSetting: widget.editorSetting,
         photoEditorSetting: widget.photoEditorSetting,
       );
-    _photoEditingController = _camController.drishyaEditingController
-      ..addListener(_photoEditingListener);
+    _photoEditingController = _camController.drishyaEditingController..addListener(_photoEditingListener);
     Future<void>.delayed(_kRouteDuration, _camController.createCamera);
     // _camController.createCamera();
   }
@@ -111,8 +109,7 @@ class _CameraViewState extends State<CameraView>
   // Listen photo editing state
   void _photoEditingListener() {
     final value = _photoEditingController.value;
-    final isPlaygroundActive =
-        value.hasFocus || value.isEditing || value.hasStickers;
+    final isPlaygroundActive = value.hasFocus || value.isEditing || value.hasStickers;
     _camController.update(isPlaygroundActive: isPlaygroundActive);
   }
 
@@ -130,8 +127,7 @@ class _CameraViewState extends State<CameraView>
           editorSetting: widget.editorSetting,
           photoEditorSetting: widget.photoEditorSetting,
         );
-      _photoEditingController = _camController.drishyaEditingController
-        ..addListener(_photoEditingListener);
+      _photoEditingController = _camController.drishyaEditingController..addListener(_photoEditingListener);
       _camController.createCamera();
     }
   }
@@ -210,8 +206,7 @@ class _CameraViewState extends State<CameraView>
             }
 
             // Camera permission
-            if (value.error != null &&
-                value.error!.code == 'cameraPermission') {
+            if (value.error != null && value.error!.code == 'cameraPermission') {
               return Container(
                 alignment: Alignment.center,
                 child: GalleryPermissionView(
@@ -239,7 +234,7 @@ class _CameraViewState extends State<CameraView>
 
 ///
 class _GalleryView extends StatelessWidget {
-  const _GalleryView({Key? key}) : super(key: key);
+  const _GalleryView();
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +286,7 @@ class _GalleryView extends StatelessWidget {
 }
 
 class _CameraView extends StatelessWidget {
-  const _CameraView({Key? key}) : super(key: key);
+  const _CameraView();
 
   @override
   Widget build(BuildContext context) {

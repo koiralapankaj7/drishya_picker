@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -9,10 +8,10 @@ import 'package:flutter/material.dart';
 class EntityThumbnail extends StatelessWidget {
   ///
   const EntityThumbnail({
-    Key? key,
+    super.key,
     required this.entity,
     this.onBytesGenerated,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEntity entity;
@@ -32,6 +31,19 @@ class EntityThumbnail extends StatelessWidget {
           fit: BoxFit.cover,
         );
       } else {
+        // child = FutureBuilder<Uint8List?>(
+        //   future: entity.thumbnailData,
+        //   builder: (context, snapshot) {
+        //     if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+        //       onBytesGenerated?.call(snapshot.data);
+        //       return Image.memory(
+        //         snapshot.data!,
+        //         fit: BoxFit.cover,
+        //       );
+        //     }
+        //     return const SizedBox.shrink();
+        //   },
+        // );
         child = Image(
           image: _MediaThumbnailProvider(
             entity: entity,
@@ -107,8 +119,7 @@ class _MediaThumbnailProvider extends ImageProvider<_MediaThumbnailProvider> {
   }
 
   @override
-  Future<_MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<_MediaThumbnailProvider>(this);
+  Future<_MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) => SynchronousFuture<_MediaThumbnailProvider>(this);
 
   @override
   bool operator ==(dynamic other) {
@@ -127,9 +138,8 @@ class _MediaThumbnailProvider extends ImageProvider<_MediaThumbnailProvider> {
 
 class _DurationView extends StatelessWidget {
   const _DurationView({
-    Key? key,
     required this.duration,
-  }) : super(key: key);
+  });
 
   final int duration;
 

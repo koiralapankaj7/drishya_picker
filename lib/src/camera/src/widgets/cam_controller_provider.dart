@@ -9,17 +9,16 @@ import '../controllers/cam_controller.dart';
 class CamControllerProvider extends InheritedWidget {
   /// Creates a widget that associates a [CamController] with a subtree.
   const CamControllerProvider({
-    Key? key,
+    super.key,
     required CamController this.action,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// Creates a subtree without an associated [CamController].
   const CamControllerProvider.none({
-    Key? key,
-    required Widget child,
-  })  : action = null,
-        super(key: key, child: child);
+    super.key,
+    required super.child,
+  })  : action = null;
 
   /// The [CamController] associated with the subtree.
   ///

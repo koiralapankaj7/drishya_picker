@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 class EditorTextfieldButton extends StatelessWidget {
   ///
   const EditorTextfieldButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

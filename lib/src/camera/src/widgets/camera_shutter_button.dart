@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 class CameraShutterButton extends StatelessWidget {
   ///
   const CameraShutterButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;
@@ -38,10 +38,10 @@ class CameraShutterButton extends StatelessWidget {
 
 class _ShutterButton extends StatefulWidget {
   const _ShutterButton({
-    Key? key,
+    super.key,
     required this.controller,
     this.size = 70.0,
-  }) : super(key: key);
+  });
 
   final double size;
   final CamController controller;
@@ -220,10 +220,10 @@ class _ShutterButtonState extends State<_ShutterButton>
 
 class _VideoIcon extends StatelessWidget {
   const _VideoIcon({
-    Key? key,
+    super.key,
     this.size = 20.0,
     this.radius = 10.0,
-  }) : super(key: key);
+  });
 
   final double radius;
   final double size;
@@ -291,10 +291,10 @@ class _CustomPainter extends CustomPainter {
 
 class _Pulse extends StatefulWidget {
   const _Pulse({
-    Key? key,
+    super.key,
     required this.controller,
     this.size = 50.0,
-  }) : super(key: key);
+  });
 
   final double size;
   final AnimationController controller;

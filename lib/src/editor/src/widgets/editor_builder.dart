@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 class EditorBuilder extends StatelessWidget {
   ///
   const EditorBuilder({
-    Key? key,
+    super.key,
     required this.controller,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;

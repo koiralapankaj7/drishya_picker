@@ -12,9 +12,9 @@ import 'camera_type_changer.dart';
 class CameraFooter extends StatelessWidget {
   ///
   const CameraFooter({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;

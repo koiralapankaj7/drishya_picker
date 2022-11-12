@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 ///
 class TextStickerView extends StatelessWidget {
   ///
-  const TextStickerView({Key? key}) : super(key: key);
+  const TextStickerView({super.key});
 
   @override
   Widget build(BuildContext context) {

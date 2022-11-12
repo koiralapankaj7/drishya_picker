@@ -264,13 +264,13 @@ abstract class Sticker {
 class TextSticker extends Sticker {
   ///
   const TextSticker({
-    Size size = const Size(200, 200),
-    Map<String, Object> extra = const {},
+    super.size,
+    super.extra,
     this.text = '',
     this.style,
     this.textAlign,
     this.background,
-  }) : super(size: size, extra: extra);
+  });
 
   ///
   final String text;
@@ -360,12 +360,12 @@ class TextSticker extends Sticker {
 class ImageSticker extends Sticker {
   ///
   const ImageSticker({
-    String name = '',
-    Size size = const Size(200, 200),
-    Map<String, Object> extra = const {},
+    super.name,
+    super.size,
+    super.extra,
     this.path = '',
     this.isNetworkImage = true,
-  }) : super(name: name, size: size, extra: extra);
+  });
 
   /// The url of the sticker. either network/accets or text
   final String path;
@@ -442,14 +442,10 @@ class IconSticker extends Sticker {
   const IconSticker({
     required this.iconData,
     this.color,
-    String name = '',
-    Size size = const Size(100, 100),
-    Map<String, Object> extra = const {},
-  }) : super(
-          name: name,
-          size: size,
-          extra: extra,
-        );
+    super.name,
+    super.size = const Size(100, 100),
+    super.extra,
+  });
 
   ///
   final IconData iconData;

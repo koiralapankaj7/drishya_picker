@@ -10,9 +10,9 @@ import 'camera_builder.dart';
 class CameraRotateButton extends StatelessWidget {
   ///
   const CameraRotateButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;

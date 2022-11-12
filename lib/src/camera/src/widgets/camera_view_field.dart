@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class CameraViewField extends StatelessWidget {
   ///
   const CameraViewField({
-    Key? key,
+    super.key,
     required this.child,
     this.controller,
     this.setting,
@@ -16,7 +16,7 @@ class CameraViewField extends StatelessWidget {
     this.photoEditorSetting,
     this.routeSetting,
     this.onCapture,
-  }) : super(key: key);
+  });
 
   ///
   /// Child widget

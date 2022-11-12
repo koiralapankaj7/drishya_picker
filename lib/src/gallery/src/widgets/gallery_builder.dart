@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 class GalleryBuilder extends StatelessWidget {
   ///
   const GalleryBuilder({
-    Key? key,
+    super.key,
     required this.controller,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;

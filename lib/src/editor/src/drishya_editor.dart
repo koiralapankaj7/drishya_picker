@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 class DrishyaEditor extends StatefulWidget {
   ///
   const DrishyaEditor({
-    Key? key,
+    super.key,
     this.controller,
     this.setting,
     this.hideOverlay = false,
-  }) : super(key: key);
+  });
 
   ///
   /// Drishya editing controller

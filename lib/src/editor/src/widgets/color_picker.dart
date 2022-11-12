@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 class ColorPicker extends StatelessWidget {
   ///
   const ColorPicker({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -87,10 +87,9 @@ class ColorPicker extends StatelessWidget {
 
 class _ColorCircle extends StatelessWidget {
   const _ColorCircle({
-    Key? key,
     required this.color,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final Color color;
   final DrishyaEditingController controller;

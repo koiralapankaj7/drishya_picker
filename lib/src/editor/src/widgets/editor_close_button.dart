@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 class EditorCloseButton extends StatelessWidget {
   ///
   const EditorCloseButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final DrishyaEditingController controller;
@@ -80,7 +80,7 @@ class EditorCloseButton extends StatelessWidget {
 }
 
 class _AppDialog extends StatelessWidget {
-  const _AppDialog({Key? key}) : super(key: key);
+  const _AppDialog();
 
   @override
   Widget build(BuildContext context) {

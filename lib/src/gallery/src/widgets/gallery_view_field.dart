@@ -11,14 +11,14 @@ class GalleryViewField extends StatelessWidget {
   /// and [GallerySetting] will be override by the [SlidableGallery]
   ///
   const GalleryViewField({
-    Key? key,
+    super.key,
     this.controller,
     this.onChanged,
     this.onSubmitted,
     this.setting,
     this.routeSetting,
     this.child,
-  }) : super(key: key);
+  });
 
   ///
   /// Gallery controller

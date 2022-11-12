@@ -11,13 +11,13 @@ import 'package:flutter/material.dart';
 class GalleryHeader extends StatefulWidget {
   ///
   const GalleryHeader({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onClose,
     required this.onAlbumToggle,
     required this.albums,
     this.headerSubtitle,
-  }) : super(key: key);
+  });
 
   ///
   final GalleryController controller;
@@ -138,11 +138,10 @@ class _GalleryHeaderState extends State<GalleryHeader> {
 
 class _AnimatedDropdown extends StatelessWidget {
   const _AnimatedDropdown({
-    Key? key,
     required this.controller,
     required this.onPressed,
     required this.albumVisibility,
-  }) : super(key: key);
+  });
 
   final GalleryController controller;
 
@@ -196,11 +195,10 @@ class _AnimatedDropdown extends StatelessWidget {
 
 class _IconButton extends StatelessWidget {
   const _IconButton({
-    Key? key,
     this.iconData,
     this.onPressed,
     this.size,
-  }) : super(key: key);
+  });
 
   final IconData? iconData;
   final void Function()? onPressed;
@@ -227,11 +225,10 @@ class _IconButton extends StatelessWidget {
 
 class _AlbumDetail extends StatelessWidget {
   const _AlbumDetail({
-    Key? key,
     this.subtitle,
     required this.controller,
     required this.albums,
-  }) : super(key: key);
+  });
 
   ///
   final String? subtitle;
@@ -282,9 +279,8 @@ class _AlbumDetail extends StatelessWidget {
 
 class _Handler extends StatelessWidget {
   const _Handler({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final GalleryController controller;
 

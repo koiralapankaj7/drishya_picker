@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 class RawCameraView extends StatelessWidget {
   ///
   const RawCameraView({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;

@@ -169,7 +169,7 @@ class GradientBackground implements EditorBackground {
 
 /// For better performance, this approact prevent unnecessary build
 class _EntityBGView extends StatefulWidget {
-  const _EntityBGView({Key? key, required this.entity}) : super(key: key);
+  const _EntityBGView({required this.entity});
 
   final DrishyaEntity entity;
 

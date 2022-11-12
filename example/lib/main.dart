@@ -45,11 +45,12 @@ class _PickerDemo extends StatelessWidget {
                 Navigator.push<void>(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const FullscreenGallery()),
+                    builder: (context) => const FullscreenGallery(),
+                  ),
                 );
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: Colors.green,
               ),
               child: const Text('Full screen mode'),
@@ -60,11 +61,13 @@ class _PickerDemo extends StatelessWidget {
                 Navigator.push<void>(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const CollapsableGallery()),
+                    builder: (context) => const CollapsableGallery(),
+                  
+                  ),
                 );
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: Colors.green,
               ),
               child: const Text('Collapsable mode'),

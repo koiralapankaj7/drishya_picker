@@ -18,10 +18,10 @@ import 'package:flutter/services.dart';
 class GalleryView extends StatefulWidget {
   ///
   const GalleryView({
-    Key? key,
+    super.key,
     this.controller,
     this.setting,
-  }) : super(key: key);
+  });
 
   /// Gallery controller
   final GalleryController? controller;
@@ -90,8 +90,7 @@ class _GalleryViewState extends State<GalleryView> {
       setting: widget.setting?.panelSetting,
       builder: (panelSetting) => _View(
         controller: _controller,
-        setting: (widget.setting ?? _controller.setting)
-            .copyWith(panelSetting: panelSetting),
+        setting: (widget.setting ?? _controller.setting).copyWith(panelSetting: panelSetting),
       ),
     );
 
@@ -103,10 +102,9 @@ class _GalleryViewState extends State<GalleryView> {
 class _View extends StatefulWidget {
   ///
   const _View({
-    Key? key,
     required this.controller,
     required this.setting,
-  }) : super(key: key);
+  });
 
   final GalleryController controller;
   final GallerySetting setting;
@@ -260,8 +258,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final panelSetting = widget.setting.panelSetting!;
-    final actionMode =
-        _controller.setting.selectionMode == SelectionMode.actionBased;
+    final actionMode = _controller.setting.selectionMode == SelectionMode.actionBased;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: panelSetting.overlayStyle,
@@ -271,6 +268,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
           backgroundColor: Colors.black,
           body: Stack(
             fit: StackFit.expand,
+            alignment: Alignment.center,
             children: [
               // Header
               Align(
@@ -284,52 +282,51 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               ),
 
               // Body
-              Column(
-                children: [
-                  // Header space
-                  Builder(
-                    builder: (context) {
-                      // Header space for full screen mode
-                      if (_controller.fullScreenMode) {
-                        return SizedBox(height: panelSetting.headerMaxHeight);
-                      }
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    // Header space
+                    Builder(
+                      builder: (context) {
+                        // Header space for full screen mode
+                        if (_controller.fullScreenMode) {
+                          return SizedBox(height: panelSetting.headerMaxHeight);
+                        }
 
-                      // Toogling size for header hiding animation
-                      return ValueListenableBuilder<PanelValue>(
-                        valueListenable: _panelController,
-                        builder: (context, value, child) {
-                          final height = (panelSetting.headerMaxHeight *
-                                  value.factor *
-                                  1.2)
-                              .clamp(
-                            panelSetting.thumbHandlerHeight,
-                            panelSetting.headerMaxHeight,
-                          );
-                          return SizedBox(height: height);
-                        },
-                      );
+                        // Toogling size for header hiding animation
+                        return ValueListenableBuilder<PanelValue>(
+                          valueListenable: _panelController,
+                          builder: (context, value, child) {
+                            final height = (panelSetting.headerMaxHeight * value.factor * 1.2).clamp(
+                              panelSetting.thumbHandlerHeight,
+                              panelSetting.headerMaxHeight,
+                            );
+                            return SizedBox(height: height);
+                          },
+                        );
 //
-                    },
-                  ),
-
-                  // Divider
-                  Divider(
-                    color: Colors.lightBlue.shade300,
-                    thickness: 0.5,
-                    height: 0.5,
-                    indent: 0,
-                    endIndent: 0,
-                  ),
-
-                  // Gallery grid
-                  Expanded(
-                    child: GalleryGridView(
-                      controller: _controller,
-                      albums: _albums,
-                      onClosePressed: _onClosePressed,
+                      },
                     ),
-                  ),
-                ],
+
+                    // Divider
+                    Divider(
+                      color: Colors.lightBlue.shade300,
+                      thickness: 0.5,
+                      height: 0.5,
+                      indent: 0,
+                      endIndent: 0,
+                    ),
+
+                    // Gallery grid
+                    Expanded(
+                      child: GalleryGridView(
+                        controller: _controller,
+                        albums: _albums,
+                        onClosePressed: _onClosePressed,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               // Send and edit button
@@ -351,9 +348,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
               AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
-                  final offsetY = panelSetting.headerMaxHeight +
-                      (panelSetting.maxHeight! - panelSetting.headerMaxHeight) *
-                          (1 - _animation.value);
+                  final offsetY = panelSetting.headerMaxHeight + (panelSetting.maxHeight! - panelSetting.headerMaxHeight) * (1 - _animation.value);
                   return Visibility(
                     visible: _animation.value > 0.0,
                     child: Transform.translate(

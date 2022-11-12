@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 class CameraCloseButton extends StatelessWidget {
   ///
   const CameraCloseButton({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   ///
   final CamController controller;

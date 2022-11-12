@@ -5,10 +5,10 @@ import 'package:photo_manager/photo_manager.dart';
 class GalleryPermissionView extends StatefulWidget {
   ///
   const GalleryPermissionView({
-    Key? key,
+    super.key,
     this.onRefresh,
     this.isCamera = false,
-  }) : super(key: key);
+  });
 
   ///
   final VoidCallback? onRefresh;
@@ -20,8 +20,7 @@ class GalleryPermissionView extends StatefulWidget {
   State<GalleryPermissionView> createState() => _GalleryPermissionViewState();
 }
 
-class _GalleryPermissionViewState extends State<GalleryPermissionView>
-    with WidgetsBindingObserver {
+class _GalleryPermissionViewState extends State<GalleryPermissionView> with WidgetsBindingObserver {
   var _setting = false;
 
   @override
@@ -52,8 +51,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
 
     return Container(
       padding: const EdgeInsets.all(24),
-      margin:
-          widget.isCamera ? const EdgeInsets.symmetric(horizontal: 32) : null,
+      margin: widget.isCamera ? const EdgeInsets.symmetric(horizontal: 32) : null,
       decoration: BoxDecoration(
         borderRadius: widget.isCamera ? BorderRadius.circular(12) : null,
         color: Colors.white,
@@ -91,7 +89,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
                   child: OutlinedButton(
                     onPressed: Navigator.of(context).pop,
                     style: OutlinedButton.styleFrom(
-                      primary: scheme.secondary,
+                      foregroundColor: scheme.secondary,
                       visualDensity: VisualDensity.comfortable,
                     ),
                     child: const Text('Deny Access'),
@@ -105,7 +103,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
                 style: OutlinedButton.styleFrom(
                   visualDensity: VisualDensity.comfortable,
                   backgroundColor: scheme.primary,
-                  primary: scheme.onPrimary,
+                  foregroundColor: scheme.onPrimary,
                 ),
                 child: const Text('Allow Access'),
               ),
