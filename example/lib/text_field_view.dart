@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 class TextFieldView extends StatelessWidget {
   ///
   const TextFieldView({
-    Key? key,
     required this.notifier,
-  }) : super(key: key);
+    super.key,
+  });
 
   ///
   final ValueNotifier<Data> notifier;

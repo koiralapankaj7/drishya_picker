@@ -1,0 +1,8 @@
+name: drishya_picker
+
+packages:
+  - packages/*
+
+scripts:
+  analyze:
+    exec: dart analyze .
