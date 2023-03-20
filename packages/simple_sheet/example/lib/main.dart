@@ -33,46 +33,32 @@ class _MyHomePageState extends State<MyHomePage> {
   final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    return SimpleSheetScaffold(
-      child: Scaffold(
+    return SimpleSheet(
+      body: Scaffold(
+        backgroundColor: Colors.black,
         body: Builder(builder: (context) {
-          // return DraggableScrollableSheet(
-          //   snap: true,
-          //   minChildSize: 0.45,
-          //   snapAnimationDuration: const Duration(milliseconds: 100),
-          //   builder: (context, controller) {
-          //     return ListView.builder(
-          //       controller: controller,
-          //       itemBuilder: (context, index) {
-          //         return Container(
-          //           color: Colors.amber,
-          //           margin: const EdgeInsets.all(2),
-          //           child: Text('$index'),
-          //         );
-          //       },
-          //     );
-          //   },
-          // );
           return Container(
-            color: Colors.cyan,
+            color: Colors.green.withOpacity(0.4),
             alignment: Alignment.center,
             child: TextButton(
               onPressed: () {
-                SimpleSheetScaffold.of(context).showBottomSheet((context) {
-                  return Container(color: Colors.amber);
+                SimpleSheet.of(context).show((context, controller) {
+                  // return Container(color: Colors.amber);
                   return Container(
-                    color: Colors.black12,
-                    alignment: Alignment
-                        .topCenter, // TODO remove alignment and see the size issue
+                    // alignment: Alignment
+                    //     .topCenter, // TODO remove alignment and see the size issue
                     // child: TextButton(
                     //   onPressed: Navigator.of(context).pop,
                     //   child: const Text('Close'),
                     // ),
+                    color: Colors.white,
                     child: ListView.builder(
+                      controller: controller,
                       itemBuilder: (context, index) {
                         return Container(
                           color: Colors.amber,
                           margin: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(16),
                           child: Text('$index'),
                         );
                       },

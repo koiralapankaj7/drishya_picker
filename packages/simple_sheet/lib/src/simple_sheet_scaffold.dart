@@ -2,33 +2,27 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:simple_sheet/src/drag_gesture.dart';
-import 'package:simple_sheet/src/sheet_controller.dart';
-
-const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation =
-    FloatingActionButtonLocation.endFloat;
-const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator =
-    FloatingActionButtonAnimator.scaling;
-
-const Curve _standardBottomSheetCurve = standardEasing;
-// When the top of the BottomSheet crosses this threshold, it will start to
-// shrink the FAB and show a scrim.
-const double _kBottomSheetDominatesPercentage = 0.3;
-const double _kMinBottomSheetScrimOpacity = 0.1;
-const double _kMaxBottomSheetScrimOpacity = 0.6;
 
 // =============================================================================
 ///
-class SimpleSheetScaffold extends StatefulWidget {
+class SimpleSheet extends StatefulWidget {
   ///
-  const SimpleSheetScaffold({
-    required this.child,
+  const SimpleSheet({
+    required this.body,
+    this.bottomSheet,
+    this.minOffset = 0.45,
     super.key,
   });
 
   ///
-  final Widget child;
+  final Widget body;
+
+  ///
+  final DragWidgetBuilder? bottomSheet;
+
+  ///
+  final double minOffset;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -68,8 +62,8 @@ class SimpleSheetScaffold extends StatefulWidget {
   ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], use [maybeOf] instead.
-  static SimpleSheetScaffoldState of(BuildContext context) {
-    final result = context.findAncestorStateOfType<SimpleSheetScaffoldState>();
+  static SimpleSheetState of(BuildContext context) {
+    final result = context.findAncestorStateOfType<SimpleSheetState>();
     if (result != null) {
       return result;
     }
@@ -114,128 +108,79 @@ class SimpleSheetScaffold extends StatefulWidget {
   ///  * [of], a similar function to this one that throws if no instance
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
-  static SimpleSheetScaffoldState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<SimpleSheetScaffoldState>();
+  static SimpleSheetState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<SimpleSheetState>();
   }
 
   @override
-  State<SimpleSheetScaffold> createState() => SimpleSheetScaffoldState();
+  State<SimpleSheet> createState() => SimpleSheetState();
 }
 
 ///
-class SimpleSheetScaffoldState extends State<SimpleSheetScaffold>
+class SimpleSheetState extends State<SimpleSheet>
     with TickerProviderStateMixin {
-  // late final GalleryController _controller;
-  // late final PanelController _panelController;
-  late AnimationController _controller;
-  Widget? _currentBottomSheet;
-
-  final GlobalKey<SSControllerState> _sheetKey = GlobalKey<SSControllerState>();
-
-  ///
-  bool get isSheetOpen => _currentBottomSheet != null;
+  DragGesture? _currentSheet;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      // value: 1,
-      duration: const Duration(milliseconds: 300),
-    );
+    _setupSheet();
   }
 
-  // ///
-  // void closeSheet() {
-  //   _sheetKey.currentState?.close();
-  // }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // No need to init controller from here, [GalleryView] will do that for us.
-  //   _controller = widget.controller ?? GalleryController();
-  //   _panelController = _controller.panelController;
-  // }
-
-  @override
-  void dispose() {
-    // if (widget.controller == null) {
-    //   _controller.dispose();
-    // }
-    _controller.dispose();
-    super.dispose();
+  void _setupSheet() {
+    if (widget.bottomSheet != null) {
+      assert(_currentSheet == null, '');
+      _currentSheet = _buildBottomSheet<void>(
+        widget.bottomSheet!,
+        animationController: BottomSheet.createAnimationController(this),
+        minOffset: widget.minOffset,
+        disposeController: true,
+      );
+    }
   }
 
-  Widget _buildBottomSheet<T>(
-    WidgetBuilder builder, {
-    // required AnimationController animationController,
-    Color? backgroundColor,
-    double? elevation,
-    ShapeBorder? shape,
-    Clip? clipBehavior,
-    BoxConstraints? constraints,
-    bool? enableDrag,
-    bool shouldDisposeAnimationController = true,
+  ///
+  bool get isSheetOpen => _currentSheet != null;
+
+  DragGesture _buildBottomSheet<T>(
+    DragWidgetBuilder builder, {
+    required AnimationController animationController,
+    required double minOffset,
+    required bool disposeController,
   }) {
-    // assert(() {
-    //   if (widget.bottomSheet != null &&
-    //       isPersistent &&
-    //       _currentBottomSheet != null) {
-    //     throw FlutterError(
-    //       'Scaffold.bottomSheet cannot be specified while a bottom sheet '
-    //       'displayed with showBottomSheet() is still visible.\n'
-    //       'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().',
-    //     );
-    //   }
-    //   return true;
-    // }());
+    assert(
+      () {
+        if (widget.bottomSheet != null && _currentSheet != null) {
+          throw FlutterError(
+            'SimpleSheet.bottomSheet cannot be specified while a simple sheet '
+            'displayed with showSimpleSheet() is still visible.\n'
+            'Rebuild the SimpleSheet with a null simpleSheet before calling showSimpleSheet().',
+          );
+        }
+        return true;
+      }(),
+      '',
+    );
 
     final completer = Completer<T>();
-    final bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
-    late _StandardBottomSheet bottomSheet;
+    final bottomSheetKey = GlobalKey<DragGestureController>();
 
     var removedEntry = false;
     var doingDispose = false;
 
-    // void removePersistentSheetHistoryEntryIfNeeded() {
-    //   assert(isPersistent);
-    //   if (_persistentSheetHistoryEntry != null) {
-    //     _persistentSheetHistoryEntry!.remove();
-    //     _persistentSheetHistoryEntry = null;
-    //   }
-    // }
-
     void removeCurrentBottomSheet() {
       removedEntry = true;
-      if (_currentBottomSheet == null) {
+      if (_currentSheet == null) {
         return;
       }
-      // assert(_currentBottomSheet!._widget == bottomSheet);
-      // assert(bottomSheetKey.currentState != null);
-      // _showFloatingActionButton();
-
-      // if (isPersistent) {
-      //   removePersistentSheetHistoryEntryIfNeeded();
-      // }
-
+      assert(bottomSheetKey.currentState != null, '');
       bottomSheetKey.currentState!.close();
-
-      // if (animationController.status != AnimationStatus.dismissed) {
-      //   _dismissedBottomSheets.add(bottomSheet);
-      // }
       completer.complete();
     }
 
     final entry = LocalHistoryEntry(
-      onRemove: () {
-        if (!removedEntry &&
-            // _currentBottomSheet?._widget == bottomSheet
-            //  &&
-            !doingDispose) {
-          removeCurrentBottomSheet();
-        }
-      },
+      onRemove: removeCurrentBottomSheet,
+      impliesAppBarDismissal: false,
     );
 
     void removeEntryIfNeeded() {
@@ -245,50 +190,36 @@ class SimpleSheetScaffoldState extends State<SimpleSheetScaffold>
       }
     }
 
-    bottomSheet = _StandardBottomSheet(
+    final bottomSheet = DragGesture(
       key: bottomSheetKey,
-      // animationController: animationController,
-      animationController: _controller,
-      enableDrag: enableDrag ?? true,
+      animationController: animationController,
+      midThreshold: minOffset,
       onClosing: () {
-        if (_currentBottomSheet == null) {
+        if (_currentSheet == null) {
           return;
         }
-        // assert(_currentBottomSheet!._widget == bottomSheet);
         removeEntryIfNeeded();
       },
-      onDismissed: () {
-        // if (_dismissedBottomSheets.contains(bottomSheet)) {
-        //   setState(() {
-        //     _dismissedBottomSheets.remove(bottomSheet);
-        //   });
-        // }
+      onClose: () {
+        removeEntryIfNeeded();
         setState(() {
-          _currentBottomSheet = null;
+          _currentSheet = null;
         });
       },
       onDispose: () {
         doingDispose = true;
         removeEntryIfNeeded();
-        if (_currentBottomSheet != null) {
-          setState(() {
-            _currentBottomSheet = null;
-          });
+        if (disposeController) {
+          animationController.dispose();
         }
-        // if (shouldDisposeAnimationController) {
-        //   animationController.dispose();
-        // }
       },
       builder: builder,
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      constraints: constraints,
     );
 
     ///
     ModalRoute.of(context)!.addLocalHistoryEntry(entry);
+
+    return bottomSheet;
 
     // return PersistentBottomSheetController<T>._(
     //   bottomSheet,
@@ -299,101 +230,98 @@ class SimpleSheetScaffoldState extends State<SimpleSheetScaffold>
     //   },
     //   !isPersistent,
     // );
+  }
 
-    return bottomSheet;
+  void _closeCurrentSheet() {
+    if (_currentSheet != null) {
+      // if (!_currentSheet!._isLocalHistoryEntry) {
+      //   _currentSheet!.close();
+      // }
+      assert(
+        () {
+          // _currentSheet?._completer.future.whenComplete(() {
+          //   assert(_currentBottomSheet == null);
+          // });
+          return true;
+        }(),
+        '',
+      );
+    }
   }
 
   ///
-  void showBottomSheet<T>(
-    WidgetBuilder builder, {
-    Color? backgroundColor,
-    double? elevation,
-    ShapeBorder? shape,
-    Clip? clipBehavior,
-    BoxConstraints? constraints,
-    bool? enableDrag,
-    AnimationController? transitionAnimationController,
+  void show<T>(
+    DragWidgetBuilder builder, {
+    AnimationController? animationController,
+    double minOffset = 0.45,
   }) {
-    assert(debugCheckHasSimpleSheetScaffold(context), '');
+    assert(
+      () {
+        if (widget.bottomSheet != null && _currentSheet != null) {
+          throw FlutterError(
+            'SimpleSheet.bottomSheet cannot be specified while a simple sheet '
+            'displayed with showSimpleSheet() is still visible.\n'
+            'Rebuild the SimpleSheet with a null simpleSheet before calling showSimpleSheet().',
+          );
+        }
+        return true;
+      }(),
+      '',
+    );
+    assert(debugCheckHasSimpleSheet(context), '');
 
-    // _closeCurrentBottomSheet();
-    // final controller = (transitionAnimationController ??
-    //     BottomSheet.createAnimationController(this))
-    //   ..forward();
-    if (_currentBottomSheet != null) {
-      Navigator.of(context).pop();
-      return;
-    }
-    // _controller.animateTo(
-    //   0.45,
-    //   duration: const Duration(milliseconds: 300),
-    //   curve: Curves.fastLinearToSlowEaseIn,
-    // );
-    _snapToPosition(0.45);
+    // if (_currentSheet != null) {
+    //   Navigator.of(context).pop();
+    //   return;
+    // }
+    _closeCurrentSheet();
+
+    final controller = (animationController ??
+        BottomSheet.createAnimationController(this))
+      ..snapToPosition(minOffset);
 
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(
+      _currentSheet = _buildBottomSheet<T>(
         builder,
-        // animationController: controller,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-        constraints: constraints,
-        enableDrag: enableDrag,
-        shouldDisposeAnimationController: transitionAnimationController == null,
+        animationController: controller,
+        minOffset: minOffset,
+        disposeController: animationController == null,
       );
     });
     // return _currentBottomSheet! as PersistentBottomSheetController<T>;
-
-    // _sheetKey.currentState?.open();
-    // if (_bottomSheet != null) return;
-    // setState(() {
-    //   _bottomSheet = builder(context);
-    // });
-  }
-
-  void _snapToPosition(double endValue, {double? startValue}) {
-    final Simulation simulation = SpringSimulation(
-      SpringDescription.withDampingRatio(
-        mass: 1,
-        stiffness: 600,
-        ratio: 1.1,
-      ),
-      startValue ?? _controller.value,
-      endValue,
-      0,
-    );
-    _controller.animateWith(simulation);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_currentSheet == null) {
+      return widget.body;
+    }
+
     return Material(
       // color: Colors.amber,
+      color: Colors.pink,
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: _currentSheet!.animationController,
         builder: (context, child) {
-          // log('Progress is => ${_controller.value}');
           return Actions(
             actions: <Type, Action<Intent>>{
               DismissIntent: _DismissSheetAction(context),
             },
             child: CustomMultiChildLayout(
               delegate: _ScaffoldLayout(
-                progress: _controller.value,
+                progress: _currentSheet!.animationController.value,
               ),
               children: <LayoutId>[
                 LayoutId(
                   id: 'SimpleSheet.body',
                   child: _BodyBuilder(
-                    body: widget.child,
+                    body: widget.body,
                   ),
                 ),
-                if (_currentBottomSheet != null)
+                if (_currentSheet != null)
                   LayoutId(
                     id: 'SimpleSheet.sheet',
-                    child: _currentBottomSheet!,
+                    child: _currentSheet!,
                     // child: SSController(
                     //   key: _sheetKey,
                     //   alignment: DrawerAlignment.start,
@@ -440,7 +368,7 @@ class SimpleSheetScaffoldState extends State<SimpleSheetScaffold>
 //   );
 // }
 
-/// Asserts that the given context has a [SimpleSheetScaffold] ancestor.
+/// Asserts that the given context has a [SimpleSheet] ancestor.
 ///
 /// Used by various widgets to make sure that they are only used in an
 /// appropriate context.
@@ -459,24 +387,23 @@ class SimpleSheetScaffoldState extends State<SimpleSheetScaffold>
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasSimpleSheetScaffold(BuildContext context) {
+bool debugCheckHasSimpleSheet(BuildContext context) {
   assert(
     () {
-      if (context.widget is! SimpleSheetScaffold &&
-          context.findAncestorWidgetOfExactType<SimpleSheetScaffold>() ==
-              null) {
+      if (context.widget is! SimpleSheet &&
+          context.findAncestorWidgetOfExactType<SimpleSheet>() == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No SimpleSheetScaffold widget found.'),
+          ErrorSummary('No SimpleSheet widget found.'),
           ErrorDescription(
-            '${context.widget.runtimeType} widgets require a SimpleSheetScaffold widget ancestor.',
+            '${context.widget.runtimeType} widgets require a SimpleSheet widget ancestor.',
           ),
           ...context.describeMissingAncestor(
-            expectedAncestorType: SimpleSheetScaffold,
+            expectedAncestorType: SimpleSheet,
           ),
-          ErrorHint(
-            'Typically, the SimpleSheetScaffold widget is introduced by the MaterialApp or '
-            'WidgetsApp widget at the top of your application widget tree.',
-          ),
+          // ErrorHint(
+          //   'Typically, the SimpleSheet widget is introduced by the MaterialApp or '
+          //   'WidgetsApp widget at the top of your application widget tree.',
+          // ),
         ]);
       }
       return true;
@@ -594,6 +521,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild('SimpleSheet.body', Offset.zero);
     }
 
+    // log('$progress');
+
     if (hasBottomSheet) {
       layoutChild('SimpleSheet.sheet', fullWidthConstraints);
       positionChild(
@@ -618,7 +547,7 @@ class _DismissSheetAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return SimpleSheetScaffold.of(context).isSheetOpen;
+    return SimpleSheet.of(context).isSheetOpen;
   }
 
   @override
@@ -670,145 +599,132 @@ class _DismissSheetAction extends DismissAction {
 //   }
 // }
 
-class _StandardBottomSheet extends StatefulWidget {
-  const _StandardBottomSheet({
-    required this.animationController,
-    required this.onClosing,
-    required this.onDismissed,
-    required this.builder,
-    this.enableDrag = true,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
-    this.clipBehavior,
-    this.constraints,
-    this.onDispose,
-    super.key,
-  });
+// class _StandardBottomSheet extends StatefulWidget {
+//   const _StandardBottomSheet({
+//     required this.animationController,
+//     required this.onClosing,
+//     required this.onDismissed,
+//     required this.builder,
+//     this.enableDrag = true,
+//     this.backgroundColor,
+//     this.elevation,
+//     this.shape,
+//     this.clipBehavior,
+//     this.constraints,
+//     this.onDispose,
+//     super.key,
+//   });
 
-  final AnimationController
-      animationController; // we control it, but it must be disposed by whoever created it.
-  final bool enableDrag;
-  final VoidCallback? onClosing;
-  final VoidCallback? onDismissed;
-  final VoidCallback? onDispose;
-  final WidgetBuilder builder;
-  final Color? backgroundColor;
-  final double? elevation;
-  final ShapeBorder? shape;
-  final Clip? clipBehavior;
-  final BoxConstraints? constraints;
+//   final AnimationController
+//       animationController; // we control it, but it must be disposed by whoever created it.
+//   final bool enableDrag;
+//   final VoidCallback? onClosing;
+//   final VoidCallback? onDismissed;
+//   final VoidCallback? onDispose;
+//   final DragWidgetBuilder builder;
+//   final Color? backgroundColor;
+//   final double? elevation;
+//   final ShapeBorder? shape;
+//   final Clip? clipBehavior;
+//   final BoxConstraints? constraints;
 
-  @override
-  _StandardBottomSheetState createState() => _StandardBottomSheetState();
-}
+//   @override
+//   _StandardBottomSheetState createState() => _StandardBottomSheetState();
+// }
 
-class _StandardBottomSheetState extends State<_StandardBottomSheet> {
-  // ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
+// class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+//   // ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
 
-  @override
-  void initState() {
-    super.initState();
-    assert(
-      widget.animationController.status == AnimationStatus.forward ||
-          widget.animationController.status == AnimationStatus.completed,
-      '',
-    );
-    widget.animationController.addStatusListener(_handleStatusChange);
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     assert(
+//       widget.animationController.status == AnimationStatus.forward ||
+//           widget.animationController.status == AnimationStatus.completed,
+//       '',
+//     );
+//     widget.animationController.addStatusListener(_handleStatusChange);
+//   }
 
-  @override
-  void dispose() {
-    widget.onDispose?.call();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     widget.onDispose?.call();
+//     super.dispose();
+//   }
 
-  @override
-  void didUpdateWidget(_StandardBottomSheet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(widget.animationController == oldWidget.animationController, '');
-  }
+//   @override
+//   void didUpdateWidget(_StandardBottomSheet oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     assert(widget.animationController == oldWidget.animationController, '');
+//   }
 
-  void close() {
-    // Fully open
-    if (widget.animationController.value > 0.45) {
-      widget.animationController.animateTo(0.45);
-    } else {
-      widget.animationController.reverse();
-    }
-    widget.onClosing?.call();
-  }
+//   // void close() {
+//   //   // Fully open
+//   //   if (widget.animationController.value > 0.45) {
+//   //     widget.animationController.animateTo(0.45);
+//   //   } else {
+//   //     widget.animationController.reverse();
+//   //   }
+//   //   widget.onClosing?.call();
+//   // }
 
-  void _handleDragStart(DragStartDetails details) {
-    // Allow the bottom sheet to track the user's finger accurately.
-    // animationCurve = Curves.linear;
-  }
+//   // void _handleDragStart(DragStartDetails details) {
+//   // Allow the bottom sheet to track the user's finger accurately.
+//   // animationCurve = Curves.linear;
+//   // }
 
-  void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
-    // Allow the bottom sheet to animate smoothly from its current position.
-    // animationCurve = _BottomSheetSuspendedCurve(
-    //   widget.animationController.value,
-    //   curve: _standardBottomSheetCurve,
-    // );
-  }
+//   // void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
+//   // Allow the bottom sheet to animate smoothly from its current position.
+//   // animationCurve = _BottomSheetSuspendedCurve(
+//   //   widget.animationController.value,
+//   //   curve: _standardBottomSheetCurve,
+//   // );
+//   // }
 
-  void _handleStatusChange(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed) {
-      widget.onDismissed?.call();
-    }
-  }
+//   void _handleStatusChange(AnimationStatus status) {
+//     if (status == AnimationStatus.dismissed) {
+//       widget.onDismissed?.call();
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    // return Listener(
-    //   onPointerDown: _onPointerDown,
-    //   onPointerMove: _onPointerMove,
-    //   onPointerUp: _onPointerUp,
-    //   child: widget.child ?? const SizedBox(),
-    // );
-    return Semantics(
-      container: true,
-      // onDismiss: !widget.isPersistent ? close : null,
-      onDismiss: close,
-      child: DragGesture(
-        animationController: widget.animationController,
-        onDragStart: _handleDragStart,
-        onDragEnd: _handleDragEnd,
-        onClosing: widget.onClosing!,
-        builder: widget.builder,
-      ),
-    );
-    // return AnimatedBuilder(
-    //   animation: widget.animationController,
-    //   builder: (BuildContext context, Widget? child) {
-    //     return Align(
-    //       alignment: AlignmentDirectional.topStart,
-    //       heightFactor:
-    //           animationCurve.transform(widget.animationController.value),
-    //       child: child,
-    //     );
-    //   },
-    //   child: Semantics(
-    //     container: true,
-    //     // onDismiss: !widget.isPersistent ? close : null,
-    //     onDismiss: close,
-    //     child: NotificationListener<DraggableScrollableNotification>(
-    //       onNotification: extentChanged,
-    //       child: BottomSheet(
-    //         animationController: widget.animationController,
-    //         enableDrag: widget.enableDrag,
-    //         onDragStart: _handleDragStart,
-    //         onDragEnd: _handleDragEnd,
-    //         onClosing: widget.onClosing!,
-    //         builder: widget.builder,
-    //         backgroundColor: widget.backgroundColor,
-    //         elevation: widget.elevation,
-    //         shape: widget.shape,
-    //         clipBehavior: widget.clipBehavior,
-    //         constraints: widget.constraints,
-    //       ),
-    //     ),
-    //   ),
-    // );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return DragGesture(
+//       animationController: widget.animationController,
+//       onClosing: widget.onClosing!,
+//       builder: widget.builder,
+//     );
+//     // return AnimatedBuilder(
+//     //   animation: widget.animationController,
+//     //   builder: (BuildContext context, Widget? child) {
+//     //     return Align(
+//     //       alignment: AlignmentDirectional.topStart,
+//     //       heightFactor:
+//     //           animationCurve.transform(widget.animationController.value),
+//     //       child: child,
+//     //     );
+//     //   },
+//     //   child: Semantics(
+//     //     container: true,
+//     //     // onDismiss: !widget.isPersistent ? close : null,
+//     //     onDismiss: close,
+//     //     child: NotificationListener<DraggableScrollableNotification>(
+//     //       onNotification: extentChanged,
+//     //       child: BottomSheet(
+//     //         animationController: widget.animationController,
+//     //         enableDrag: widget.enableDrag,
+//     //         onDragStart: _handleDragStart,
+//     //         onDragEnd: _handleDragEnd,
+//     //         onClosing: widget.onClosing!,
+//     //         builder: widget.builder,
+//     //         backgroundColor: widget.backgroundColor,
+//     //         elevation: widget.elevation,
+//     //         shape: widget.shape,
+//     //         clipBehavior: widget.clipBehavior,
+//     //         constraints: widget.constraints,
+//     //       ),
+//     //     ),
+//     //   ),
+//     // );
+//   }
+// }
