@@ -1,627 +1,734 @@
-// import 'package:flutter/gestures.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/physics.dart';
-// import 'package:flutter/services.dart';
-// import 'package:meta/meta.dart';
+import 'dart:async';
+import 'dart:math' as math;
 
-// /// {@template simple_sheet}
-// /// A simple sheet
-// /// {@endtemplate}
-// class SimpleSheet extends StatefulWidget {
-//   /// {@macro simple_sheet}
-//   const SimpleSheet({
-//     super.key,
-//     this.controller,
-//     this.setting,
-//     this.child,
-//   });
+import 'package:flutter/material.dart';
+import 'package:simple_sheet/src/simple_draggable.dart';
 
-//   ///
-//   final SimpleSheetSeeting? setting;
+// =============================================================================
+///
+class SimpleSheet extends StatefulWidget {
+  ///
+  const SimpleSheet({
+    required this.body,
+    this.bottomSheet,
+    this.minOffset = 0.45,
+    super.key,
+  });
 
-//   ///
-//   final SimpleSheetController? controller;
+  ///
+  final Widget body;
 
-//   ///
-//   final Widget? child;
+  ///
+  final DragWidgetBuilder? bottomSheet;
 
-//   @override
-//   State<SimpleSheet> createState() => _SimpleSheetState();
+  ///
+  final double minOffset;
+
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will cause an
+  /// assert in debug mode, and throw an exception in release mode.
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// {@tool dartpad}
+  /// Typical usage of the [Scaffold.of] function is to call it from within the
+  /// `build` method of a child of a [Scaffold].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.of.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// When the [Scaffold] is actually created in the same `build` function, the
+  /// `context` argument to the `build` function can't be used to find the
+  /// [Scaffold] (since it's "above" the widget being returned in the widget
+  /// tree). In such cases, the following technique with a [Builder] can be used
+  /// to provide a new scope with a [BuildContext] that is "under" the
+  /// [Scaffold]:
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold.of.1.dart **
+  /// {@end-tool}
+  ///
+  /// A more efficient solution is to split your build function into several
+  /// widgets. This introduces a new context from which you can obtain the
+  /// [Scaffold]. In this solution, you would have an outer widget that creates
+  /// the [Scaffold] populated by instances of your new inner widgets, and then
+  /// in these inner widgets you would use [Scaffold.of].
+  ///
+  /// A less elegant but more expedient solution is assign a [GlobalKey] to the
+  /// [Scaffold], then use the `key.currentState` property to obtain the
+  /// [ScaffoldState] rather than using the [Scaffold.of] function.
+  ///
+  /// If there is no [Scaffold] in scope, then this will throw an exception.
+  /// To return null if there is no [Scaffold], use [maybeOf] instead.
+  static SimpleSheetState of(BuildContext context) {
+    final result = context.findAncestorStateOfType<SimpleSheetState>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'SimpleSheetScaffoldState.of() called with a context that does not contain a SimpleSheetScaffoldState.',
+      ),
+      ErrorDescription(
+        'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
+        'This usually happens when the context provided is from the same StatefulWidget as that '
+        'whose build function actually creates the Scaffold widget being sought.',
+      ),
+      ErrorHint(
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the Scaffold. For an example of this, please see the '
+        'documentation for Scaffold.of():\n'
+        '  https://api.flutter.dev/flutter/material/Scaffold/of.html',
+      ),
+      ErrorHint(
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the Scaffold. In this solution, '
+        'you would have an outer widget that creates the Scaffold populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use Scaffold.of().\n'
+        'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
+        'then use the key.currentState property to obtain the ScaffoldState rather than '
+        'using the Scaffold.of() function.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
+
+  /// Finds the [ScaffoldState] from the closest instance of this class that
+  /// encloses the given context.
+  ///
+  /// If no instance of this class encloses the given context, will return null.
+  /// To throw an exception instead, use [of] instead of this function.
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function to this one that throws if no instance
+  ///    encloses the given context. Also includes some sample code in its
+  ///    documentation.
+  static SimpleSheetState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<SimpleSheetState>();
+  }
+
+  @override
+  State<SimpleSheet> createState() => SimpleSheetState();
+}
+
+///
+class SimpleSheetState extends State<SimpleSheet>
+    with TickerProviderStateMixin {
+  SimpleDraggable? _currentSheet;
+  final bottomSheetKey = GlobalKey<SimpleDraggableController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _setupSheet();
+  }
+
+  void _setupSheet() {
+    if (widget.bottomSheet != null) {
+      assert(_currentSheet == null, '');
+      _currentSheet = _buildBottomSheet<void>(
+        widget.bottomSheet!,
+        animationController: BottomSheet.createAnimationController(this),
+        minOffset: widget.minOffset,
+        disposeController: true,
+      );
+    }
+  }
+
+  ///
+  bool get isSheetOpen => _currentSheet != null;
+
+  SimpleDraggable _buildBottomSheet<T>(
+    DragWidgetBuilder builder, {
+    required AnimationController animationController,
+    required double minOffset,
+    required bool disposeController,
+  }) {
+    assert(
+      () {
+        if (widget.bottomSheet != null && _currentSheet != null) {
+          throw FlutterError(
+            'SimpleSheet.bottomSheet cannot be specified while a simple sheet '
+            'displayed with showSimpleSheet() is still visible.\n'
+            'Rebuild the SimpleSheet with a null simpleSheet before calling showSimpleSheet().',
+          );
+        }
+        return true;
+      }(),
+      '',
+    );
+
+    final completer = Completer<T>();
+
+    var removedEntry = false;
+    var doingDispose = false;
+
+    void removeCurrentBottomSheet() {
+      removedEntry = true;
+      if (_currentSheet == null) {
+        return;
+      }
+      assert(bottomSheetKey.currentState != null, '');
+      bottomSheetKey.currentState!.close();
+      completer.complete();
+    }
+
+    final entry = LocalHistoryEntry(
+      onRemove: removeCurrentBottomSheet,
+      impliesAppBarDismissal: false,
+    );
+
+    void removeEntryIfNeeded() {
+      if (!removedEntry) {
+        entry.remove();
+        removedEntry = true;
+      }
+    }
+
+    final bottomSheet = SimpleDraggable(
+      key: bottomSheetKey,
+      animationController: animationController,
+      midThreshold: minOffset,
+      onClosing: () {
+        if (_currentSheet == null) {
+          return;
+        }
+        removeEntryIfNeeded();
+      },
+      onClose: () {
+        removeEntryIfNeeded();
+        setState(() {
+          _currentSheet = null;
+        });
+      },
+      onDispose: () {
+        doingDispose = true;
+        removeEntryIfNeeded();
+        if (disposeController) {
+          animationController.dispose();
+        }
+      },
+      builder: builder,
+    );
+
+    ///
+    ModalRoute.of(context)!.addLocalHistoryEntry(entry);
+
+    return bottomSheet;
+
+    // return PersistentBottomSheetController<T>._(
+    //   bottomSheet,
+    //   completer,
+    //   entry != null ? entry.remove : removeCurrentBottomSheet,
+    //   (VoidCallback fn) {
+    //     bottomSheetKey.currentState?.setState(fn);
+    //   },
+    //   !isPersistent,
+    // );
+  }
+
+  void _closeCurrentSheet() {
+    if (_currentSheet != null) {
+      // if (!_currentSheet!._isLocalHistoryEntry) {
+      //   _currentSheet!.close();
+      // }
+      assert(
+        () {
+          // _currentSheet?._completer.future.whenComplete(() {
+          //   assert(_currentBottomSheet == null);
+          // });
+          return true;
+        }(),
+        '',
+      );
+    }
+  }
+
+  ///
+  void show<T>(
+    DragWidgetBuilder builder, {
+    AnimationController? animationController,
+    double minOffset = 0.45,
+  }) {
+    assert(
+      () {
+        if (widget.bottomSheet != null && _currentSheet != null) {
+          throw FlutterError(
+            'SimpleSheet.bottomSheet cannot be specified while a simple sheet '
+            'displayed with showSimpleSheet() is still visible.\n'
+            'Rebuild the SimpleSheet with a null simpleSheet before calling showSimpleSheet().',
+          );
+        }
+        return true;
+      }(),
+      '',
+    );
+    assert(debugCheckHasSimpleSheet(context), '');
+
+    // if (_currentSheet != null) {
+    //   Navigator.of(context).pop();
+    //   return;
+    // }
+    _closeCurrentSheet();
+
+    final controller = (animationController ??
+        BottomSheet.createAnimationController(this))
+      ..snapToPosition(minOffset);
+
+    setState(() {
+      _currentSheet = _buildBottomSheet<T>(
+        builder,
+        animationController: controller,
+        minOffset: minOffset,
+        disposeController: animationController == null,
+      );
+    });
+    // return _currentBottomSheet! as PersistentBottomSheetController<T>;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_currentSheet == null) {
+      return widget.body;
+    }
+
+    final controller = bottomSheetKey.currentState?.controller;
+
+    if (controller == null) return const SizedBox();
+
+    return Material(
+      // color: Colors.amber,
+      color: Colors.pink,
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) {
+          return Actions(
+            actions: <Type, Action<Intent>>{
+              DismissIntent: _DismissSheetAction(context),
+            },
+            child: CustomMultiChildLayout(
+              delegate: _ScaffoldLayout(
+                progress: controller.value,
+              ),
+              children: <LayoutId>[
+                LayoutId(
+                  id: 'SimpleSheet.body',
+                  child: _BodyBuilder(
+                    body: widget.body,
+                  ),
+                ),
+                if (_currentSheet != null)
+                  LayoutId(
+                    id: 'SimpleSheet.sheet',
+                    child: _currentSheet!,
+                    // child: SSController(
+                    //   key: _sheetKey,
+                    //   alignment: DrawerAlignment.start,
+                    //   drawerCallback: (isOpened) {
+                    //     if (isOpened) {}
+                    //   },
+                    //   child: _currentBottomSheet!,
+                    // ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// =============================================================================
+
+///
+// PersistentBottomSheetController<T> showSimpleSheet<T>({
+//   required BuildContext context,
+//   required WidgetBuilder builder,
+//   Color? backgroundColor,
+//   double? elevation,
+//   ShapeBorder? shape,
+//   Clip? clipBehavior,
+//   BoxConstraints? constraints,
+//   bool? enableDrag,
+//   AnimationController? transitionAnimationController,
+// }) {
+//   assert(debugCheckHasSimpleSheetScaffold(context), '');
+
+//   return Scaffold.of(context).showBottomSheet<T>(
+//     builder,
+//     backgroundColor: backgroundColor,
+//     elevation: elevation,
+//     shape: shape,
+//     clipBehavior: clipBehavior,
+//     constraints: constraints,
+//     enableDrag: enableDrag,
+//     transitionAnimationController: transitionAnimationController,
+//   );
 // }
 
-// class _SimpleSheetState extends State<SimpleSheet>
-//     with TickerProviderStateMixin {
-//   late double _panelMinHeight;
-//   late double _panelMaxHeight;
-//   late double _remainingSpace;
-//   late Size _size;
-//   late SimpleSheetSeeting _setting;
+/// Asserts that the given context has a [SimpleSheet] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasSimpleSheetScaffold(context));
+/// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
+/// This method can be expensive (it walks the element tree).
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasSimpleSheet(BuildContext context) {
+  assert(
+    () {
+      if (context.widget is! SimpleSheet &&
+          context.findAncestorWidgetOfExactType<SimpleSheet>() == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('No SimpleSheet widget found.'),
+          ErrorDescription(
+            '${context.widget.runtimeType} widgets require a SimpleSheet widget ancestor.',
+          ),
+          ...context.describeMissingAncestor(
+            expectedAncestorType: SimpleSheet,
+          ),
+          // ErrorHint(
+          //   'Typically, the SimpleSheet widget is introduced by the MaterialApp or '
+          //   'WidgetsApp widget at the top of your application widget tree.',
+          // ),
+        ]);
+      }
+      return true;
+    }(),
+    '',
+  );
+  return true;
+}
 
-//   //
-//   late SimpleSheetController _panelController;
+// =============================================================================
 
-//   // Scroll controller
-//   late ScrollController _scrollController;
+// Used to communicate the height of the Scaffold's bottomNavigationBar and
+// persistentFooterButtons to the LayoutBuilder which builds the Scaffold's body.
+//
+// Scaffold expects a _BodyBoxConstraints to be passed to the _BodyBuilder
+// widget's LayoutBuilder, see _ScaffoldLayout.performLayout(). The BoxConstraints
+// methods that construct new BoxConstraints objects, like copyWith() have not
+// been overridden here because we expect the _BodyBoxConstraintsObject to be
+// passed along unmodified to the LayoutBuilder. If that changes in the future
+// then _BodyBuilder will assert.
+class _BodyBoxConstraints extends BoxConstraints {
+  const _BodyBoxConstraints({
+    required this.bottomWidgetsHeight,
+    super.maxWidth,
+    super.maxHeight,
+  });
 
-//   // Animation controller
-//   late AnimationController _animationController;
+  final double bottomWidgetsHeight;
 
-//   // Tracking pointer velocity for snaping panel
-//   VelocityTracker? _velocityTracker;
+  // RenderObject.layout() will only short-circuit its call to its performLayout
+  // method if the new layout constraints are not == to the current constraints.
+  // If the height of the bottom widgets has changed, even though the constraints'
+  // min and max values have not, we still want performLayout to happen.
+  @override
+  bool operator ==(Object other) {
+    if (super != other) {
+      return false;
+    }
+    return other is _BodyBoxConstraints &&
+        other.bottomWidgetsHeight == bottomWidgetsHeight;
+  }
 
-//   // Initial position of pointer
-//   var _pointerInitialPosition = Offset.zero;
+  @override
+  int get hashCode => Object.hash(
+        super.hashCode,
+        bottomWidgetsHeight,
+      );
+}
 
-//   // true, if panel can be scrolled to bottom
-//   var _scrollToBottom = false;
+// Used when Scaffold.extendBody is true to wrap the scaffold's body in a MediaQuery
+// whose padding accounts for the height of the bottomNavigationBar and/or the
+// persistentFooterButtons.
+//
+// The bottom widgets' height is passed along via the _BodyBoxConstraints parameter.
+// The constraints parameter is constructed in_ScaffoldLayout.performLayout().
+class _BodyBuilder extends StatelessWidget {
+  const _BodyBuilder({
+    required this.body,
+  });
 
-//   // true, if panel can be scrolled to top
-//   var _scrollToTop = false;
+  final Widget body;
 
-//   // Initial position of pointer before scrolling panel to min height.
-//   var _pointerPositionBeforeScroll = Offset.zero;
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bodyConstraints = constraints as _BodyBoxConstraints;
+        final metrics = MediaQuery.of(context);
 
-//   // true, if pointer is above halfway of the screen, false otherwise.
-//   bool get _aboveHalfWay =>
-//       _panelController.value.factor > (_setting.snapingPoint);
+        final bottom = math.max(
+          metrics.padding.bottom,
+          bodyConstraints.bottomWidgetsHeight,
+        );
+
+        // print(bottom);
+
+        return MediaQuery(
+          data: metrics.copyWith(
+            padding: metrics.padding.copyWith(bottom: bottom),
+          ),
+          child: body,
+        );
+      },
+    );
+  }
+}
+
+// =============================================================================
+
+class _ScaffoldLayout extends MultiChildLayoutDelegate {
+  _ScaffoldLayout({required this.progress});
+
+  final double progress;
+
+  @override
+  void performLayout(Size size) {
+    // log('progress => $progress');
+    final looseConstraints = BoxConstraints.loose(size);
+    final fullWidthConstraints = looseConstraints.tighten(width: size.width);
+
+    final hasBottomSheet = hasChild('SimpleSheet.sheet');
+
+    final bottomWidgetsHeight =
+        hasBottomSheet ? size.height * progress.clamp(0.0, 0.45) : 0.0;
+
+    if (hasChild('SimpleSheet.body')) {
+      layoutChild(
+        'SimpleSheet.body',
+        _BodyBoxConstraints(
+          maxHeight: size.height - bottomWidgetsHeight,
+          maxWidth: fullWidthConstraints.maxWidth,
+          bottomWidgetsHeight: bottomWidgetsHeight,
+        ),
+      );
+      positionChild('SimpleSheet.body', Offset.zero);
+    }
+
+    // log('$progress');
+
+    if (hasBottomSheet) {
+      layoutChild('SimpleSheet.sheet', fullWidthConstraints);
+      positionChild(
+        'SimpleSheet.sheet',
+        Offset(0, size.height - size.height * progress),
+      );
+    }
+  }
+
+  @override
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
+    return true;
+  }
+}
+
+// =============================================================================
+
+class _DismissSheetAction extends DismissAction {
+  _DismissSheetAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  bool isEnabled(DismissIntent intent) {
+    return SimpleSheet.of(context).isSheetOpen;
+  }
+
+  @override
+  void invoke(DismissIntent intent) {
+    // SimpleSheetScaffold.of(context).closeSheet();
+  }
+}
+
+// =============================================================================
+
+// ///
+// /// The [startingPoint] and [curve] arguments must not be null.
+// class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
+//   /// Creates a suspended curve.
+//   const _BottomSheetSuspendedCurve(
+//     this.startingPoint, {
+//     this.curve = Curves.easeOutCubic,
+//   });
+
+//   /// The progress value at which [curve] should begin.
+//   ///
+//   /// This defaults to [Curves.easeOutCubic].
+//   final double startingPoint;
+
+//   /// The curve to use when [startingPoint] is reached.
+//   final Curve curve;
+
+//   @override
+//   double transform(double t) {
+//     assert(t >= 0.0 && t <= 1.0, '');
+//     assert(startingPoint >= 0.0 && startingPoint <= 1.0, '');
+
+//     if (t < startingPoint) {
+//       return t;
+//     }
+
+//     if (t == 1.0) {
+//       return t;
+//     }
+
+//     final curveProgress = (t - startingPoint) / (1 - startingPoint);
+//     final transformed = curve.transform(curveProgress);
+//     return lerpDouble(startingPoint, 1, transformed)!;
+//   }
+
+//   @override
+//   String toString() {
+//     return '${describeIdentity(this)}($startingPoint, $curve)';
+//   }
+// }
+
+// class _StandardBottomSheet extends StatefulWidget {
+//   const _StandardBottomSheet({
+//     required this.animationController,
+//     required this.onClosing,
+//     required this.onDismissed,
+//     required this.builder,
+//     this.enableDrag = true,
+//     this.backgroundColor,
+//     this.elevation,
+//     this.shape,
+//     this.clipBehavior,
+//     this.constraints,
+//     this.onDispose,
+//     super.key,
+//   });
+
+//   final AnimationController
+//       animationController; // we control it, but it must be disposed by whoever created it.
+//   final bool enableDrag;
+//   final VoidCallback? onClosing;
+//   final VoidCallback? onDismissed;
+//   final VoidCallback? onDispose;
+//   final DragWidgetBuilder builder;
+//   final Color? backgroundColor;
+//   final double? elevation;
+//   final ShapeBorder? shape;
+//   final Clip? clipBehavior;
+//   final BoxConstraints? constraints;
+
+//   @override
+//   _StandardBottomSheetState createState() => _StandardBottomSheetState();
+// }
+
+// class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+//   // ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     _setting = widget.setting ?? const SimpleSheetSeeting();
-//     // Initialization of panel controller
-//     _panelController = (widget.controller ?? SimpleSheetController())
-//       .._init(this);
-//     _scrollController = _panelController.scrollController
-//       ..addListener(() {
-//         if ((_scrollToTop || _scrollToBottom) && _scrollController.hasClients) {
-//           _scrollController.position.hold(() {});
-//         }
-//       });
-//     _animationController = AnimationController(
-//       vsync: this,
-//       duration: const Duration(milliseconds: 400),
-//     )..addListener(() {
-//         _panelController.attach(
-//           SimpleSheetValue(
-//             factor: _animationController.value,
-//             state: _aboveHalfWay ? SimpleSheetState.max : SimpleSheetState.min,
-//           ),
-//         );
-//       });
-//   }
-
-//   void _onPointerDown(PointerDownEvent event) {
-//     _pointerInitialPosition = event.position;
-//     _velocityTracker ??= VelocityTracker.withKind(event.kind);
-//   }
-
-//   void _onPointerMove(PointerMoveEvent event) {
-//     if (!_panelController.isGestureEnabled) return;
-
-//     if (_animationController.isAnimating) return;
-
-//     if (!_shouldScroll(event.position.dy)) return;
-
-//     _velocityTracker!.addPosition(event.timeStamp, event.position);
-
-//     final state = _pointerInitialPosition.dy - event.position.dy < 0.0
-//         ? SimpleSheetState.slidingDown
-//         : SimpleSheetState.slidingUp;
-//     final panelState = _panelController.value.state;
-//     final mediaQuery = MediaQuery.of(context);
-
-//     if (!_scrollToTop &&
-//         panelState == SimpleSheetState.min &&
-//         state == SimpleSheetState.slidingUp) {
-//       final pointerReachedHandler =
-//           (mediaQuery.size.height - event.position.dy) > _panelMinHeight;
-//       _scrollToTop = pointerReachedHandler;
-//     }
-
-//     if (!_scrollToBottom &&
-//         panelState == SimpleSheetState.max &&
-//         state == SimpleSheetState.slidingDown) {
-//       final isControllerOffsetZero =
-//           _scrollController.hasClients && _scrollController.offset == 0.0;
-
-//       final headerMinPosition = _size.height - _panelMaxHeight;
-//       final headerMaxPosition = headerMinPosition + _setting.headerHeight;
-//       final isHandler = event.position.dy >= headerMinPosition &&
-//           event.position.dy <= headerMaxPosition;
-//       _scrollToBottom = isHandler || isControllerOffsetZero;
-//       if (_scrollToBottom) {
-//         _pointerPositionBeforeScroll = event.position;
-//       }
-//     }
-
-//     if (_scrollToTop || _scrollToBottom) {
-//       final startingPX = event.position.dy -
-//           (_scrollToTop
-//               ? _setting.thumbHandlerHeight
-//               : _pointerPositionBeforeScroll.dy);
-//       final num remainingPX =
-//           (_remainingSpace - startingPX).clamp(0.0, _remainingSpace);
-
-//       final num factor = (remainingPX / _remainingSpace).clamp(0.0, 1.0);
-//       _slidePanelWithPosition(factor as double, state);
-//     }
-//   }
-
-//   void _onPointerUp(PointerUpEvent event) {
-//     if (!_panelController.isGestureEnabled) return;
-
-//     if (_animationController.isAnimating) return;
-
-//     if (!_shouldScroll(event.position.dy)) return;
-
-//     final velocity = _velocityTracker!.getVelocity();
-
-//     if (_scrollToTop || _scrollToBottom) {
-//       // +ve velocity -> top to bottom
-//       // -ve velocity -> bottom to top
-//       final dyVelocity = velocity.pixelsPerSecond.dy;
-//       final flingPanel = dyVelocity.abs() > 800.0;
-//       final endValue = flingPanel
-//           ? (dyVelocity.isNegative ? 1.0 : 0.0)
-//           : (_aboveHalfWay ? 1.0 : 0.0);
-//       _snapToPosition(endValue);
-//     }
-
-//     _scrollToTop = false;
-//     _scrollToBottom = false;
-//     _pointerInitialPosition = Offset.zero;
-//     _pointerPositionBeforeScroll = Offset.zero;
-//     _velocityTracker = null;
-//   }
-
-//   // If pointer is moved by more than 2 px then only begain
-//   bool _shouldScroll(double currentDY) {
-//     return (currentDY.abs() - _pointerInitialPosition.dy.abs()).abs() > 2.0;
-//   }
-
-//   void _slidePanelWithPosition(double factor, SimpleSheetState state) {
-//     _panelController.attach(
-//       SimpleSheetValue(
-//         factor: factor,
-//         state: state,
-//       ),
+//     assert(
+//       widget.animationController.status == AnimationStatus.forward ||
+//           widget.animationController.status == AnimationStatus.completed,
+//       '',
 //     );
+//     widget.animationController.addStatusListener(_handleStatusChange);
 //   }
 
-//   void _snapToPosition(double endValue, {double? startValue}) {
-//     final Simulation simulation = SpringSimulation(
-//       SpringDescription.withDampingRatio(
-//         mass: 1,
-//         stiffness: 600,
-//         ratio: 1.1,
-//       ),
-//       startValue ?? _panelController.value.factor,
-//       endValue,
-//       0,
-//     );
-//     _animationController.animateWith(simulation);
+//   @override
+//   void dispose() {
+//     widget.onDispose?.call();
+//     super.dispose();
+//   }
+
+//   @override
+//   void didUpdateWidget(_StandardBottomSheet oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     assert(widget.animationController == oldWidget.animationController, '');
+//   }
+
+//   // void close() {
+//   //   // Fully open
+//   //   if (widget.animationController.value > 0.45) {
+//   //     widget.animationController.animateTo(0.45);
+//   //   } else {
+//   //     widget.animationController.reverse();
+//   //   }
+//   //   widget.onClosing?.call();
+//   // }
+
+//   // void _handleDragStart(DragStartDetails details) {
+//   // Allow the bottom sheet to track the user's finger accurately.
+//   // animationCurve = Curves.linear;
+//   // }
+
+//   // void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
+//   // Allow the bottom sheet to animate smoothly from its current position.
+//   // animationCurve = _BottomSheetSuspendedCurve(
+//   //   widget.animationController.value,
+//   //   curve: _standardBottomSheetCurve,
+//   // );
+//   // }
+
+//   void _handleStatusChange(AnimationStatus status) {
+//     if (status == AnimationStatus.dismissed) {
+//       widget.onDismissed?.call();
+//     }
 //   }
 
 //   @override
 //   Widget build(BuildContext context) {
-//     return LayoutBuilder(
-//       builder: (context, constraints) {
-//         final mediaQuery = MediaQuery.of(context);
-
-//         _size = constraints.biggest;
-//         _panelMaxHeight =
-//             _setting.maxHeight ?? _size.height - mediaQuery.padding.top;
-//         _panelMinHeight = _setting.minHeight ?? _panelMaxHeight * 0.37;
-//         _remainingSpace = _panelMaxHeight - _panelMinHeight;
-
-//         return ValueListenableBuilder<bool>(
-//           valueListenable: _panelController._panelVisibility,
-//           builder: (context, bool isVisible, child) {
-//             return isVisible ? child! : const SizedBox();
-//           },
-//           child: Builder(
-//             builder: (context) {
-//               return Column(
-//                 children: [
-//                   // Space between sliding panel and status bar
-//                   const Spacer(),
-
-//                   // Sliding panel
-//                   ValueListenableBuilder(
-//                     valueListenable: _panelController,
-//                     builder: (context, SimpleSheetValue value, child) {
-//                       final height =
-//                           (_panelMinHeight + (_remainingSpace * value.factor))
-//                               .clamp(_panelMinHeight, _panelMaxHeight);
-//                       return SizedBox(height: height, child: child);
-//                     },
-//                     child: Listener(
-//                       onPointerDown: _onPointerDown,
-//                       onPointerMove: _onPointerMove,
-//                       onPointerUp: _onPointerUp,
-//                       child: widget.child ?? const SizedBox(),
-//                     ),
-//                   ),
-
-//                   ///
-//                 ],
-//               );
-//             },
-//           ),
-//         );
-//       },
+//     return DragGesture(
+//       animationController: widget.animationController,
+//       onClosing: widget.onClosing!,
+//       builder: widget.builder,
 //     );
-//   }
-
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     if (widget.controller == null) {
-//       _panelController.dispose();
-//     }
-//     super.dispose();
-//   }
-//   //
-// }
-
-// /// Sliding panel controller
-// class SimpleSheetController extends ValueNotifier<SimpleSheetValue> {
-//   ///
-//   SimpleSheetController({
-//     ScrollController? scrollController,
-//   })  : _scrollController = scrollController ?? ScrollController(),
-//         _panelVisibility = ValueNotifier(false),
-//         super(const SimpleSheetValue());
-
-//   final ScrollController _scrollController;
-//   final ValueNotifier<bool> _panelVisibility;
-
-//   late _SimpleSheetState _state;
-
-//   // ignore: use_setters_to_change_properties
-//   void _init(_SimpleSheetState state) {
-//     _state = state;
-//   }
-
-//   bool _gesture = true;
-//   bool _internal = true;
-
-//   ///
-//   ScrollController get scrollController => _scrollController;
-
-//   ///
-//   ValueNotifier<bool> get panelVisibility => _panelVisibility;
-
-//   /// Current state of the pannel
-//   SimpleSheetState get panelState => value.state;
-
-//   /// If panel is open return true, otherwise false
-//   bool get isVisible => _panelVisibility.value;
-
-//   /// Gestaure status
-//   bool get isGestureEnabled => _gesture;
-
-//   /// Change gesture status
-//   set isGestureEnabled(bool isEnable) {
-//     if (isGestureEnabled && isEnable) return;
-//     _gesture = isEnable;
-//   }
-
-//   ///
-//   /// Open panel to the viewport
-//   ///
-//   void openPanel() {
-//     _internal = true;
-//     if (value.state == SimpleSheetState.min) return;
-//     value = value.copyWith(
-//       state: SimpleSheetState.min,
-//       factor: 0,
-//       offset: 0,
-//       position: Offset.zero,
-//     );
-//     _panelVisibility.value = true;
-//     _gesture = true;
-//     _internal = false;
-//   }
-
-//   ///
-//   /// Maximize panel to its full size
-//   ///
-//   void maximizePanel() {
-//     if (value.state == SimpleSheetState.max) return;
-//     _state._snapToPosition(1);
-//   }
-
-//   /// Minimize panel to its minimum size
-//   void minimizePanel() {
-//     if (value.state == SimpleSheetState.min) return;
-//     _state._snapToPosition(0);
-//   }
-
-//   ///
-//   /// Close Panel from viewport
-//   ///
-//   void closePanel() {
-//     if (!isVisible || value.state == SimpleSheetState.close) return;
-//     _internal = true;
-//     value = value.copyWith(
-//       state: SimpleSheetState.close,
-//       factor: 0,
-//       offset: 0,
-//       position: Offset.zero,
-//     );
-//     _panelVisibility.value = false;
-//     _gesture = false;
-//     _internal = false;
-//   }
-
-//   ///
-//   @internal
-//   void pausePanel() {
-//     _internal = true;
-//     if (value.state == SimpleSheetState.paused) return;
-//     value = value.copyWith(state: SimpleSheetState.paused);
-//     _panelVisibility.value = false;
-//     _internal = false;
-//   }
-
-//   ///
-//   @internal
-//   void attach(SimpleSheetValue sliderValue) {
-//     _internal = true;
-//     value = value.copyWith(
-//       factor: sliderValue.factor,
-//       offset: sliderValue.offset,
-//       position: sliderValue.position,
-//       state: sliderValue.state,
-//     );
-//     _internal = false;
-//   }
-
-//   @override
-//   set value(SimpleSheetValue newValue) {
-//     if (!_internal) return;
-//     super.value = newValue;
-//   }
-
-//   @override
-//   void dispose() {
-//     _panelVisibility.dispose();
-//     _scrollController.dispose();
-//     super.dispose();
-//   }
-
-//   //
-// }
-
-// ///
-// @immutable
-// class SimpleSheetValue {
-//   ///
-//   const SimpleSheetValue({
-//     this.state = SimpleSheetState.close,
-//     this.factor = 0.0,
-//     this.offset = 0.0,
-//     this.position = Offset.zero,
-//   });
-
-//   /// Sliding state
-//   final SimpleSheetState state;
-
-//   /// From 0.0 - 1.0
-//   final double factor;
-
-//   /// Height of the panel
-//   final double offset;
-
-//   /// Position of the panel
-//   final Offset position;
-
-//   ///
-//   SimpleSheetValue copyWith({
-//     SimpleSheetState? state,
-//     double? factor,
-//     double? offset,
-//     Offset? position,
-//   }) {
-//     return SimpleSheetValue(
-//       state: state ?? this.state,
-//       factor: factor ?? this.factor,
-//       offset: offset ?? this.offset,
-//       position: position ?? this.position,
-//     );
-//   }
-
-//   @override
-//   String toString() {
-//     return '''
-//     PanelValue(
-//       state: $state, 
-//       factor: $factor, 
-//       offset: $offset, 
-//       position: $position
-//     )''';
-//   }
-
-//   @override
-//   bool operator ==(Object other) {
-//     if (identical(this, other)) return true;
-
-//     return other is SimpleSheetValue &&
-//         other.state == state &&
-//         other.factor == factor &&
-//         other.offset == offset &&
-//         other.position == position;
-//   }
-
-//   @override
-//   int get hashCode {
-//     return state.hashCode ^
-//         factor.hashCode ^
-//         offset.hashCode ^
-//         position.hashCode;
-//   }
-// }
-
-// /// State of the panel
-// enum SimpleSheetState {
-//   /// Panel is currently sliding up
-//   slidingUp,
-
-//   /// Panel is currently sliding down
-//   slidingDown,
-
-//   /// Panel is at its max size
-//   max,
-
-//   /// Panel is at its min size
-//   min,
-
-//   /// Panel is closed
-//   close,
-
-//   /// Panel is in pause state, where gesture will not work
-//   paused,
-// }
-
-// ///
-// /// Settings for gallery panel
-// @immutable
-// class SimpleSheetSeeting {
-//   ///
-//   const SimpleSheetSeeting({
-//     this.maxHeight,
-//     this.minHeight,
-//     this.headerHeight = kToolbarHeight,
-//     this.thumbHandlerHeight = 25.0,
-//     this.snapingPoint = 0.4,
-//     this.headerBackground = Colors.black,
-//     this.foregroundColor = Colors.black,
-//     this.backgroundColor = Colors.black,
-//     this.overlayStyle = SystemUiOverlayStyle.light,
-//   }) : assert(
-//           snapingPoint >= 0.0 && snapingPoint <= 1.0,
-//           '[snapingPoint] value must be between 1.0 and 0.0',
-//         );
-
-//   /// Margin for panel top. Which can be used to show status bar if you need
-//   /// to show panel above scaffold.
-//   // final double? topMargin;
-
-//   /// Panel maximum height
-//   ///
-//   /// mediaQuery = MediaQuery.of(context)
-//   /// Default: mediaQuery.size.height -  mediaQuery.padding.top
-//   final double? maxHeight;
-
-//   /// Panel minimum height
-//   /// Default: 37% of [maxHeight]
-//   final double? minHeight;
-
-//   /// Panel header height
-//   ///
-//   /// Default:  [kToolbarHeight]
-//   final double headerHeight;
-
-//   /// Panel thumb handler height, which will be used to drag the panel
-//   ///
-//   /// Default: 25.0 px
-//   final double thumbHandlerHeight;
-
-//   /// Point from where panel will start fling animation to snap it's height
-//   /// to [minHeight] or [maxHeight]
-//   /// Value must be between 0.0 - 1.0
-//   /// Default: 0.4
-//   final double snapingPoint;
-
-//   /// Background color for panel header,
-//   /// Default: [Colors.black]
-//   final Color headerBackground;
-
-//   /// Background color for panel,
-//   /// Default: [Colors.black]
-//   final Color foregroundColor;
-
-//   /// If [headerBackground] is missing [backgroundColor] will be applied
-//   /// If [foregroundColor] is missing [backgroundColor] will be applied
-//   ///
-//   /// Default: [Colors.black]
-//   final Color backgroundColor;
-
-//   ///
-//   final SystemUiOverlayStyle overlayStyle;
-
-//   /// Header max height
-//   double get headerMaxHeight => thumbHandlerHeight + headerHeight;
-
-//   /// Helper function
-//   SimpleSheetSeeting copyWith({
-//     double? maxHeight,
-//     double? minHeight,
-//     double? headerHeight,
-//     double? thumbHandlerHeight,
-//     double? snapingPoint,
-//     Color? headerBackground,
-//     Color? foregroundColor,
-//     Color? backgroundColor,
-//     SystemUiOverlayStyle? overlayStyle,
-//   }) {
-//     return SimpleSheetSeeting(
-//       maxHeight: maxHeight ?? this.maxHeight,
-//       minHeight: minHeight ?? this.minHeight,
-//       headerHeight: headerHeight ?? this.headerHeight,
-//       thumbHandlerHeight: thumbHandlerHeight ?? this.thumbHandlerHeight,
-//       snapingPoint: snapingPoint ?? this.snapingPoint,
-//       headerBackground: headerBackground ?? this.headerBackground,
-//       foregroundColor: foregroundColor ?? this.foregroundColor,
-//       backgroundColor: backgroundColor ?? this.backgroundColor,
-//       overlayStyle: overlayStyle ?? this.overlayStyle,
-//     );
-//   }
-
-//   @override
-//   String toString() {
-//     return '''
-//     PanelSetting(
-//       maxHeight: $maxHeight, 
-//       minHeight: $minHeight, 
-//       headerHeight: $headerHeight, 
-//       thumbHandlerHeight: $thumbHandlerHeight, 
-//       snapingPoint: $snapingPoint, 
-//       headerBackground: $headerBackground, 
-//       foregroundColor: $foregroundColor, 
-//       backgroundColor: $backgroundColor, 
-//       overlayStyle: $overlayStyle
-//     )''';
-//   }
-
-//   @override
-//   bool operator ==(Object other) {
-//     if (identical(this, other)) return true;
-
-//     return other is SimpleSheetSeeting &&
-//         other.maxHeight == maxHeight &&
-//         other.minHeight == minHeight &&
-//         other.headerHeight == headerHeight &&
-//         other.thumbHandlerHeight == thumbHandlerHeight &&
-//         other.snapingPoint == snapingPoint &&
-//         other.headerBackground == headerBackground &&
-//         other.foregroundColor == foregroundColor &&
-//         other.backgroundColor == backgroundColor &&
-//         other.overlayStyle == overlayStyle;
-//   }
-
-//   @override
-//   int get hashCode {
-//     return maxHeight.hashCode ^
-//         minHeight.hashCode ^
-//         headerHeight.hashCode ^
-//         thumbHandlerHeight.hashCode ^
-//         snapingPoint.hashCode ^
-//         headerBackground.hashCode ^
-//         foregroundColor.hashCode ^
-//         backgroundColor.hashCode ^
-//         overlayStyle.hashCode;
+//     // return AnimatedBuilder(
+//     //   animation: widget.animationController,
+//     //   builder: (BuildContext context, Widget? child) {
+//     //     return Align(
+//     //       alignment: AlignmentDirectional.topStart,
+//     //       heightFactor:
+//     //           animationCurve.transform(widget.animationController.value),
+//     //       child: child,
+//     //     );
+//     //   },
+//     //   child: Semantics(
+//     //     container: true,
+//     //     // onDismiss: !widget.isPersistent ? close : null,
+//     //     onDismiss: close,
+//     //     child: NotificationListener<DraggableScrollableNotification>(
+//     //       onNotification: extentChanged,
+//     //       child: BottomSheet(
+//     //         animationController: widget.animationController,
+//     //         enableDrag: widget.enableDrag,
+//     //         onDragStart: _handleDragStart,
+//     //         onDragEnd: _handleDragEnd,
+//     //         onClosing: widget.onClosing!,
+//     //         builder: widget.builder,
+//     //         backgroundColor: widget.backgroundColor,
+//     //         elevation: widget.elevation,
+//     //         shape: widget.shape,
+//     //         clipBehavior: widget.clipBehavior,
+//     //         constraints: widget.constraints,
+//     //       ),
+//     //     ),
+//     //   ),
+//     // );
 //   }
 // }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:simple_sheet/simple_sheet.dart';
 
@@ -31,55 +33,106 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _key = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.cyan,
+      body: SimpleDraggable(
+        builder: (context, controller) {
+          return Container(
+            color: Colors.green.withOpacity(0.7),
+            alignment: Alignment.center,
+            child: TextButton(
+              onPressed: () {
+                log('Pressed');
+              },
+              child: const Text('Click Me'),
+            ),
+
+            // child: ListView.builder(
+            //   controller: controller,
+            //   itemBuilder: (context, index) => Container(
+            //     color: Colors.amber,
+            //     height: 100,
+            //     child: Text('$index'),
+            //   ),
+            // ),
+          );
+        },
+      ),
+
+//
+      // body: DraggableScrollableSheet(
+      //   snap: true,
+      //   // expand: false,
+      //   // minChildSize: 0.1,
+      //   // initialChildSize: 0.1,
+      //   // snapSizes: const [0.3, 0.5],
+      //   builder: (context, controller) {
+      //     return ListView.builder(
+      //       controller: controller,
+      //       itemBuilder: (context, index) => Container(
+      //         color: Colors.amber,
+      //         height: 100,
+      //         child: Text('$index'),
+      //       ),
+      //     );
+      //   },
+      // ),
+    );
     return SimpleSheet(
       body: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.cyan,
         body: Builder(builder: (context) {
           return Container(
             color: Colors.green.withOpacity(0.4),
             alignment: Alignment.center,
-            child: TextButton(
-              onPressed: () {
-                SimpleSheet.of(context).show((context, controller) {
-                  // return Container(color: Colors.amber);
-                  return Container(
-                    // alignment: Alignment
-                    //     .topCenter, // TODO remove alignment and see the size issue
-                    // child: TextButton(
-                    //   onPressed: Navigator.of(context).pop,
-                    //   child: const Text('Close'),
-                    // ),
-                    color: Colors.white,
-                    child: ListView.builder(
-                      controller: controller,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          color: Colors.amber,
-                          margin: const EdgeInsets.all(2),
-                          padding: const EdgeInsets.all(16),
-                          child: Text('$index'),
-                        );
-                      },
-                    ),
-                  );
-                });
-                // Scaffold.of(context).showBottomSheet(
-                //   (context) {
-                //     return Container(color: Colors.amber);
-                //     // return ListView.builder(
-                //     //   itemBuilder: (context, index) => SizedBox(
-                //     //     height: 100,
-                //     //     child: Text('$index'),
-                //     //   ),
-                //     // );
-                //   },
-                //   enableDrag: true,
-                // );
+            child: SimpleDraggable(
+              builder: (context, scrollController) {
+                return Container(color: Colors.amber);
               },
-              child: const Text('Open'),
             ),
+            // child: TextButton(
+            //   onPressed: () {
+            //     SimpleSheet.of(context).show((context, controller) {
+            //       // return Container(color: Colors.amber);
+            //       return Container(
+            //         // alignment: Alignment
+            //         //     .topCenter, // TODO remove alignment and see the size issue
+            //         // child: TextButton(
+            //         //   onPressed: Navigator.of(context).pop,
+            //         //   child: const Text('Close'),
+            //         // ),
+            //         color: Colors.white,
+            //         child: ListView.builder(
+            //           controller: controller,
+            //           itemBuilder: (context, index) {
+            //             return Container(
+            //               color: Colors.amber,
+            //               margin: const EdgeInsets.all(2),
+            //               padding: const EdgeInsets.all(16),
+            //               child: Text('$index'),
+            //             );
+            //           },
+            //         ),
+            //       );
+            //     });
+            //     // Scaffold.of(context).showBottomSheet(
+            //     //   (context) {
+            //     //     return Container(color: Colors.amber);
+            //     //     // return ListView.builder(
+            //     //     //   itemBuilder: (context, index) => SizedBox(
+            //     //     //     height: 100,
+            //     //     //     child: Text('$index'),
+            //     //     //   ),
+            //     //     // );
+            //     //   },
+            //     //   enableDrag: true,
+            //     // );
+            //   },
+            //   child: const Text('Open'),
+            // ),
           );
         }),
       ),
@@ -225,185 +278,3 @@ class _TextFieldView extends StatelessWidget {
     );
   }
 }
-
-class MyRoute extends ModalRoute<void> {
-  MyRoute(this.child);
-
-  final Widget child;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return Stack(
-      children: [
-        child,
-      ],
-    );
-    return child;
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    // secondaryAnimation
-    //     .drive(Tween(begin: const Offset(-0.4, 0.0), end: Offset.zero));
-    return SlideTransition(
-      position: animation.drive(
-        Tween(begin: const Offset(0.5, 1), end: const Offset(0.5, 0.0)),
-      ),
-      child: child,
-    );
-  }
-
-  @override
-  Iterable<OverlayEntry> createOverlayEntries() {
-    final entries = super.createOverlayEntries();
-    return [entries.last];
-  }
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 500);
-}
-
-class CustomRoute extends PageRouteBuilder {
-  final Widget page;
-  final double? offset;
-  final GlobalKey key;
-
-  CustomRoute({required this.page, required this.key, this.offset})
-      : super(
-          pageBuilder: (BuildContext context, Animation<double> animation,
-              Animation<double> secondaryAnimation) {
-            return page;
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-          transitionsBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) {
-            double screenHeight = MediaQuery.of(context).size.height;
-            double sheetHeight = offset ?? (screenHeight * 0.45);
-
-            return SlideTransition(
-              position: secondaryAnimation.drive(Tween<Offset>(
-                  begin: Offset.zero, end: const Offset(0.0, -0.5))),
-              child: Stack(
-                children: [
-                  // SlideTransition(
-                  //   position: Tween<Offset>(
-                  //     begin: const Offset(0, 0),
-                  //     end: const Offset(0, -0.45),
-                  //   ).animate(
-                  //     CurvedAnimation(
-                  //       parent: animation,
-                  //       curve: Curves.easeInOut,
-                  //     ),
-                  //   ),
-                  //   // child: key.currentContext?.widget,
-                  //   child: child,
-                  // ),
-                  StatefulBuilder(builder: (context, setState) {
-                    return Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: sheetHeight,
-                      child: GestureDetector(
-                        onVerticalDragUpdate: (DragUpdateDetails details) {
-                          double scrollPosition = details.localPosition.dy;
-                          double scrollPercentage =
-                              (scrollPosition / screenHeight).clamp(0, 1);
-
-                          if (scrollPercentage > 0.5) {
-                            Navigator.pop(context);
-                          } else {
-                            sheetHeight =
-                                (screenHeight * (1 - scrollPercentage));
-                            // Navigator.of(context).markNeedsBuild();
-                            setState(() {});
-                          }
-                        },
-                        onVerticalDragEnd: (DragEndDetails details) {
-                          double scrollVelocity =
-                              details.velocity.pixelsPerSecond.dy;
-
-                          if (scrollVelocity > 0) {
-                            sheetHeight = screenHeight * 0.05;
-                            Navigator.of(context).pop();
-                          } else if (scrollVelocity < 0) {
-                            sheetHeight = screenHeight * 0.55;
-                            setState(() {});
-                            // Navigator.of(context).markNeedsBuild();
-                          }
-                        },
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'This is the content of the bottom sheet',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            );
-          },
-        );
-
-  // static void openBottomSheet(BuildContext context, {double? offset}) {
-  //   Navigator.of(context).push(
-  //     CustomRoute(
-  //       page: Container(),
-  //       offset: offset,
-  //     ),
-  //   );
-  // }
-}
-
-// class ScaleCupertinoPageRoute<T> extends CupertinoPageRoute<T> {
-//   ScaleCupertinoPageRoute({
-//     required super.builder,
-//     super.settings,
-//   });
-
-//   @override
-//   Widget buildPage(BuildContext context, Animation<double> animation,
-//       Animation<double> secondaryAnimation) {
-//     final Widget child = builder(context);
-
-//     return ScaleTransition(
-//       scale: secondaryAnimation.drive(Tween<double>(begin: 1.0, end: 0.8)),
-//       child: FadeTransition(
-//         opacity: secondaryAnimation.drive(Tween<double>(begin: 1.0, end: 0.8)),
-//         child: child,
-//       ),
-//     );
-//   }
-// }
