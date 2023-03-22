@@ -39,6 +39,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.cyan,
       body: SimpleDraggable(
+        setting: const SDraggableSetting(
+          initialPoint: SPoint(offset: 0.45),
+        ),
         builder: (context, controller) {
           return Container(
             color: Colors.green.withOpacity(0.7),
@@ -81,166 +84,167 @@ class _MyHomePageState extends State<MyHomePage> {
       //   },
       // ),
     );
-    return SimpleSheet(
-      body: Scaffold(
-        backgroundColor: Colors.cyan,
-        body: Builder(builder: (context) {
-          return Container(
-            color: Colors.green.withOpacity(0.4),
-            alignment: Alignment.center,
-            child: SimpleDraggable(
-              builder: (context, scrollController) {
-                return Container(color: Colors.amber);
-              },
-            ),
-            // child: TextButton(
-            //   onPressed: () {
-            //     SimpleSheet.of(context).show((context, controller) {
-            //       // return Container(color: Colors.amber);
-            //       return Container(
-            //         // alignment: Alignment
-            //         //     .topCenter, // TODO remove alignment and see the size issue
-            //         // child: TextButton(
-            //         //   onPressed: Navigator.of(context).pop,
-            //         //   child: const Text('Close'),
-            //         // ),
-            //         color: Colors.white,
-            //         child: ListView.builder(
-            //           controller: controller,
-            //           itemBuilder: (context, index) {
-            //             return Container(
-            //               color: Colors.amber,
-            //               margin: const EdgeInsets.all(2),
-            //               padding: const EdgeInsets.all(16),
-            //               child: Text('$index'),
-            //             );
-            //           },
-            //         ),
-            //       );
-            //     });
-            //     // Scaffold.of(context).showBottomSheet(
-            //     //   (context) {
-            //     //     return Container(color: Colors.amber);
-            //     //     // return ListView.builder(
-            //     //     //   itemBuilder: (context, index) => SizedBox(
-            //     //     //     height: 100,
-            //     //     //     child: Text('$index'),
-            //     //     //   ),
-            //     //     // );
-            //     //   },
-            //     //   enableDrag: true,
-            //     // );
-            //   },
-            //   child: const Text('Open'),
-            // ),
-          );
-        }),
-      ),
-      // child: Scaffold(
-      //   key: _key,
-      //   appBar: AppBar(title: Text(widget.title)),
-      //   body: Center(
-      //     child: Column(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: <Widget>[
-      //         const SizedBox(height: 8),
 
-      //         // Textfield
-      //         Container(
-      //           padding: const EdgeInsets.all(8),
-      //           decoration: BoxDecoration(
-      //             color: Colors.white,
-      //             boxShadow: [
-      //               BoxShadow(
-      //                 color: Colors.grey.shade200,
-      //                 spreadRadius: 2,
-      //                 blurRadius: 10,
-      //               ),
-      //             ],
-      //           ),
-      //           child: Row(
-      //             children: [
-      //               // Textfield
-      //               Expanded(child: _TextFieldView(onChanged: (value) {})),
+    // return SimpleSheet(
+    //   body: Scaffold(
+    //     backgroundColor: Colors.cyan,
+    //     body: Builder(builder: (context) {
+    //       return Container(
+    //         color: Colors.green.withOpacity(0.4),
+    //         alignment: Alignment.center,
+    //         child: SimpleDraggable(
+    //           builder: (context, scrollController) {
+    //             return Container(color: Colors.amber);
+    //           },
+    //         ),
+    //         // child: TextButton(
+    //         //   onPressed: () {
+    //         //     SimpleSheet.of(context).show((context, controller) {
+    //         //       // return Container(color: Colors.amber);
+    //         //       return Container(
+    //         //         // alignment: Alignment
+    //         //         //     .topCenter, // TODO remove alignment and see the size issue
+    //         //         // child: TextButton(
+    //         //         //   onPressed: Navigator.of(context).pop,
+    //         //         //   child: const Text('Close'),
+    //         //         // ),
+    //         //         color: Colors.white,
+    //         //         child: ListView.builder(
+    //         //           controller: controller,
+    //         //           itemBuilder: (context, index) {
+    //         //             return Container(
+    //         //               color: Colors.amber,
+    //         //               margin: const EdgeInsets.all(2),
+    //         //               padding: const EdgeInsets.all(16),
+    //         //               child: Text('$index'),
+    //         //             );
+    //         //           },
+    //         //         ),
+    //         //       );
+    //         //     });
+    //         //     // Scaffold.of(context).showBottomSheet(
+    //         //     //   (context) {
+    //         //     //     return Container(color: Colors.amber);
+    //         //     //     // return ListView.builder(
+    //         //     //     //   itemBuilder: (context, index) => SizedBox(
+    //         //     //     //     height: 100,
+    //         //     //     //     child: Text('$index'),
+    //         //     //     //   ),
+    //         //     //     // );
+    //         //     //   },
+    //         //     //   enableDrag: true,
+    //         //     // );
+    //         //   },
+    //         //   child: const Text('Open'),
+    //         // ),
+    //       );
+    //     }),
+    //   ),
+    //   // child: Scaffold(
+    //   //   key: _key,
+    //   //   appBar: AppBar(title: Text(widget.title)),
+    //   //   body: Center(
+    //   //     child: Column(
+    //   //       mainAxisAlignment: MainAxisAlignment.center,
+    //   //       children: <Widget>[
+    //   //         const SizedBox(height: 8),
 
-      //               // Gallery field
-      //               IconButton(
-      //                 onPressed: () {
-      //                   Widget builder(BuildContext context) {
-      //                     return Scaffold(
-      //                       backgroundColor: Colors.transparent,
-      //                       body: Container(
-      //                         margin: const EdgeInsets.all(64),
-      //                         decoration:
-      //                             const BoxDecoration(color: Colors.amber),
-      //                         child: Center(
-      //                           child: IconButton(
-      //                             onPressed: Navigator.of(context).pop,
-      //                             icon: const Icon(Icons.close),
-      //                           ),
-      //                         ),
-      //                       ),
-      //                     );
-      //                   }
+    //   //         // Textfield
+    //   //         Container(
+    //   //           padding: const EdgeInsets.all(8),
+    //   //           decoration: BoxDecoration(
+    //   //             color: Colors.white,
+    //   //             boxShadow: [
+    //   //               BoxShadow(
+    //   //                 color: Colors.grey.shade200,
+    //   //                 spreadRadius: 2,
+    //   //                 blurRadius: 10,
+    //   //               ),
+    //   //             ],
+    //   //           ),
+    //   //           child: Row(
+    //   //             children: [
+    //   //               // Textfield
+    //   //               Expanded(child: _TextFieldView(onChanged: (value) {})),
 
-      //                   // showDialog(
-      //                   //   context: context,
-      //                   //   builder: (context) => const Text(''),
-      //                   // );
+    //   //               // Gallery field
+    //   //               IconButton(
+    //   //                 onPressed: () {
+    //   //                   Widget builder(BuildContext context) {
+    //   //                     return Scaffold(
+    //   //                       backgroundColor: Colors.transparent,
+    //   //                       body: Container(
+    //   //                         margin: const EdgeInsets.all(64),
+    //   //                         decoration:
+    //   //                             const BoxDecoration(color: Colors.amber),
+    //   //                         child: Center(
+    //   //                           child: IconButton(
+    //   //                             onPressed: Navigator.of(context).pop,
+    //   //                             icon: const Icon(Icons.close),
+    //   //                           ),
+    //   //                         ),
+    //   //                       ),
+    //   //                     );
+    //   //                   }
 
-      //                   // Navigator.of(context)
-      //                   //     .push(CupertinoPageRoute(builder: builder));
+    //   //                   // showDialog(
+    //   //                   //   context: context,
+    //   //                   //   builder: (context) => const Text(''),
+    //   //                   // );
 
-      //                   // Navigator.of(context)
-      //                   //     .push(CupertinoPageRoute(builder: builder));
+    //   //                   // Navigator.of(context)
+    //   //                   //     .push(CupertinoPageRoute(builder: builder));
 
-      //                   // Navigator.of(context).push(
-      //                   //   CustomRoute(
-      //                   //     page: Container(
-      //                   //       decoration: BoxDecoration(
-      //                   //         border: Border.all(),
-      //                   //         color: Colors.amber,
-      //                   //       ),
-      //                   //       child: Center(
-      //                   //         child: TextButton(
-      //                   //           onPressed: () {
-      //                   //             print('lllll');
-      //                   //           },
-      //                   //           child: const Text('Tap Me'),
-      //                   //         ),
-      //                   //       ),
-      //                   //     ),
-      //                   //     key: _key,
-      //                   //   ),
-      //                   // );
+    //   //                   // Navigator.of(context)
+    //   //                   //     .push(CupertinoPageRoute(builder: builder));
 
-      //                   // Navigator.of(context).push(
-      //                   //   MyRoute(
-      //                   //     GestureDetector(
-      //                   //       onTap: Navigator.of(context).pop,
-      //                   //       child: const SizedBox(
-      //                   //         height: 400,
-      //                   //         width: 400,
-      //                   //         child: ColoredBox(color: Colors.red),
-      //                   //       ),
-      //                   //     ),
-      //                   //   ),
-      //                   // );
+    //   //                   // Navigator.of(context).push(
+    //   //                   //   CustomRoute(
+    //   //                   //     page: Container(
+    //   //                   //       decoration: BoxDecoration(
+    //   //                   //         border: Border.all(),
+    //   //                   //         color: Colors.amber,
+    //   //                   //       ),
+    //   //                   //       child: Center(
+    //   //                   //         child: TextButton(
+    //   //                   //           onPressed: () {
+    //   //                   //             print('lllll');
+    //   //                   //           },
+    //   //                   //           child: const Text('Tap Me'),
+    //   //                   //         ),
+    //   //                   //       ),
+    //   //                   //     ),
+    //   //                   //     key: _key,
+    //   //                   //   ),
+    //   //                   // );
 
-      //                   //
-      //                 },
-      //                 icon: const Icon(Icons.open_in_browser),
-      //               ),
+    //   //                   // Navigator.of(context).push(
+    //   //                   //   MyRoute(
+    //   //                   //     GestureDetector(
+    //   //                   //       onTap: Navigator.of(context).pop,
+    //   //                   //       child: const SizedBox(
+    //   //                   //         height: 400,
+    //   //                   //         width: 400,
+    //   //                   //         child: ColoredBox(color: Colors.red),
+    //   //                   //       ),
+    //   //                   //     ),
+    //   //                   //   ),
+    //   //                   // );
 
-      //               //
-      //             ],
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-    );
+    //   //                   //
+    //   //                 },
+    //   //                 icon: const Icon(Icons.open_in_browser),
+    //   //               ),
+
+    //   //               //
+    //   //             ],
+    //   //           ),
+    //   //         ),
+    //   //       ],
+    //   //     ),
+    //   //   ),
+    //   // ),
+    // );
   }
 }
 
