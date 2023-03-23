@@ -32,25 +32,29 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _key = GlobalKey();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.cyan,
+      backgroundColor: Colors.green,
       body: SimpleDraggable(
         setting: const SDraggableSetting(
+          maxPoint: SPoint(offset: 0.9),
           initialPoint: SPoint(offset: 0.45),
+          minPoint: SPoint(offset: 0.2),
+          byPosition: true,
         ),
         builder: (context, controller) {
           return Container(
-            color: Colors.green.withOpacity(0.7),
+            color: Colors.red,
             alignment: Alignment.center,
             child: TextButton(
               onPressed: () {
-                log('Pressed');
+                log('Click Me');
               },
-              child: const Text('Click Me'),
+              child: const Text(
+                'Click Me',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
 
             // child: ListView.builder(

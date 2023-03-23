@@ -75,37 +75,39 @@ class _SimpleDraggableState extends State<SimpleDraggable>
   final _childKey = GlobalKey(debugLabel: 'SimpleDraggable child');
   late SDController _controller;
   late ScrollController _scrollController;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? SDController();
     _scrollController = widget.scrollController ?? ScrollController();
-    _initController();
-    _controller._animationController = AnimationController(
+    _animationController = AnimationController(
       vsync: this,
       value: widget.setting.initialPoint.offset,
     );
+    _initController();
   }
 
   void _initController() {
-    _controller
-      .._childKey = _childKey
-      .._setting = widget.setting
-      .._scrollController = _scrollController
-      .._initialized = true;
+    _controller._init(
+      childKey: _childKey,
+      animationController: _animationController,
+      scrollController: _scrollController,
+      setting: widget.setting,
+    );
   }
 
   @override
   void didUpdateWidget(covariant SimpleDraggable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    var needsSetup = false;
+    var needsUpdate = false;
     if (oldWidget.controller != widget.controller) {
       if (oldWidget.controller == null) {
         _controller.dispose();
       }
       _controller = widget.controller ?? SDController();
-      needsSetup = true;
+      needsUpdate = true;
     }
 
     if (oldWidget.scrollController != widget.scrollController) {
@@ -113,10 +115,14 @@ class _SimpleDraggableState extends State<SimpleDraggable>
         _scrollController.dispose();
       }
       _scrollController = widget.scrollController ?? ScrollController();
-      needsSetup = true;
+      needsUpdate = true;
     }
 
-    if (needsSetup || oldWidget.setting != widget.setting) {
+    if (needsUpdate || oldWidget.setting != widget.setting) {
+      if (oldWidget.setting.initialPoint != widget.setting.initialPoint) {
+        _controller._animationController.value =
+            widget.setting.initialPoint.offset;
+      }
       _initController();
     }
   }
@@ -129,121 +135,79 @@ class _SimpleDraggableState extends State<SimpleDraggable>
     if (widget.scrollController == null) {
       _scrollController.dispose();
     }
+    _animationController.dispose();
     super.dispose();
-  }
-
-  VelocityTracker? _velocityTracker;
-
-  void _onPointerDown(PointerDownEvent event) {
-    _controller._onDown(position: event.localPosition);
-    _velocityTracker ??= VelocityTracker.withKind(event.kind);
-  }
-
-  void _onPointerMove(PointerMoveEvent event) {
-    _controller._move(delta: event.delta, position: event.localPosition);
-    _velocityTracker!.addPosition(event.timeStamp, event.position);
-  }
-
-  void _onPointerUp(PointerUpEvent event) {
-    _controller._settle(
-      velocity: _velocityTracker!.getVelocity(),
-      position: event.localPosition,
-      // onClosing: widget.onClosing,
-    );
-    _velocityTracker = null;
-  }
-
-  ///
-  bool _extentChanged(DraggableScrollableNotification notification) {
-    // if (notification.extent == notification.minExtent) {
-    //   widget.onClosing();
-    // }
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final handler = widget.delegate?.buildHandler(context);
 
-    return KeyedSubtree(
+    return SafeArea(
       key: _childKey,
-      child: Semantics(
-        container: true,
-        onDismiss: _controller.close,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ColoredBox(
-            color: Colors.amber,
-            child: AnimatedBuilder(
-              animation: _controller.animation,
-              builder: (context, child) {
-                if (handler != null) {
-                  return CustomMultiChildLayout(
-                    delegate: _LayoutDelegate(
-                      progress: _controller.animation.value,
-                      setting: widget.setting,
-                    ),
-                    children: [
-                      // Handler
-                      LayoutId(id: _Type.handler, child: handler),
-                      // Body
-                      LayoutId(
-                        id: _Type.body,
-                        child: SizedBox.expand(child: child),
-                      ),
-                      // Scrim
-                      LayoutId(
-                        id: _Type.scrim,
-                        child: Listener(
-                          onPointerDown: _onPointerDown,
-                          onPointerMove: _onPointerMove,
-                          onPointerUp: _onPointerUp,
-                          behavior: HitTestBehavior.translucent,
-                          child: const SizedBox.shrink(),
-                        ),
-                      ),
-                    ],
-                  );
-                }
-
-                // Position based
-                if (widget.setting.byPosition) {
-                  return CustomSingleChildLayout(
-                    delegate: _Layout(progress: _controller.animation.value),
-                    child: SizedBox.expand(child: child),
-                  );
-                }
-
-                // Size based
-                return FractionallySizedBox(
-                  heightFactor: _controller.animation.value,
-                  widthFactor: 1,
-                  alignment: Alignment.bottomCenter,
-                  child: child,
-                );
-              },
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.metrics.axis == Axis.horizontal) {
-                    return true;
-                  }
-                  // While dragging may be we can disable child pointer
-                  return false;
-                },
-                child: NotificationListener<DraggableScrollableNotification>(
-                  onNotification: _extentChanged,
-                  child: widget.builder(context, _scrollController),
-                  // child: Listener(
-                  //   onPointerDown: _onPointerDown,
-                  //   onPointerMove: _onPointerMove,
-                  //   onPointerUp: _onPointerUp,
-                  //   behavior: HitTestBehavior.opaque,
-                  //   child: widget.builder(context, scrollController),
-                  // ),
-                ),
+      child: AnimatedBuilder(
+        animation: _controller.animation,
+        builder: (context, child) {
+          if (handler != null) {
+            return CustomMultiChildLayout(
+              delegate: _LayoutDelegate(
+                progress: _controller.animation.value,
+                setting: widget.setting,
               ),
+              children: [
+                // Handler
+                LayoutId(id: _Type.handler, child: handler),
+                // Body
+                LayoutId(
+                  id: _Type.body,
+                  child: SizedBox.expand(child: child),
+                ),
+                // Scrim
+                LayoutId(
+                  id: _Type.scrim,
+                  child: Listener(
+                    onPointerDown: _controller._onPointerDown,
+                    onPointerMove: _controller._onPointerMove,
+                    onPointerUp: _controller._onPointerUp,
+                    behavior: HitTestBehavior.translucent,
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          // Position based
+          if (widget.setting.byPosition) {
+            return CustomSingleChildLayout(
+              delegate: _Layout(progress: _controller.animation.value),
+              child: SizedBox.expand(child: child),
+            );
+          }
+
+          // Size based
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: _controller.animation.value,
+              widthFactor: 1,
+              alignment: Alignment.bottomCenter,
+              child: child,
             ),
-          ),
+          );
+        },
+        child: Semantics(
+          container: true,
+          onDismiss: _controller.close,
+          child: handler != null
+              ? widget.builder(context, _scrollController)
+              : Listener(
+                  onPointerDown: _controller._onPointerDown,
+                  onPointerMove: _controller._onPointerMove,
+                  onPointerUp: _controller._onPointerUp,
+                  behavior: HitTestBehavior.translucent,
+                  child: widget.builder(context, _scrollController),
+                ),
         ),
       ),
     );
@@ -280,8 +244,8 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
 
   // Size based layout
   void _sizeBased(Size size) {
-    final max = setting.minPoint.offset;
-    final min = setting.minPoint.offset;
+    final max = setting.maxPoint.offset;
+    final min = setting.snapPoint.offset;
 
     final visibleHeight = size.height * progress;
     final looseConstraints = BoxConstraints.loose(size);
@@ -302,7 +266,7 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
       width: size.width,
       height: visibleHeight -
           _handlerHeight -
-          (handlerSize.height - _handlerHeight) * (1 - remaining),
+          (handlerSize.height - _handlerHeight) * (1 - remaining).clamp(0, 1),
     );
 
     if (hasChild(_Type.body)) {
@@ -316,8 +280,8 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
 
   // Position based layout
   void _positionBased(Size size) {
-    final max = setting.minPoint.offset;
-    final min = setting.minPoint.offset;
+    final max = setting.maxPoint.offset;
+    final min = setting.snapPoint.offset;
     final visibleHeight = size.height * progress;
     final looseConstraints = BoxConstraints.loose(size);
 
@@ -348,7 +312,8 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
           size.height -
               visibleHeight +
               _handlerHeight +
-              (handlerSize.height - _handlerHeight) * (1 - remaining),
+              (handlerSize.height - _handlerHeight) *
+                  (1 - remaining).clamp(0, 1),
         ),
       );
     }
@@ -614,165 +579,35 @@ class SDraggableSetting {
   }
 }
 
-mixin _GestureMixin {
+///
+class SDController extends ChangeNotifier {
+  late GlobalKey<State<StatefulWidget>> _childKey;
   late AnimationController _animationController;
   late ScrollController _scrollController;
   late SDraggableSetting _setting;
-  double get _childHeight;
-
-  double _initialOffset = 0;
-  Offset _initialPosition = Offset.zero;
-
-  SPoint get _maxPoint => _setting.maxPoint;
-  SPoint get _snapPoint => _setting.snapPoint;
-  SPoint get _minPoint => _setting.minPoint;
-  //controller.status == AnimationStatus.reverse;
-  bool get _dismissUnderway => _animationController.isAnimating;
-  bool get isFullyOpen => _initialOffset == _maxPoint.offset;
-  bool get isSnapped => _initialOffset == _snapPoint.offset;
-  bool get isMinimized => _value == _minPoint.offset;
-  // 0.7 => When screen is fully open
-  // midThreshold + 0.2 => When screen is halfway
-  bool get _top =>
-      _value > 0.7 || _value > _snapPoint.offset + _snapPoint.snapThreshold;
-  // Move to center
-  bool get _center =>
-      isFullyOpen && _value < 0.7 ||
-      isSnapped &&
-          _animationController.isBetween(
-            from: -0.15,
-            to: 0.2,
-            offset: _snapPoint.offset,
-          );
-  // Move to bottm, i.e, close
-  bool get _bottom =>
-      _value < _snapPoint.offset - _snapPoint.snapThreshold; //0.15;
-
-  double get _value => _animationController.value;
-  //
-  bool _isScrollInEffect(Offset position) {
-    // +ve position.dy => Pointer is inside the view
-    // -ve position.dy => Pointer is outside the view
-    return _scrollController.hasClients &&
-        _scrollController.position.extentBefore > 0 &&
-        position.dy > 0;
-  }
-
-  ///
-  void _onDown({required Offset position}) {
-    _initialOffset = double.parse(
-      _value.toStringAsFixed(2),
-    );
-    _initialPosition = position;
-  }
-
-  ///
-  void _move({required Offset delta, required Offset position}) {
-    if (_dismissUnderway) return;
-    // if (_isScrollInEffect(position)) return;
-    // _scrollController.jumpTo(_scrollController.offset);
-    // controller.value -= delta.dy / _childHeight;
-
-    final isClosing = _initialPosition.dy - position.dy < 0;
-
-    // If sheet is closing and scrollable content is at top
-    // then can move gesture
-    final canMove = _scrollController.hasClients
-        ? isClosing && _scrollController.position.extentBefore <= 0
-        : isClosing;
-
-    late final canMoveFromTop = isFullyOpen && canMove;
-    // -ve Local position means pointer reached outside of the view,
-    late final crossHandler = position.dy < 0;
-    late final canMoveFromMid =
-        _initialOffset == _snapPoint.offset && (crossHandler || canMove);
-
-    if (canMoveFromTop || canMoveFromMid) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.offset);
-      }
-      _animationController.value -= delta.dy / _childHeight;
-    }
-  }
-
-  ///
-  void _settle({
-    required Velocity velocity,
-    required Offset position,
-    VoidCallback? onClosing,
-  }) {
-    if (_dismissUnderway) return;
-
-    var isClosing = false;
-
-    // Fling movement
-    if (velocity.pixelsPerSecond.dy.abs() > _minFlingVelocity) {
-      // If scroll is in effect can't fling the sheet
-      if (_isScrollInEffect(position)) return;
-
-      final flingVelocity = -velocity.pixelsPerSecond.dy / _childHeight;
-
-      // -ve flingVelocity => close, +ve flingVelocity => open
-      if (flingVelocity < 0.0) {
-        isClosing = true;
-      }
-
-      _snapToPosition(
-        isFullyOpen && isClosing
-            ? _snapPoint.offset
-            : isClosing
-                ? _minPoint.offset
-                : _maxPoint.offset,
-      );
-    } else {
-      final target = _targetPosition();
-      if (target != null) {
-        isClosing = target == 0;
-        _snapToPosition(target);
-      }
-    }
-
-    if (isClosing && onClosing != null) {
-      onClosing();
-    }
-  }
-
-  double? _targetPosition() {
-    if (_top) return _maxPoint.offset;
-    if (_center) return _snapPoint.offset;
-    if (_bottom) return _minPoint.offset;
-    return null;
-  }
-
-  void _snapToPosition(double endValue, {double? startValue}) {
-    final Simulation simulation = SpringSimulation(
-      SpringDescription.withDampingRatio(
-        mass: 1,
-        stiffness: 600,
-        ratio: 1.1,
-      ),
-      startValue ?? _value,
-      endValue,
-      0,
-    );
-    _animationController.animateWith(simulation);
-  }
-
-  void _close() {
-    _snapToPosition(
-      _initialOffset == _maxPoint.offset ? _snapPoint.offset : _minPoint.offset,
-    );
-  }
-}
-
-///
-class SDController extends ChangeNotifier with _GestureMixin {
-  late GlobalKey<State<StatefulWidget>> _childKey;
+  late SPoint _currentPoint;
 
   var _isDisposed = false;
   bool _initialized = false;
+  SDState _state = SDState.close;
+  VelocityTracker? _velocityTracker;
+  double _initialOffset = 0;
+  Offset _initialPosition = Offset.zero;
 
-  @override
+  void _init({
+    required GlobalKey<State<StatefulWidget>> childKey,
+    required AnimationController animationController,
+    required ScrollController scrollController,
+    required SDraggableSetting setting,
+  }) {
+    _childKey = childKey;
+    _animationController = animationController;
+    _scrollController = scrollController;
+    _setting = setting;
+    _currentPoint = setting.initialPoint;
+    _initialized = true;
+  }
+
   double get _childHeight {
     final renderBox =
         _childKey.currentContext!.findRenderObject()! as RenderBox;
@@ -789,11 +624,187 @@ class SDController extends ChangeNotifier with _GestureMixin {
     return object;
   }
 
+  SPoint get _maxPoint => _setting.maxPoint;
+  SPoint get _snapPoint => _setting.snapPoint;
+  SPoint get _minPoint => _setting.minPoint;
+
+  List<SPoint> get _points => [
+        _setting.minPoint,
+        _setting.snapPoint,
+        _setting.maxPoint,
+      ];
+
+  //controller.status == AnimationStatus.reverse;
+  bool get _dismissUnderway => _animationController.isAnimating;
+  bool get isFullyOpen => _initialOffset == _maxPoint.offset;
+  bool get isSnapped => _initialOffset == _snapPoint.offset;
+  bool get isMinimized => _value == _minPoint.offset;
+
+  // 0.7 => When screen is fully open
+  // midThreshold + 0.2 => When screen is halfway
+  bool get _goToTop =>
+      _value > (_maxPoint.offset - _maxPoint.snapThreshold) ||
+      _value > _snapPoint.offset + _snapPoint.snapThreshold;
+
+  // Move to center
+  bool get _goToCenter =>
+      isFullyOpen && _value < (_maxPoint.offset - _maxPoint.snapThreshold) ||
+      isSnapped &&
+          _animationController.isBetween(
+            from: -_snapPoint.snapThreshold,
+            to: _snapPoint.snapThreshold,
+            offset: _snapPoint.offset,
+          );
+
+  // Move to bottm, i.e, close
+  bool get _goToBottom =>
+      _value < _snapPoint.offset - _snapPoint.snapThreshold; //0.15;
+
+  double get _value => _animationController.value;
+
+  //
+  bool _isScrollInEffect(Offset position) {
+    // +ve position.dy => Pointer is inside the view
+    // -ve position.dy => Pointer is outside the view
+    return _scrollController.hasClients &&
+        _scrollController.position.extentBefore > 0 &&
+        position.dy > 0;
+  }
+
+  ///
+  void _onPointerDown(PointerDownEvent event) {
+    // _initialOffset = double.parse(
+    //   _value.toStringAsFixed(2),
+    // );
+    _initialOffset = _value;
+    _initialPosition = event.localPosition;
+    _velocityTracker ??= VelocityTracker.withKind(event.kind);
+  }
+
+  ///
+  void _onPointerMove(PointerMoveEvent event) {
+    if (_dismissUnderway) return;
+    final position = event.localPosition;
+    final isClosing = _initialPosition.dy - position.dy < 0;
+    _updateState(isClosing ? SDState.slidingDown : SDState.slidingUp);
+
+    // If sheet is closing and scrollable content is at top
+    // then can move gesture
+    final canMove = _scrollController.hasClients
+        ? isClosing && _scrollController.position.extentBefore <= 0
+        : isClosing;
+
+    late final canMoveFromTop = isFullyOpen && canMove;
+    // -ve Local position means pointer reached outside of the view,
+    late final crossHandler = position.dy < 0;
+    late final canMoveFromMid =
+        _initialOffset == _snapPoint.offset && (crossHandler || canMove);
+
+    log('$canMoveFromTop : $canMoveFromMid');
+
+    if (canMoveFromTop || canMoveFromMid) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.offset);
+      }
+      _animationController.value -= event.delta.dy / _childHeight;
+    }
+
+    _velocityTracker!.addPosition(event.timeStamp, event.position);
+  }
+
+  ///
+  void _onPointerUp(PointerUpEvent event) {
+    if (_dismissUnderway) return;
+    final velocity = _velocityTracker!.getVelocity();
+    _velocityTracker = null;
+
+    var isClosing = false;
+
+    // Fling movement
+    if (velocity.pixelsPerSecond.dy.abs() > _minFlingVelocity) {
+      // If scroll is in effect can't fling the sheet
+      if (_isScrollInEffect(event.localPosition)) return;
+
+      final flingVelocity = -velocity.pixelsPerSecond.dy / _childHeight;
+
+      // -ve flingVelocity => close, +ve flingVelocity => open
+      if (flingVelocity < 0.0) {
+        isClosing = true;
+      }
+
+      final point = isFullyOpen && isClosing
+          ? _snapPoint
+          : isClosing
+              ? _minPoint
+              : _maxPoint;
+
+      // _snapToPosition(point.offset);
+      _animateTo(point);
+    } else {
+      final point = _targetPoint();
+      if (point != null) {
+        isClosing = point.offset == 0;
+        // _snapToPosition(point.offset);
+        _animateTo(point);
+      }
+    }
+
+    // if (isClosing && onClosing != null) {
+    //   onClosing();
+    // }
+  }
+
+  SPoint? _targetPoint() {
+    if (_goToTop) return _maxPoint;
+    if (_goToCenter) return _snapPoint;
+    if (_goToBottom) return _minPoint;
+    return null;
+  }
+
+  void _animateTo(SPoint point) {
+    _animationController.animateTo(
+      point.offset,
+      duration: point.duration ?? const Duration(milliseconds: 250),
+      curve: point.curve ?? Curves.decelerate,
+    );
+  }
+
+  void _close() {
+    // _snapToPosition(
+    //   _initialOffset == _maxPoint.offset ?
+    //_snapPoint.offset : _minPoint.offset,
+    // );
+    _animateTo(
+      _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
+    );
+  }
+
+  void _updateState(SDState state) {
+    if (state == _state) return;
+    _state = state;
+    notifyListeners();
+  }
+
+  void _updatePoint(SPoint point) {
+    if (point == _currentPoint) return;
+    _currentPoint = point;
+    notifyListeners();
+  }
+
+  // =========================== PUBLIC API ===========================
+  // ==================================================================
+
+  SDState get state => _state;
+
+  SPoint get point => _currentPoint;
+
   ///
   Animation<double> get animation => _assert(_animationController);
 
   ///
-  void open() {}
+  void open() {
+    _state = SDState.min;
+  }
 
   ///
   void close() => _close();
@@ -814,9 +825,31 @@ class SDController extends ChangeNotifier with _GestureMixin {
   @mustCallSuper
   void dispose() {
     _animationController.dispose();
+    _initialized = false;
     _isDisposed = true;
     super.dispose();
   }
+}
+
+/// State of the panel
+enum SDState {
+  /// Panel is currently sliding up
+  slidingUp,
+
+  /// Panel is currently sliding down
+  slidingDown,
+
+  /// Panel is at its max size
+  max,
+
+  /// Panel is at its min size
+  min,
+
+  /// Panel is closed
+  close,
+
+  /// Panel is in pause state, where gesture will not work
+  paused,
 }
 
 ///
@@ -848,3 +881,180 @@ extension AnimationControllerX on AnimationController {
   }) =>
       value >= (from + offset) && value <= (offset + to);
 }
+
+// mixin _GestureMixin {
+//   late AnimationController _animationController;
+//   late ScrollController _scrollController;
+//   late SDraggableSetting _setting;
+//   double get _childHeight;
+
+//   double _initialOffset = 0;
+//   Offset _initialPosition = Offset.zero;
+
+//   SPoint get _maxPoint => _setting.maxPoint;
+//   SPoint get _snapPoint => _setting.snapPoint;
+//   SPoint get _minPoint => _setting.minPoint;
+
+//   List<SPoint> get _points => [_minPoint, _snapPoint, _maxPoint];
+
+//   //controller.status == AnimationStatus.reverse;
+//   bool get _dismissUnderway => _animationController.isAnimating;
+//   bool get isFullyOpen => _initialOffset == _maxPoint.offset;
+//   bool get isSnapped => _initialOffset == _snapPoint.offset;
+//   bool get isMinimized => _value == _minPoint.offset;
+
+//   // 0.7 => When screen is fully open
+//   // midThreshold + 0.2 => When screen is halfway
+//   bool get _goToTop =>
+//       _value > (_maxPoint.offset - _maxPoint.snapThreshold) ||
+//       _value > _snapPoint.offset + _snapPoint.snapThreshold;
+
+//   // Move to center
+//   bool get _goToCenter =>
+//       isFullyOpen && _value < (_maxPoint.offset - _maxPoint.snapThreshold) ||
+//       isSnapped &&
+//           _animationController.isBetween(
+//             from: -_snapPoint.snapThreshold,
+//             to: _snapPoint.snapThreshold,
+//             offset: _snapPoint.offset,
+//           );
+
+//   // Move to bottm, i.e, close
+//   bool get _goToBottom =>
+//       _value < _snapPoint.offset - _snapPoint.snapThreshold; //0.15;
+
+//   double get _value => _animationController.value;
+
+//   //
+//   bool _isScrollInEffect(Offset position) {
+//     // +ve position.dy => Pointer is inside the view
+//     // -ve position.dy => Pointer is outside the view
+//     return _scrollController.hasClients &&
+//         _scrollController.position.extentBefore > 0 &&
+//         position.dy > 0;
+//   }
+
+//   ///
+//   void _onDown({required Offset position}) {
+//     // _initialOffset = double.parse(
+//     //   _value.toStringAsFixed(2),
+//     // );
+//     log('$_initialOffset');
+//     _initialOffset = _value;
+//     _initialPosition = position;
+//   }
+
+//   VerticalDirection? _direction;
+
+//   ///
+//   void _move({required Offset delta, required Offset position}) {
+//     if (_dismissUnderway) return;
+
+//     final isClosing = _initialPosition.dy - position.dy < 0;
+//     _direction = isClosing ? VerticalDirection.down : VerticalDirection.up;
+
+//     // If sheet is closing and scrollable content is at top
+//     // then can move gesture
+//     final canMove = _scrollController.hasClients
+//         ? isClosing && _scrollController.position.extentBefore <= 0
+//         : isClosing;
+
+//     late final canMoveFromTop = isFullyOpen && canMove;
+//     // -ve Local position means pointer reached outside of the view,
+//     late final crossHandler = position.dy < 0;
+//     late final canMoveFromMid =
+//         _initialOffset == _snapPoint.offset && (crossHandler || canMove);
+
+//     log('$canMoveFromTop : $canMoveFromMid');
+
+//     if (canMoveFromTop || canMoveFromMid) {
+//       if (_scrollController.hasClients) {
+//         _scrollController.jumpTo(_scrollController.offset);
+//       }
+//       _animationController.value -= delta.dy / _childHeight;
+//     }
+//   }
+
+//   ///
+//   void _settle({
+//     required Velocity velocity,
+//     required Offset position,
+//     VoidCallback? onClosing,
+//   }) {
+//     if (_dismissUnderway) return;
+
+//     var isClosing = false;
+
+//     // Fling movement
+//     if (velocity.pixelsPerSecond.dy.abs() > _minFlingVelocity) {
+//       // If scroll is in effect can't fling the sheet
+//       if (_isScrollInEffect(position)) return;
+
+//       final flingVelocity = -velocity.pixelsPerSecond.dy / _childHeight;
+
+//       // -ve flingVelocity => close, +ve flingVelocity => open
+//       if (flingVelocity < 0.0) {
+//         isClosing = true;
+//       }
+
+//       final point = isFullyOpen && isClosing
+//           ? _snapPoint
+//           : isClosing
+//               ? _minPoint
+//               : _maxPoint;
+
+//       // _snapToPosition(point.offset);
+//       _animateTo(point);
+//     } else {
+//       final point = _targetPoint();
+//       if (point != null) {
+//         isClosing = point.offset == 0;
+//         // _snapToPosition(point.offset);
+//         _animateTo(point);
+//       }
+//     }
+
+//     if (isClosing && onClosing != null) {
+//       onClosing();
+//     }
+//   }
+
+//   SPoint? _targetPoint() {
+//     if (_goToTop) return _maxPoint;
+//     if (_goToCenter) return _snapPoint;
+//     if (_goToBottom) return _minPoint;
+//     return null;
+//   }
+
+//   void _animateTo(SPoint point) {
+//     _animationController.animateTo(
+//       point.offset,
+//       duration: point.duration ?? const Duration(milliseconds: 250),
+//       curve: point.curve ?? Curves.decelerate,
+//     );
+//   }
+
+//   void _close() {
+//     // _snapToPosition(
+//     //   _initialOffset == _maxPoint.offset ?
+//     //_snapPoint.offset : _minPoint.offset,
+//     // );
+//     _animateTo(
+//       _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
+//     );
+//   }
+
+//   // void _snapToPosition(double endValue, {double? startValue}) {
+//   //   final Simulation simulation = SpringSimulation(
+//   //     SpringDescription.withDampingRatio(
+//   //       mass: 1,
+//   //       stiffness: 600,
+//   //       ratio: 1.1,
+//   //     ),
+//   //     startValue ?? _value,
+//   //     endValue,
+//   //     0,
+//   //   );
+//   //   _animationController.animateWith(simulation);
+//   // }
+// }
