@@ -15,7 +15,7 @@ typedef DragWidgetBuilder = Widget Function(
 const double _minFlingVelocity = 800;
 // const double _minDragThreshold = 20;
 const _maxPoint = SPoint(offset: 1, snapThreshold: 0.3);
-const _snapPoint = SPoint(offset: 0.45, snapThreshold: 0.2);
+const _snapPoint = SPoint(offset: 0.45);
 const _minPoint = SPoint();
 
 ///
@@ -156,22 +156,21 @@ class _SimpleDraggableState extends State<SimpleDraggable>
               ),
               children: [
                 // Handler
-                LayoutId(id: _Type.handler, child: handler),
+                LayoutId(
+                  id: _Type.handler,
+                  child: Listener(
+                    onPointerDown: _controller._onPointerDown,
+                    onPointerMove: _controller._onHandlerMove,
+                    onPointerUp: _controller._onPointerUp,
+                    behavior: HitTestBehavior.translucent,
+                    child: handler,
+                  ),
+                ),
+
                 // Body
                 LayoutId(
                   id: _Type.body,
                   child: SizedBox.expand(child: child),
-                ),
-                // Scrim
-                LayoutId(
-                  id: _Type.scrim,
-                  child: Listener(
-                    onPointerDown: _controller._onPointerDown,
-                    onPointerMove: _controller._onPointerMove,
-                    onPointerUp: _controller._onPointerUp,
-                    behavior: HitTestBehavior.translucent,
-                    child: const SizedBox.shrink(),
-                  ),
                 ),
               ],
             );
@@ -199,15 +198,18 @@ class _SimpleDraggableState extends State<SimpleDraggable>
         child: Semantics(
           container: true,
           onDismiss: _controller.close,
-          child: handler != null
-              ? widget.builder(context, _scrollController)
-              : Listener(
-                  onPointerDown: _controller._onPointerDown,
-                  onPointerMove: _controller._onPointerMove,
-                  onPointerUp: _controller._onPointerUp,
-                  behavior: HitTestBehavior.translucent,
-                  child: widget.builder(context, _scrollController),
-                ),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              overscroll: false,
+            ),
+            child: Listener(
+              onPointerDown: _controller._onPointerDown,
+              onPointerMove: _controller._onPointerMove,
+              onPointerUp: _controller._onPointerUp,
+              behavior: HitTestBehavior.translucent,
+              child: widget.builder(context, _scrollController),
+            ),
+          ),
         ),
       ),
     );
@@ -229,7 +231,7 @@ class _Layout extends SingleChildLayoutDelegate {
       oldDelegate.progress != progress;
 }
 
-enum _Type { handler, body, scrim }
+enum _Type { handler, body }
 
 class _LayoutDelegate extends MultiChildLayoutDelegate {
   _LayoutDelegate({
@@ -323,14 +325,14 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     // Layout handler and content
     setting.byPosition ? _positionBased(size) : _sizeBased(size);
-    // Layout scrim
-    if (hasChild(_Type.scrim)) {
-      layoutChild(_Type.scrim, BoxConstraints.tight(size));
-      positionChild(
-        _Type.scrim,
-        Offset(0, size.height - size.height * progress),
-      );
-    }
+    // // Layout scrim
+    // if (hasChild(_Type.scrim)) {
+    //   layoutChild(_Type.scrim, BoxConstraints.tight(size));
+    //   positionChild(
+    //     _Type.scrim,
+    //     Offset(0, size.height - size.height * progress),
+    //   );
+    // }
   }
 
   @override
@@ -431,7 +433,7 @@ class _DefaultDelegate extends SimpleDraggableDelegate {
 class SPoint {
   const SPoint({
     this.offset = 0,
-    this.snapThreshold = 0,
+    this.snapThreshold = 0.15,
     this.duration,
     this.curve,
   })  : assert(
@@ -624,42 +626,13 @@ class SDController extends ChangeNotifier {
     return object;
   }
 
-  SPoint get _maxPoint => _setting.maxPoint;
-  SPoint get _snapPoint => _setting.snapPoint;
-  SPoint get _minPoint => _setting.minPoint;
-
   List<SPoint> get _points => [
         _setting.minPoint,
         _setting.snapPoint,
         _setting.maxPoint,
       ];
 
-  //controller.status == AnimationStatus.reverse;
-  bool get _dismissUnderway => _animationController.isAnimating;
-  bool get isFullyOpen => _initialOffset == _maxPoint.offset;
-  bool get isSnapped => _initialOffset == _snapPoint.offset;
-  bool get isMinimized => _value == _minPoint.offset;
-
-  // 0.7 => When screen is fully open
-  // midThreshold + 0.2 => When screen is halfway
-  bool get _goToTop =>
-      _value > (_maxPoint.offset - _maxPoint.snapThreshold) ||
-      _value > _snapPoint.offset + _snapPoint.snapThreshold;
-
-  // Move to center
-  bool get _goToCenter =>
-      isFullyOpen && _value < (_maxPoint.offset - _maxPoint.snapThreshold) ||
-      isSnapped &&
-          _animationController.isBetween(
-            from: -_snapPoint.snapThreshold,
-            to: _snapPoint.snapThreshold,
-            offset: _snapPoint.offset,
-          );
-
-  // Move to bottm, i.e, close
-  bool get _goToBottom =>
-      _value < _snapPoint.offset - _snapPoint.snapThreshold; //0.15;
-
+  bool get _underway => _animationController.isAnimating;
   double get _value => _animationController.value;
 
   //
@@ -673,48 +646,36 @@ class SDController extends ChangeNotifier {
 
   ///
   void _onPointerDown(PointerDownEvent event) {
-    // _initialOffset = double.parse(
-    //   _value.toStringAsFixed(2),
-    // );
     _initialOffset = _value;
     _initialPosition = event.localPosition;
     _velocityTracker ??= VelocityTracker.withKind(event.kind);
   }
 
-  ///
+  void _onHandlerMove(PointerMoveEvent event) {
+    if (_underway) return;
+    _animationController.value -= event.delta.dy / _childHeight;
+    _velocityTracker!.addPosition(event.timeStamp, event.position);
+  }
+
   void _onPointerMove(PointerMoveEvent event) {
-    if (_dismissUnderway) return;
+    if (_underway) return;
     final position = event.localPosition;
-    final isClosing = _initialPosition.dy - position.dy < 0;
-    _updateState(isClosing ? SDState.slidingDown : SDState.slidingUp);
 
-    // If sheet is closing and scrollable content is at top
-    // then can move gesture
-    final canMove = _scrollController.hasClients
-        ? isClosing && _scrollController.position.extentBefore <= 0
-        : isClosing;
-
-    late final canMoveFromTop = isFullyOpen && canMove;
-    // -ve Local position means pointer reached outside of the view,
-    late final crossHandler = position.dy < 0;
-    late final canMoveFromMid =
-        _initialOffset == _snapPoint.offset && (crossHandler || canMove);
-
-    log('$canMoveFromTop : $canMoveFromMid');
-
-    if (canMoveFromTop || canMoveFromMid) {
-      if (_scrollController.hasClients) {
+    if (_isScrollInEffect(position)) {
+      final reachedHandler = position.dy - 20 < 0;
+      if (reachedHandler) {
         _scrollController.jumpTo(_scrollController.offset);
+        _animationController.value -= event.delta.dy / _childHeight;
       }
+    } else {
       _animationController.value -= event.delta.dy / _childHeight;
     }
 
     _velocityTracker!.addPosition(event.timeStamp, event.position);
   }
 
-  ///
   void _onPointerUp(PointerUpEvent event) {
-    if (_dismissUnderway) return;
+    if (_underway) return;
     final velocity = _velocityTracker!.getVelocity();
     _velocityTracker = null;
 
@@ -732,49 +693,28 @@ class SDController extends ChangeNotifier {
         isClosing = true;
       }
 
-      final point = isFullyOpen && isClosing
-          ? _snapPoint
-          : isClosing
-              ? _minPoint
-              : _maxPoint;
-
-      // _snapToPosition(point.offset);
-      _animateTo(point);
-    } else {
-      final point = _targetPoint();
-      if (point != null) {
-        isClosing = point.offset == 0;
-        // _snapToPosition(point.offset);
-        _animateTo(point);
+      late SPoint nextPoint;
+      final index = _points.indexOf(_currentPoint);
+      if (isClosing) {
+        nextPoint = index > 0 ? _points[index - 1] : _currentPoint;
+      } else {
+        nextPoint =
+            index < _points.length - 1 ? _points[index + 1] : _currentPoint;
       }
+      _updatePoint(nextPoint);
+    } else {
+      final nextPoint = _points.firstWhere(
+        (p) =>
+            _value > p.offset - p.snapThreshold &&
+            _value < p.offset + p.snapThreshold,
+        orElse: () => _currentPoint,
+      );
+      _updatePoint(nextPoint);
     }
-
-    // if (isClosing && onClosing != null) {
-    //   onClosing();
-    // }
-  }
-
-  SPoint? _targetPoint() {
-    if (_goToTop) return _maxPoint;
-    if (_goToCenter) return _snapPoint;
-    if (_goToBottom) return _minPoint;
-    return null;
-  }
-
-  void _animateTo(SPoint point) {
-    _animationController.animateTo(
-      point.offset,
-      duration: point.duration ?? const Duration(milliseconds: 250),
-      curve: point.curve ?? Curves.decelerate,
-    );
   }
 
   void _close() {
-    // _snapToPosition(
-    //   _initialOffset == _maxPoint.offset ?
-    //_snapPoint.offset : _minPoint.offset,
-    // );
-    _animateTo(
+    _updatePoint(
       _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
     );
   }
@@ -786,9 +726,17 @@ class SDController extends ChangeNotifier {
   }
 
   void _updatePoint(SPoint point) {
-    if (point == _currentPoint) return;
-    _currentPoint = point;
-    notifyListeners();
+    _animationController
+        .animateTo(
+      point.offset,
+      duration: point.duration ?? const Duration(milliseconds: 250),
+      curve: point.curve ?? Curves.decelerate,
+    )
+        .then((value) {
+      if (point == _currentPoint) return;
+      _currentPoint = point;
+      notifyListeners();
+    });
   }
 
   // =========================== PUBLIC API ===========================

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:simple_sheet/simple_sheet.dart';
 
@@ -34,6 +32,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    // DraggableScrollableSheet(builder: builder)
     return Scaffold(
       backgroundColor: Colors.green,
       body: SimpleDraggable(
@@ -41,30 +40,30 @@ class _MyHomePageState extends State<MyHomePage> {
           maxPoint: SPoint(offset: 0.9),
           initialPoint: SPoint(offset: 0.45),
           minPoint: SPoint(offset: 0.2),
-          byPosition: true,
+          // byPosition: true,
         ),
         builder: (context, controller) {
           return Container(
-            color: Colors.red,
+            // color: Colors.red,
             alignment: Alignment.center,
-            child: TextButton(
-              onPressed: () {
-                log('Click Me');
-              },
-              child: const Text(
-                'Click Me',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-
-            // child: ListView.builder(
-            //   controller: controller,
-            //   itemBuilder: (context, index) => Container(
-            //     color: Colors.amber,
-            //     height: 100,
-            //     child: Text('$index'),
+            // child: TextButton(
+            //   onPressed: () {},
+            //   child: const Text(
+            //     'Click Me',
+            //     style: TextStyle(color: Colors.white),
             //   ),
             // ),
+
+            child: ListView.builder(
+              controller: controller,
+              // physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) => Container(
+                color: Colors.amber,
+                height: 100,
+                margin: const EdgeInsets.all(2),
+                child: Text('$index'),
+              ),
+            ),
           );
         },
       ),
