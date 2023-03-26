@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_sheet/simple_sheet.dart';
 
@@ -30,224 +33,156 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    // DraggableScrollableSheet(builder: builder)
+  Widget _view() {
     return Scaffold(
       backgroundColor: Colors.green,
       body: SimpleDraggable(
-        setting: const SDraggableSetting(
-          maxPoint: SPoint(offset: 0.9),
-          initialPoint: SPoint(offset: 0.45),
-          minPoint: SPoint(offset: 0.2),
-          // byPosition: true,
-        ),
+        // setting: const SDraggableSetting(
+        //   maxPoint: SPoint(offset: 0.9),
+        //   initialPoint: SPoint(offset: 0.45),
+        //   minPoint: SPoint(offset: 0.2),
+        //   // byPosition: true,
+        // ),
         builder: (context, controller) {
-          return Container(
-            // color: Colors.red,
-            alignment: Alignment.center,
-            // child: TextButton(
-            //   onPressed: () {},
-            //   child: const Text(
-            //     'Click Me',
-            //     style: TextStyle(color: Colors.white),
-            //   ),
-            // ),
+          // return Container(
+          //   color: Colors.red,
+          //   alignment: Alignment.center,
+          //   child: TextButton(
+          //     onPressed: () {},
+          //     child: const Text(
+          //       'Click Me',
+          //       style: TextStyle(color: Colors.white),
+          //     ),
+          //   ),
+          // );
 
-            child: ListView.builder(
-              controller: controller,
-              // physics: const AlwaysScrollableScrollPhysics(),
-              itemBuilder: (context, index) => Container(
-                color: Colors.amber,
-                height: 100,
-                margin: const EdgeInsets.all(2),
-                child: Text('$index'),
-              ),
+          return ListView.builder(
+            controller: controller,
+            // physics: const AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) => Container(
+              color: Colors.amber,
+              height: 100,
+              margin: const EdgeInsets.all(2),
+              child: Text('$index'),
             ),
           );
         },
       ),
-
-//
-      // body: DraggableScrollableSheet(
-      //   snap: true,
-      //   // expand: false,
-      //   // minChildSize: 0.1,
-      //   // initialChildSize: 0.1,
-      //   // snapSizes: const [0.3, 0.5],
-      //   builder: (context, controller) {
-      //     return ListView.builder(
-      //       controller: controller,
-      //       itemBuilder: (context, index) => Container(
-      //         color: Colors.amber,
-      //         height: 100,
-      //         child: Text('$index'),
-      //       ),
-      //     );
-      //   },
-      // ),
     );
+  }
 
-    // return SimpleSheet(
-    //   body: Scaffold(
-    //     backgroundColor: Colors.cyan,
-    //     body: Builder(builder: (context) {
-    //       return Container(
-    //         color: Colors.green.withOpacity(0.4),
-    //         alignment: Alignment.center,
-    //         child: SimpleDraggable(
-    //           builder: (context, scrollController) {
-    //             return Container(color: Colors.amber);
-    //           },
-    //         ),
-    //         // child: TextButton(
-    //         //   onPressed: () {
-    //         //     SimpleSheet.of(context).show((context, controller) {
-    //         //       // return Container(color: Colors.amber);
-    //         //       return Container(
-    //         //         // alignment: Alignment
-    //         //         //     .topCenter, // TODO remove alignment and see the size issue
-    //         //         // child: TextButton(
-    //         //         //   onPressed: Navigator.of(context).pop,
-    //         //         //   child: const Text('Close'),
-    //         //         // ),
-    //         //         color: Colors.white,
-    //         //         child: ListView.builder(
-    //         //           controller: controller,
-    //         //           itemBuilder: (context, index) {
-    //         //             return Container(
-    //         //               color: Colors.amber,
-    //         //               margin: const EdgeInsets.all(2),
-    //         //               padding: const EdgeInsets.all(16),
-    //         //               child: Text('$index'),
-    //         //             );
-    //         //           },
-    //         //         ),
-    //         //       );
-    //         //     });
-    //         //     // Scaffold.of(context).showBottomSheet(
-    //         //     //   (context) {
-    //         //     //     return Container(color: Colors.amber);
-    //         //     //     // return ListView.builder(
-    //         //     //     //   itemBuilder: (context, index) => SizedBox(
-    //         //     //     //     height: 100,
-    //         //     //     //     child: Text('$index'),
-    //         //     //     //   ),
-    //         //     //     // );
-    //         //     //   },
-    //         //     //   enableDrag: true,
-    //         //     // );
-    //         //   },
-    //         //   child: const Text('Open'),
-    //         // ),
-    //       );
-    //     }),
-    //   ),
-    //   // child: Scaffold(
-    //   //   key: _key,
-    //   //   appBar: AppBar(title: Text(widget.title)),
-    //   //   body: Center(
-    //   //     child: Column(
-    //   //       mainAxisAlignment: MainAxisAlignment.center,
-    //   //       children: <Widget>[
-    //   //         const SizedBox(height: 8),
+  Widget _view1() {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: 8),
 
-    //   //         // Textfield
-    //   //         Container(
-    //   //           padding: const EdgeInsets.all(8),
-    //   //           decoration: BoxDecoration(
-    //   //             color: Colors.white,
-    //   //             boxShadow: [
-    //   //               BoxShadow(
-    //   //                 color: Colors.grey.shade200,
-    //   //                 spreadRadius: 2,
-    //   //                 blurRadius: 10,
-    //   //               ),
-    //   //             ],
-    //   //           ),
-    //   //           child: Row(
-    //   //             children: [
-    //   //               // Textfield
-    //   //               Expanded(child: _TextFieldView(onChanged: (value) {})),
+            // Textfield
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Textfield
+                  Expanded(child: _TextFieldView(onChanged: (value) {})),
 
-    //   //               // Gallery field
-    //   //               IconButton(
-    //   //                 onPressed: () {
-    //   //                   Widget builder(BuildContext context) {
-    //   //                     return Scaffold(
-    //   //                       backgroundColor: Colors.transparent,
-    //   //                       body: Container(
-    //   //                         margin: const EdgeInsets.all(64),
-    //   //                         decoration:
-    //   //                             const BoxDecoration(color: Colors.amber),
-    //   //                         child: Center(
-    //   //                           child: IconButton(
-    //   //                             onPressed: Navigator.of(context).pop,
-    //   //                             icon: const Icon(Icons.close),
-    //   //                           ),
-    //   //                         ),
-    //   //                       ),
-    //   //                     );
-    //   //                   }
+                  // Gallery field
+                  IconButton(
+                    onPressed: () {
+                      Widget builder(BuildContext context) {
+                        return Scaffold(
+                          backgroundColor: Colors.transparent,
+                          body: Container(
+                            margin: const EdgeInsets.all(64),
+                            decoration:
+                                const BoxDecoration(color: Colors.amber),
+                            child: Center(
+                              child: IconButton(
+                                onPressed: Navigator.of(context).pop,
+                                icon: const Icon(Icons.close),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
 
-    //   //                   // showDialog(
-    //   //                   //   context: context,
-    //   //                   //   builder: (context) => const Text(''),
-    //   //                   // );
+                      Navigator.of(context)
+                          .push(CupertinoPageRoute(builder: builder));
+                    },
+                    icon: const Icon(Icons.open_in_browser),
+                  ),
 
-    //   //                   // Navigator.of(context)
-    //   //                   //     .push(CupertinoPageRoute(builder: builder));
+                  //
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    //   //                   // Navigator.of(context)
-    //   //                   //     .push(CupertinoPageRoute(builder: builder));
+  @override
+  Widget build(BuildContext context) {
+    // return _view();
 
-    //   //                   // Navigator.of(context).push(
-    //   //                   //   CustomRoute(
-    //   //                   //     page: Container(
-    //   //                   //       decoration: BoxDecoration(
-    //   //                   //         border: Border.all(),
-    //   //                   //         color: Colors.amber,
-    //   //                   //       ),
-    //   //                   //       child: Center(
-    //   //                   //         child: TextButton(
-    //   //                   //           onPressed: () {
-    //   //                   //             print('lllll');
-    //   //                   //           },
-    //   //                   //           child: const Text('Tap Me'),
-    //   //                   //         ),
-    //   //                   //       ),
-    //   //                   //     ),
-    //   //                   //     key: _key,
-    //   //                   //   ),
-    //   //                   // );
+    return SimpleSheet(
+      child: Scaffold(
+        backgroundColor: Colors.cyan,
+        body: Builder(builder: (context) {
+          return Center(
+            child: TextButton(
+              onPressed: () async {
+                SimpleSheet.of(context).show(
+                  builder: (context, controller) {
+                    return _TestWidget(
+                      title: 'Simple SHeet',
+                      controller: controller,
+                    );
+                  },
+                );
 
-    //   //                   // Navigator.of(context).push(
-    //   //                   //   MyRoute(
-    //   //                   //     GestureDetector(
-    //   //                   //       onTap: Navigator.of(context).pop,
-    //   //                   //       child: const SizedBox(
-    //   //                   //         height: 400,
-    //   //                   //         width: 400,
-    //   //                   //         child: ColoredBox(color: Colors.red),
-    //   //                   //       ),
-    //   //                   //     ),
-    //   //                   //   ),
-    //   //                   // );
+                // final controller =
+                //     Scaffold.of(context).showBottomSheet<String?>(
+                //   (context) {
+                //     return const _TestWidget(title: 'Non-Persistance');
+                //     // return ListView.builder(
+                //     //   itemBuilder: (context, index) => SizedBox(
+                //     //     height: 100,
+                //     //     child: Text('$index'),
+                //     //   ),
+                //     // );
+                //   },
+                //   enableDrag: true,
+                // );
 
-    //   //                   //
-    //   //                 },
-    //   //                 icon: const Icon(Icons.open_in_browser),
-    //   //               ),
+                // controller.closed.then((value) {
+                //   log('Result is => $value');
+                // });
 
-    //   //               //
-    //   //             ],
-    //   //           ),
-    //   //         ),
-    //   //       ],
-    //   //     ),
-    //   //   ),
-    //   // ),
-    // );
+                // showModalBottomSheet(
+                //   context: context,
+                //   builder: (context) => const _TestWidget(title: 'None'),
+                // );
+              },
+              child: const Text('Open'),
+            ),
+          );
+        }),
+      ),
+    );
   }
 }
 
@@ -282,6 +217,48 @@ class _TextFieldView extends StatelessWidget {
           onChanged(max);
         }
       },
+    );
+  }
+}
+
+class _TestWidget extends StatefulWidget {
+  const _TestWidget({
+    required this.title,
+    this.controller,
+  });
+
+  final String title;
+  final ScrollController? controller;
+
+  @override
+  State<_TestWidget> createState() => __TestWidgetState();
+}
+
+class __TestWidgetState extends State<_TestWidget> {
+  @override
+  void initState() {
+    super.initState();
+    log('Init ======>>>> ');
+  }
+
+  @override
+  void dispose() {
+    log('<<<<====== Disposed');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Container(
+        color: Colors.amber,
+        alignment: Alignment.center,
+        child: TextButton(
+          onPressed: () => Navigator.of(context).pop('Lamo Katha'),
+          child: const Text('Pop'),
+        ),
+      ),
     );
   }
 }

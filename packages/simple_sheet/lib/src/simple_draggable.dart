@@ -7,38 +7,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 ///
-typedef DragWidgetBuilder = Widget Function(
+typedef DraggableWidgetBuilder = Widget Function(
   BuildContext context,
   ScrollController scrollController,
 );
 
 const double _minFlingVelocity = 800;
-// const double _minDragThreshold = 20;
-const _maxPoint = SPoint(offset: 1, snapThreshold: 0.3);
+const _maxPoint = SPoint(offset: 1);
 const _snapPoint = SPoint(offset: 0.45);
 const _minPoint = SPoint();
 
 ///
 class SimpleDraggable extends StatefulWidget {
   ///
-  SimpleDraggable({
+  const SimpleDraggable({
     required this.builder,
     this.controller,
     this.scrollController,
-    this.setting = const SDraggableSetting(),
+    this.byPosition = false,
     this.delegate = const _DefaultDelegate(),
     super.key,
-  }) : assert(
-          setting.initialPoint >= setting.minPoint &&
-              setting.initialPoint <= setting.maxPoint,
-          'Initial point must be between minimum and maximum point.',
-        );
+  });
 
   /// A builder for the contents of the sheet.
   ///
   /// The bottom sheet will wrap the widget produced by this builder in a
   /// [Material] widget.
-  final DragWidgetBuilder builder;
+  final DraggableWidgetBuilder builder;
 
   ///
   final SDController? controller;
@@ -47,23 +42,10 @@ class SimpleDraggable extends StatefulWidget {
   final ScrollController? scrollController;
 
   ///
-  final SDraggableSetting setting;
+  final bool byPosition;
 
   ///
-  final SimpleDraggableDelegate? delegate;
-
-  // /// Called when the bottom sheet begins to close.
-  // ///
-  // /// A bottom sheet might be prevented from closing (e.g., by user
-  // /// interaction) even after this callback is called. For this reason, this
-  // /// callback might be call multiple times for a given bottom sheet.
-  // final VoidCallback? onClosing;
-
-  // ///
-  // final VoidCallback? onClose;
-
-  // ///
-  // final VoidCallback? onDispose;
+  final SimpleDraggableDelegate delegate;
 
   @override
   State<SimpleDraggable> createState() => _SimpleDraggableState();
@@ -71,30 +53,23 @@ class SimpleDraggable extends StatefulWidget {
 
 ///
 class _SimpleDraggableState extends State<SimpleDraggable>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final _childKey = GlobalKey(debugLabel: 'SimpleDraggable child');
   late SDController _controller;
   late ScrollController _scrollController;
-  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? SDController();
+    _controller = widget.controller ?? SDController(vsync: this);
     _scrollController = widget.scrollController ?? ScrollController();
-    _animationController = AnimationController(
-      vsync: this,
-      value: widget.setting.initialPoint.offset,
-    );
     _initController();
   }
 
   void _initController() {
     _controller._init(
       childKey: _childKey,
-      animationController: _animationController,
       scrollController: _scrollController,
-      setting: widget.setting,
     );
   }
 
@@ -106,7 +81,7 @@ class _SimpleDraggableState extends State<SimpleDraggable>
       if (oldWidget.controller == null) {
         _controller.dispose();
       }
-      _controller = widget.controller ?? SDController();
+      _controller = widget.controller ?? SDController(vsync: this);
       needsUpdate = true;
     }
 
@@ -118,11 +93,7 @@ class _SimpleDraggableState extends State<SimpleDraggable>
       needsUpdate = true;
     }
 
-    if (needsUpdate || oldWidget.setting != widget.setting) {
-      if (oldWidget.setting.initialPoint != widget.setting.initialPoint) {
-        _controller._animationController.value =
-            widget.setting.initialPoint.offset;
-      }
+    if (needsUpdate) {
       _initController();
     }
   }
@@ -135,13 +106,13 @@ class _SimpleDraggableState extends State<SimpleDraggable>
     if (widget.scrollController == null) {
       _scrollController.dispose();
     }
-    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final handler = widget.delegate?.buildHandler(context);
+    // return widget.builder(context, _scrollController);
+    final handler = widget.delegate.buildHandler(context);
 
     return SafeArea(
       key: _childKey,
@@ -152,7 +123,8 @@ class _SimpleDraggableState extends State<SimpleDraggable>
             return CustomMultiChildLayout(
               delegate: _LayoutDelegate(
                 progress: _controller.animation.value,
-                setting: widget.setting,
+                byPosition: widget.byPosition,
+                controller: _controller,
               ),
               children: [
                 // Handler
@@ -177,7 +149,7 @@ class _SimpleDraggableState extends State<SimpleDraggable>
           }
 
           // Position based
-          if (widget.setting.byPosition) {
+          if (widget.byPosition) {
             return CustomSingleChildLayout(
               delegate: _Layout(progress: _controller.animation.value),
               child: SizedBox.expand(child: child),
@@ -236,23 +208,25 @@ enum _Type { handler, body }
 class _LayoutDelegate extends MultiChildLayoutDelegate {
   _LayoutDelegate({
     required this.progress,
-    required this.setting,
+    required this.byPosition,
+    required this.controller,
   });
 
   final double progress;
-  final SDraggableSetting setting;
+  final bool byPosition;
+  final SDController controller;
 
   final _handlerHeight = 21;
 
   // Size based layout
   void _sizeBased(Size size) {
-    final max = setting.maxPoint.offset;
-    final min = setting.snapPoint.offset;
+    final max = controller.maxPoint.offset;
+    final snap = controller.snapPoint.offset;
 
     final visibleHeight = size.height * progress;
     final looseConstraints = BoxConstraints.loose(size);
 
-    final remaining = (max - progress) / (max - min);
+    final remaining = (max - progress) / (max - snap);
     var handlerSize = Size.zero;
 
     // Handler
@@ -282,8 +256,8 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
 
   // Position based layout
   void _positionBased(Size size) {
-    final max = setting.maxPoint.offset;
-    final min = setting.snapPoint.offset;
+    final max = controller.maxPoint.offset;
+    final min = controller.snapPoint.offset;
     final visibleHeight = size.height * progress;
     final looseConstraints = BoxConstraints.loose(size);
 
@@ -324,7 +298,7 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     // Layout handler and content
-    setting.byPosition ? _positionBased(size) : _sizeBased(size);
+    byPosition ? _positionBased(size) : _sizeBased(size);
     // // Layout scrim
     // if (hasChild(_Type.scrim)) {
     //   layoutChild(_Type.scrim, BoxConstraints.tight(size));
@@ -337,10 +311,7 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(covariant _LayoutDelegate oldDelegate) =>
-      oldDelegate.progress != progress ||
-      oldDelegate.setting.maxPoint.offset != setting.maxPoint.offset ||
-      oldDelegate.setting.minPoint.offset != setting.minPoint.offset ||
-      oldDelegate.setting.byPosition != setting.byPosition;
+      oldDelegate.progress != progress || oldDelegate.byPosition != byPosition;
 }
 
 abstract class SimpleDraggableDelegate {
@@ -434,6 +405,7 @@ class SPoint {
   const SPoint({
     this.offset = 0,
     this.snapThreshold = 0.15,
+    // this.minFlingVelocity = 800,
     this.duration,
     this.curve,
   })  : assert(
@@ -450,6 +422,9 @@ class SPoint {
 
   /// Factor
   final double snapThreshold;
+
+  ///
+  // final double minFlingVelocity;
 
   /// Animation duration
   final Duration? duration;
@@ -513,15 +488,23 @@ class SPoint {
 }
 
 ///
-@immutable
-class SDraggableSetting {
-  const SDraggableSetting({
+class SDController extends ChangeNotifier {
+  SDController({
+    required TickerProvider vsync,
     this.maxPoint = _maxPoint,
     this.snapPoint = _snapPoint,
     this.minPoint = _minPoint,
     this.initialPoint = _minPoint,
-    this.byPosition = false,
-  });
+  }) : assert(
+          initialPoint >= minPoint && initialPoint <= maxPoint,
+          'Initial point must be between minimum and maximum point.',
+        ) {
+    _animationController = AnimationController(
+      vsync: vsync,
+      value: initialPoint.offset,
+    );
+    _currentPoint = initialPoint;
+  }
 
   ///
   final SPoint maxPoint;
@@ -535,79 +518,24 @@ class SDraggableSetting {
   ///
   final SPoint initialPoint;
 
-  ///
-  final bool byPosition;
-
-  ///
-  SDraggableSetting copyWith({
-    SPoint? maxPoint,
-    SPoint? snapPoint,
-    SPoint? minPoint,
-    SPoint? initialPoint,
-    bool? byPosition,
-  }) {
-    return SDraggableSetting(
-      maxPoint: maxPoint ?? this.maxPoint,
-      snapPoint: snapPoint ?? this.snapPoint,
-      minPoint: minPoint ?? this.minPoint,
-      initialPoint: initialPoint ?? this.initialPoint,
-      byPosition: byPosition ?? this.byPosition,
-    );
-  }
-
-  @override
-  String toString() {
-    return '''SDraggableSetting(maxPoint: $maxPoint, snapPoint: $snapPoint, minPoint: $minPoint, initialPoint: $initialPoint, byPosition: $byPosition)''';
-  }
-
-  @override
-  bool operator ==(covariant SDraggableSetting other) {
-    if (identical(this, other)) return true;
-
-    return other.maxPoint == maxPoint &&
-        other.snapPoint == snapPoint &&
-        other.minPoint == minPoint &&
-        other.initialPoint == initialPoint &&
-        other.byPosition == byPosition;
-  }
-
-  @override
-  int get hashCode {
-    return maxPoint.hashCode ^
-        snapPoint.hashCode ^
-        minPoint.hashCode ^
-        initialPoint.hashCode ^
-        byPosition.hashCode;
-  }
-}
-
-///
-class SDController extends ChangeNotifier {
-  late GlobalKey<State<StatefulWidget>> _childKey;
-  late AnimationController _animationController;
-  late ScrollController _scrollController;
-  late SDraggableSetting _setting;
+  late final AnimationController _animationController;
   late SPoint _currentPoint;
 
+  late GlobalKey<State<StatefulWidget>> _childKey;
+  late ScrollController _scrollController;
+
   var _isDisposed = false;
-  bool _initialized = false;
-  SDState _state = SDState.close;
+  // SDState _state = SDState.close;
   VelocityTracker? _velocityTracker;
   double _initialOffset = 0;
-  Offset _initialPosition = Offset.zero;
+  // Offset _initialPosition = Offset.zero;
 
   void _init({
     required GlobalKey<State<StatefulWidget>> childKey,
-    required AnimationController animationController,
     required ScrollController scrollController,
-    required SDraggableSetting setting,
   }) {
     _childKey = childKey;
-    _animationController = animationController;
     _scrollController = scrollController;
-    _setting = setting;
-    _currentPoint = setting.initialPoint;
-    _initialized = true;
   }
 
   double get _childHeight {
@@ -616,20 +544,10 @@ class SDController extends ChangeNotifier {
     return renderBox.size.height;
   }
 
-//
-  T _assert<T>(T object) {
-    assert(
-      _initialized,
-      'SDController is not attached to a widget. A SDController '
-      'must be used in a SimpleDraggable before any of its methods are called.',
-    );
-    return object;
-  }
-
   List<SPoint> get _points => [
-        _setting.minPoint,
-        _setting.snapPoint,
-        _setting.maxPoint,
+        minPoint,
+        snapPoint,
+        maxPoint,
       ];
 
   bool get _underway => _animationController.isAnimating;
@@ -647,7 +565,7 @@ class SDController extends ChangeNotifier {
   ///
   void _onPointerDown(PointerDownEvent event) {
     _initialOffset = _value;
-    _initialPosition = event.localPosition;
+    // _initialPosition = event.localPosition;
     _velocityTracker ??= VelocityTracker.withKind(event.kind);
   }
 
@@ -713,23 +631,20 @@ class SDController extends ChangeNotifier {
     }
   }
 
-  void _close() {
-    _updatePoint(
-      _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
-    );
-  }
-
-  void _updateState(SDState state) {
-    if (state == _state) return;
-    _state = state;
-    notifyListeners();
-  }
+  // void _updateState(SDState state) {
+  //   if (state == _state) return;
+  //   _state = state;
+  //   notifyListeners();
+  // }
 
   void _updatePoint(SPoint point) {
+    final duration = point.duration ?? const Duration(milliseconds: 250);
+    // final full = (_currentPoint.offset - _value).abs();
+    // final newDuration = duration.inMilliseconds * full / point.offset;
     _animationController
         .animateTo(
       point.offset,
-      duration: point.duration ?? const Duration(milliseconds: 250),
+      duration: duration,
       curve: point.curve ?? Curves.decelerate,
     )
         .then((value) {
@@ -742,20 +657,20 @@ class SDController extends ChangeNotifier {
   // =========================== PUBLIC API ===========================
   // ==================================================================
 
-  SDState get state => _state;
+  // SDState get state => _state;
 
   SPoint get point => _currentPoint;
 
   ///
-  Animation<double> get animation => _assert(_animationController);
+  Animation<double> get animation => _animationController;
 
   ///
-  void open() {
-    _state = SDState.min;
-  }
+  void open() => _updatePoint(snapPoint);
 
   ///
-  void close() => _close();
+  void close() => _updatePoint(
+        _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
+      );
 
   ///
   void moveTo({required SPoint point}) {
@@ -773,7 +688,6 @@ class SDController extends ChangeNotifier {
   @mustCallSuper
   void dispose() {
     _animationController.dispose();
-    _initialized = false;
     _isDisposed = true;
     super.dispose();
   }
