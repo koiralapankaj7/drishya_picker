@@ -6,6 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+const _defaultDuration = Duration(milliseconds: 250);
+
 ///
 typedef DraggableWidgetBuilder = Widget Function(
   BuildContext context,
@@ -114,72 +116,81 @@ class _SimpleDraggableState extends State<SimpleDraggable>
     // return widget.builder(context, _scrollController);
     final handler = widget.delegate.buildHandler(context);
 
-    return SafeArea(
+    return Material(
+      type: MaterialType.transparency,
       key: _childKey,
-      child: AnimatedBuilder(
-        animation: _controller.animation,
-        builder: (context, child) {
-          if (handler != null) {
-            return CustomMultiChildLayout(
-              delegate: _LayoutDelegate(
-                progress: _controller.animation.value,
-                byPosition: widget.byPosition,
-                controller: _controller,
-              ),
-              children: [
-                // Handler
-                LayoutId(
-                  id: _Type.handler,
-                  child: Listener(
-                    onPointerDown: _controller._onPointerDown,
-                    onPointerMove: _controller._onHandlerMove,
-                    onPointerUp: _controller._onPointerUp,
-                    behavior: HitTestBehavior.translucent,
-                    child: handler,
-                  ),
-                ),
-
-                // Body
-                LayoutId(
-                  id: _Type.body,
-                  child: SizedBox.expand(child: child),
-                ),
-              ],
-            );
-          }
-
-          // Position based
-          if (widget.byPosition) {
-            return CustomSingleChildLayout(
-              delegate: _Layout(progress: _controller.animation.value),
-              child: SizedBox.expand(child: child),
-            );
-          }
-
-          // Size based
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              heightFactor: _controller.animation.value,
-              widthFactor: 1,
-              alignment: Alignment.bottomCenter,
-              child: child,
-            ),
-          );
+      child: WillPopScope(
+        onWillPop: () async {
+          print('On will pop');
+          if (_controller.animation.value <= 0.0) return true;
+          await _controller.close();
+          return true;
         },
-        child: Semantics(
-          container: true,
-          onDismiss: _controller.close,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              overscroll: false,
-            ),
-            child: Listener(
-              onPointerDown: _controller._onPointerDown,
-              onPointerMove: _controller._onPointerMove,
-              onPointerUp: _controller._onPointerUp,
-              behavior: HitTestBehavior.translucent,
-              child: widget.builder(context, _scrollController),
+        child: AnimatedBuilder(
+          animation: _controller.animation,
+          builder: (context, child) {
+            if (handler != null) {
+              return CustomMultiChildLayout(
+                delegate: _LayoutDelegate(
+                  progress: _controller.animation.value,
+                  byPosition: widget.byPosition,
+                  controller: _controller,
+                ),
+                children: [
+                  // Handler
+                  LayoutId(
+                    id: _Type.handler,
+                    child: Listener(
+                      onPointerDown: _controller._onPointerDown,
+                      onPointerMove: _controller._onHandlerMove,
+                      onPointerUp: _controller._onPointerUp,
+                      behavior: HitTestBehavior.translucent,
+                      child: handler,
+                    ),
+                  ),
+
+                  // Body
+                  LayoutId(
+                    id: _Type.body,
+                    child: SizedBox.expand(child: child),
+                  ),
+                ],
+              );
+            }
+
+            // Position based
+            if (widget.byPosition) {
+              return CustomSingleChildLayout(
+                delegate: _Layout(progress: _controller.animation.value),
+                child: SizedBox.expand(child: child),
+              );
+            }
+
+            // Size based
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: FractionallySizedBox(
+                heightFactor: _controller.animation.value,
+                widthFactor: 1,
+                alignment: Alignment.bottomCenter,
+                child: child,
+              ),
+            );
+          },
+          child: Semantics(
+            container: true,
+            onDismiss: _controller.close,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                overscroll: false,
+              ),
+              child: Listener(
+                onPointerDown: _controller._onPointerDown,
+                onPointerMove: _controller._onPointerMove,
+                onPointerUp: _controller._onPointerUp,
+                behavior: HitTestBehavior.translucent,
+                child: widget.builder(context, _scrollController),
+              ),
             ),
           ),
         ),
@@ -235,6 +246,7 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
       positionChild(
         _Type.handler,
         Offset(0, size.height - visibleHeight),
+        // Offset.zero,
       );
     }
 
@@ -250,6 +262,12 @@ class _LayoutDelegate extends MultiChildLayoutDelegate {
       positionChild(
         _Type.body,
         Offset(0, size.height - bodyConstraints.maxHeight),
+        // Offset(
+        //   0,
+        //   _handlerHeight +
+        //       (handlerSize.height - _handlerHeight) *
+        //           (1 - remaining).clamp(0, 1),
+        // ),
       );
     }
   }
@@ -499,8 +517,11 @@ class SDController extends ChangeNotifier {
           initialPoint >= minPoint && initialPoint <= maxPoint,
           'Initial point must be between minimum and maximum point.',
         ) {
+    log('Controller init ==>>');
     _animationController = AnimationController(
       vsync: vsync,
+      duration: initialPoint.duration ?? _defaultDuration,
+      reverseDuration: initialPoint.duration ?? _defaultDuration,
       value: initialPoint.offset,
     );
     _currentPoint = initialPoint;
@@ -527,7 +548,7 @@ class SDController extends ChangeNotifier {
   var _isDisposed = false;
   // SDState _state = SDState.close;
   VelocityTracker? _velocityTracker;
-  double _initialOffset = 0;
+  // double _initialOffset = 0;
   // Offset _initialPosition = Offset.zero;
 
   void _init({
@@ -564,7 +585,7 @@ class SDController extends ChangeNotifier {
 
   ///
   void _onPointerDown(PointerDownEvent event) {
-    _initialOffset = _value;
+    // _initialOffset = _value;
     // _initialPosition = event.localPosition;
     _velocityTracker ??= VelocityTracker.withKind(event.kind);
   }
@@ -637,21 +658,20 @@ class SDController extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void _updatePoint(SPoint point) {
-    final duration = point.duration ?? const Duration(milliseconds: 250);
+  TickerFuture _updatePoint(SPoint point) {
+    final duration = point.duration ?? _defaultDuration;
     // final full = (_currentPoint.offset - _value).abs();
     // final newDuration = duration.inMilliseconds * full / point.offset;
-    _animationController
-        .animateTo(
+    TickerFuture.complete();
+    return _animationController.animateTo(
       point.offset,
       duration: duration,
       curve: point.curve ?? Curves.decelerate,
-    )
-        .then((value) {
-      if (point == _currentPoint) return;
-      _currentPoint = point;
-      notifyListeners();
-    });
+    )..then((value) {
+        if (point == _currentPoint) return;
+        _currentPoint = point;
+        notifyListeners();
+      });
   }
 
   // =========================== PUBLIC API ===========================
@@ -665,17 +685,16 @@ class SDController extends ChangeNotifier {
   Animation<double> get animation => _animationController;
 
   ///
-  void open() => _updatePoint(snapPoint);
+  TickerFuture open() => _updatePoint(snapPoint);
 
   ///
-  void close() => _updatePoint(
-        _initialOffset == _maxPoint.offset ? _snapPoint : _minPoint,
-      );
+  TickerFuture close() => _updatePoint(_minPoint);
 
   ///
-  void moveTo({required SPoint point}) {
-    //
-  }
+  TickerFuture animateTo(SPoint point) => _updatePoint(point);
+
+  ///
+  void moveTo(SPoint point) => _animationController.value = point.offset;
 
   @mustCallSuper
   @override
@@ -688,6 +707,7 @@ class SDController extends ChangeNotifier {
   @mustCallSuper
   void dispose() {
     _animationController.dispose();
+    log('Controller disposed ==>>');
     _isDisposed = true;
     super.dispose();
   }
@@ -743,6 +763,189 @@ extension AnimationControllerX on AnimationController {
   }) =>
       value >= (from + offset) && value <= (offset + to);
 }
+
+/// ===================NEW======================
+
+class SimpleDraggableScopeNew extends StatefulWidget {
+  ///
+  const SimpleDraggableScopeNew({
+    required this.child,
+    super.key,
+  });
+
+  ///
+  final Widget child;
+
+  @override
+  State<SimpleDraggableScopeNew> createState() =>
+      _SimpleDraggableScopeNewState();
+}
+
+class _SimpleDraggableScopeNewState extends State<SimpleDraggableScopeNew> {
+  SDController? _controller;
+
+  Future<void> _update(SDController? controller) async {
+    await null;
+    setState(() {
+      _controller = controller;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller == null) return widget.child;
+
+    return AnimatedBuilder(
+      animation: _controller!.animation,
+      builder: (context, child) {
+        return FractionallySizedBox(
+          heightFactor: (1 - _controller!.animation.value)
+              .clamp(1 - _controller!.snapPoint.offset, 1),
+          alignment: Alignment.topCenter,
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+///
+class DraggableRoute<T> extends ModalRoute<T> {
+  DraggableRoute(
+    BuildContext context, {
+    required this.builder,
+    // SDController? controller,
+  }) {
+    _state = context.findAncestorStateOfType<_SimpleDraggableScopeNewState>();
+  }
+
+  final DraggableWidgetBuilder builder;
+  late SDController _controller;
+  _SimpleDraggableScopeNewState? _state;
+
+  @override
+  void install() {
+    super.install();
+    log('install');
+    _controller = SDController(vsync: navigator!)
+      .._animationController.addListener(() {
+        // if (_controller.animation.value <= 0.0) {
+        //   navigator!.pop();
+        // }
+      });
+    _state?._update(_controller);
+  }
+
+  @override
+  void dispose() {
+    log('dispose');
+    _state?._update(null);
+    _state = null;
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Color? get barrierColor => Colors.transparent;
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  Duration get reverseTransitionDuration => Duration.zero;
+
+  @override
+  bool get allowSnapshotting => false;
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => false;
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => false;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    log('buildPage');
+    // _updateState(context);
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        log('${animation.value}');
+        return Material(
+          type: MaterialType.transparency,
+          child: SimpleDraggable(
+            builder: builder,
+            controller: _controller,
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  TickerFuture didPush() {
+    log('didPush');
+    Future.delayed(Duration.zero, _controller.open);
+    return super.didPush();
+  }
+
+  @override
+  bool didPop(T? result) {
+    log('didPop');
+    if (_controller.animation.value > 0) {
+      _controller.close().then((_) => navigator!.pop(result));
+      return false;
+    }
+    return super.didPop(result);
+  }
+
+  @override
+  List<OverlayEntry> get overlayEntries {
+    return [
+      // OverlayEntry(
+      //   builder: (context) => GestureDetector(
+      //     onTap: navigator!.pop,
+      //     behavior: HitTestBehavior.translucent,
+      //     child: const SizedBox.expand(),
+      //   ),
+      // ),
+      super.overlayEntries.last,
+    ];
+  }
+}
+
+///
+Future<T?> showSimpleSheet<T>({
+  required BuildContext context,
+  required DraggableWidgetBuilder builder,
+}) {
+  return Navigator.of(context).push<T>(
+    DraggableRoute(
+      context,
+      builder: builder,
+    ),
+  );
+}
+
+
+
 
 // mixin _GestureMixin {
 //   late AnimationController _animationController;

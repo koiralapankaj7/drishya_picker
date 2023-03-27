@@ -138,50 +138,48 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // return _view();
 
-    return SimpleSheet(
-      child: Scaffold(
-        backgroundColor: Colors.cyan,
-        body: Builder(builder: (context) {
-          return Center(
-            child: TextButton(
-              onPressed: () async {
-                SimpleSheet.of(context).show(
-                  builder: (context, controller) {
-                    return _TestWidget(
-                      title: 'Simple SHeet',
-                      controller: controller,
-                    );
-                  },
-                );
+    return SimpleDraggableScope(
+      child: Builder(builder: (context) {
+        return Scaffold(
+          backgroundColor: Colors.cyan,
+          body: Builder(builder: (context) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      log('Test tapped...');
+                    },
+                    child: const Text('Test'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      Widget builder(context, controller) {
+                        return _TestWidget(
+                          title: 'Simple SHeet',
+                          controller: controller,
+                        );
+                      }
 
-                // final controller =
-                //     Scaffold.of(context).showBottomSheet<String?>(
-                //   (context) {
-                //     return const _TestWidget(title: 'Non-Persistance');
-                //     // return ListView.builder(
-                //     //   itemBuilder: (context, index) => SizedBox(
-                //     //     height: 100,
-                //     //     child: Text('$index'),
-                //     //   ),
-                //     // );
-                //   },
-                //   enableDrag: true,
-                // );
+                      final result = await SimpleDraggableScope.of(context)
+                          .show<String>(builder: builder);
 
-                // controller.closed.then((value) {
-                //   log('Result is => $value');
-                // });
+                      // final result = await showSimpleSheet(
+                      //   context: context,
+                      //   builder: builder,
+                      // );
 
-                // showModalBottomSheet(
-                //   context: context,
-                //   builder: (context) => const _TestWidget(title: 'None'),
-                // );
-              },
-              child: const Text('Open'),
-            ),
-          );
-        }),
-      ),
+                      log("This is the result =>$result");
+                    },
+                    child: const Text('Open'),
+                  ),
+                ],
+              ),
+            );
+          }),
+        );
+      }),
     );
   }
 }
@@ -231,26 +229,26 @@ class _TestWidget extends StatefulWidget {
   final ScrollController? controller;
 
   @override
-  State<_TestWidget> createState() => __TestWidgetState();
+  State<_TestWidget> createState() => _TestWidgetState();
 }
 
-class __TestWidgetState extends State<_TestWidget> {
+class _TestWidgetState extends State<_TestWidget> {
   @override
   void initState() {
     super.initState();
-    log('Init ======>>>> ');
+    // log('Init ======>>>> ');
   }
 
   @override
   void dispose() {
-    log('<<<<====== Disposed');
+    // log('<<<<====== Disposed');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      // appBar: AppBar(title: Text(widget.title)),
       body: Container(
         color: Colors.amber,
         alignment: Alignment.center,

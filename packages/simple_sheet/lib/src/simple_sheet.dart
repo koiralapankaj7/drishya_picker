@@ -1,25 +1,44 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+
 import 'dart:async';
 import 'dart:developer';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:simple_sheet/src/simple_draggable.dart';
 
+class _DraggableScope extends InheritedWidget {
+  const _DraggableScope({
+    required this.controller,
+    required super.child,
+  });
+
+  final SDController controller;
+
+  @override
+  bool updateShouldNotify(_DraggableScope old) {
+    return controller != old.controller;
+  }
+}
+
 // =============================================================================
 ///
-class SimpleSheet extends StatefulWidget {
+class SimpleDraggableScope extends StatefulWidget {
   ///
-  const SimpleSheet({
+  const SimpleDraggableScope({
     required this.child,
+    // this.controller,
     super.key,
   });
 
   ///
   final Widget child;
 
+  // ///
+  // final SDController? controller;
+
   ///
-  static SimpleSheetState of(BuildContext context) {
-    final result = context.findAncestorStateOfType<SimpleSheetState>();
+  static SimpleDraggableScopeState of(BuildContext context) {
+    final result = context.findAncestorStateOfType<SimpleDraggableScopeState>();
     if (result != null) {
       return result;
     }
@@ -52,18 +71,21 @@ class SimpleSheet extends StatefulWidget {
   }
 
   ///
-  static SimpleSheetState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<SimpleSheetState>();
+  static SimpleDraggableScopeState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<SimpleDraggableScopeState>();
   }
 
   @override
-  State<SimpleSheet> createState() => SimpleSheetState();
+  State<SimpleDraggableScope> createState() => SimpleDraggableScopeState();
 }
 
 ///
-class SimpleSheetState extends State<SimpleSheet>
+class SimpleDraggableScopeState extends State<SimpleDraggableScope>
     with TickerProviderStateMixin {
+  bool _keepAlive = false;
   SimpleSheetController<dynamic>? _currentSheet;
+
+  // OverlayEntry? _entry;
 
   ///
   bool get isSheetOpen => _currentSheet != null;
@@ -74,14 +96,141 @@ class SimpleSheetState extends State<SimpleSheet>
     }
   }
 
-  SimpleSheetController<T> _buildSheet<T>({
+  // void _buildOverlay({
+  //   required DraggableWidgetBuilder builder,
+  //   required SDController controller,
+  //   required bool needDisposeController,
+  // }) {
+  //   _entry = OverlayEntry(
+  //     builder: (context) {
+  //       return _StandardSheet(
+  //         child: SimpleDraggable(
+  //           builder: builder,
+  //           controller: controller,
+  //         ),
+  //         onInit: () {},
+  //         onDispose: () {
+  //           // removeEntryIfNeeded();
+  //           // controller.removeListener(listener);
+  //           // if (needDisposeController) {
+  //           //   controller.dispose();
+  //           // }
+  //         },
+  //       );
+  //     },
+  //   );
+  //   Overlay.of(context).insert(_entry!);
+  // }
+
+  // SimpleSheetController<T> _buildSheet<T>({
+  //   required DraggableWidgetBuilder builder,
+  //   required SDController controller,
+  //   required bool needDisposeController,
+  // }) {
+  //   final completer = Completer<T>();
+  //   var removedEntry = false;
+  //   const doingDispose = false;
+
+  //   void removeCurrentBottomSheet() {
+  //     removedEntry = true;
+  //     if (_currentSheet == null) return;
+  //     controller.close();
+  //     completer.complete('This is from completer' as T);
+  //   }
+
+  //   final entry = LocalHistoryEntry(
+  //     onRemove: removeCurrentBottomSheet,
+  //     impliesAppBarDismissal: false,
+  //   );
+
+  //   // Navigator.of(context).push(LocalHistoryRoute)
+
+  //   void removeEntryIfNeeded() {
+  //     if (!removedEntry) {
+  //       entry.remove();
+  //       removedEntry = true;
+  //     }
+  //   }
+
+  //   void listener() {
+  //     if (controller.animation.value <= 0 && _currentSheet != null) {
+  //       log('This is from listener ===>>');
+  //       setState(() {
+  //         _currentSheet = null;
+  //       });
+  //     }
+  //   }
+
+  //   controller.addListener(listener);
+
+  //   final bottomSheet = _StandardSheet(
+  //     child: SimpleDraggable(
+  //       builder: builder,
+  //       controller: controller,
+  //       // setting: const SDraggableSetting(),
+  //       // midThreshold: minOffset,
+  //       // onClosing: () {
+  //       //   if (_currentSheet == null) {
+  //       //     return;
+  //       //   }
+  //       //   removeEntryIfNeeded();
+  //       // },
+  //       // onClose: () {
+  //       //   removeEntryIfNeeded();
+  //       //   setState(() {
+  //       //     _currentSheet = null;
+  //       //   });
+  //       // },
+  //       // onDispose: () {
+  //       //   doingDispose = true;
+  //       //
+  //       //   if (disposeController) {
+  //       //     animationController.dispose();
+  //       //   }
+  //       // },
+  //     ),
+  //     onInit: () {
+  //       // TODO : This is only for test may not required
+  //       // controller.open();
+  //     },
+  //     onDispose: () {
+  //       removeEntryIfNeeded();
+  //       controller.removeListener(listener);
+  //       if (needDisposeController) {
+  //         controller.dispose();
+  //       }
+  //     },
+  //   );
+
+  //   ///
+  //   ModalRoute.of(context)!.addLocalHistoryEntry(entry);
+
+  //   return SimpleSheetController._(
+  //     bottomSheet,
+  //     completer,
+  //     entry.remove,
+  //     controller,
+  //   );
+  // }
+
+  ///
+  Future<T?> show<T>({
     required DraggableWidgetBuilder builder,
-    required SDController controller,
-    required bool needDisposeController,
+    SDController? sdController,
+    ScrollController? scrollController,
+    SimpleDraggableDelegate? delegate,
+    bool keepAlive = false,
   }) {
-    final completer = Completer<T>();
+    assert(debugCheckHasSimpleSheet(context), '');
+    _closeCurrentSheet();
+    _keepAlive = true;
     var removedEntry = false;
     const doingDispose = false;
+
+    final controller = sdController ?? SDController(vsync: this);
+    final completer = Completer<T?>();
+    // Future.delayed(Duration.zero, controller.open);
+    controller.open();
 
     void removeCurrentBottomSheet() {
       removedEntry = true;
@@ -117,75 +266,29 @@ class SimpleSheetState extends State<SimpleSheet>
       child: SimpleDraggable(
         builder: builder,
         controller: controller,
-        // setting: const SDraggableSetting(),
-        // midThreshold: minOffset,
-        // onClosing: () {
-        //   if (_currentSheet == null) {
-        //     return;
-        //   }
-        //   removeEntryIfNeeded();
-        // },
-        // onClose: () {
-        //   removeEntryIfNeeded();
-        //   setState(() {
-        //     _currentSheet = null;
-        //   });
-        // },
-        // onDispose: () {
-        //   doingDispose = true;
-        //
-        //   if (disposeController) {
-        //     animationController.dispose();
-        //   }
-        // },
       ),
-      onInit: () {
-        // TODO : This is only for test may not required
-        controller.open();
-      },
+      onInit: () {},
       onDispose: () {
         removeEntryIfNeeded();
         controller.removeListener(listener);
-        if (needDisposeController) {
+        if (sdController == null) {
           controller.dispose();
         }
       },
     );
 
-    ///
-    ModalRoute.of(context)!.addLocalHistoryEntry(entry);
-
-    return SimpleSheetController._(
-      bottomSheet,
-      completer,
-      entry.remove,
-      controller,
-    );
-  }
-
-  ///
-  SimpleSheetController<T> show<T>({
-    required DraggableWidgetBuilder builder,
-    SDController? sdController,
-    ScrollController? scrollController,
-    SimpleDraggableDelegate? delegate,
-  }) {
-    assert(debugCheckHasSimpleSheet(context), '');
-    _closeCurrentSheet();
-
-    final controller = sdController ?? SDController(vsync: this);
-
     setState(() {
-      _currentSheet = _buildSheet(
-        builder: builder,
-        controller: controller,
-        needDisposeController: sdController == null,
+      _currentSheet = SimpleSheetController._(
+        bottomSheet,
+        entry.remove,
+        controller,
       );
     });
 
-    controller.open();
+    ///
+    ModalRoute.of(context)!.addLocalHistoryEntry(entry);
 
-    return _currentSheet! as SimpleSheetController<T>;
+    return completer.future;
   }
 
   ///
@@ -197,47 +300,38 @@ class SimpleSheetState extends State<SimpleSheet>
       return widget.child;
     }
 
-    final animation = _currentSheet!._controller.animation;
+    final controller = _currentSheet!._controller;
+    final animation = controller.animation;
 
-    return Material(
-      // color: Colors.amber,
-      // color: Colors.pink,
-      color: Colors.transparent,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          DismissIntent: _DismissSheetAction(context),
-        },
-        child: AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            log('${animation.value}');
-            return CustomMultiChildLayout(
-              delegate: _ScaffoldLayout(
-                progress: animation.value,
-              ),
-              children: <LayoutId>[
-                LayoutId(
-                  id: 'SimpleSheet.body',
-                  child: _BodyBuilder(
-                    body: widget.child,
-                  ),
-                ),
-                LayoutId(
-                  id: 'SimpleSheet.sheet',
-                  child: _currentSheet!._widget,
-                  // child: Container(color: Colors.amber),
-                  // child: SimpleDraggable(
-                  //   controller: _currentSheet!._controller,
-                  //   builder: (context, controller) {
-                  //     return Container(
-                  //       color: Colors.amber,
-                  //     );
-                  //   },
-                  // ),
-                ),
-              ],
-            );
+    return _DraggableScope(
+      controller: controller,
+      child: Material(
+        color: Colors.red,
+        // color: Colors.pink,
+        // color: Colors.transparent,
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            DismissIntent: _DismissSheetAction(context),
           },
+          child: Stack(
+            children: [
+              AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return FractionallySizedBox(
+                    heightFactor: (1 - animation.value)
+                        .clamp(1 - controller.snapPoint.offset, 1),
+                    alignment: Alignment.topCenter,
+                    child: child,
+                  );
+                },
+                child: widget.child,
+              ),
+
+              // Bottom sheet
+              _currentSheet!._widget,
+            ],
+          ),
         ),
       ),
     );
@@ -248,19 +342,14 @@ class SimpleSheetState extends State<SimpleSheet>
 class SimpleSheetController<T> {
   const SimpleSheetController._(
     this._widget,
-    this._completer,
     this.close,
     this._controller,
   );
 
   final Widget _widget;
-  final Completer<T> _completer;
   final SDController _controller;
 
-  /// Completes when the feature controlled by this object is no longer visible.
-  Future<T> get closed => _completer.future;
-
-  /// Remove the feature (e.g., bottom sheet, snack bar, or material banner) from the scaffold.
+  ///
   final VoidCallback close;
 }
 
@@ -276,10 +365,10 @@ class _StandardSheet extends StatefulWidget {
   final VoidCallback onInit;
 
   @override
-  State<_StandardSheet> createState() => __StandardSheetState();
+  State<_StandardSheet> createState() => _StandardSheetState();
 }
 
-class __StandardSheetState extends State<_StandardSheet> {
+class _StandardSheetState extends State<_StandardSheet> {
   @override
   void initState() {
     super.initState();
@@ -295,65 +384,21 @@ class __StandardSheetState extends State<_StandardSheet> {
   @override
   Widget build(BuildContext context) => widget.child;
 }
-// =============================================================================
 
-// ///
-// PersistentBottomSheetController<T> showSimpleSheet<T>({
-//   required BuildContext context,
-//   required WidgetBuilder builder,
-//   Color? backgroundColor,
-//   double? elevation,
-//   ShapeBorder? shape,
-//   Clip? clipBehavior,
-//   BoxConstraints? constraints,
-//   bool? enableDrag,
-//   AnimationController? transitionAnimationController,
-// }) {
-//   assert(debugCheckHasSimpleSheetScaffold(context), '');
-
-//   return Scaffold.of(context).showBottomSheet<T>(
-//     builder,
-//     backgroundColor: backgroundColor,
-//     elevation: elevation,
-//     shape: shape,
-//     clipBehavior: clipBehavior,
-//     constraints: constraints,
-//     enableDrag: enableDrag,
-//     transitionAnimationController: transitionAnimationController,
-//   );
-// }
-
-/// Asserts that the given context has a [SimpleSheet] ancestor.
 ///
-/// Used by various widgets to make sure that they are only used in an
-/// appropriate context.
-///
-/// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's build method:
-///
-/// ```dart
-/// assert(debugCheckHasSimpleSheetScaffold(context));
-/// ```
-///
-/// Always place this before any early returns, so that the invariant is checked
-/// in all cases. This prevents bugs from hiding until a particular codepath is
-/// hit.
-///
-/// This method can be expensive (it walks the element tree).
-///
-/// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasSimpleSheet(BuildContext context) {
   assert(
     () {
-      if (context.widget is! SimpleSheet &&
-          context.findAncestorWidgetOfExactType<SimpleSheet>() == null) {
+      if (context.widget is! SimpleDraggableScope &&
+          context.findAncestorWidgetOfExactType<SimpleDraggableScope>() ==
+              null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('No SimpleSheet widget found.'),
           ErrorDescription(
             '${context.widget.runtimeType} widgets require a SimpleSheet widget ancestor.',
           ),
           ...context.describeMissingAncestor(
-            expectedAncestorType: SimpleSheet,
+            expectedAncestorType: SimpleDraggableScope,
           ),
           // ErrorHint(
           //   'Typically, the SimpleSheet widget is introduced by the MaterialApp or '
@@ -370,127 +415,6 @@ bool debugCheckHasSimpleSheet(BuildContext context) {
 
 // =============================================================================
 
-// Used to communicate the height of the Scaffold's bottomNavigationBar and
-// persistentFooterButtons to the LayoutBuilder which builds the Scaffold's body.
-//
-// Scaffold expects a _BodyBoxConstraints to be passed to the _BodyBuilder
-// widget's LayoutBuilder, see _ScaffoldLayout.performLayout(). The BoxConstraints
-// methods that construct new BoxConstraints objects, like copyWith() have not
-// been overridden here because we expect the _BodyBoxConstraintsObject to be
-// passed along unmodified to the LayoutBuilder. If that changes in the future
-// then _BodyBuilder will assert.
-class _BodyBoxConstraints extends BoxConstraints {
-  const _BodyBoxConstraints({
-    required this.bottomWidgetsHeight,
-    super.maxWidth,
-    super.maxHeight,
-  });
-
-  final double bottomWidgetsHeight;
-
-  // RenderObject.layout() will only short-circuit its call to its performLayout
-  // method if the new layout constraints are not == to the current constraints.
-  // If the height of the bottom widgets has changed, even though the constraints'
-  // min and max values have not, we still want performLayout to happen.
-  @override
-  bool operator ==(Object other) {
-    if (super != other) {
-      return false;
-    }
-    return other is _BodyBoxConstraints &&
-        other.bottomWidgetsHeight == bottomWidgetsHeight;
-  }
-
-  @override
-  int get hashCode => Object.hash(
-        super.hashCode,
-        bottomWidgetsHeight,
-      );
-}
-
-// Used when Scaffold.extendBody is true to wrap the scaffold's body in a MediaQuery
-// whose padding accounts for the height of the bottomNavigationBar and/or the
-// persistentFooterButtons.
-//
-// The bottom widgets' height is passed along via the _BodyBoxConstraints parameter.
-// The constraints parameter is constructed in_ScaffoldLayout.performLayout().
-class _BodyBuilder extends StatelessWidget {
-  const _BodyBuilder({
-    required this.body,
-  });
-
-  final Widget body;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final bodyConstraints = constraints as _BodyBoxConstraints;
-        final metrics = MediaQuery.of(context);
-
-        final bottom = math.max(
-          metrics.padding.bottom,
-          bodyConstraints.bottomWidgetsHeight,
-        );
-
-        return MediaQuery(
-          data: metrics.copyWith(
-            padding: metrics.padding.copyWith(bottom: bottom),
-          ),
-          child: body,
-        );
-      },
-    );
-  }
-}
-
-// =============================================================================
-
-class _ScaffoldLayout extends MultiChildLayoutDelegate {
-  _ScaffoldLayout({required this.progress});
-
-  final double progress;
-
-  @override
-  void performLayout(Size size) {
-    // log('progress => $progress');
-    final looseConstraints = BoxConstraints.loose(size);
-    final fullWidthConstraints = looseConstraints.tighten(width: size.width);
-
-    final hasBottomSheet = hasChild('SimpleSheet.sheet');
-
-    final bottomWidgetsHeight =
-        hasBottomSheet ? size.height * progress.clamp(0.0, 0.45) : 0.0;
-
-    if (hasChild('SimpleSheet.body')) {
-      layoutChild(
-        'SimpleSheet.body',
-        _BodyBoxConstraints(
-          maxHeight: size.height - bottomWidgetsHeight,
-          maxWidth: fullWidthConstraints.maxWidth,
-          bottomWidgetsHeight: bottomWidgetsHeight,
-        ),
-      );
-      positionChild('SimpleSheet.body', Offset.zero);
-    }
-
-    if (hasBottomSheet) {
-      layoutChild('SimpleSheet.sheet', fullWidthConstraints);
-      positionChild(
-        'SimpleSheet.sheet',
-        Offset(0, size.height - size.height * progress),
-      );
-    }
-  }
-
-  @override
-  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate) {
-    return true;
-  }
-}
-
-// =============================================================================
-
 class _DismissSheetAction extends DismissAction {
   _DismissSheetAction(this.context);
 
@@ -498,7 +422,7 @@ class _DismissSheetAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return SimpleSheet.of(context).isSheetOpen;
+    return SimpleDraggableScope.of(context).isSheetOpen;
   }
 
   @override
@@ -507,4 +431,4 @@ class _DismissSheetAction extends DismissAction {
   }
 }
 
-// =============================================================================
+// =========================================================================
