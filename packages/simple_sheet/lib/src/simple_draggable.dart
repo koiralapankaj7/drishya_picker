@@ -27,7 +27,7 @@ class SimpleDraggable extends StatefulWidget {
     this.controller,
     this.scrollController,
     this.byPosition = false,
-    this.delegate = const _DefaultDelegate(),
+    this.delegate,
     super.key,
   });
 
@@ -47,7 +47,7 @@ class SimpleDraggable extends StatefulWidget {
   final bool byPosition;
 
   ///
-  final SimpleDraggableDelegate delegate;
+  final SimpleDraggableDelegate? delegate;
 
   @override
   State<SimpleDraggable> createState() => _SimpleDraggableState();
@@ -63,6 +63,7 @@ class _SimpleDraggableState extends State<SimpleDraggable>
   @override
   void initState() {
     super.initState();
+    log('_SimpleDraggableState.initState');
     _controller = widget.controller ?? SDController(vsync: this);
     _scrollController = widget.scrollController ?? ScrollController();
     _initController();
@@ -114,14 +115,14 @@ class _SimpleDraggableState extends State<SimpleDraggable>
   @override
   Widget build(BuildContext context) {
     // return widget.builder(context, _scrollController);
-    final handler = widget.delegate.buildHandler(context);
+    final handler =
+        (widget.delegate ?? const _DefaultDelegate()).buildHandler(context);
 
     return Material(
       type: MaterialType.transparency,
       key: _childKey,
       child: WillPopScope(
         onWillPop: () async {
-          print('On will pop');
           if (_controller.animation.value <= 0.0) return true;
           await _controller.close();
           return true;
@@ -812,39 +813,47 @@ class _SimpleDraggableScopeNewState extends State<SimpleDraggableScopeNew> {
 
 ///
 class DraggableRoute<T> extends ModalRoute<T> {
-  DraggableRoute(
-    BuildContext context, {
-    required this.builder,
-    // SDController? controller,
+  DraggableRoute({
+    // required this.simpleDraggable,
+    required this.child,
   }) {
-    _state = context.findAncestorStateOfType<_SimpleDraggableScopeNewState>();
+    // print(context);
+    // _state = context.findAncestorStateOfType<_SimpleDraggableScopeNewState>();
   }
 
-  final DraggableWidgetBuilder builder;
-  late SDController _controller;
-  _SimpleDraggableScopeNewState? _state;
+  final Widget child;
+
+  // final SimpleDraggable simpleDraggable;
+//  SDController? controller,
+//   ScrollController? scrollController,
+//   bool byPosition = false,
+//   SimpleDraggableDelegate? delegate,
+
+  // late SDController _controller;
+  // _SimpleDraggableScopeNewState? _state;
 
   @override
   void install() {
     super.install();
     log('install');
-    _controller = SDController(vsync: navigator!)
-      .._animationController.addListener(() {
-        // if (_controller.animation.value <= 0.0) {
-        //   navigator!.pop();
-        // }
-      });
-    _state?._update(_controller);
+    // _controller = simpleDraggable.controller ?? SDController(vsync: navigator!);
   }
 
-  @override
-  void dispose() {
-    log('dispose');
-    _state?._update(null);
-    _state = null;
-    _controller.dispose();
-    super.dispose();
-  }
+  // void _upodateState(BuildContext context) {
+  //   if (_state != null) return;
+  //   _state = subtreeContext!
+  //       .findAncestorStateOfType<_SimpleDraggableScopeNewState>();
+  //   _state?._update(_controller);
+  // }
+
+  // @override
+  // void dispose() {
+  //   log('dispose');
+  //   _state?._update(null);
+  //   _state = null;
+  //   _controller.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -883,38 +892,41 @@ class DraggableRoute<T> extends ModalRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     log('buildPage');
-    // _updateState(context);
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        log('${animation.value}');
-        return Material(
-          type: MaterialType.transparency,
-          child: SimpleDraggable(
-            builder: builder,
-            controller: _controller,
-          ),
-        );
-      },
+    // return const Material(
+    //   color: Colors.amber,
+    // );
+    // _upodateState(subtreeContext!);
+    return Material(
+      type: MaterialType.transparency,
+      // child: SimpleDraggable(
+      //   controller: _controller,
+      //   builder: (context, controller) {
+      //     return Container();
+      //   },
+      //   byPosition: simpleDraggable.byPosition,
+      //   delegate: simpleDraggable.delegate,
+      //   scrollController: simpleDraggable.scrollController,
+      // ),
+      child: child,
     );
   }
 
-  @override
-  TickerFuture didPush() {
-    log('didPush');
-    Future.delayed(Duration.zero, _controller.open);
-    return super.didPush();
-  }
+  // @override
+  // TickerFuture didPush() {
+  //   log('didPush');
+  //   Future.delayed(Duration.zero, _controller.open);
+  //   return super.didPush();
+  // }
 
-  @override
-  bool didPop(T? result) {
-    log('didPop');
-    if (_controller.animation.value > 0) {
-      _controller.close().then((_) => navigator!.pop(result));
-      return false;
-    }
-    return super.didPop(result);
-  }
+  // @override
+  // bool didPop(T? result) {
+  //   log('didPop');
+  //   if (_controller.animation.value > 0) {
+  //     _controller.close().then((_) => navigator!.pop(result));
+  //     return false;
+  //   }
+  //   return super.didPop(result);
+  // }
 
   @override
   List<OverlayEntry> get overlayEntries {
@@ -932,16 +944,97 @@ class DraggableRoute<T> extends ModalRoute<T> {
 }
 
 ///
-Future<T?> showSimpleSheet<T>({
+Future<T?> showSimpleDraggableSheet<T>({
   required BuildContext context,
   required DraggableWidgetBuilder builder,
+  SDController? controller,
+  ScrollController? scrollController,
+  bool byPosition = false,
+  SimpleDraggableDelegate? delegate,
 }) {
+  final widget = _TestWrapper(
+    scopeState:
+        context.findAncestorStateOfType<_SimpleDraggableScopeNewState>(),
+    builder: (c) {
+      return SimpleDraggable(
+        builder: builder,
+        controller: c,
+        scrollController: scrollController,
+        byPosition: byPosition,
+        delegate: delegate,
+      );
+    },
+  );
   return Navigator.of(context).push<T>(
-    DraggableRoute(
-      context,
-      builder: builder,
+    DraggableRoute<T>(
+      // context,
+      // simpleDraggable: SimpleDraggable(
+      //   builder: builder,
+      //   controller: controller,
+      //   scrollController: scrollController,
+      //   byPosition: byPosition,
+      //   delegate: delegate,
+      // ),
+      child: widget,
     ),
   );
+}
+
+class _TestWrapper extends StatefulWidget {
+  const _TestWrapper({
+    required this.builder,
+    this.scopeState,
+  });
+
+  final Widget Function(SDController controller) builder;
+
+  final _SimpleDraggableScopeNewState? scopeState;
+
+  @override
+  State<_TestWrapper> createState() => _TestWrapperState();
+}
+
+class _TestWrapperState extends State<_TestWrapper>
+    with TickerProviderStateMixin {
+  late SDController controller;
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    TickerFuture.complete();
+    controller = SDController(vsync: this);
+    // Future.delayed(Duration.zero, controller.open);
+    TickerFuture.complete();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..forward();
+
+    widget.scopeState?._update(controller);
+    WidgetsBinding.instance.endOfFrame.then((value) {
+      controller.open();
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    widget.scopeState?._update(null);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        print(_animationController.value);
+        return child!;
+      },
+      child: widget.builder(controller),
+    );
+  }
 }
 
 

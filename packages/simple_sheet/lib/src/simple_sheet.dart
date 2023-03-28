@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:simple_sheet/src/simple_draggable.dart';
@@ -432,3 +433,96 @@ class _DismissSheetAction extends DismissAction {
 }
 
 // =========================================================================
+
+class _BodyBoxConstraints extends BoxConstraints {
+  const _BodyBoxConstraints({
+    required this.bottomWidgetsHeight,
+    required this.appBarHeight,
+    required this.materialBannerHeight,
+    super.maxWidth,
+    super.maxHeight,
+  });
+
+  final double bottomWidgetsHeight;
+  final double appBarHeight;
+  final double materialBannerHeight;
+
+  @override
+  bool operator ==(Object other) {
+    if (super != other) {
+      return false;
+    }
+    return other is _BodyBoxConstraints &&
+        other.materialBannerHeight == materialBannerHeight &&
+        other.bottomWidgetsHeight == bottomWidgetsHeight &&
+        other.appBarHeight == appBarHeight;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        super.hashCode,
+        materialBannerHeight,
+        bottomWidgetsHeight,
+        appBarHeight,
+      );
+}
+
+class _BodyBuilder extends StatelessWidget {
+  const _BodyBuilder({
+    required this.extendBody,
+    required this.extendBodyBehindAppBar,
+    required this.body,
+  });
+
+  final Widget body;
+  final bool extendBody;
+  final bool extendBodyBehindAppBar;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!extendBody && !extendBodyBehindAppBar) {
+      return body;
+    }
+
+    const _BodyBoxConstraints(
+      bottomWidgetsHeight: 0,
+      appBarHeight: 0,
+      materialBannerHeight: 0,
+      maxHeight: 0,
+      maxWidth: 0,
+    );
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bodyConstraints = constraints as _BodyBoxConstraints;
+
+        final metrics = MediaQuery.of(context);
+
+        final bottom = extendBody
+            ? math.max(
+                metrics.padding.bottom,
+                bodyConstraints.bottomWidgetsHeight,
+              )
+            : metrics.padding.bottom;
+
+        final top = extendBodyBehindAppBar
+            ? math.max(
+                metrics.padding.top,
+                bodyConstraints.appBarHeight +
+                    bodyConstraints.materialBannerHeight,
+              )
+            : metrics.padding.top;
+
+        return MediaQuery(
+          data: metrics.copyWith(
+            padding: metrics.padding.copyWith(
+              top: top,
+              bottom: bottom,
+            ),
+          ),
+          child: body,
+        );
+      },
+    );
+  }
+}

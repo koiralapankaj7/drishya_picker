@@ -138,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // return _view();
 
-    return SimpleDraggableScope(
+    return SimpleDraggableScopeNew(
       child: Builder(builder: (context) {
         return Scaffold(
           backgroundColor: Colors.cyan,
@@ -156,19 +156,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   TextButton(
                     onPressed: () async {
                       Widget builder(context, controller) {
-                        return _TestWidget(
+                        return const _TestWidget(
                           title: 'Simple SHeet',
-                          controller: controller,
+                          controller: null,
                         );
                       }
 
-                      final result = await SimpleDraggableScope.of(context)
-                          .show<String>(builder: builder);
+                      // final result = await SimpleDraggableScope.of(context)
+                      //     .show<String>(builder: builder);
 
-                      // final result = await showSimpleSheet(
-                      //   context: context,
-                      //   builder: builder,
-                      // );
+                      // final result = Navigator.of(context)
+                      //     .push(NoTransitionRoute(builder: builder));
+
+                      final result = await showSimpleDraggableSheet(
+                        context: context,
+                        builder: builder,
+                      );
 
                       log("This is the result =>$result");
                     },
@@ -258,5 +261,45 @@ class _TestWidgetState extends State<_TestWidget> {
         ),
       ),
     );
+  }
+}
+
+class NoTransitionRoute<T> extends PageRoute<T> {
+  NoTransitionRoute({required this.builder});
+
+  final WidgetBuilder builder;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Color get barrierColor => Colors.transparent;
+
+  @override
+  String get barrierLabel => '';
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
   }
 }
