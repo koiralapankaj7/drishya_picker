@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// Drishya editing controller
@@ -166,18 +169,21 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
       final bg = _backgroundNotifier.value;
 
       if (bg is DrishyaBackground && !value.hasStickers) {
+        print("no strickers");
         // If background is drishya background and user has not edit the image
         // return its enity
         return bg.entity;
       } else if (bg is MemoryAssetBackground && !value.hasStickers) {
         // If background is memory bytes background and user has not edited the
         // image, create entity and return it
+        print("no boh");
         final entity = await PhotoManager.editor.saveImage(
           bg.bytes,
-          title: const Uuid().v4(),
+          title: const Uuid().v4()+'.png',
         );
         return entity?.toDrishya;
       } else {
+        print("all cases");
         // If user has edited the background take screenshot
         // todo: remove screenshot approach, edit image properly
         final boundary = _editorKey.currentContext?.findRenderObject()
@@ -185,13 +191,26 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         final image = await boundary!.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
-        final entity = await PhotoManager.editor.saveImage(
-          data,
+        final directory = await getApplicationDocumentsDirectory();
+
+        final file=await File('${directory.path}/${const Uuid().v4()}.png').writeAsBytes(
+            data,);
+        print(data);
+        print(file.path);
+        final editor= PhotoManager.editor;
+        print(editor);
+        final entity = await editor.saveImageWithPath(
+          file.path,
           title: const Uuid().v4(),
         );
+        print(entity);
         return entity?.toDrishya;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      if (kDebugMode) {
+        print(e);
+        print(stack);
+      }
       onException?.call(
         Exception('Exception occured while capturing picture : $e'),
       );
