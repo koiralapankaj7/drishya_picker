@@ -241,7 +241,12 @@ class _TextButton extends StatelessWidget {
       ),
       child: Text(
         label ?? '',
-        style: Theme.of(context).textTheme.labelLarge,
+        style: labelColor != null
+            ? Theme.of(context)
+                .textTheme
+                .labelLarge!
+                .copyWith(color: labelColor)
+            : Theme.of(context).textTheme.labelLarge,
       ),
     );
   }
