@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -193,10 +194,8 @@ class _EntityBGViewState extends State<_EntityBGView> {
     if (entity.type != AssetType.image) {
       return Center(
         child: Text(
-          'Un-supported background!',
-          style: Theme.of(context).textTheme.subtitle1?.copyWith(
-                color: Colors.white,
-              ),
+          Singleton.textDelegate.unsupportedBackground,
+          style: Theme.of(context).textTheme.titleMedium
         ),
       );
     }
@@ -212,11 +211,9 @@ class _EntityBGViewState extends State<_EntityBGView> {
         if (snapshot.data == null) {
           return Center(
             child: Text(
-              'Failed to load background!',
-              style: Theme.of(context).textTheme.subtitle1?.copyWith(
-                    color: Colors.white,
-                  ),
-            ),
+              Singleton.textDelegate.failedLoadBackground,
+              style: Theme.of(context).textTheme.titleMedium,)
+            ,
           );
         }
 

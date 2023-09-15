@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -87,10 +88,8 @@ class _AppDialog extends StatelessWidget {
     final cancel = TextButton(
       onPressed: Navigator.of(context).pop,
       child: Text(
-        'NO',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: Colors.lightBlue,
-            ),
+        Singleton.textDelegate.no,
+        style: Theme.of(context).textTheme.labelLarge,
       ),
     );
     final unselectItems = TextButton(
@@ -98,25 +97,19 @@ class _AppDialog extends StatelessWidget {
         Navigator.of(context).pop(true);
       },
       child: Text(
-        'DISCARD',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: Colors.blue,
-            ),
+        Singleton.textDelegate.discard,
+        style: Theme.of(context).textTheme.labelLarge,
       ),
     );
 
     return AlertDialog(
       title: Text(
-        'Discard changes?',
-        style: Theme.of(context).textTheme.headline6!.copyWith(
-              color: Colors.white70,
-            ),
+        Singleton.textDelegate.discardChanges,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
       content: Text(
-        'Are you sure you want to discard your changes?',
-        style: Theme.of(context).textTheme.bodyText2!.copyWith(
-              color: Colors.grey.shade600,
-            ),
+        Singleton.textDelegate.areYouSureDiscard,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       actions: [cancel, unselectItems],
       backgroundColor: Colors.grey.shade900,

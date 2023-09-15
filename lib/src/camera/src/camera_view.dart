@@ -6,11 +6,14 @@ import 'package:drishya_picker/src/camera/src/widgets/camera_builder.dart';
 import 'package:drishya_picker/src/camera/src/widgets/camera_overlay.dart';
 import 'package:drishya_picker/src/camera/src/widgets/raw_camera_view.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'entities/singleton.dart';
 
 const Duration _kRouteDuration = Duration(milliseconds: 300);
 
@@ -39,13 +42,9 @@ class CameraView extends StatefulWidget {
   /// If this setting is null [editorSetting] will be used
   final EditorSetting? photoEditorSetting;
 
-  /// Camera view route name
-  static const String name = 'CameraView';
-
   /// Open camera view for picking.
   static Future<List<DrishyaEntity>?> pick(
     BuildContext context, {
-
     /// Camera controller
     CamController? controller,
 
@@ -73,10 +72,12 @@ class CameraView extends StatefulWidget {
           photoEditorSetting: photoEditorSetting,
         ),
         setting: routeSetting ??
-            const CustomRouteSetting(
+            CustomRouteSetting(
               transitionDuration: _kRouteDuration,
               reverseTransitionDuration: _kRouteDuration,
-              settings: RouteSettings(name: name),
+              settings: RouteSettings(
+                name: Singleton.textDelegate.cameraView,
+              ),
             ),
       ),
     );
@@ -204,7 +205,10 @@ class _CameraViewState extends State<CameraView>
                 child: PageView(
                   controller: _camController.pageController,
                   physics: const NeverScrollableScrollPhysics(),
-                  children: const [_GalleryView(), _CameraView()],
+                  children: const[
+                    _GalleryView(),
+                     _CameraView()
+                  ],
                 ),
               );
             }
@@ -228,7 +232,10 @@ class _CameraViewState extends State<CameraView>
             child: PageView(
               controller: _camController.pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const [_GalleryView(), _CameraView()],
+              children: const[
+                _GalleryView(),
+                 _CameraView()
+              ],
             ),
           ),
         ),
@@ -244,7 +251,6 @@ class _GalleryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.camController!;
-
     if (!controller.setting.enableGallery) {
       return const SizedBox();
     }
@@ -253,12 +259,13 @@ class _GalleryView extends StatelessWidget {
       children: [
         GalleryView(
           controller: controller.galleryController,
-          setting: const GallerySetting(
+          setting: GallerySetting(
             selectionMode: SelectionMode.actionBased,
-            albumTitle: 'Gallery',
+            albumTitle: Singleton.textDelegate.gallery,
             enableCamera: false,
-            panelSetting: PanelSetting(thumbHandlerHeight: 0),
+            panelSetting: const PanelSetting(thumbHandlerHeight: 0),
           ),
+          textDelegate: Singleton.textDelegate,
         ),
 
         // Camera switch button

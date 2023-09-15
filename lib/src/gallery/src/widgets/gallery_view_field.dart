@@ -1,5 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -10,7 +11,7 @@ class GalleryViewField extends StatelessWidget {
   /// If used [GalleryViewField] with [SlidableGallery], [PanelSetting]
   /// and [GallerySetting] will be override by the [SlidableGallery]
   ///
-  const GalleryViewField({
+  GalleryViewField({
     Key? key,
     this.controller,
     this.onChanged,
@@ -18,7 +19,10 @@ class GalleryViewField extends StatelessWidget {
     this.setting,
     this.routeSetting,
     this.child,
-  }) : super(key: key);
+    DrishyaTextDelegate? textDelegate,
+  }) : super(key: key){
+    Singleton.textDelegate=textDelegate??Singleton.textDelegate;
+  }
 
   ///
   /// Gallery controller

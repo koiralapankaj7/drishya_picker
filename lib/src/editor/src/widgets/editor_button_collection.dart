@@ -6,6 +6,8 @@ import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 final PageStorageBucket _bucket = PageStorageBucket();
 var _initialIndex = 0;
 
@@ -58,7 +60,9 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
     final setting = controller.setting;
 
     if (setting.stickers?.isEmpty ?? true) {
-      UIHandler.of(context).showSnackBar('Stickers not available!');
+      UIHandler.of(context).showSnackBar(
+        Singleton.textDelegate.stickersNotAvailable,
+      );
       return;
     }
 
@@ -306,9 +310,9 @@ class _DoneButton extends StatelessWidget {
       onTap: onPressed,
       child: Padding(
         padding: padding ?? EdgeInsets.zero,
-        child: const Text(
-          'Done',
-          style: TextStyle(
+        child:  Text(
+          Singleton.textDelegate.done,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 17,
             fontWeight: FontWeight.w500,

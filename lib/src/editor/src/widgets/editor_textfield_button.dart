@@ -3,6 +3,8 @@ import 'package:drishya_picker/src/editor/editor.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 ///
 class EditorTextfieldButton extends StatelessWidget {
   ///
@@ -33,9 +35,9 @@ class EditorTextfieldButton extends StatelessWidget {
         onTap: () {
           controller.updateValue(hasFocus: true);
         },
-        child: const Text(
-          'Tap to type...',
-          style: TextStyle(
+        child:  Text(
+          Singleton.textDelegate.tapToType,
+          style: const TextStyle(
             color: Colors.white60,
             fontSize: 30,
             fontWeight: FontWeight.w800,

@@ -3,20 +3,24 @@ import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:flutter/material.dart';
 
+import '../entities/singleton.dart';
+
 ///
 /// Widget to pick media using camera
 class CameraViewField extends StatelessWidget {
   ///
-  const CameraViewField({
-    Key? key,
-    required this.child,
+  CameraViewField({
+    required this.child, Key? key,
     this.controller,
     this.setting,
     this.editorSetting,
     this.photoEditorSetting,
     this.routeSetting,
     this.onCapture,
-  }) : super(key: key);
+    DrishyaTextDelegate? textDelegate,
+  }) : super(key: key){
+    Singleton.textDelegate=textDelegate??Singleton.textDelegate;
+  }
 
   ///
   /// Child widget

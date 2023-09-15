@@ -291,7 +291,7 @@ class TextSticker extends Sticker {
     VoidCallback? onPressed,
     StickerAsset? asset,
   ) {
-    return DecoratedBox(
+    final icon= DecoratedBox(
       decoration: BoxDecoration(
         color: background ?? Colors.transparent,
         borderRadius: BorderRadius.circular(10),
@@ -307,6 +307,8 @@ class TextSticker extends Sticker {
         ),
       ),
     );
+    if(onPressed==null) return icon;
+    return InkWell(onTap: onPressed,child: icon,);
   }
 
   ///

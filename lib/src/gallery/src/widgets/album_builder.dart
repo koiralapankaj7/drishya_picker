@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:flutter/material.dart';
@@ -48,10 +49,10 @@ class AlbumBuilder extends StatelessWidget {
 
         // No data
         if (value.state == BaseState.completed && value.albums.isEmpty) {
-          return const Center(
+          return  Center(
             child: Text(
-              'No albums available',
-              style: TextStyle(
+              Singleton.textDelegate.noAlbumsAvailable,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
@@ -60,10 +61,10 @@ class AlbumBuilder extends StatelessWidget {
         }
 
         if (value.state == BaseState.error) {
-          return const Center(
+          return  Center(
             child: Text(
-              'Something went wrong. Please try again!',
-              style: TextStyle(
+              Singleton.textDelegate.somethingWrong,
+              style:const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),

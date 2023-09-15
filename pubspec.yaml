@@ -4,22 +4,23 @@ version: 2.0.0-dev-1
 homepage: https://github.com/koiralapankaj7/drishya_picker
 
 environment:
-  sdk: ">=2.13.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
 
 dependencies:
-  camera: ^0.9.8+1
-  collection: ^1.16.0
+  camera: ^0.10.5+2
+  collection: ^1.17.1
   flutter:
     sdk: flutter
-  meta: ^1.7.0
-  path: ^1.8.1
-  photo_manager: ^2.1.4
-  uuid: ^3.0.6
+  meta: ^1.9.1
+  path: ^1.8.3
+  path_provider: ^2.0.15
+  photo_manager: ^2.6.0
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  very_good_analysis: ^3.0.1
+  very_good_analysis: ^5.0.0+1
 
 flutter:
   uses-material-design: true

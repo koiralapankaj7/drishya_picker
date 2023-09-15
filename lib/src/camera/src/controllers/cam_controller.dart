@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -46,7 +47,8 @@ class CamController extends ValueNotifier<CamValue> {
     EditorSetting? editorSetting,
     EditorSetting? photoEditorSetting,
   }) {
-    _setting = setting ?? const CameraSetting();
+    _setting = setting ??
+        const CameraSetting();
     _editorSetting = editorSetting ?? const EditorSetting();
     _photoEditorSetting = photoEditorSetting ?? _editorSetting;
   }
@@ -88,8 +90,8 @@ class CamController extends ValueNotifier<CamValue> {
   bool _hasCamera() {
     if (!initialized) {
       final exception = CameraException(
-        'cameraUnavailable',
-        "Couldn't find the camera!",
+        Singleton.textDelegate.unavailable,
+        Singleton.textDelegate.couldntFindCamera,
       );
       value = value.copyWith(error: exception);
       return false;
@@ -156,8 +158,8 @@ class CamController extends ValueNotifier<CamValue> {
       if (cameras.isNotEmpty) {
         description = cameras[0];
       } else {
-        description = const CameraDescription(
-          name: 'Simulator',
+        description = CameraDescription(
+          name: Singleton.textDelegate.simulator,
           lensDirection: CameraLensDirection.front,
           sensorOrientation: 0,
         );
@@ -289,7 +291,7 @@ class CamController extends ValueNotifier<CamValue> {
           return drishyaEntity;
         } else {
           final exception = CameraException(
-            'takePictyre',
+            'takePicture',
             'Something went wrong! Please try again',
           );
           value = value.copyWith(isTakingPicture: false, error: exception);

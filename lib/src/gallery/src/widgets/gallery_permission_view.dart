@@ -1,3 +1,4 @@
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -64,7 +65,10 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
         children: [
           // Heading
           Text(
-            'Access Your ${widget.isCamera ? 'Camera' : 'Album'}',
+            Singleton.textDelegate.accessYour +
+                (widget.isCamera
+                    ? Singleton.textDelegate.camera
+                    : Singleton.textDelegate.album),
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
@@ -75,7 +79,10 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
 
           // Description
           Text(
-            '''Allow Drishya picker to access your ${widget.isCamera ? 'camera and microphone' : 'album for picking media'} .''',
+            Singleton.textDelegate.allowPermission +
+                (widget.isCamera
+                    ? Singleton.textDelegate.cameraAndMicrophone
+                    : Singleton.textDelegate.albumForMedia),
             textAlign: TextAlign.center,
           ),
 
@@ -94,7 +101,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
                       primary: scheme.secondary,
                       visualDensity: VisualDensity.comfortable,
                     ),
-                    child: const Text('Deny Access'),
+                    child: Text(Singleton.textDelegate.denyAccess),
                   ),
                 ),
               OutlinedButton(
@@ -107,7 +114,7 @@ class _GalleryPermissionViewState extends State<GalleryPermissionView>
                   backgroundColor: scheme.primary,
                   primary: scheme.onPrimary,
                 ),
-                child: const Text('Allow Access'),
+                child: Text(Singleton.textDelegate.allowAccess),
               ),
             ],
           ),

@@ -194,9 +194,9 @@ class _ShutterButtonState extends State<_ShutterButton>
                     builder: (value, child) {
                       switch (value.cameraType) {
                         case CameraType.selfi:
-                          return const Icon(
+                          return Icon(
                             CupertinoIcons.person_fill,
-                            color: Colors.blue,
+                            color: Theme.of(context).primaryColor,
                           );
                         case CameraType.video:
                           return _VideoIcon(radius: _videoIconRadius);
@@ -235,7 +235,7 @@ class _VideoIcon extends StatelessWidget {
       height: size,
       width: size,
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(radius),
       ),
     );
@@ -247,7 +247,7 @@ class _CustomPainter extends CustomPainter {
     this.progress = 0.0,
     this.strokeWidth = 7.0,
     this.strokeColor = Colors.white,
-    this.progressColor = Colors.blue,
+    this.progressColor = Colors.red,
   });
 
   final double progress;

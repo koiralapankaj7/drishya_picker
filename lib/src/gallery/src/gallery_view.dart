@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/albums_page.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_asset_selector.dart';
@@ -13,15 +14,19 @@ import 'package:drishya_picker/src/gallery/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../camera/src/entities/singleton.dart';
+
 ///
 ///
 class GalleryView extends StatefulWidget {
   ///
-  const GalleryView({
-    Key? key,
+  GalleryView({Key? key,
     this.controller,
     this.setting,
-  }) : super(key: key);
+    DrishyaTextDelegate? textDelegate,
+  }) : super(key: key){
+    Singleton.textDelegate=textDelegate??Singleton.textDelegate;
+  }
 
   /// Gallery controller
   final GalleryController? controller;
@@ -30,7 +35,7 @@ class GalleryView extends StatefulWidget {
   final GallerySetting? setting;
 
   ///
-  static const String name = 'GalleryView';
+  static String name = Singleton.textDelegate.galleryView;
 
   ///
   /// Pick media
@@ -50,7 +55,7 @@ class GalleryView extends StatefulWidget {
       SlideTransitionPageRoute(
         builder: GalleryView(controller: controller, setting: setting),
         setting: routeSetting ??
-            const CustomRouteSetting(
+            CustomRouteSetting(
               settings: RouteSettings(name: name),
             ),
       ),
@@ -172,37 +177,29 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
     final cancel = TextButton(
       onPressed: Navigator.of(context).pop,
       child: Text(
-        'CANCEL',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: Colors.lightBlue,
-            ),
+        Singleton.textDelegate.cancel,
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
     final unselectItems = TextButton(
       onPressed: _onSelectionClear,
       child: Text(
-        'USELECT ITEMS',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: Colors.blue,
-            ),
+        Singleton.textDelegate.unselectItems,
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
 
     final alertDialog = AlertDialog(
       title: Text(
-        'Unselect these items?',
-        style: Theme.of(context).textTheme.headline6!.copyWith(
-              color: Colors.white70,
-            ),
+        Singleton.textDelegate.unselectTheseItems,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
       content: Text(
-        'Going back will undo the selections you made.',
-        style: Theme.of(context).textTheme.bodyText2!.copyWith(
-              color: Colors.grey.shade600,
-            ),
+        Singleton.textDelegate.backUndo,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       actions: [cancel, unselectItems],
-      backgroundColor: Colors.grey.shade900,
+      //backgroundColor: Colors.grey.shade900,
       titlePadding: const EdgeInsets.all(16),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
@@ -314,7 +311,7 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
 
                   // Divider
                   Divider(
-                    color: Colors.lightBlue.shade300,
+                    color: Theme.of(context).primaryColor,
                     thickness: 0.5,
                     height: 0.5,
                     indent: 0,

@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// Drishya editing controller
@@ -174,7 +177,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         // image, create entity and return it
         final entity = await PhotoManager.editor.saveImage(
           bg.bytes,
-          title: const Uuid().v4(),
+          title: const Uuid().v4()+'.png',
         );
         return entity?.toDrishya;
       } else {
@@ -185,13 +188,22 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         final image = await boundary!.toImage();
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final data = byteData!.buffer.asUint8List();
-        final entity = await PhotoManager.editor.saveImage(
-          data,
+        final directory = await getApplicationDocumentsDirectory();
+
+        final file=await File('${directory.path}/${const Uuid().v4()}.png').writeAsBytes(
+            data,);
+        final editor= PhotoManager.editor;
+        final entity = await editor.saveImageWithPath(
+          file.path,
           title: const Uuid().v4(),
         );
         return entity?.toDrishya;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      if (kDebugMode) {
+        print(e);
+        print(stack);
+      }
       onException?.call(
         Exception('Exception occured while capturing picture : $e'),
       );

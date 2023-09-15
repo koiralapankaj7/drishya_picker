@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/text_delegates/italian_drishya_text_delegate.dart';
 import 'package:example/fullscreen_gallery.dart';
 import 'package:example/recent_entities.dart';
 import 'package:example/shape_icons.dart';
@@ -39,6 +40,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   Widget build(BuildContext context) {
     return SlidableGallery(
+      //textDelegate: CustomDrishyaTextDelegate(),
       controller: _controller,
       child: Scaffold(
         appBar: AppBar(
@@ -193,15 +195,15 @@ const _colors = [
 ];
 
 ///
-final _stickers1 = {'ARTS': _arts, 'EMOJIS': _gifs, 'SHAPES': _shapes};
-final _stickers2 = {'EMOJIS': _gifs, 'SHAPES': _shapes};
+final _stickers1 = {'ARTS': _arts,'EMOJI':_emojis, 'EMOJIS': _gifs, 'SHAPES': _shapes};
+final _stickers2 = {'EMOJIS': _gifs,'EMOJI':_emojis, 'SHAPES': _shapes};
 final _stickers3 = {
   'SHAPES': _shapes,
   'SHAPES1': _shapes,
   'SHAPES2': _shapes,
   'SHAPES3': _shapes,
   'SHAPES4': _shapes,
-  'SHAPES5': _shapes,
+  'SHAPES5': _shapes,'EMOJI':_emojis,
 };
 
 ///
@@ -351,4 +353,9 @@ final _shapes = ShapeIcons.values
     .map(
       (iconData) => IconSticker(iconData: iconData),
     )
+    .toSet();
+final _emojis = Emojis.values
+    .map(
+      (iconData) => TextSticker(text: iconData,),
+)
     .toSet();

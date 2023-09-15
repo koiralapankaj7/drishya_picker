@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -155,7 +156,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                                 }
                               });
                             },
-                            label: 'EDIT',
+                            label: Singleton.textDelegate.edit,
                             background: Colors.white,
                             labelColor: Colors.black,
                           ),
@@ -196,7 +197,7 @@ class GalleryAssetSelectorState extends State<GalleryAssetSelector>
                         },
                         child: _TextButton(
                           onPressed: widget.controller.completeTask,
-                          label: 'SELECT',
+                          label: Singleton.textDelegate.select,
                         ),
                       ),
                     ),
@@ -232,7 +233,7 @@ class _TextButton extends StatelessWidget {
     return TextButton(
       onPressed: () => onPressed?.call(context),
       style: TextButton.styleFrom(
-        backgroundColor: background ?? Theme.of(context).colorScheme.primary,
+        backgroundColor: background ?? Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -240,9 +241,12 @@ class _TextButton extends StatelessWidget {
       ),
       child: Text(
         label ?? '',
-        style: Theme.of(context).textTheme.button!.copyWith(
-              color: labelColor ?? Theme.of(context).colorScheme.onPrimary,
-            ),
+        style: labelColor != null
+            ? Theme.of(context)
+                .textTheme
+                .labelLarge!
+                .copyWith(color: labelColor)
+            : Theme.of(context).textTheme.labelLarge,
       ),
     );
   }
