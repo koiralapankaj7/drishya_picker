@@ -233,7 +233,7 @@ class _TextButton extends StatelessWidget {
     return TextButton(
       onPressed: () => onPressed?.call(context),
       style: TextButton.styleFrom(
-        backgroundColor: background ?? Theme.of(context).colorScheme.primary,
+        backgroundColor: background ?? Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
