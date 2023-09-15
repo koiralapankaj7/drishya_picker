@@ -178,14 +178,14 @@ class _ViewState extends State<_View> with SingleTickerProviderStateMixin {
       onPressed: Navigator.of(context).pop,
       child: Text(
         Singleton.textDelegate.cancel,
-        style: Theme.of(context).textTheme.labelLarge,
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
     final unselectItems = TextButton(
       onPressed: _onSelectionClear,
       child: Text(
         Singleton.textDelegate.unselectItems,
-        style: Theme.of(context).textTheme.labelLarge,
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
 
