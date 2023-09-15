@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 /// Available multiselection mode for gallery
 enum SelectionMode {
   /// maximumCount provided in [GallerySetting] will be use to determine
@@ -19,13 +21,13 @@ enum SelectionMode {
 class GallerySetting {
   ///
   /// Gallery setting
-  const GallerySetting({
+  GallerySetting({
     this.selectedEntities = const [],
     this.requestType = RequestType.all,
     this.maximumCount = 50,
     this.selectionMode = SelectionMode.countBased,
-    this.albumTitle = 'All Photos',
-    this.albumSubtitle = 'Select Media',
+    String? albumTitle,
+    String? albumSubtitle,
     this.enableCamera = true,
     this.crossAxisCount,
     this.panelSetting,
@@ -33,7 +35,11 @@ class GallerySetting {
     this.cameraSetting,
     this.cameraTextEditorSetting,
     this.cameraPhotoEditorSetting,
-  });
+  }){
+   this.albumTitle=albumTitle??Singleton.textDelegate.allPhotos;
+   this.albumSubtitle=albumSubtitle??Singleton.textDelegate.selectMedia;
+
+  }
 
   ///
   /// Previously selected entities
@@ -54,11 +60,11 @@ class GallerySetting {
 
   ///
   /// Album name for all photos, default is set to "All Photos"
-  final String albumTitle;
+  late final String albumTitle;
 
   ///
   /// String displayed below album name. Default : 'Select media'
-  final String albumSubtitle;
+  late final String albumSubtitle;
 
   ///
   /// Set false to hide camera from gallery view

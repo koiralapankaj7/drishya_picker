@@ -3,23 +3,25 @@
 import 'dart:math';
 
 import 'package:drishya_picker/assets/icons/custom_icons.dart';
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:flutter/material.dart';
 
 import '../controllers/cam_controller.dart';
 import '../entities/camera_type.dart';
+import '../entities/singleton.dart';
 import 'camera_builder.dart';
 
 ///
 class CameraTypeChanger extends StatelessWidget {
   ///
   const CameraTypeChanger({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///
   final CamController controller;
 
+  ///
   @override
   Widget build(BuildContext context) {
     return CameraBuilder(
@@ -64,13 +66,10 @@ class CameraTypeChanger extends StatelessWidget {
 
 class _TypesPageView extends StatefulWidget {
   const _TypesPageView({
-    Key? key,
-    required this.initialType,
-    required this.onChanged,
+    required this.initialType, required this.onChanged, Key? key,
   }) : super(key: key);
 
   final void Function(CameraType type) onChanged;
-
   final CameraType initialType;
 
   @override
@@ -115,7 +114,7 @@ class _TypesPageViewState extends State<_TypesPageView> {
           activePercent = 0.0;
         }
         return _CameraType(
-          type: type,
+          label: Singleton.textDelegate.typeLabel(type.index),
           activePercent: activePercent,
           onPressed: () {
             pageController.animateToPage(
@@ -133,15 +132,12 @@ class _TypesPageViewState extends State<_TypesPageView> {
 class _CameraType extends StatelessWidget {
   ///
   const _CameraType({
-    Key? key,
-    required this.type,
-    required this.activePercent,
+    required this.activePercent, required this.label, Key? key,
     this.onPressed,
   }) : super(key: key);
 
   ///
-  final CameraType type;
-
+  final String label;
   ///
   final double activePercent;
 
@@ -156,7 +152,7 @@ class _CameraType extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Text(
-          type.value.toUpperCase(),
+          label,
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: (14.0 * activePercent).clamp(12.0, 14.0),

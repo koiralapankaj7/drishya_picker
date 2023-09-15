@@ -3,15 +3,18 @@ import 'package:drishya_picker/src/gallery/src/widgets/widgets.dart';
 import 'package:drishya_picker/src/slidable_panel/slidable_panel.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 ///
 class SlidableGallery extends StatefulWidget {
   ///
-  const SlidableGallery({
-    Key? key,
-    required this.child,
+  SlidableGallery({required this.child, Key? key,
     this.controller,
     this.setting,
-  }) : super(key: key);
+    DrishyaTextDelegate? textDelegate,
+  }) : super(key: key){
+    Singleton.textDelegate=textDelegate??Singleton.textDelegate;
+  }
 
   /// Child
   final Widget child;

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
@@ -55,10 +56,10 @@ class GalleryGridView extends StatelessWidget {
               // No data
               if (value.state == BaseState.completed &&
                   value.entities.isEmpty) {
-                return const Center(
+                return  Center(
                   child: Text(
-                    'No media available',
-                    style: TextStyle(
+                    Singleton.textDelegate.noMediaAvailable,
+                    style:const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
@@ -67,10 +68,10 @@ class GalleryGridView extends StatelessWidget {
               }
 
               if (value.state == BaseState.error) {
-                return const Center(
+                return  Center(
                   child: Text(
-                    'Something went wrong. Please try again!',
-                    style: TextStyle(
+                    Singleton.textDelegate.somethingWrong,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
@@ -111,7 +112,7 @@ class GalleryGridView extends StatelessWidget {
                         },
                         child: Icon(
                           CupertinoIcons.camera,
-                          color: Colors.lightBlue.shade300,
+                          color: Theme.of(context).primaryColor,
                           size: 26,
                         ),
                       );

@@ -1,5 +1,6 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:example/collapsable_gallery.dart';
+import 'package:example/text_delegates/italian_drishya_text_delegate.dart';
 import 'package:example/grid_view_widget.dart';
 import 'package:example/recent_entities.dart';
 import 'package:example/text_field_view.dart';
@@ -19,7 +20,7 @@ class FullscreenGallery extends StatefulWidget {
 class _FullscreenGalleryState extends State<FullscreenGallery> {
   late final GalleryController _controller;
   late final ValueNotifier<Data> _notifier;
-
+  final ItalianDrishyaTextDelegate textDelegate=ItalianDrishyaTextDelegate();
   @override
   void initState() {
     super.initState();
@@ -36,6 +37,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
 
   @override
   Widget build(BuildContext context) {
+    print(textDelegate.hashCode);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fullscreen Gallery'),
@@ -79,6 +81,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CameraViewField(
+                    textDelegate: textDelegate,
                     editorSetting: gallerySetting.editorSetting,
                     onCapture: (entities) {
                       _notifier.value = _notifier.value.copyWith(
@@ -94,6 +97,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                   valueListenable: _notifier,
                   builder: (context, data, child) {
                     return GalleryViewField(
+                      textDelegate: textDelegate,
                       setting: gallerySetting.copyWith(
                         maximumCount: data.maxLimit,
                         albumSubtitle: 'Image only',

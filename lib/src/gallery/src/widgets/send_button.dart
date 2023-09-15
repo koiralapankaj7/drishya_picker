@@ -63,9 +63,9 @@ class SendButton extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.white,
           ),
-          child: const Icon(
+          child: Icon(
             CustomIcons.send,
-            color: Colors.blue,
+            color: Theme.of(context).primaryColor,
           ),
         ),
       ),

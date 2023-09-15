@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
@@ -216,7 +217,7 @@ class _IconButton extends StatelessWidget {
         padding: EdgeInsets.zero,
         icon: Icon(
           iconData ?? Icons.close,
-          color: Colors.lightBlue.shade300,
+          color: Theme.of(context).primaryColor,
           size: size ?? 26.0,
         ),
         onPressed: onPressed,
@@ -256,11 +257,8 @@ class _AlbumDetail extends StatelessWidget {
             return Text(
               isAll
                   ? controller.setting.albumTitle
-                  : album.value.assetPathEntity?.name ?? 'Unknown',
-              style: Theme.of(context).textTheme.subtitle2!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  : album.value.assetPathEntity?.name ?? Singleton.textDelegate.unknown,
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
             );
           },
         ),
@@ -269,11 +267,10 @@ class _AlbumDetail extends StatelessWidget {
 
         // Receiver name
         Text(
-          subtitle ?? 'Select',
+          subtitle ?? Singleton.textDelegate.select,
           style: Theme.of(context)
               .textTheme
-              .caption!
-              .copyWith(color: Colors.grey.shade500),
+              .bodySmall!.copyWith(color: Colors.white),
         ),
       ],
     );

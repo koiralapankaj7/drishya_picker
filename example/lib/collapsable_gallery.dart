@@ -1,4 +1,5 @@
 import 'package:drishya_picker/drishya_picker.dart';
+import 'package:example/text_delegates/italian_drishya_text_delegate.dart';
 import 'package:example/fullscreen_gallery.dart';
 import 'package:example/recent_entities.dart';
 import 'package:example/shape_icons.dart';
@@ -39,6 +40,7 @@ class _CollapsableGalleryState extends State<CollapsableGallery> {
   @override
   Widget build(BuildContext context) {
     return SlidableGallery(
+      //textDelegate: CustomDrishyaTextDelegate(),
       controller: _controller,
       child: Scaffold(
         appBar: AppBar(

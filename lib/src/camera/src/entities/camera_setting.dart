@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -42,6 +43,7 @@ class CameraSetting {
       videoDuration: videoDuration ?? this.videoDuration,
       editAfterCapture: editAfterCapture ?? this.editAfterCapture,
       enableGallery: enableGallery ?? this.enableGallery,
+
     );
   }
 

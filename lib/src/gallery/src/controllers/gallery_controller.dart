@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/animations/animations.dart';
+import 'package:drishya_picker/src/camera/src/entities/singleton.dart';
 import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -12,11 +14,12 @@ import 'package:meta/meta.dart';
 class GalleryController extends ValueNotifier<GalleryValue> {
   ///
   /// Gallery controller constructor
-  GalleryController()
+  GalleryController({DrishyaTextDelegate? textDelegate})
       : panelKey = GlobalKey(),
         _panelController = PanelController(),
         _albumVisibility = ValueNotifier(false),
         super(const GalleryValue()) {
+    Singleton.textDelegate=textDelegate?? Singleton.textDelegate;
     init();
   }
 
@@ -74,10 +77,12 @@ class GalleryController extends ValueNotifier<GalleryValue> {
   /// Initialize controller setting
   @internal
   void init({GallerySetting? setting}) {
-    _setting = setting ?? const GallerySetting();
+    _setting = setting ??
+        GallerySetting();
     _panelSetting = _setting.panelSetting ?? const PanelSetting();
     _editorSetting = _setting.editorSetting ?? const EditorSetting();
-    _cameraSetting = _setting.cameraSetting ?? const CameraSetting();
+    _cameraSetting = _setting.cameraSetting ??
+        const CameraSetting();
     _cameraTextEditorSetting =
         _setting.cameraTextEditorSetting ?? _editorSetting;
     _cameraPhotoEditorSetting =
@@ -121,8 +126,7 @@ class GalleryController extends ValueNotifier<GalleryValue> {
     // Check limit
     if (reachedMaximumLimit) {
       UIHandler.of(context).showSnackBar(
-        'Maximum selection limit of '
-        '${setting.maximumCount} has been reached!',
+        Singleton.textDelegate.maximumSelection(setting.maximumCount),
       );
       return;
     }

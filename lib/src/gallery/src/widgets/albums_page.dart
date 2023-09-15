@@ -3,6 +3,8 @@ import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 const _imageSize = 48;
 
 ///
@@ -35,9 +37,9 @@ class AlbumsPage extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             color: Colors.black,
-            child: const Text(
-              'No albums',
-              style: TextStyle(
+            child:  Text(
+              Singleton.textDelegate.noAlbums,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -129,7 +131,7 @@ class _AlbumTile extends StatelessWidget {
                   // Album name
                   Text(
                     isAll
-                        ? 'All Photos'
+                        ? Singleton.textDelegate.allPhotos
                         : album.value.assetPathEntity?.name ?? '',
                     style: const TextStyle(
                       color: Colors.white,

@@ -5,6 +5,8 @@ import 'package:drishya_picker/src/camera/src/widgets/ui_handler.dart';
 import 'package:drishya_picker/src/editor/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
+import '../../../camera/src/entities/singleton.dart';
+
 ///
 class EditorShutterButton extends StatelessWidget {
   ///
@@ -55,7 +57,7 @@ class EditorShutterButton extends StatelessWidget {
                   }
                 } else {
                   uiHandler.showSnackBar(
-                    'Something went wront! Please try again.',
+                    Singleton.textDelegate.somethingWrong,
                   );
                 }
               },
@@ -67,9 +69,9 @@ class EditorShutterButton extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: Colors.white,
                 ),
-                child: const Icon(
+                child: Icon(
                   CustomIcons.send,
-                  color: Colors.blue,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
             ),

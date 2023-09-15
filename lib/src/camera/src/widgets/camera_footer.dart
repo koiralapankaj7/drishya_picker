@@ -1,5 +1,6 @@
 // ignore_for_file: always_use_package_imports
 
+import 'package:drishya_picker/src/config/config.dart';
 import 'package:flutter/material.dart';
 
 import '../controllers/cam_controller.dart';
@@ -49,7 +50,11 @@ class CameraFooter extends StatelessWidget {
             const SizedBox(width: 8),
 
             // Camera type scroller
-            Expanded(child: CameraTypeChanger(controller: controller)),
+            Expanded(
+              child: CameraTypeChanger(
+                controller: controller,
+              ),
+            ),
 
             // Switch camera
             CameraRotateButton(controller: controller),
