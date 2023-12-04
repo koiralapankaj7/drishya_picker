@@ -33,7 +33,7 @@ class EntityThumbnail extends StatelessWidget {
         );
       } else {
         child = Image(
-          image: _MediaThumbnailProvider(
+          image: MediaThumbnailProvider(
             entity: entity,
             onBytesLoaded: onBytesGenerated,
           ),
@@ -72,10 +72,14 @@ class EntityThumbnail extends StatelessWidget {
 
 /// ImageProvider implementation
 @immutable
-class _MediaThumbnailProvider extends ImageProvider<_MediaThumbnailProvider> {
-  /// Constructor for creating a [_MediaThumbnailProvider]
-  const _MediaThumbnailProvider({
+class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
+  /// Constructor for creating a [MediaThumbnailProvider]
+  const MediaThumbnailProvider({
     required this.entity,
+    this.size = const ThumbnailSize(400, 400),
+    this.format = ThumbnailFormat.jpeg,
+    this.quality = 100,
+    this.scale = 1,
     this.onBytesLoaded,
   });
 
@@ -83,38 +87,62 @@ class _MediaThumbnailProvider extends ImageProvider<_MediaThumbnailProvider> {
   final DrishyaEntity entity;
   final ValueSetter<Uint8List?>? onBytesLoaded;
 
+  /// The thumbnail size.
+  final ThumbnailSize size;
+
+  /// {@macro photo_manager.ThumbnailFormat}
+  final ThumbnailFormat format;
+
+  /// The quality value for the thumbnail.
+  ///
+  /// Valid from 1 to 100.
+  /// Defaults to 100.
+  final int quality;
+
+  /// Scale of the image.
+  final double scale;
+
   @override
-  ImageStreamCompleter load(
-    _MediaThumbnailProvider key,
-    DecoderCallback decode,
-  ) =>
-      MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode),
-        scale: 1,
-        informationCollector: () sync* {
-          yield ErrorDescription('Id: ${entity.id}');
-        },
-      );
+  ImageStreamCompleter loadImage(
+    MediaThumbnailProvider key,
+    ImageDecoderCallback decode,
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode),
+      scale: key.scale,
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>(
+          'Thumbnail provider: $this \n Thumbnail key: $key',
+          this,
+          style: DiagnosticsTreeStyle.errorProperty,
+        );
+      },
+    );
+  }
 
   Future<ui.Codec> _loadAsync(
-    _MediaThumbnailProvider key,
-    DecoderCallback decode,
+    MediaThumbnailProvider key,
+    ImageDecoderCallback decode,
   ) async {
-    assert(key == this, 'Checks _MediaThumbnailProvider');
-    final bytes = await entity.thumbnailData;
-    onBytesLoaded?.call(bytes);
-    return decode(bytes!);
+    assert(key == this, '$key is not $this');
+    final bytes = await entity.thumbnailDataWithSize(
+      size,
+      format: format,
+      quality: quality,
+    );
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes!);
+    return decode(buffer);
   }
 
   @override
-  Future<_MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<_MediaThumbnailProvider>(this);
+  Future<MediaThumbnailProvider> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<MediaThumbnailProvider>(this);
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     // ignore: test_types_in_equals
-    final typedOther = other as _MediaThumbnailProvider;
+    final typedOther = other as MediaThumbnailProvider;
     return entity.id == typedOther.entity.id;
   }
 
@@ -122,7 +150,7 @@ class _MediaThumbnailProvider extends ImageProvider<_MediaThumbnailProvider> {
   int get hashCode => entity.id.hashCode;
 
   @override
-  String toString() => '$_MediaThumbnailProvider("${entity.id}")';
+  String toString() => '$MediaThumbnailProvider("${entity.id}")';
 }
 
 class _DurationView extends StatelessWidget {
