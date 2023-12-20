@@ -166,6 +166,10 @@ class _CameraViewState extends State<CameraView>
   void dispose() {
     // UIHandler.showStatusBar();
     WidgetsBinding.instance.removeObserver(this);
+    try {
+      _camController.cameraController!.stopImageStream();
+    } catch (_) {
+    }
     _photoEditingController.removeListener(_photoEditingListener);
     if (widget.controller == null) {
       _camController.dispose();
