@@ -8,15 +8,12 @@ import 'package:flutter/material.dart';
 class GalleryControllerProvider extends InheritedWidget {
   /// Creates a widget that associates a [GalleryController] with a subtree.
   const GalleryControllerProvider({
-    Key? key,
-    required GalleryController this.controller,
-    required Widget child,
+    required GalleryController this.controller, required Widget child, Key? key,
   }) : super(key: key, child: child);
 
   /// Creates a subtree without an associated [GalleryController].
   const GalleryControllerProvider.none({
-    Key? key,
-    required Widget child,
+    required Widget child, Key? key,
   })  : controller = null,
         super(key: key, child: child);
 

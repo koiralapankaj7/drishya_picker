@@ -36,9 +36,7 @@ class DragUpdate {
 class DraggableResizable extends StatefulWidget {
   /// {@macro draggable_resizable}
   DraggableResizable({
-    Key? key,
-    required this.child,
-    required this.size,
+    required this.child, required this.size, Key? key,
     this.onTap,
     BoxConstraints? constraints,
     this.initialPosition,
@@ -256,8 +254,7 @@ enum _PositionMode { local, global }
 
 class _DraggablePoint extends StatefulWidget {
   const _DraggablePoint({
-    Key? key,
-    required this.child,
+    required this.child, Key? key,
     this.onDrag,
     this.onScale,
     this.onRotate,

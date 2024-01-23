@@ -21,42 +21,42 @@ packages:
     dependency: "direct main"
     description:
       name: camera
-      sha256: "3ad71371b8168a4c8012c0b40a53c05afc75d46cc688b0f37b4611a841d47b25"
+      sha256: "1f9010f0689774380fbcd7d6b7820a5157e8e97685fa66d619e1d1f58b3fdf93"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+1"
+    version: "0.10.5+5"
   camera_android:
     dependency: transitive
     description:
       name: camera_android
-      sha256: "665d62c1f334722c7519ca5d3b94ad68ecaa801691870602da5638a42c1fff67"
+      sha256: b63304d553dde613ca68fb40aaa76bbbcdbd051683bdbf2019671ec8d9645ce7
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+3"
+    version: "0.10.8+14"
   camera_avfoundation:
     dependency: transitive
     description:
       name: camera_avfoundation
-      sha256: ef2313d3e0d5ffd453b69360456794e7676c2df356dbd7fa9faee91451dc57e1
+      sha256: "3b6d9f550cfd658c71f34a99509528501e5e5d4fa79f11e3a4d6ef380d8e0254"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+2"
+    version: "0.9.13+7"
   camera_platform_interface:
     dependency: transitive
     description:
       name: camera_platform_interface
-      sha256: "33ef011afebe1e55e07330435c74174a7f66ddb1049158557993518b91e1494a"
+      sha256: "86fd4fc597c6e455265ddb5884feb352d0171ad14b9cdf3aba30da59b25738c4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.6.0"
   camera_web:
     dependency: transitive
     description:
       name: camera_web
-      sha256: b4056a3e6b0857cf9c362d4a5bf5a1153dc793d4a1052805cffa896ff9e39d12
+      sha256: d4c2c571c7af04f8b10702ca16bb9ed2a26e64534171e8f75c9349b2c004d8f1
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1+1"
+    version: "0.3.2+3"
   characters:
     dependency: transitive
     description:
@@ -164,10 +164,10 @@ packages:
     dependency: "direct main"
     description:
       name: photo_manager
-      sha256: "2dfa3710fb0a8566489abcc6494ce05edd4ff87ee6e4f21e28d82e5ce98d7429"
+      sha256: "742ffef549dca7206963942c78883bfbe6fe561ef06c6f3fde84527a5e285566"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "3.0.0-dev.4"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -197,6 +197,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.0"
+  sprintf:
+    dependency: transitive
+    description:
+      name: sprintf
+      sha256: "1fc9ffe69d4df602376b52949af107d8f5703b77cda567c4d7d86a0693120f23"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   stack_trace:
     dependency: transitive
     description:
@@ -257,10 +265,10 @@ packages:
     dependency: "direct main"
     description:
       name: uuid
-      sha256: "2469694ad079893e3b434a627970c33f2fa5adc46dfe03c9617546969a9a8afc"
+      sha256: df5a4d8f22ee4ccd77f8839ac7cb274ebc11ef9adcce8b92be14b797fe889921
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
+    version: "4.2.1"
   vector_math:
     dependency: transitive
     description:
@@ -273,10 +281,10 @@ packages:
     dependency: "direct dev"
     description:
       name: very_good_analysis
-      sha256: "396bf7de205dd5b03eb164d04692de3e8335c11a7ddb2f63153de8dfcee921d9"
+      sha256: "9ae7f3a3bd5764fb021b335ca28a34f040cd0ab6eec00a1b213b445dae58a4b8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "5.1.0"
   web:
     dependency: transitive
     description:
@@ -287,4 +295,4 @@ packages:
     version: "0.3.0"
 sdks:
   dart: ">=3.2.0-194.0.dev <4.0.0"
-  flutter: ">=2.8.0"
+  flutter: ">=3.13.0"

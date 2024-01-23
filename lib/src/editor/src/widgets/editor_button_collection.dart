@@ -13,8 +13,7 @@ var _initialIndex = 0;
 class EditorButtonCollection extends StatefulWidget {
   ///
   const EditorButtonCollection({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
     this.stickerViewBackground,
   }) : super(key: key);
 
@@ -186,7 +185,7 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
                   onDonePressed: widget.controller.focusNode.unfocus,
                 ),
               );
-            })
+            }),
 
             //
           ],
@@ -198,9 +197,7 @@ class _EditorButtonCollectionState extends State<EditorButtonCollection> {
 
 class _OptionView extends StatefulWidget {
   const _OptionView({
-    Key? key,
-    required this.option,
-    required this.onPressed,
+    required this.option, required this.onPressed, Key? key,
     this.onDonePressed,
     this.isSelected = false,
     this.visible = true,

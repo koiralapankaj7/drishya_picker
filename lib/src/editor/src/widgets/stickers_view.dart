@@ -8,8 +8,7 @@ const _minStickerScale = 1.0;
 class StickersView extends StatefulWidget {
   ///
   const StickersView({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///

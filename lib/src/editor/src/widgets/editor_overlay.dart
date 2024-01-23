@@ -9,8 +9,7 @@ const _top = 16.0;
 class EditorOverlay extends StatelessWidget {
   ///
   const EditorOverlay({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///

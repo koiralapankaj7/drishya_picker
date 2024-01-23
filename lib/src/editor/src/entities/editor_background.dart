@@ -169,7 +169,7 @@ class GradientBackground implements EditorBackground {
 
 /// For better performance, this approact prevent unnecessary build
 class _EntityBGView extends StatefulWidget {
-  const _EntityBGView({Key? key, required this.entity}) : super(key: key);
+  const _EntityBGView({required this.entity, Key? key}) : super(key: key);
 
   final DrishyaEntity entity;
 
@@ -194,7 +194,7 @@ class _EntityBGViewState extends State<_EntityBGView> {
       return Center(
         child: Text(
           'Un-supported background!',
-          style: Theme.of(context).textTheme.subtitle1?.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.white,
               ),
         ),
@@ -213,7 +213,7 @@ class _EntityBGViewState extends State<_EntityBGView> {
           return Center(
             child: Text(
               'Failed to load background!',
-              style: Theme.of(context).textTheme.subtitle1?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                   ),
             ),

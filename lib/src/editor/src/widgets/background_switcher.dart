@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 class BackgroundSwitcher extends StatelessWidget {
   ///
   const BackgroundSwitcher({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///

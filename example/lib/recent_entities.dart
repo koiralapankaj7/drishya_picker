@@ -39,7 +39,7 @@ class _RecentEntitiesState extends State<RecentEntities> {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             'Recent',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
         SizedBox(

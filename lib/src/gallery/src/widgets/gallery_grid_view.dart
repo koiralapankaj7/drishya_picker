@@ -13,10 +13,7 @@ import 'package:flutter/material.dart';
 class GalleryGridView extends StatelessWidget {
   ///
   const GalleryGridView({
-    Key? key,
-    required this.controller,
-    required this.albums,
-    required this.onClosePressed,
+    required this.controller, required this.albums, required this.onClosePressed, Key? key,
   }) : super(key: key);
 
   ///
@@ -143,9 +140,7 @@ class GalleryGridView extends StatelessWidget {
 class _MediaTile extends StatelessWidget {
   ///
   const _MediaTile({
-    Key? key,
-    required this.entity,
-    required this.controller,
+    required this.entity, required this.controller, Key? key,
   }) : super(key: key);
 
   ///
@@ -186,9 +181,7 @@ class _MediaTile extends StatelessWidget {
 
 class _SelectionCount extends StatelessWidget {
   const _SelectionCount({
-    Key? key,
-    required this.controller,
-    required this.entity,
+    required this.controller, required this.entity, Key? key,
   }) : super(key: key);
 
   final GalleryController controller;
@@ -217,7 +210,7 @@ class _SelectionCount extends StatelessWidget {
             radius: 14,
             child: Text(
               '${index + 1}',
-              style: Theme.of(context).textTheme.button?.copyWith(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
             ),

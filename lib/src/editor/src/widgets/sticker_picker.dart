@@ -7,14 +7,7 @@ import 'package:flutter/material.dart';
 class StickerPicker extends StatelessWidget {
   ///
   const StickerPicker({
-    Key? key,
-    required this.controller,
-    required this.initialIndex,
-    required this.onStickerSelected,
-    required this.onTabChanged,
-    required this.bucket,
-    required this.background,
-    required this.onBackground,
+    required this.controller, required this.initialIndex, required this.onStickerSelected, required this.onTabChanged, required this.bucket, required this.background, required this.onBackground, Key? key,
   }) : super(key: key);
 
   ///
@@ -76,12 +69,7 @@ class StickerPicker extends StatelessWidget {
 class StickersTabs extends StatefulWidget {
   ///
   const StickersTabs({
-    Key? key,
-    required this.controller,
-    required this.onStickerSelected,
-    required this.onTabChanged,
-    required this.background,
-    required this.onBackground,
+    required this.controller, required this.onStickerSelected, required this.onTabChanged, required this.background, required this.onBackground, Key? key,
     this.initialIndex = 0,
   }) : super(key: key);
 
@@ -189,8 +177,7 @@ class _StickersTabsState extends State<StickersTabs>
 class StickersTab extends StatefulWidget {
   ///
   const StickersTab({
-    Key? key,
-    required this.label,
+    required this.label, Key? key,
     this.active = true,
   }) : super(key: key);
 
@@ -214,7 +201,7 @@ class _StickersTabState extends State<StickersTab>
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
         child: Text(
           widget.label,
-          style: Theme.of(context).textTheme.button?.copyWith(
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: Colors.white,
               ),
         ),
@@ -231,11 +218,7 @@ class _StickersTabState extends State<StickersTab>
 class StickersTabBarView extends StatelessWidget {
   ///
   const StickersTabBarView({
-    Key? key,
-    required this.controller,
-    required this.stickers,
-    required this.onStickerSelected,
-    required this.color,
+    required this.controller, required this.stickers, required this.onStickerSelected, required this.color, Key? key,
     this.maxCrossAxisExtent = 80.0,
   }) : super(key: key);
 

@@ -1,4 +1,3 @@
-library editor;
 
 export 'src/controllers/controllers.dart';
 export 'src/drishya_editor.dart';

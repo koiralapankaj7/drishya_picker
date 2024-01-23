@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 class SlidableGallery extends StatefulWidget {
   ///
   const SlidableGallery({
-    Key? key,
-    required this.child,
+    required this.child, Key? key,
     this.controller,
     this.setting,
   }) : super(key: key);

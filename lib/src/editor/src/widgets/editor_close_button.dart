@@ -11,8 +11,7 @@ import 'package:flutter/material.dart';
 class EditorCloseButton extends StatelessWidget {
   ///
   const EditorCloseButton({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///
@@ -88,7 +87,7 @@ class _AppDialog extends StatelessWidget {
       onPressed: Navigator.of(context).pop,
       child: Text(
         'NO',
-        style: Theme.of(context).textTheme.button!.copyWith(
+        style: Theme.of(context).textTheme.labelLarge!.copyWith(
               color: Colors.lightBlue,
             ),
       ),
@@ -99,7 +98,7 @@ class _AppDialog extends StatelessWidget {
       },
       child: Text(
         'DISCARD',
-        style: Theme.of(context).textTheme.button!.copyWith(
+        style: Theme.of(context).textTheme.labelLarge!.copyWith(
               color: Colors.blue,
             ),
       ),
@@ -108,13 +107,13 @@ class _AppDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(
         'Discard changes?',
-        style: Theme.of(context).textTheme.headline6!.copyWith(
+        style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Colors.white70,
             ),
       ),
       content: Text(
         'Are you sure you want to discard your changes?',
-        style: Theme.of(context).textTheme.bodyText2!.copyWith(
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
               color: Colors.grey.shade600,
             ),
       ),

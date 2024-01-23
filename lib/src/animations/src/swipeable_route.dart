@@ -324,12 +324,7 @@ class SwipeablePageTransition extends StatelessWidget {
   ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
   SwipeablePageTransition({
-    Key? key,
-    required this.child,
-    required this.primaryRouteAnimation,
-    required this.slidingState,
-    required Animation<double> secondaryRouteAnimation,
-    required bool linearTransition,
+    required this.child, required this.primaryRouteAnimation, required this.slidingState, required Animation<double> secondaryRouteAnimation, required bool linearTransition, Key? key,
   })  : _secondaryPositionAnimation = (linearTransition
                 ? secondaryRouteAnimation
                 : CurvedAnimation(
@@ -417,10 +412,7 @@ class SwipeablePageTransition extends StatelessWidget {
 /// detector is associated.
 class _SwipeableBackGestureDetector<T> extends StatefulWidget {
   const _SwipeableBackGestureDetector({
-    Key? key,
-    required this.enabledCallback,
-    required this.onStartPopGesture,
-    required this.builder,
+    required this.enabledCallback, required this.onStartPopGesture, required this.builder, Key? key,
     this.notificationDepth,
   }) : super(key: key);
 

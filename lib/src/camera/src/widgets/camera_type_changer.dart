@@ -13,8 +13,7 @@ import 'camera_builder.dart';
 class CameraTypeChanger extends StatelessWidget {
   ///
   const CameraTypeChanger({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///
@@ -64,9 +63,7 @@ class CameraTypeChanger extends StatelessWidget {
 
 class _TypesPageView extends StatefulWidget {
   const _TypesPageView({
-    Key? key,
-    required this.initialType,
-    required this.onChanged,
+    required this.initialType, required this.onChanged, Key? key,
   }) : super(key: key);
 
   final void Function(CameraType type) onChanged;
@@ -133,9 +130,7 @@ class _TypesPageViewState extends State<_TypesPageView> {
 class _CameraType extends StatelessWidget {
   ///
   const _CameraType({
-    Key? key,
-    required this.type,
-    required this.activePercent,
+    required this.type, required this.activePercent, Key? key,
     this.onPressed,
   }) : super(key: key);
 

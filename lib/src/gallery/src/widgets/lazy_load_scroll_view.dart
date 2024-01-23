@@ -9,8 +9,7 @@ class LazyLoadScrollView extends StatefulWidget {
   /// Creates a new instance of [LazyLoadScrollView]. The parameter [child]
   /// must be supplied and not null.
   const LazyLoadScrollView({
-    Key? key,
-    required this.child,
+    required this.child, Key? key,
     this.onStartOfPage,
     this.onEndOfPage,
     this.onPageScrollStart,

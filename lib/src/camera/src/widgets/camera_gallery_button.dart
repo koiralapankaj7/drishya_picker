@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 class CameraGalleryButton extends StatelessWidget {
   ///
   const CameraGalleryButton({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///
@@ -43,8 +42,7 @@ class CameraGalleryButton extends StatelessWidget {
 
 class _GalleyView extends StatefulWidget {
   const _GalleyView({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   final CamController controller;

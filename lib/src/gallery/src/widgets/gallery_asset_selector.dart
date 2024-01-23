@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 class GalleryAssetSelector extends StatefulWidget {
   ///
   const GalleryAssetSelector({
-    Key? key,
-    required this.controller,
-    required this.albums,
+    required this.controller, required this.albums, Key? key,
   }) : super(key: key);
 
   ///
@@ -240,7 +238,7 @@ class _TextButton extends StatelessWidget {
       ),
       child: Text(
         label ?? '',
-        style: Theme.of(context).textTheme.button!.copyWith(
+        style: Theme.of(context).textTheme.labelLarge!.copyWith(
               color: labelColor ?? Theme.of(context).colorScheme.onPrimary,
             ),
       ),

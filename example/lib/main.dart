@@ -49,8 +49,7 @@ class _PickerDemo extends StatelessWidget {
                 );
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Colors.green,
+                foregroundColor: Colors.white, backgroundColor: Colors.green,
               ),
               child: const Text('Full screen mode'),
             ),
@@ -64,8 +63,7 @@ class _PickerDemo extends StatelessWidget {
                 );
               },
               style: TextButton.styleFrom(
-                primary: Colors.white,
-                backgroundColor: Colors.green,
+                foregroundColor: Colors.white, backgroundColor: Colors.green,
               ),
               child: const Text('Collapsable mode'),
             ),

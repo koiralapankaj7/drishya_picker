@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 class EditorBuilder extends StatelessWidget {
   ///
   const EditorBuilder({
-    Key? key,
-    required this.controller,
-    required this.builder,
+    required this.controller, required this.builder, Key? key,
     this.child,
   }) : super(key: key);
 

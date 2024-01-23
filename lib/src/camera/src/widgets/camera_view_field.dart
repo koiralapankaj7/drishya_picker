@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 class CameraViewField extends StatelessWidget {
   ///
   const CameraViewField({
-    Key? key,
-    required this.child,
+    required this.child, Key? key,
     this.controller,
     this.setting,
     this.editorSetting,

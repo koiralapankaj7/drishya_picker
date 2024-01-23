@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:drishya_picker/drishya_picker.dart';
@@ -9,8 +8,7 @@ import 'package:flutter/material.dart';
 class EntityThumbnail extends StatelessWidget {
   ///
   const EntityThumbnail({
-    Key? key,
-    required this.entity,
+    required this.entity, Key? key,
     this.onBytesGenerated,
   }) : super(key: key);
 
@@ -155,8 +153,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
 
 class _DurationView extends StatelessWidget {
   const _DurationView({
-    Key? key,
-    required this.duration,
+    required this.duration, Key? key,
   }) : super(key: key);
 
   final int duration;

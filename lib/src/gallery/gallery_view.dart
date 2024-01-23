@@ -4,7 +4,7 @@ export 'src/gallery_view.dart';
 export 'src/widgets/widgets.dart'
     show
         EntityThumbnail,
-        SlidableGallery,
-        GalleryViewField,
         GalleryControllerProvider,
-        GalleryControllerProviderExtension;
+        GalleryControllerProviderExtension,
+        GalleryViewField,
+        SlidableGallery;

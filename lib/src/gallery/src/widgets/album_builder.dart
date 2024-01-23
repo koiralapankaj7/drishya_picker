@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 class AlbumBuilder extends StatelessWidget {
   ///
   const AlbumBuilder({
-    Key? key,
-    required this.controller,
-    required this.albums,
+    required this.controller, required this.albums, Key? key,
     this.builder,
     this.child,
     this.hidePermissionView = false,
@@ -84,8 +82,7 @@ class AlbumBuilder extends StatelessWidget {
 class CurrentAlbumBuilder extends StatelessWidget {
   ///
   const CurrentAlbumBuilder({
-    Key? key,
-    required this.albums,
+    required this.albums, Key? key,
     this.builder,
     this.child,
   }) : super(key: key);

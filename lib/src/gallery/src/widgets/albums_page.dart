@@ -9,10 +9,7 @@ const _imageSize = 48;
 class AlbumsPage extends StatelessWidget {
   ///
   const AlbumsPage({
-    Key? key,
-    required this.controller,
-    required this.onAlbumChange,
-    required this.albums,
+    required this.controller, required this.onAlbumChange, required this.albums, Key? key,
   }) : super(key: key);
 
   ///
@@ -68,9 +65,7 @@ class AlbumsPage extends StatelessWidget {
 
 class _AlbumTile extends StatelessWidget {
   const _AlbumTile({
-    Key? key,
-    required this.controller,
-    required this.album,
+    required this.controller, required this.album, Key? key,
     this.onPressed,
   }) : super(key: key);
 
@@ -138,12 +133,18 @@ class _AlbumTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   // Total photos
-                  Text(
-                    album.value.assetPathEntity?.assetCount.toString() ?? '',
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 13,
-                    ),
+                  FutureBuilder<int>(
+                    initialData: 0,
+                    future: album.value.assetPathEntity?.assetCountAsync,
+                    builder: (context, snapshot) {
+                      return Text(
+                        snapshot.data?.toString() ?? '',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 13,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

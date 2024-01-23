@@ -7,9 +7,9 @@ const _defaultMin = 0.37;
 class PanelSettingBuilder extends StatelessWidget {
   ///
   const PanelSettingBuilder({
-    Key? key,
     required this.setting,
     required this.builder,
+    Key? key,
   }) : super(key: key);
 
   ///
@@ -26,14 +26,14 @@ class PanelSettingBuilder extends StatelessWidget {
         final size = constraints.biggest;
         final isFullScreen = size.height == mediaQuery.size.height;
         final ps = setting ?? const PanelSetting();
-        final _panelMaxHeight = ps.maxHeight ??
+        final panelMaxHeight = ps.maxHeight ??
             size.height - (isFullScreen ? mediaQuery.padding.top : 0);
-        final _panelMinHeight = ps.minHeight ?? _panelMaxHeight * _defaultMin;
-        final _setting = ps.copyWith(
-          maxHeight: _panelMaxHeight,
-          minHeight: _panelMinHeight,
+        final panelMinHeight = ps.minHeight ?? panelMaxHeight * _defaultMin;
+        final updatedSetting = ps.copyWith(
+          maxHeight: panelMaxHeight,
+          minHeight: panelMinHeight,
         );
-        return builder(_setting);
+        return builder(updatedSetting);
       },
     );
   }

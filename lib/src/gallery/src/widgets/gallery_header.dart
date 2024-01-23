@@ -11,11 +11,7 @@ import 'package:flutter/material.dart';
 class GalleryHeader extends StatefulWidget {
   ///
   const GalleryHeader({
-    Key? key,
-    required this.controller,
-    required this.onClose,
-    required this.onAlbumToggle,
-    required this.albums,
+    required this.controller, required this.onClose, required this.onAlbumToggle, required this.albums, Key? key,
     this.headerSubtitle,
   }) : super(key: key);
 
@@ -138,10 +134,7 @@ class _GalleryHeaderState extends State<GalleryHeader> {
 
 class _AnimatedDropdown extends StatelessWidget {
   const _AnimatedDropdown({
-    Key? key,
-    required this.controller,
-    required this.onPressed,
-    required this.albumVisibility,
+    required this.controller, required this.onPressed, required this.albumVisibility, Key? key,
   }) : super(key: key);
 
   final GalleryController controller;
@@ -227,10 +220,8 @@ class _IconButton extends StatelessWidget {
 
 class _AlbumDetail extends StatelessWidget {
   const _AlbumDetail({
-    Key? key,
+    required this.controller, required this.albums, Key? key,
     this.subtitle,
-    required this.controller,
-    required this.albums,
   }) : super(key: key);
 
   ///
@@ -257,7 +248,7 @@ class _AlbumDetail extends StatelessWidget {
               isAll
                   ? controller.setting.albumTitle
                   : album.value.assetPathEntity?.name ?? 'Unknown',
-              style: Theme.of(context).textTheme.subtitle2!.copyWith(
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -272,7 +263,7 @@ class _AlbumDetail extends StatelessWidget {
           subtitle ?? 'Select',
           style: Theme.of(context)
               .textTheme
-              .caption!
+              .bodySmall!
               .copyWith(color: Colors.grey.shade500),
         ),
       ],
@@ -282,8 +273,7 @@ class _AlbumDetail extends StatelessWidget {
 
 class _Handler extends StatelessWidget {
   const _Handler({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   final GalleryController controller;

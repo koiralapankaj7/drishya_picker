@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 class GalleryBuilder extends StatelessWidget {
   ///
   const GalleryBuilder({
-    Key? key,
-    required this.controller,
-    required this.builder,
+    required this.controller, required this.builder, Key? key,
     this.child,
   }) : super(key: key);
 

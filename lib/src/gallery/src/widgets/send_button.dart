@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 class SendButton extends StatelessWidget {
   ///
   const SendButton({
-    Key? key,
-    required this.controller,
+    required this.controller, Key? key,
   }) : super(key: key);
 
   ///
@@ -44,7 +43,7 @@ class SendButton extends StatelessWidget {
                       radius: 12,
                       child: Text(
                         '${value.selectedEntities.length}',
-                        style: Theme.of(context).textTheme.caption?.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSecondary,
                             ),
                       ),
