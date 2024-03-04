@@ -76,6 +76,10 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
   void init({EditorSetting? setting}) {
     _setting = setting ?? const EditorSetting();
     _colorNotifier = ValueNotifier(_setting.colors.first);
+    assert(
+      _setting.backgrounds.isNotEmpty,
+      'Editor backgrounds cannot be empty',
+    );
     _backgroundNotifier = ValueNotifier(_setting.backgrounds.first);
   }
 

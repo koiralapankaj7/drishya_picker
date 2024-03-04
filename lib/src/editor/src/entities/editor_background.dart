@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 ///
 // ignore: one_member_abstracts
 abstract class EditorBackground {
-  /// Playgroung builder
+  /// Playground builder
   Widget build(BuildContext context);
 }
 
