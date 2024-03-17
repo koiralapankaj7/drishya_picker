@@ -161,6 +161,7 @@ GallerySetting get gallerySetting => GallerySetting(
         colors: _colors.skip(4).toList(),
         stickers: _stickers3,
       ),
+      permissionDelegate: _PermissionDelegate(),
     );
 
 const _defaultBackgrounds = [
@@ -352,3 +353,10 @@ final _shapes = ShapeIcons.values
       (iconData) => IconSticker(iconData: iconData),
     )
     .toSet();
+
+class _PermissionDelegate extends PermissionDelegate {
+  @override
+  String descriptionString({required bool isCamera}) {
+    return '''Allow Example app to access your ${isCamera ? 'camera and microphone' : 'album for picking media'} .''';
+  }
+}

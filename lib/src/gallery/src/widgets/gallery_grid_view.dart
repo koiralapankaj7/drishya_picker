@@ -4,8 +4,8 @@ import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/album_builder.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/gallery_builder.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
 import 'package:drishya_picker/src/gallery/src/widgets/lazy_load_scroll_view.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/permission_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -13,8 +13,11 @@ import 'package:flutter/material.dart';
 class GalleryGridView extends StatelessWidget {
   ///
   const GalleryGridView({
-    required this.controller, required this.albums, required this.onClosePressed, Key? key,
-  }) : super(key: key);
+    required this.controller,
+    required this.albums,
+    required this.onClosePressed,
+    super.key,
+  });
 
   ///
   final GalleryController controller;
@@ -36,9 +39,10 @@ class GalleryGridView extends StatelessWidget {
             valueListenable: album,
             builder: (context, value, child) {
               // Error
-              if (value.state == BaseState.unauthorised &&
+              if (value.state == BaseState.unauthorized &&
                   value.entities.isEmpty) {
-                return GalleryPermissionView(
+                return PermissionView(
+                  delegate: controller.setting.permissionDelegate,
                   onRefresh: () {
                     if (value.assetPathEntity == null) {
                       albums.fetchAlbums(controller.setting.requestType);
@@ -116,7 +120,8 @@ class GalleryGridView extends StatelessWidget {
 
                     final ind = enableCamera ? index - 1 : index;
 
-                    final entity = albums.value.state == BaseState.fetching
+                    final entity = albums.value.state == BaseState.fetching ||
+                            entities.isEmpty
                         ? null
                         : entities[ind];
 
@@ -140,8 +145,9 @@ class GalleryGridView extends StatelessWidget {
 class _MediaTile extends StatelessWidget {
   ///
   const _MediaTile({
-    required this.entity, required this.controller, Key? key,
-  }) : super(key: key);
+    required this.entity,
+    required this.controller,
+  });
 
   ///
   final GalleryController controller;
@@ -181,8 +187,9 @@ class _MediaTile extends StatelessWidget {
 
 class _SelectionCount extends StatelessWidget {
   const _SelectionCount({
-    required this.controller, required this.entity, Key? key,
-  }) : super(key: key);
+    required this.controller,
+    required this.entity,
+  });
 
   final GalleryController controller;
   final AssetEntity entity;

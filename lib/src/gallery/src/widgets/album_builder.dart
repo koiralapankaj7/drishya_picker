@@ -1,13 +1,15 @@
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:drishya_picker/src/gallery/src/repo/gallery_repository.dart';
-import 'package:drishya_picker/src/gallery/src/widgets/gallery_permission_view.dart';
+import 'package:drishya_picker/src/gallery/src/widgets/permission_view.dart';
 import 'package:flutter/material.dart';
 
 ///
 class AlbumBuilder extends StatelessWidget {
   ///
   const AlbumBuilder({
-    required this.controller, required this.albums, Key? key,
+    required this.controller,
+    required this.albums,
+    Key? key,
     this.builder,
     this.child,
     this.hidePermissionView = false,
@@ -34,10 +36,10 @@ class AlbumBuilder extends StatelessWidget {
       valueListenable: albums,
       builder: (context, value, child) {
         // Error
-        if (value.state == BaseState.unauthorised &&
+        if (value.state == BaseState.unauthorized &&
             value.albums.isEmpty &&
             !hidePermissionView) {
-          return GalleryPermissionView(
+          return PermissionView(
             onRefresh: () {
               albums.fetchAlbums(controller.setting.requestType);
             },
@@ -82,7 +84,8 @@ class AlbumBuilder extends StatelessWidget {
 class CurrentAlbumBuilder extends StatelessWidget {
   ///
   const CurrentAlbumBuilder({
-    required this.albums, Key? key,
+    required this.albums,
+    Key? key,
     this.builder,
     this.child,
   }) : super(key: key);

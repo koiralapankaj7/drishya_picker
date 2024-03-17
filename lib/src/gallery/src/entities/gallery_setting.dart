@@ -1,6 +1,9 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:collection/collection.dart';
 import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/permission_view.dart';
 
 /// Available multiselection mode for gallery
 enum SelectionMode {
@@ -27,6 +30,7 @@ class GallerySetting {
     this.albumTitle = 'All Photos',
     this.albumSubtitle = 'Select Media',
     this.enableCamera = true,
+    this.permissionDelegate,
     this.crossAxisCount,
     this.panelSetting,
     this.editorSetting,
@@ -69,6 +73,9 @@ class GallerySetting {
   final int? crossAxisCount;
 
   ///
+  final PermissionDelegate? permissionDelegate;
+
+  ///
   /// Gallery slidable panel setting
   final PanelSetting? panelSetting;
 
@@ -99,6 +106,7 @@ class GallerySetting {
     String? albumSubtitle,
     bool? enableCamera,
     int? crossAxisCount,
+    PermissionDelegate? permissionDelegate,
     PanelSetting? panelSetting,
     EditorSetting? editorSetting,
     CameraSetting? cameraSetting,
@@ -114,6 +122,7 @@ class GallerySetting {
       albumSubtitle: albumSubtitle ?? this.albumSubtitle,
       enableCamera: enableCamera ?? this.enableCamera,
       crossAxisCount: crossAxisCount ?? this.crossAxisCount,
+      permissionDelegate: permissionDelegate ?? this.permissionDelegate,
       panelSetting: panelSetting ?? this.panelSetting,
       editorSetting: editorSetting ?? this.editorSetting,
       cameraSetting: cameraSetting ?? this.cameraSetting,

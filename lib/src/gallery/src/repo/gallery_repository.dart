@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 /// State for the fetching process
 enum BaseState {
   /// Permission to access the asset has not been requested yet.
-  unauthorised,
+  unauthorized,
 
   /// Fetching assets is in progress.
   fetching,
@@ -112,7 +112,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
     ValueSetter<Exception>? onException,
   }) async {
     final state = await PhotoManager.requestPermissionExtend();
-    if (state == PermissionState.authorized) {
+    if (state.hasAccess) {
       try {
         final albums = await PhotoManager.getAssetPathList(
           type: type ?? RequestType.all,
@@ -137,7 +137,7 @@ class Albums extends ValueNotifier<AlbumsValue> {
   /// Get album list
   Future<List<Album>> fetchAlbums(RequestType type) async {
     final state = await PhotoManager.requestPermissionExtend();
-    if (state == PermissionState.authorized) {
+    if (state.hasAccess) {
       try {
         final albums = await PhotoManager.getAssetPathList(type: type);
         // Update album list
@@ -163,9 +163,9 @@ class Albums extends ValueNotifier<AlbumsValue> {
       }
     } else {
       value =
-          value.copyWith(error: 'Permission', state: BaseState.unauthorised);
+          value.copyWith(error: 'Permission', state: BaseState.unauthorized);
       currentAlbum.value = Album(
-        albumValue: const AlbumValue(state: BaseState.unauthorised),
+        albumValue: const AlbumValue(state: BaseState.unauthorized),
       );
       return [];
     }
@@ -194,7 +194,7 @@ class Album extends ValueNotifier<AlbumValue> {
   /// Get assets for the current album
   Future<List<AssetEntity>> fetchAssets() async {
     final state = await PhotoManager.requestPermissionExtend();
-    if (state == PermissionState.authorized) {
+    if (state.hasAccess) {
       try {
         final entities = (await value.assetPathEntity
                 ?.getAssetListPaged(page: _currentPage, size: 30)) ??
@@ -211,7 +211,7 @@ class Album extends ValueNotifier<AlbumValue> {
         value = value.copyWith(state: BaseState.error, error: e.toString());
       }
     } else {
-      value = value.copyWith(state: BaseState.unauthorised);
+      value = value.copyWith(state: BaseState.unauthorized);
     }
     return value.entities;
   }
