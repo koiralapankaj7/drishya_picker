@@ -151,6 +151,12 @@ class Albums extends ValueNotifier<AlbumsValue> {
           }
           return album;
         });
+        // Update current album state as well
+        if (albums.isEmpty) {
+          currentAlbum.value = Album(
+            albumValue: const AlbumValue(state: BaseState.completed),
+          );
+        }
         value = value.copyWith(
           state: BaseState.completed,
           albums: albumList,

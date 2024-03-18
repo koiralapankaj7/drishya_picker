@@ -39,8 +39,7 @@ class GalleryGridView extends StatelessWidget {
             valueListenable: album,
             builder: (context, value, child) {
               // Error
-              if (value.state == BaseState.unauthorized &&
-                  value.entities.isEmpty) {
+              if (value.state == BaseState.unauthorized) {
                 return PermissionView(
                   delegate: controller.setting.permissionDelegate,
                   onRefresh: () {
@@ -50,20 +49,6 @@ class GalleryGridView extends StatelessWidget {
                       album.fetchAssets();
                     }
                   },
-                );
-              }
-
-              // No data
-              if (value.state == BaseState.completed &&
-                  value.entities.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No media available',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 );
               }
 
@@ -87,6 +72,19 @@ class GalleryGridView extends StatelessWidget {
                   : enableCamera
                       ? entities.length + 1
                       : entities.length;
+
+              // No data
+              if (value.state == BaseState.completed && itemCount == 0) {
+                return const Center(
+                  child: Text(
+                    'No media available',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              }
 
               return LazyLoadScrollView(
                 onEndOfPage: album.fetchAssets,
