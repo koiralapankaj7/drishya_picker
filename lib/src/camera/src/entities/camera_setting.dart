@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:drishya_picker/drishya_picker.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -6,12 +7,16 @@ import 'package:flutter/material.dart';
 class CameraSetting {
   ///
   const CameraSetting({
+    this.permissionDelegate,
     this.resolutionPreset = ResolutionPreset.high,
     this.imageFormatGroup = ImageFormatGroup.jpeg,
     this.videoDuration = const Duration(seconds: 10),
     this.editAfterCapture = true,
     this.enableGallery = true,
   });
+
+  ///
+  final PermissionDelegate? permissionDelegate;
 
   /// Image resolution. Default value is [ResolutionPreset.high].
   final ResolutionPreset resolutionPreset;
@@ -30,6 +35,7 @@ class CameraSetting {
 
   ///
   CameraSetting copyWith({
+    PermissionDelegate? permissionDelegate,
     ResolutionPreset? resolutionPreset,
     ImageFormatGroup? imageFormatGroup,
     Duration? videoDuration,
@@ -37,6 +43,7 @@ class CameraSetting {
     bool? enableGallery,
   }) {
     return CameraSetting(
+      permissionDelegate: permissionDelegate ?? this.permissionDelegate,
       resolutionPreset: resolutionPreset ?? this.resolutionPreset,
       imageFormatGroup: imageFormatGroup ?? this.imageFormatGroup,
       videoDuration: videoDuration ?? this.videoDuration,

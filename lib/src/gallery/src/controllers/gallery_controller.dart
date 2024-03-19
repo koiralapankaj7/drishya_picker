@@ -176,7 +176,10 @@ class GalleryController extends ValueNotifier<GalleryValue> {
 
     final route = SlideTransitionPageRoute<List<DrishyaEntity>>(
       builder: CameraView(
-        setting: _cameraSetting.copyWith(enableGallery: false),
+        setting: _cameraSetting.copyWith(
+          enableGallery: false,
+          permissionDelegate: _setting.permissionDelegate,
+        ),
         editorSetting: _cameraTextEditorSetting,
         photoEditorSetting: _cameraPhotoEditorSetting,
       ),

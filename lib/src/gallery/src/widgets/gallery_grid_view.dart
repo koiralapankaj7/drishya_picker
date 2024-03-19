@@ -38,9 +38,15 @@ class GalleryGridView extends StatelessWidget {
           return ValueListenableBuilder<AlbumValue>(
             valueListenable: album,
             builder: (context, value, child) {
+              late final entities = value.entities;
+              late final hasLimitedAccess =
+                  value.permissionState == PermissionState.limited;
+
               // Error
-              if (value.state == BaseState.unauthorized) {
+              if (value.state == BaseState.unauthorized ||
+                  (entities.isEmpty && hasLimitedAccess)) {
                 return PermissionView(
+                  hasLimitedAccess: hasLimitedAccess,
                   delegate: controller.setting.permissionDelegate,
                   onRefresh: () {
                     if (value.assetPathEntity == null) {
@@ -52,6 +58,7 @@ class GalleryGridView extends StatelessWidget {
                 );
               }
 
+              ///
               if (value.state == BaseState.error) {
                 return const Center(
                   child: Text(
@@ -64,7 +71,6 @@ class GalleryGridView extends StatelessWidget {
                 );
               }
 
-              final entities = value.entities;
               final enableCamera = controller.setting.enableCamera;
 
               final itemCount = albums.value.state == BaseState.fetching

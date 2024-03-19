@@ -161,7 +161,7 @@ GallerySetting get gallerySetting => GallerySetting(
         colors: _colors.skip(4).toList(),
         stickers: _stickers3,
       ),
-      permissionDelegate: _PermissionDelegate(),
+      permissionDelegate: const PermissionDelegate(appName: 'Example'),
     );
 
 const _defaultBackgrounds = [
@@ -354,9 +354,12 @@ final _shapes = ShapeIcons.values
     )
     .toSet();
 
-class _PermissionDelegate extends PermissionDelegate {
-  @override
-  String descriptionString({required bool isCamera}) {
-    return '''Allow Example app to access your ${isCamera ? 'camera and microphone' : 'album for picking media'} .''';
-  }
-}
+// class _PermissionDelegate extends PermissionDelegate {
+//   @override
+//   String descriptionString({
+//     required bool isCamera,
+//     required bool hasLimitedAccess,
+//   }) {
+//     return '''Allow Example app to access your ${isCamera ? 'camera and microphone' : 'album for picking media'} .''';
+//   }
+// }

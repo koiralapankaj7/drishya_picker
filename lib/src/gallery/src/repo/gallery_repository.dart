@@ -23,6 +23,7 @@ enum BaseState {
 class AlbumsValue {
   ///
   const AlbumsValue({
+    this.permissionState = PermissionState.notDetermined,
     this.albums = const <Album>[],
     this.error,
     this.state = BaseState.fetching,
@@ -35,15 +36,20 @@ class AlbumsValue {
   final String? error;
 
   ///
+  final PermissionState permissionState;
+
+  ///
   final BaseState state;
 
   ///
   AlbumsValue copyWith({
     List<Album>? albums,
+    PermissionState? permissionState,
     String? error,
     BaseState? state,
   }) =>
       AlbumsValue(
+        permissionState: permissionState ?? this.permissionState,
         albums: albums ?? this.albums,
         error: error ?? this.error,
         state: state ?? this.state,
@@ -54,11 +60,15 @@ class AlbumsValue {
 class AlbumValue {
   ///
   const AlbumValue({
+    this.permissionState = PermissionState.notDetermined,
     this.assetPathEntity,
     this.entities = const <AssetEntity>[],
     this.state = BaseState.fetching,
     this.error,
   });
+
+  ///
+  final PermissionState permissionState;
 
   ///
   final AssetPathEntity? assetPathEntity;
@@ -74,12 +84,14 @@ class AlbumValue {
 
   ///
   AlbumValue copyWith({
+    PermissionState? permissionState,
     AssetPathEntity? assetPathEntity,
     List<AssetEntity>? entities,
     String? error,
     BaseState? state,
   }) =>
       AlbumValue(
+        permissionState: permissionState ?? this.permissionState,
         assetPathEntity: assetPathEntity ?? this.assetPathEntity,
         entities: entities ?? this.entities,
         error: error ?? this.error,
@@ -143,7 +155,10 @@ class Albums extends ValueNotifier<AlbumsValue> {
         // Update album list
         final albumList = List.generate(albums.length, (index) {
           final album = Album(
-            albumValue: AlbumValue(assetPathEntity: albums[index]),
+            albumValue: AlbumValue(
+              permissionState: state,
+              assetPathEntity: albums[index],
+            ),
           );
           if (index == 0) {
             currentAlbum.value = album;
@@ -154,24 +169,38 @@ class Albums extends ValueNotifier<AlbumsValue> {
         // Update current album state as well
         if (albums.isEmpty) {
           currentAlbum.value = Album(
-            albumValue: const AlbumValue(state: BaseState.completed),
+            albumValue: AlbumValue(
+              permissionState: state,
+              state: BaseState.completed,
+            ),
           );
         }
         value = value.copyWith(
+          permissionState: state,
           state: BaseState.completed,
           albums: albumList,
         );
         return albumList;
       } catch (e) {
         debugPrint('Exception fetching albums => $e');
-        value = value.copyWith(error: e.toString(), state: BaseState.error);
+        value = value.copyWith(
+          permissionState: state,
+          error: e.toString(),
+          state: BaseState.error,
+        );
         return [];
       }
     } else {
-      value =
-          value.copyWith(error: 'Permission', state: BaseState.unauthorized);
+      value = value.copyWith(
+        permissionState: state,
+        error: 'Permission',
+        state: BaseState.unauthorized,
+      );
       currentAlbum.value = Album(
-        albumValue: const AlbumValue(state: BaseState.unauthorized),
+        albumValue: AlbumValue(
+          permissionState: state,
+          state: BaseState.unauthorized,
+        ),
       );
       return [];
     }
@@ -209,15 +238,23 @@ class Album extends ValueNotifier<AlbumValue> {
         final updatedEntities = [...value.entities, ...entities];
         ++_currentPage;
         value = value.copyWith(
+          permissionState: state,
           state: BaseState.completed,
           entities: updatedEntities,
         );
       } catch (e) {
         debugPrint('Exception fetching assets => $e');
-        value = value.copyWith(state: BaseState.error, error: e.toString());
+        value = value.copyWith(
+          permissionState: state,
+          state: BaseState.error,
+          error: e.toString(),
+        );
       }
     } else {
-      value = value.copyWith(state: BaseState.unauthorized);
+      value = value.copyWith(
+        state: BaseState.unauthorized,
+        permissionState: state,
+      );
     }
     return value.entities;
   }

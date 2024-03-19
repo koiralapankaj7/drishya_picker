@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 class EditorShutterButton extends StatelessWidget {
   ///
   const EditorShutterButton({
-    required this.controller, Key? key,
+    required this.controller,
+    Key? key,
     this.onSuccess,
   }) : super(key: key);
 
@@ -54,7 +55,7 @@ class EditorShutterButton extends StatelessWidget {
                   }
                 } else {
                   uiHandler.showSnackBar(
-                    'Something went wront! Please try again.',
+                    'Something went wrong! Please try again.',
                   );
                 }
               },

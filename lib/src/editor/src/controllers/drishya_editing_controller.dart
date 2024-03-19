@@ -178,7 +178,7 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         // image, create entity and return it
         final entity = await PhotoManager.editor.saveImage(
           bg.bytes,
-          title: const Uuid().v4(),
+          title: '${const Uuid().v4()}.jpg',
         );
         return entity?.toDrishya;
       } else {
@@ -191,13 +191,13 @@ class DrishyaEditingController extends ValueNotifier<EditorValue> {
         final data = byteData!.buffer.asUint8List();
         final entity = await PhotoManager.editor.saveImage(
           data,
-          title: const Uuid().v4(),
+          title: '${const Uuid().v4()}.jpg',
         );
         return entity?.toDrishya;
       }
     } catch (e) {
       onException?.call(
-        Exception('Exception occured while capturing picture : $e'),
+        Exception('Exception occurred while capturing picture : $e'),
       );
     }
     return null;

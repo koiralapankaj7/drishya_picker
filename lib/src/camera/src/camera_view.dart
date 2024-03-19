@@ -209,12 +209,13 @@ class _CameraViewState extends State<CameraView>
             }
 
             // Camera permission
-            if (value.error != null &&
-                value.error!.code == 'cameraPermission') {
+            if (value.error != null && value.error!.code.isNotEmpty) {
               return Container(
                 alignment: Alignment.center,
                 child: PermissionView(
+                  delegate: widget.setting?.permissionDelegate,
                   isCamera: true,
+                  cameraErrorCode: value.error!.code,
                   onRefresh: _camController.createCamera,
                 ),
               );
@@ -227,7 +228,12 @@ class _CameraViewState extends State<CameraView>
             child: PageView(
               controller: _camController.pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const [_GalleryView(), _CameraView()],
+              children: [
+                _GalleryView(
+                  permissionDelegate: widget.setting?.permissionDelegate,
+                ),
+                const _CameraView(),
+              ],
             ),
           ),
         ),
@@ -238,7 +244,10 @@ class _CameraViewState extends State<CameraView>
 
 ///
 class _GalleryView extends StatelessWidget {
-  const _GalleryView({Key? key}) : super(key: key);
+  const _GalleryView({Key? key, this.permissionDelegate}) : super(key: key);
+
+  ///
+  final PermissionDelegate? permissionDelegate;
 
   @override
   Widget build(BuildContext context) {
@@ -252,11 +261,12 @@ class _GalleryView extends StatelessWidget {
       children: [
         GalleryView(
           controller: controller.galleryController,
-          setting: const GallerySetting(
+          setting: GallerySetting(
+            permissionDelegate: permissionDelegate,
             selectionMode: SelectionMode.actionBased,
             albumTitle: 'Gallery',
             enableCamera: false,
-            panelSetting: PanelSetting(thumbHandlerHeight: 0),
+            panelSetting: const PanelSetting(thumbHandlerHeight: 0),
           ),
         ),
 

@@ -271,6 +271,7 @@ class CamController extends ValueNotifier<CamValue> {
       } else {
         final entity = await PhotoManager.editor.saveImage(
           bytes,
+          // TODO (pankajKoirala): check for extension issue
           title: path.basename(file.path),
         );
 
@@ -289,7 +290,7 @@ class CamController extends ValueNotifier<CamValue> {
           return drishyaEntity;
         } else {
           final exception = CameraException(
-            'takePictyre',
+            'takePicture',
             'Something went wrong! Please try again',
           );
           value = value.copyWith(isTakingPicture: false, error: exception);

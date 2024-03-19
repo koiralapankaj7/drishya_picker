@@ -5,22 +5,41 @@ import 'package:photo_manager/photo_manager.dart';
 typedef StringGetter = String Function({bool isCamera});
 
 ///
-abstract class PermissionDelegate {
+class PermissionDelegate {
   ///
-  const PermissionDelegate();
+  const PermissionDelegate({String? appName})
+      : appName = appName ?? 'Drishya Picker';
 
   ///
-  String titleString({required bool isCamera}) =>
-      'Access Your ${isCamera ? 'Camera' : 'Album'}';
+  final String appName;
 
   ///
-  String descriptionString({required bool isCamera}) =>
-      '''Allow Drishya picker to access your ${isCamera ? 'camera and microphone' : 'album for picking media'} .''';
+  String titleString({
+    required bool isCamera,
+    required bool hasLimitedAccess,
+  }) {
+    if (!isCamera && hasLimitedAccess) return 'Limited Access';
+    return 'Access Your ${isCamera ? 'Camera' : 'Album'}';
+  }
 
   ///
-  Widget buildTitle({required bool isCamera}) {
+  String descriptionString({
+    required bool isCamera,
+    required bool hasLimitedAccess,
+  }) {
+    if (!isCamera && hasLimitedAccess) {
+      return '$appName has been granted limited access, allow full permission to access media.';
+    }
+    return '''Allow $appName to access your ${isCamera ? 'camera and microphone' : 'album for picking media'}.''';
+  }
+
+  ///
+  Widget buildTitle({
+    required bool isCamera,
+    required bool hasLimitedAccess,
+  }) {
     return Text(
-      titleString(isCamera: isCamera),
+      titleString(isCamera: isCamera, hasLimitedAccess: hasLimitedAccess),
       style: const TextStyle(
         fontWeight: FontWeight.w700,
         fontSize: 18,
@@ -29,9 +48,12 @@ abstract class PermissionDelegate {
   }
 
   ///
-  Widget buildDescription({required bool isCamera}) {
+  Widget buildDescription({
+    required bool isCamera,
+    required bool hasLimitedAccess,
+  }) {
     return Text(
-      descriptionString(isCamera: isCamera),
+      descriptionString(isCamera: isCamera, hasLimitedAccess: hasLimitedAccess),
       textAlign: TextAlign.center,
     );
   }
@@ -51,6 +73,8 @@ class PermissionView extends StatefulWidget {
     this.onRefresh,
     PermissionDelegate? delegate,
     this.isCamera = false,
+    this.cameraErrorCode,
+    this.hasLimitedAccess = false,
   }) : delegate = delegate ?? const DefaultPermissionDelegate();
 
   ///
@@ -61,6 +85,12 @@ class PermissionView extends StatefulWidget {
 
   ///
   final bool isCamera;
+
+  ///
+  final String? cameraErrorCode;
+
+  ///
+  final bool hasLimitedAccess;
 
   @override
   State<PermissionView> createState() => _PermissionViewState();
@@ -109,12 +139,18 @@ class _PermissionViewState extends State<PermissionView>
         mainAxisSize: MainAxisSize.min,
         children: [
           // Heading
-          widget.delegate.buildTitle(isCamera: widget.isCamera),
+          widget.delegate.buildTitle(
+            isCamera: widget.isCamera,
+            hasLimitedAccess: widget.hasLimitedAccess,
+          ),
 
           const SizedBox(height: 24),
 
           // Description
-          widget.delegate.buildDescription(isCamera: widget.isCamera),
+          widget.delegate.buildDescription(
+            isCamera: widget.isCamera,
+            hasLimitedAccess: widget.hasLimitedAccess,
+          ),
 
           const SizedBox(height: 20),
 
